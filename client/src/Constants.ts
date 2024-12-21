@@ -1,0 +1,1 @@
+export const PATH_PREFIX = "/api/rest";
