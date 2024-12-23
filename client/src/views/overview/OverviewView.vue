@@ -1,19 +1,6 @@
 <template>
 	<div>
 		overview
-
-		dg
-
-		g
-		fdg
-		fd
-		g
-		f
-		g
-		dfg
-		df
-		g
-		dg
 	</div>
 </template>
 

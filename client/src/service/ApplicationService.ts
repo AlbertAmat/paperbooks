@@ -5,6 +5,7 @@ import {PATH_PREFIX} from "@/Constants";
 import IPolicyResponse from "@/types/IPolicyResponse";
 import Language from "@/model/language/Language";
 import Category from "@/model/category/Category";
+import Format from "@/model/format/Format";
 
 export class ApplicationService {
 
@@ -32,17 +33,24 @@ export class ApplicationService {
      */
     private m_languages: Language[];
 
-     /**
+    /**
      *
      * @private
      */
     private m_categories: Category[];
+
+    /**
+     *
+     * @private
+     */
+    private m_formats: Format[];
 
     public constructor() {
         this.m_error = null;
         this.m_user = null;
         this.m_languages = [];
         this.m_categories = [];
+        this.m_formats = [];
     }
 
     public async fetchPolicy() {
@@ -53,6 +61,7 @@ export class ApplicationService {
             this.m_user = data.user;
             this.m_categories = data.categories.map((category) => new Category(category));
             this.m_languages = data.languages.map((lang) => new Language(lang));
+            this.m_formats = data.formats.map((format) => new Format(format));
         } catch (e: any) {
             const error = e as Error;
             console.error("Error while fetching application policy.", e);
@@ -125,6 +134,28 @@ export class ApplicationService {
             return undefined;
         }
         return this.m_languages.find((language) => language.getLanguageCode() === code);
+    }
+
+    /**
+     *
+     */
+    public hasFormats(): boolean {
+        return this.m_formats.length > 0;
+    }
+
+    /**
+     *
+     * @param id
+     */
+    public getFormat(id: number): Format | undefined {
+        return this.m_formats.find((format) => format.getFormatId() === id);
+    }
+
+    /**
+     *
+     */
+    public getFormats(): Format[] {
+        return this.m_formats;
     }
 }
 

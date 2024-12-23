@@ -83,6 +83,7 @@ html, body {
 .app-main,
 .app-content {
 	background-color: #f6f6f6;
+	overflow: hidden !important;
 }
 
 .app-content {
@@ -94,5 +95,6 @@ html, body {
 .error-container {
 	background-color: red;
 	color: white;
+	height: 100%;
 }
 </style>

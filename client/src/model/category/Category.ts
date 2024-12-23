@@ -1,4 +1,4 @@
-import ICategory from "@/types/categories/ICategory";
+import ICategory from "@/types/category/ICategory";
 
 export default class Category {
     /**

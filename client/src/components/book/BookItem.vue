@@ -35,11 +35,11 @@
 
 						<!-- Book author-->
 						<v-list-item-subtitle
-							v-if="book.hasAuthor()"
-							:title="book.getAuthor()"
+							v-if="book.hasAuthors()"
+							:title="book.getAuthors()[0].getAuthorName()"
 							class="book-subtitle ellipsis"
 						>
-							{{ book.getAuthor() }}
+							{{ book.getAuthors()[0].getAuthorName() }}
 						</v-list-item-subtitle>
 
 						<!-- Book isbn -->

@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div style="position: relative; overflow-y: auto">
 		<v-overlay
 			v-if="model.isLoading()"
 			:opacity="0"

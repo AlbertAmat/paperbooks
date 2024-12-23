@@ -5,6 +5,7 @@ export default interface IBook extends IBookItem {
     publisher: string | null;
     published_date: string | null;
     pages: number | null;
-    format: string | null;
-    created_date: string | null;
+    format_id: number | null;
+    date_created: string;
+    date_updated: string;
 }

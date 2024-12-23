@@ -9,7 +9,8 @@ Vue.use(VueRouter);
 export enum RoutePaths {
     OVERVIEW = "/overview",
     SEARCH_BOOKS = "/books/search",
-    BOOK = "/book/{book_id}"
+    BOOK = "/book/:book_id",
+    NOT_FOUND = "*",
 }
 
 /**
@@ -34,7 +35,7 @@ const routes: Array<RouteConfig> = [
         name: "Book",
         path: RoutePaths.BOOK,
         component: () => import("@/views/book/BookView.vue")
-    }
+    },
 
     // ========================================================================
     // Error route
@@ -43,6 +44,11 @@ const routes: Array<RouteConfig> = [
     // ========================================================================
     // Not Found route
     // ========================================================================
+    {
+        name: "Not found",
+        path: RoutePaths.NOT_FOUND,
+        component: () => import("@/views/notFound/NotFoundView.vue")
+    }
 ];
 
 /**

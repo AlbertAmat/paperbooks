@@ -1,6 +1,6 @@
 import IBookItem from "@/types/book/IBookItem";
-import {formToJSON} from "axios";
-import {RoutePaths} from "@/router/Router";
+import router, {RoutePaths} from "@/router/Router";
+import BookAuthor from "@/model/book/BookAuthor";
 
 export default abstract class ABook {
 
@@ -14,13 +14,13 @@ export default abstract class ABook {
      *
      * @private
      */
-    private readonly m_name: string;
+    private m_name: string;
 
     /**
      *
      * @private
      */
-    private readonly m_author: string | null;
+    private m_authors: BookAuthor[];
 
     /**
      *
@@ -32,29 +32,31 @@ export default abstract class ABook {
      *
      * @private
      */
-    private readonly m_isbn: string | null;
+    private m_isbn: string | null;
 
     /**
      *
      * @private
      */
-    private readonly m_categoryId: number | null;
+    private m_categoryId: number | null;
 
     /**
      *
      * @private
      */
-    private readonly m_languageCode: string | null;
+    private m_languageCode: string | null;
 
     public constructor(data: IBookItem) {
-        this.m_id           = data.id;
-        this.m_name         = data.name;
-        this.m_author       = data.author;
-        this.m_imageUrl     = data.image_url;
-        this.m_isbn         = data.isbn;
-        this.m_categoryId   = data.category_id;
+        this.m_id = data.id;
+        this.m_name = data.name;
+        this.m_authors = data.authors.map((author) => new BookAuthor(author));
+        this.m_imageUrl = data.image_url;
+        this.m_isbn = data.isbn;
+        this.m_categoryId = data.category_id;
         this.m_languageCode = data.language_code;
     }
+
+
 
     /**
      *
@@ -72,16 +74,31 @@ export default abstract class ABook {
 
     /**
      *
+     * @param value
      */
-    public hasAuthor(): boolean {
-        return this.m_author != null;
+    public setName(value: string) {
+        this.m_name = value;
     }
 
     /**
      *
      */
-    public getAuthor(): string | null {
-        return this.m_author;
+    public hasAuthors(): boolean {
+        return this.m_authors.length > 0;
+    }
+
+    /**
+     *
+     */
+    public getAuthors(): BookAuthor[] {
+        return this.m_authors;
+    }
+
+    /**
+     *
+     */
+    public setAuthors(authors: BookAuthor[]) {
+        this.m_authors = authors;
     }
 
     /**
@@ -108,8 +125,22 @@ export default abstract class ABook {
     /**
      *
      */
+    public setIsbn(value: string | null) {
+        this.m_isbn = value;
+    }
+
+    /**
+     *
+     */
     public getCategoryId(): number | null {
         return this.m_categoryId;
+    }
+
+    /**
+     *
+     */
+    public setCategoryId(value: number | null) {
+        this.m_categoryId = value;
     }
 
     /**
@@ -122,8 +153,15 @@ export default abstract class ABook {
     /**
      *
      */
+    public setLanguageCode(value: string | null) {
+        this.m_languageCode = value;
+    }
+
+    /**
+     *
+     */
     public getUrl(): string {
-        return RoutePaths.BOOK.replace("{book_id}", this.m_id.toString());
+        return RoutePaths.BOOK.replace(":book_id", this.m_id.toString());
     }
 
 }

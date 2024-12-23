@@ -30,17 +30,9 @@ CREATE TABLE languages (
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE authors (
+CREATE TABLE formats (
      id SERIAL PRIMARY KEY,
-     name VARCHAR(100) NOT NULL UNIQUE
-);
-
-CREATE TABLE book_authors (
-      book_id INT NOT NULL,
-      author_id INT NOT NULL,
-      PRIMARY KEY (book_id, author_id),
-      FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
-      FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
+     name VARCHAR(50) NOT NULL UNIQUE
 );
 
 -- Books table
@@ -48,18 +40,32 @@ CREATE TABLE books (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    author VARCHAR(100),
     image_url TEXT,
     isbn VARCHAR(20) UNIQUE,
     category_id INT,
+    format_id INT,
     publisher VARCHAR(100),
     published_date DATE,
     language_code CHAR(2),
     pages INT,
-    format VARCHAR(50),
-    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    date_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
-    FOREIGN KEY (language_code) REFERENCES languages(code) ON DELETE SET NULL
+    FOREIGN KEY (language_code) REFERENCES languages(code) ON DELETE SET NULL,
+    FOREIGN KEY (format_id) REFERENCES formats(id) ON DELETE SET NULL
+);
+
+CREATE TABLE authors (
+                         id SERIAL PRIMARY KEY,
+                         name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE book_authors (
+                              book_id INT NOT NULL,
+                              author_id INT NOT NULL,
+                              PRIMARY KEY (book_id, author_id),
+                              FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
+                              FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
 );
 
 -- Book Locations table
