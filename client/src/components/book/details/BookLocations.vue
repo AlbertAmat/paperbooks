@@ -1,9 +1,21 @@
 <template>
 	<v-card class="mx-1 mb-3">
-		<v-card-title>
+		<v-card-title class="d-flex align-center">
 			<v-icon class="mr-2">mdi-map-marker-radius-outline</v-icon>
 
 			Locations
+
+			<v-chip small class="px-2 ml-2">{{locations.length}}</v-chip>
+
+			<v-spacer></v-spacer>
+
+			<v-btn
+				small
+				color="primary"
+				class="text-none"
+			>
+				Add
+			</v-btn>
 		</v-card-title>
 		<v-card-text>
 			<v-data-table

@@ -33,17 +33,17 @@ router.get('/search', async (req: Request, res: Response) => {
                    books.category_id,
                    books.language_code,
                    COALESCE(
-                       json_agg(
-                             json_build_object(
-                               'id', authors.id,
-                               'name', authors.name
-                               )
-                       ) FILTER (WHERE authors.id IS NOT NULL),
-                       '[]'
+                           json_agg(
+                                   json_build_object(
+                                           'id', authors.id,
+                                           'name', authors.name
+                                   )
+                           ) FILTER(WHERE authors.id IS NOT NULL),
+                           '[]'
                    ) AS authors
             FROM books
-             LEFT JOIN book_authors ON books.id = book_authors.book_id
-             LEFT JOIN authors ON book_authors.author_id = authors.id        
+                     LEFT JOIN book_authors ON books.id = book_authors.book_id
+                     LEFT JOIN authors ON book_authors.author_id = authors.id
         `;
 
         if (name) {
@@ -121,56 +121,178 @@ router.get('/:id', async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
     try {
-       const result = await client.query(`
-           SELECT books.id,
-                  books.name,
-                  books.description,
-                  books.image_url,
-                  books.isbn,
-                  books.category_id,
-                  books.language_code,
-                  books.publisher,
-                  books.published_date,
-                  books.date_created,
-                  books.date_updated,
-                  books.pages,
-                  books.format_id,
-                  COALESCE(
-                          json_agg(
-                                  json_build_object(
-                                          'id', authors.id,
-                                          'name', authors.name
-                                  )
-                          ) FILTER (WHERE authors.id IS NOT NULL),
-                          '[]'
-                  ) AS authors
-           FROM books
-                    LEFT JOIN book_authors ON books.id = book_authors.book_id
-                    LEFT JOIN authors ON book_authors.author_id = authors.id
-           WHERE books.id = $1
-           GROUP BY
-               books.id,
-               books.name,
-               books.description,
-               books.image_url,
-               books.isbn,
-               books.category_id,
-               books.language_code,
-               books.publisher,
-               books.published_date,
-               books.date_created,
-               books.date_updated,
-               books.pages,
-               books.format_id
-       `, [id]);
+        const result = await client.query(`
+            SELECT books.id,
+                   books.name,
+                   books.description,
+                   books.image_url,
+                   books.isbn,
+                   books.category_id,
+                   books.language_code,
+                   books.publisher,
+                   books.published_date,
+                   books.date_created,
+                   books.date_updated,
+                   books.pages,
+                   books.format_id,
+                   COALESCE(
+                           json_agg(
+                                   json_build_object(
+                                           'id', authors.id,
+                                           'name', authors.name
+                                   )
+                           ) FILTER(WHERE authors.id IS NOT NULL),
+                           '[]'
+                   ) AS authors
+            FROM books
+                     LEFT JOIN book_authors ON books.id = book_authors.book_id
+                     LEFT JOIN authors ON book_authors.author_id = authors.id
+            WHERE books.id = $1
+            GROUP BY books.id,
+                     books.name,
+                     books.description,
+                     books.image_url,
+                     books.isbn,
+                     books.category_id,
+                     books.language_code,
+                     books.publisher,
+                     books.published_date,
+                     books.date_created,
+                     books.date_updated,
+                     books.pages,
+                     books.format_id
+        `, [id]);
 
-       if(result.rows.length !== 1) {
-           res.status(404).send("Book not found");
-       } else {
-           res.status(200).json(result.rows[0]);
-       }
+        if (result.rows.length !== 1) {
+            res.status(404).send("Book not found");
+        } else {
+            res.status(200).json(result.rows[0]);
+        }
     } catch (err: any) {
         console.error('Error executing query', err.stack);
+        res.status(500).send('Internal Server Error');
+    } finally {
+        client.release();
+    }
+});
+
+
+/**
+ * Path: /book/{id}
+ */
+//@ts-ignore
+router.put('/:id', async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    console.log("Update book, id:", id);
+
+    // Body params
+    const {
+        name,
+        image_url,
+        isbn,
+        category_id,
+        language_code,
+        authors,
+        description,
+        publisher,
+        published_date,
+        pages,
+        format_id
+    } = req.body;
+
+    // Database connection
+    const pool = appService.getDatabasePool();
+    const client = await pool.connect();
+
+    try {
+        // Validate the existence of the book
+        const bookCheck = await client.query('SELECT id FROM books WHERE id = $1', [id]);
+        if (bookCheck.rowCount === 0) {
+            return res.status(404).send({ error: "Book not found" });
+        }
+
+        // Start transaction
+        await client.query('BEGIN');
+
+        // Update the books table
+        const updateQuery = `
+            UPDATE books
+            SET 
+                name = $1,
+                description = $2,
+                image_url = $3,
+                isbn = $4,
+                category_id = $5,
+                format_id = $6,
+                publisher = $7,
+                published_date = $8,
+                language_code = $9,
+                pages = $10,
+                date_updated = CURRENT_TIMESTAMP
+            WHERE id = $11
+        `;
+        const updateValues = [
+            name,
+            description,
+            image_url,
+            isbn,
+            category_id,
+            format_id,
+            publisher,
+            published_date,
+            language_code,
+            pages,
+            id
+        ];
+        console.log("published_date", published_date)
+        await client.query(updateQuery, updateValues);
+
+        // Handle authors relationship in the book_authors table
+        if (authors && Array.isArray(authors)) {
+            // Fetch existing authors associated with the book
+            const existingAuthorsResult = await client.query(
+                'SELECT author_id FROM book_authors WHERE book_id = $1',
+                [id]
+            );
+            const existingAuthors = existingAuthorsResult.rows.map(row => row.author_id);
+
+            // Determine authors to remove (present in the database but not in the new list)
+            const authorsToRemove = existingAuthors.filter(authorId => !authors.includes(authorId));
+
+            // Determine authors to add (present in the new list but not in the database)
+            const authorsToAdd = authors.filter(authorId => !existingAuthors.includes(authorId));
+
+            // Remove authors no longer associated with the book
+            for (const authorId of authorsToRemove) {
+                await client.query(
+                    'DELETE FROM book_authors WHERE book_id = $1 AND author_id = $2',
+                    [id, authorId]
+                );
+            }
+
+            // Add new authors to the book
+            for (const authorId of authorsToAdd) {
+                // Ensure the author exists in the authors table
+                const authorCheck = await client.query('SELECT id FROM authors WHERE id = $1', [authorId]);
+                if (authorCheck.rowCount !== 0) {
+                    // Associate the author with the book
+                    await client.query(
+                        'INSERT INTO book_authors (book_id, author_id) VALUES ($1, $2)',
+                        [id, authorId]
+                    );
+                } else {
+                    console.warn(`Author with ID ${authorId} not found, skipping association.`);
+                }
+            }
+        }
+
+        // Commit transaction
+        await client.query('COMMIT');
+        res.send({ message: "Book updated successfully" });
+    } catch (e) {
+        // Rollback transaction in case of error
+        await client.query('ROLLBACK');
+        console.error("Error while updating book", e);
         res.status(500).send('Internal Server Error');
     } finally {
         client.release();
@@ -187,8 +309,8 @@ router.get('/:id/locations', async (req: Request, res: Response) => {
     const client = await pool.connect();
     try {
         const result = await client.query(`
-            SELECT locations.id     as     location_id,
-                   locations.name   as     location_name,
+            SELECT locations.id          as location_id,
+                   locations.name        as location_name,
                    locations.description as location_desc,
                    book_locations.quantity
             FROM book_locations
@@ -205,6 +327,9 @@ router.get('/:id/locations', async (req: Request, res: Response) => {
     }
 });
 
+/**
+ *
+ */
 //@ts-ignore
 router.post('/isbn/:isbn', async (req: Request, res: Response) => {
     const isbnCode = req.params.isbn;
@@ -235,7 +360,30 @@ router.post('/isbn/:isbn', async (req: Request, res: Response) => {
         // Format the publishedDate
         const formattedPublishedDate = formatPublishedDate(publishedDate);
 
-        const imageUrl = imageLinks?.thumbnail || null;
+        /**
+         * Book image
+         */
+        let imageUrl: null | string = null;
+        if (imageLinks && imageLinks.thumbnail) {
+            imageUrl = imageLinks.thumbnail as string | null;
+        } else {
+            // Step 1: Try Open Library Covers API
+            const openLibraryCoverUrl = `https://covers.openlibrary.org/b/isbn/${isbnCode}-M.jpg`;
+            const openLibraryResponse = await axios.get(
+                openLibraryCoverUrl,
+                {responseType: 'arraybuffer'}
+            );
+
+            // Check if the response is an image
+            const contentType = openLibraryResponse.headers['content-type'];
+            const isImage = contentType && contentType.startsWith('image/');
+
+            // Check if Open Library returned an image
+            if (openLibraryResponse.status === 200 && isImage) {
+                imageUrl = openLibraryCoverUrl;
+            }
+        }
+
         const categoryName = categories ? categories[0] : null;
         const languageCode = language;
 
@@ -325,8 +473,9 @@ router.post('/isbn/:isbn', async (req: Request, res: Response) => {
             }
 
             // Commit transaction
+            console.log("inside")
             await client.query("COMMIT");
-            res.status(200).send("Book added successfully");
+            res.status(200).json(bookId);
         } catch (error) {
             // Rollback on error
             await client.query("ROLLBACK");

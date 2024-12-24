@@ -2,6 +2,7 @@ import BookItem from "@/model/book/BookItem";
 import IBook from "@/types/book/IBook";
 import {applicationService} from "@/service/ApplicationService";
 import Format from "@/model/format/Format";
+import {bookService} from "@/service/book/BookService";
 
 export default class Book extends BookItem {
 
@@ -178,5 +179,30 @@ export default class Book extends BookItem {
      */
     public setFormat(format: Format | null) {
         return this.m_format = format;
+    }
+
+    /**
+     *
+     */
+    public async updateBook() {
+        try {
+            await bookService.updateBook(
+                this.m_id,
+                this.m_name,
+                this.m_imageUrl,
+                this.m_isbn,
+                this.m_categoryId,
+                this.m_languageCode,
+                this.m_authors.map((author) => author.getAuthorId()),
+                this.m_description,
+                this.m_publisher,
+                this.m_publishedDate,
+                this.m_pages,
+                this.m_format ? this.m_format.getFormatId() : null
+            )
+            console.log(`Update book ${this.m_id} successfully`)
+        } catch (e) {
+            console.log("Error while updating book")
+        }
     }
 }

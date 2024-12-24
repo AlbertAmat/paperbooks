@@ -8,43 +8,43 @@ export default abstract class ABook {
      *
      * @private
      */
-    private readonly m_id: number;
+    protected readonly m_id: number;
 
     /**
      *
      * @private
      */
-    private m_name: string;
+    protected m_name: string;
 
     /**
      *
      * @private
      */
-    private m_authors: BookAuthor[];
+    protected m_authors: BookAuthor[];
 
     /**
      *
      * @private
      */
-    private readonly m_imageUrl: string | null;
+    protected readonly m_imageUrl: string | null;
 
     /**
      *
      * @private
      */
-    private m_isbn: string | null;
+    protected m_isbn: string | null;
 
     /**
      *
      * @private
      */
-    private m_categoryId: number | null;
+    protected m_categoryId: number | null;
 
     /**
      *
      * @private
      */
-    private m_languageCode: string | null;
+    protected m_languageCode: string | null;
 
     public constructor(data: IBookItem) {
         this.m_id = data.id;
@@ -55,8 +55,6 @@ export default abstract class ABook {
         this.m_categoryId = data.category_id;
         this.m_languageCode = data.language_code;
     }
-
-
 
     /**
      *

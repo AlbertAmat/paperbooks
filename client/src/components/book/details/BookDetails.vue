@@ -23,6 +23,8 @@
 				class="text-none"
 				color="primary"
 				:disabled="!hasChanges"
+				@click="updateBook()"
+				:loading="loadingUpdate"
 				small
 			>
 				Save
@@ -44,6 +46,7 @@
 						<div class="d-flex">
 							<v-text-field
 								v-model="name"
+								:disabled="disableFields"
 								label="Name"
 								dense
 								outlined
@@ -52,6 +55,7 @@
 
 							<v-text-field
 								v-model="isbn"
+								:disabled="disableFields"
 								label="ISBN"
 								dense
 								outlined
@@ -62,6 +66,7 @@
 						<div class="d-flex">
 							<v-select
 								v-model="category"
+								:disabled="disableFields"
 								:items="categoriesJson()"
 								label="Category"
 								outlined
@@ -73,6 +78,7 @@
 
 							<v-select
 								v-model="language"
+								:disabled="disableFields"
 								:items="languagesJson()"
 								label="Language"
 								outlined
@@ -86,6 +92,7 @@
 						<div class="d-flex">
 							<v-select
 								v-model="format"
+								:disabled="disableFields"
 								:items="formatsJson()"
 								label="Format"
 								outlined
@@ -97,6 +104,7 @@
 
 							<v-text-field
 								v-model="pages"
+								:disabled="disableFields"
 								label="Pages"
 								type="number"
 								dense
@@ -108,19 +116,26 @@
 
 						<v-autocomplete
 							v-model="authors"
+							:items="loadedAuthorsJSON"
+							:loading="loadingAuthors"
+							:search-input.sync="searchAuthors"
+							:disabled="disableFields"
+							item-text="text"
+							item-value="value"
 							chips
 							outlined
 							label="Authors"
 							color="primary"
 							placeholder="Add authors.."
 							dense
-							return-object
-							multiple></v-autocomplete>
+							multiple
+						></v-autocomplete>
 
 						<div class="d-flex">
 							<v-text-field
 								v-model="publisher"
 								label="Publisher"
+								:disabled="disableFields"
 								dense
 								outlined
 								class="mr-1"
@@ -130,6 +145,7 @@
 							<v-text-field
 								v-model="publishedDate"
 								label="Published date"
+								:disabled="disableFields"
 								type="date"
 								dense
 								outlined
@@ -153,6 +169,7 @@
 					<v-card-text>
 						<v-textarea
 							v-model="description"
+							:disabled="disableFields"
 							dense
 							outlined
 							label="Description"
@@ -228,7 +245,7 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, ref, Ref} from 'vue'
+import {computed, defineComponent, ref, Ref, shallowRef, ShallowRef, watch} from 'vue'
 import Book from "@/model/book/Book";
 //@ts-ignore
 import notFound from "@/assets/images/notFound.jpg";
@@ -236,6 +253,7 @@ import {applicationService} from "@/service/ApplicationService";
 import router from "@/router/Router";
 import BookLocations from "@/components/book/details/BookLocations.vue";
 import BookAuthor from "@/model/book/BookAuthor";
+import {authorService} from "@/service/author/AuthorService";
 
 export default defineComponent({
 	name: "BookDetails",
@@ -256,6 +274,39 @@ export default defineComponent({
 		 *
 		 */
 		const hasChanges: Ref<boolean> = ref(false);
+
+		/**
+		 *
+		 */
+		const loadingUpdate: Ref<boolean> = ref(false);
+
+		/**
+		 *
+		 */
+		const loadingAuthors: Ref<boolean> = ref(false);
+
+		/**
+		 *
+		 */
+		const searchAuthors: Ref<string> = ref("");
+
+		const loadedAuthors: ShallowRef<BookAuthor[]> = shallowRef(props.book.getAuthors())
+
+		/**
+		 *
+		 */
+		const disableFields = computed(() => {
+			return loadingUpdate.value
+		})
+
+		const loadedAuthorsJSON = computed(() => {
+			return loadedAuthors.value.map((author) => {
+				return {
+					value: author.getAuthorId(),
+					text: author.getAuthorName()
+				}
+			})
+		})
 
 		const name = computed({
 			get() {
@@ -331,10 +382,20 @@ export default defineComponent({
 
 		const publishedDate = computed({
 			get() {
-				return props.book.getPublishDate();
+				const date = props.book.getPublishDate();
+				if(date) {
+				const day = String(date.getDate()).padStart(2, '0'); // Get day and pad with leading zero if necessary
+				const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+				const year = date.getFullYear(); // Get the full year
+
+				return `${year}-${month}-${day}`;
+				} else {
+					return null;
+				}
 			},
-			set(val: Date | null) {
-				props.book.setPublishDate(val);
+			set(val: string | null) {
+				console.log(val)
+				props.book.setPublishDate(val ? new Date(val) : null);
 				hasChanges.value = true;
 			}
 		})
@@ -351,10 +412,22 @@ export default defineComponent({
 
 		const authors = computed({
 			get() {
-				return props.book.getAuthors();
+				return props.book.getAuthors().map((author) => author.getAuthorId());
 			},
-			set(val: BookAuthor[]) {
-				props.book.setAuthors(val);
+			set(val: number[]) {
+				const items: BookAuthor[] = [];
+
+				console.log("val",val)
+				console.log("loadedAuthors",loadedAuthors.value)
+				val.forEach((id) => {
+					const item = loadedAuthors.value.find((a) => a.getAuthorId() === id);
+					if(item) {
+						items.push(item);
+					}
+				});
+
+				props.book.setAuthors(items);
+				hasChanges.value = true;
 			}
 		})
 
@@ -387,8 +460,46 @@ export default defineComponent({
 
 		function goBack() {
 			router.back()
-
 		}
+
+		/**
+		 *
+		 */
+		async function updateBook() {
+			if(hasChanges.value) {
+				try {
+					loadingUpdate.value = true;
+					await props.book.updateBook();
+				} finally {
+					loadingUpdate.value = false;
+				}
+			}
+		}
+
+		watch(() => searchAuthors.value, async (prompt: string | null) => {
+			// prompt is empty
+			if (prompt == null || prompt.trim().length === 0) return;
+
+			// Items have already been requested
+			if (loadingAuthors.value) return;
+
+			try {
+				loadingAuthors.value = true;
+				const data = await authorService.searchAuthors(searchAuthors.value)
+				if(data) {
+					data.forEach((author) => {
+						const index = loadedAuthors.value.findIndex((item) => item.getAuthorId() === author.id)
+						if(index == -1) {
+							loadedAuthors.value.push(new BookAuthor(author))
+						}
+					})
+
+					loadedAuthors.value = [...loadedAuthors.value];
+				}
+			} finally {
+				loadingAuthors.value = false;
+			}
+		})
 
 		return {
 			showFallbackImage,
@@ -408,7 +519,13 @@ export default defineComponent({
 			category,
 			categoriesJson,
 			goBack,
-			authors
+			authors,
+			loadedAuthorsJSON,
+			searchAuthors,
+			loadingAuthors,
+			loadingUpdate,
+			updateBook,
+			disableFields
 		}
 	}
 })

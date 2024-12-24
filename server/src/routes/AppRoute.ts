@@ -75,6 +75,9 @@ async function getLanguages(): Promise<Record<string, any>[]> {
     return result.rows;
 }
 
+/**
+ *
+ */
 async function getFormats(): Promise<Record<string, any>[]> {
     const pool = appService.getDatabasePool();
 

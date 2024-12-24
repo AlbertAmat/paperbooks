@@ -1,6 +1,15 @@
 <template>
 	<page-component :model="model">
 		<div class="d-flex mb-1">
+			<div class="d-flex align-center">
+				<span style="font-size: 13px">Total results:</span>
+				<v-chip
+					x-small
+					class="ml-2"
+				>
+					{{ model.getTotalBooks() }}
+				</v-chip>
+			</div>
 			<v-spacer></v-spacer>
 			<create-book-isbn-dialog/>
 		</div>
