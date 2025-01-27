@@ -10,6 +10,7 @@ router.get('/policy', async (req: Request, res: Response) => {
     let categories: Record<string, any>[] = [];
     let languages: Record<string, any>[] = [];
     let formats: Record<string, any>[] = [];
+    let locations: Record<string, any>[] = [];
 
     try {
         categories = await getCategories();
@@ -29,11 +30,18 @@ router.get('/policy', async (req: Request, res: Response) => {
         console.error("Error when getting formats. ", e)
     }
 
+    try {
+        locations = await getLocations();
+    } catch (e) {
+        console.error("Error when getting locations. ", e)
+    }
+
     res.status(200).json({
         user: null,
         categories: categories,
         languages: languages,
         formats: formats,
+        locations: locations
     });
 });
 
@@ -93,5 +101,27 @@ async function getFormats(): Promise<Record<string, any>[]> {
     // Return the result (found rows)
     return result.rows;
 }
+
+/**
+ *
+ */
+async function getLocations(): Promise<Record<string, any>[]> {
+    const pool = appService.getDatabasePool();
+
+    const query = `
+        SELECT id,
+               name,
+               description
+        FROM locations
+    `
+    // Use a prepared statement to fetch items by name
+    console.log("executing query: ", query);
+    const result = await pool.query(query);
+
+    // Return the result (found rows)
+    return result.rows;
+}
+
+
 
 export default router;

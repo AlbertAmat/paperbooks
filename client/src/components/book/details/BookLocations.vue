@@ -9,13 +9,7 @@
 
 			<v-spacer></v-spacer>
 
-			<v-btn
-				small
-				color="primary"
-				class="text-none"
-			>
-				Add
-			</v-btn>
+			<new-book-location-dialog />
 		</v-card-title>
 		<v-card-text>
 			<v-data-table
@@ -33,9 +27,11 @@ import {defineComponent, onMounted, ref, Ref} from 'vue'
 import Book from "@/model/book/Book";
 import {IBookLocation} from "@/types/book/IBookLocation";
 import {bookService} from "@/service/book/BookService";
+import NewBookLocationDialog from "@/components/book/details/NewBookLocationDialog.vue";
 
 export default defineComponent({
 	name: "BookLocations",
+	components: {NewBookLocationDialog},
 	props: {
 		book: {
 			type: Object as () => Book,
