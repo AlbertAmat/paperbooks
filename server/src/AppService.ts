@@ -4,6 +4,7 @@ import http, {Server} from "http";
 import DatabaseConf from "./types/DatabaseConf";
 import pg from 'pg';
 import {routes} from "./routes/Routes";
+import { Logger } from "./utils/Logger";
 
 export class AppService {
     /**
@@ -34,7 +35,25 @@ export class AppService {
      *
      * @private
      */
+    private m_databaseConf: DatabaseConf | null;
+
+    /**
+     *
+     * @private
+     */
     private m_databasePool: pg.Pool | null;
+
+    /**
+     * The database max size allowed for the application
+     * @private
+     */
+    private m_dbMaxSize: number;
+
+    /**
+     *
+     * @private
+     */
+    private m_logger!: Logger;
 
     public constructor() {
         this.m_port = 8081;
@@ -44,13 +63,22 @@ export class AppService {
         this.m_app.use(bodyParser.urlencoded({ extended: true }));
 
         this.m_server = null;
+        this.m_databaseConf = null;
         this.m_databasePool = null;
+
+        // Default DB max size of 1000 MB
+        this.m_dbMaxSize = 1000;
     }
 
     /**
      *
      */
-    public init(port: number, database: DatabaseConf) {
+    public init(
+        port: number,
+        database: DatabaseConf,
+        dbMaxSize: number,
+        loggerPath: string
+    ) {
         console.log(`
 888888b.                     888            .d8888b.  888                                              
 888  "88b                    888           d88P  Y88b 888                                              
@@ -78,6 +106,7 @@ export class AppService {
          */
         console.log(`Starting database connection...`)
         console.table([database]);
+        this.m_databaseConf = database;
         this.m_databasePool = new pg.Pool({
             host: database.host,
             port: database.port,
@@ -89,6 +118,10 @@ export class AppService {
             connectionTimeoutMillis: 2000,
         });
 
+        // DB max size
+        this.m_dbMaxSize = dbMaxSize;
+        console.log(`Database max size allowed: ${this.m_dbMaxSize} MB`)
+
         // routes
         this.__loadRoutes();
 
@@ -97,6 +130,14 @@ export class AppService {
         });
 
         this.m_server = server;
+        this.m_logger = new Logger(loggerPath);
+
+        this.m_logger.info(`Server running on port ${this.m_port}; Database: ${JSON.stringify(database)}; Database max size: ${ this.m_dbMaxSize}`)
+
+        /**
+         * Check database space and create a log only if its critical
+         */
+        this.checkDatabaseSpace();
     }
 
     /**
@@ -132,6 +173,50 @@ export class AppService {
     }
 
     /**
+     * Checks the database space usage.
+     * - If space is **full**, logs a warning and returns `false`.
+     * - If space is **low** (e.g., above 90% usage), logs a warning but returns `true`.
+     * - If space is OK, returns `true` with no log.
+     */
+    public async checkDatabaseSpace(): Promise<boolean> {
+        const currentSize = await this.getDatabaseSize();
+        const threshold = this.m_dbMaxSize * 0.9; // 90% warning threshold
+
+        if (currentSize >= this.m_dbMaxSize) {
+            this.m_logger.warn(`No more database space! Increase the limit for ${this.m_databaseConf ? this.m_databaseConf.name : ''}.`);
+            return false;
+        }
+
+        if (currentSize >= threshold) {
+            this.m_logger.warn(`Database space for ${this.m_databaseConf ? this.m_databaseConf.name : ''} is running low (${((currentSize / this.m_dbMaxSize) * 100).toFixed(2)}% used).`);
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     */
+    public getDatabaseMaxSize(): number {
+        return this.m_dbMaxSize;
+    }
+
+    /**
+     *
+     */
+    public async getDatabaseSize(): Promise<number> {
+        try {
+            const pool = this.getDatabasePool();
+            const query = "SELECT pg_database_size(current_database()) / 1024 / 1024 AS size_mb;";
+            const res = await pool.query(query);
+            return Number(res.rows[0].size_mb)
+        } catch (err) {
+            console.error('Error executing query', err);
+            return -1;
+        }
+    }
+
+    /**
      *
      * @private
      */
@@ -143,6 +228,13 @@ export class AppService {
             console.log(`Adding route [${fullRoute}]`)
             this.m_app.use(fullRoute, routes[route]);
         }
+    }
+
+    /**
+     * Returns an instance of file logger
+     */
+    public getLogger(): Logger {
+        return this.m_logger;
     }
 
 }

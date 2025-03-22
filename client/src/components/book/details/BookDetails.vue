@@ -37,13 +37,13 @@
 				<!-- BOOK														-->
 				<!-- 																  	-->
 				<!-- ================================================================== -->
-				<v-card class="mb-3">
-					<v-card-title>
-						<v-icon class="mr-2">mdi-book</v-icon>
-						Book
-					</v-card-title>
-					<v-card-text>
+				<card-component
+					title="Book"
+					icon="mdi-book"
+				>
+					<template v-slot:default>
 						<div class="d-flex">
+							<!-- Name -->
 							<v-text-field
 								v-model="name"
 								:disabled="disableFields"
@@ -53,6 +53,7 @@
 								class="mr-1"
 							></v-text-field>
 
+							<!-- ISBN code -->
 							<v-text-field
 								v-model="isbn"
 								:disabled="disableFields"
@@ -64,6 +65,7 @@
 						</div>
 
 						<div class="d-flex">
+							<!-- Category -->
 							<v-select
 								v-model="category"
 								:disabled="disableFields"
@@ -76,6 +78,7 @@
 								style="width: 50%"
 							></v-select>
 
+							<!-- Language -->
 							<v-select
 								v-model="language"
 								:disabled="disableFields"
@@ -90,6 +93,7 @@
 						</div>
 
 						<div class="d-flex">
+							<!-- Format -->
 							<v-select
 								v-model="format"
 								:disabled="disableFields"
@@ -102,6 +106,7 @@
 								style="width: 50%"
 							></v-select>
 
+							<!-- Pages -->
 							<v-text-field
 								v-model="pages"
 								:disabled="disableFields"
@@ -114,6 +119,7 @@
 							></v-text-field>
 						</div>
 
+						<!-- Authors -->
 						<v-autocomplete
 							v-model="authors"
 							:items="loadedAuthorsJSON"
@@ -132,6 +138,7 @@
 						></v-autocomplete>
 
 						<div class="d-flex">
+							<!-- Publisher -->
 							<v-text-field
 								v-model="publisher"
 								label="Publisher"
@@ -142,6 +149,7 @@
 								style="width: 50%"
 							></v-text-field>
 
+							<!-- Published date -->
 							<v-text-field
 								v-model="publishedDate"
 								label="Published date"
@@ -153,29 +161,26 @@
 								style="width: 50%"
 							></v-text-field>
 						</div>
-					</v-card-text>
-				</v-card>
+					</template>
+				</card-component>
 
 				<!-- ================================================================== -->
 				<!-- 																  	-->
 				<!-- DESCRIPTION														-->
 				<!-- 																  	-->
 				<!-- ================================================================== -->
-				<v-card class="mb-3">
-					<v-card-title>
-						<v-icon class="mr-2">mdi-text-long</v-icon>
-						Description
-					</v-card-title>
-					<v-card-text>
-						<v-textarea
-							v-model="description"
-							:disabled="disableFields"
-							dense
-							outlined
-							label="Description"
-						></v-textarea>
-					</v-card-text>
-				</v-card>
+				<card-component
+					title="Description"
+					icon="mdi-text-long"
+				>
+					<v-textarea
+						v-model="description"
+						:disabled="disableFields"
+						dense
+						outlined
+						label="Description"
+					></v-textarea>
+				</card-component>
 			</v-col>
 
 			<v-col cols="12" md="3" lg="3" class="px-1">
@@ -191,56 +196,52 @@
 
 		<!-- ================================================================== -->
 		<!-- 																  	-->
-		<!-- LOCATIONS															-->
+		<!-- STOCKS																-->
 		<!-- 																  	-->
 		<!-- ================================================================== -->
-		<book-locations :book="book"></book-locations>
+		<book-stocks :book="book"/>
 
 		<!-- ================================================================== -->
 		<!-- 																  	-->
 		<!-- INFO																-->
 		<!-- 																  	-->
 		<!-- ================================================================== -->
-		<v-card class="mx-1">
-			<v-card-title>
-				<v-icon class="mr-2">mdi-book-information-variant</v-icon>
+		<card-component
+			title="Info"
+			icon="mdi-book-information-variant"
+		>
+			<div class="d-flex">
+				<v-text-field
+					:value="book.getId()"
+					dense
+					outlined
+					hide-details
+					disabled
+					label="Identifier"
+					class="mr-2"
+				></v-text-field>
 
-				Info
-			</v-card-title>
-			<v-card-text>
-				<div class="d-flex">
-					<v-text-field
-						:value="book.getId()"
-						dense
-						outlined
-						hide-details
-						disabled
-						label="Identifier"
-						class="mr-2"
-					></v-text-field>
+				<v-text-field
+					:value="book.getFormatedDateUpdated()"
+					dense
+					outlined
+					hide-details
+					disabled
+					label="Date updated"
+					class="mr-2"
+				></v-text-field>
 
-					<v-text-field
-						:value="book.getFormatedDateUpdated()"
-						dense
-						outlined
-						hide-details
-						disabled
-						label="Date updated"
-						class="mr-2"
-					></v-text-field>
-
-					<v-text-field
-						:value="book.getFormatedDateCreated()"
-						dense
-						outlined
-						hide-details
-						disabled
-						label="Date created"
-						class="mr-2"
-					></v-text-field>
-				</div>
-			</v-card-text>
-		</v-card>
+				<v-text-field
+					:value="book.getFormatedDateCreated()"
+					dense
+					outlined
+					hide-details
+					disabled
+					label="Date created"
+					class="mr-2"
+				></v-text-field>
+			</div>
+		</card-component>
 	</div>
 </template>
 
@@ -251,13 +252,17 @@ import Book from "@/model/book/Book";
 import notFound from "@/assets/images/notFound.jpg";
 import {applicationService} from "@/service/ApplicationService";
 import router from "@/router/Router";
-import BookLocations from "@/components/book/details/BookLocations.vue";
+import BookStocks from "@/components/book/details/compoents/BookStocks.vue";
 import BookAuthor from "@/model/book/BookAuthor";
 import {authorService} from "@/service/author/AuthorService";
+import CardComponent from "@/components/card/CardComponent.vue";
 
 export default defineComponent({
 	name: "BookDetails",
-	components: {BookLocations},
+	components: {
+		CardComponent,
+		BookStocks,
+	},
 	props: {
 		book: {
 			type: Object as () => Book,

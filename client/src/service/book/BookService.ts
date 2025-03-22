@@ -1,8 +1,6 @@
 import axios from "axios";
 import {PATH_PREFIX} from "@/Constants";
 import IBook from "@/types/book/IBook";
-import {IBookLocation} from "@/types/book/IBookLocation";
-import IBookAuthor from "@/types/book/IBookAuthor";
 
 export class BookService {
 
@@ -45,15 +43,6 @@ export class BookService {
             pages: pages,
             format_id: format_id
         });
-        return data;
-    }
-
-    /**
-     *
-     * @param isbn
-     */
-    public async getBookLocations(id: number): Promise<IBookLocation[]> {
-        const {data} = await axios.get(`${PATH_PREFIX}/book/${id}/locations`, {});
         return data;
     }
 

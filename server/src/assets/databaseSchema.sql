@@ -55,27 +55,35 @@ CREATE TABLE books (
     FOREIGN KEY (format_id) REFERENCES formats(id) ON DELETE SET NULL
 );
 
+CREATE TABLE book_stocks (
+     id SERIAL PRIMARY KEY,
+     book_id INT NOT NULL,
+     code CHAR(10) UNIQUE NOT NULL,
+     -- 0: available, 1: not available, 2: booked, 3: damaged
+     status SMALLINT CHECK (status IN (0, 1, 2, 3)) NOT NULL DEFAULT 0,
+     FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
+);
+
 CREATE TABLE authors (
                          id SERIAL PRIMARY KEY,
                          name VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE book_authors (
-                              book_id INT NOT NULL,
-                              author_id INT NOT NULL,
-                              PRIMARY KEY (book_id, author_id),
-                              FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
-                              FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
+      book_id INT NOT NULL,
+      author_id INT NOT NULL,
+      PRIMARY KEY (book_id, author_id),
+      FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
+      FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
 );
 
 -- Book Locations table
-CREATE TABLE book_locations (
-    location_id INT,
-    book_id INT,
-    quantity INT NOT NULL,
-    PRIMARY KEY (location_id, book_id),
-    FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE CASCADE,
-    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
+CREATE TABLE book_stock_locations (
+      location_id INT,
+      stock_id INT,
+      PRIMARY KEY (location_id, stock_id),
+      FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE CASCADE,
+      FOREIGN KEY (stock_id) REFERENCES book_stocks(id) ON DELETE CASCADE
 );
 
 -- Roles table

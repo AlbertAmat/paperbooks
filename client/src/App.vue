@@ -25,17 +25,19 @@
 			<!-- ================================================== -->
 			<app-menu></app-menu>
 
-			<!-- ================================================== -->
-			<!-- APP BAR											-->
-			<!-- ================================================== -->
-			<app-bar/>
-
 			<v-main class="app-main">
 				<v-container
 					class="app-content pt-2"
 					fluid
 				>
-					<router-view></router-view>
+					<!-- ================================================== -->
+					<!-- APP BAR											-->
+					<!-- ================================================== -->
+					<app-bar/>
+
+					<div id="scroller" style="flex: 1; overflow-y: auto; padding-top: 10px; margin-top: 4px">
+						<router-view></router-view>
+					</div>
 				</v-container>
 			</v-main>
 		</template>
@@ -44,8 +46,8 @@
 
 <script lang="ts">
 import {defineComponent, onMounted} from 'vue';
-import AppBar from "@/components/AppBar.vue";
-import AppMenu from "@/components/AppMenu.vue";
+import AppBar from "@/components/app/AppBar.vue";
+import AppMenu from "@/components/app/AppMenu.vue";
 import {applicationService} from "@/service/ApplicationService";
 
 export default defineComponent({
@@ -67,34 +69,53 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style>
 html, body {
 	overflow-y: hidden;
 	overflow-x: hidden;
 	height: 100vh;
 }
 
-.app-main >>> .v-main__wrap {
-	display: flex !important;
-	flex-direction: column;
-	flex: 1;
+.app-main {
+	overflow: hidden;
 }
 
 .app-main,
 .app-content {
-	background-color: #f6f6f6;
+	background-color: #FAFAFA;
 	overflow: hidden !important;
+	height: 100vh;
 }
+
+.app-main  .v-main__wrap {
+	display: flex !important;
+	flex-direction: column;
+	flex: 1;
+	padding: 8px !important;
+}
+
 
 .app-content {
 	width: 100%;
-	flex: 1;
-	padding: 20px;
+	border-radius: 8px;
+	background-color: white;
+	border: 1px solid #EFEFEF;
+	position: relative;
+	display: flex;
+	flex-direction: column;
 }
 
 .error-container {
 	background-color: red;
 	color: white;
 	height: 100%;
+}
+
+.app-border-1 {
+	border: 1px solid #EFEFEF;
+}
+
+.app-border-2 {
+	border: 2px solid #EFEFEF;
 }
 </style>

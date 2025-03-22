@@ -36,12 +36,18 @@ router.get('/policy', async (req: Request, res: Response) => {
         console.error("Error when getting locations. ", e)
     }
 
+    const databaseSize = await appService.getDatabaseSize();
+
     res.status(200).json({
         user: null,
         categories: categories,
         languages: languages,
         formats: formats,
-        locations: locations
+        locations: locations,
+
+        // Size
+        maxSize: appService.getDatabaseMaxSize(),
+        size: databaseSize
     });
 });
 

@@ -1,11 +1,11 @@
 import {ref, Ref} from "vue";
-import App from "@/App.vue";
 import axios from "axios";
 import {PATH_PREFIX} from "@/Constants";
 import IPolicyResponse from "@/types/IPolicyResponse";
 import Language from "@/model/language/Language";
 import Category from "@/model/category/Category";
 import Format from "@/model/format/Format";
+import vuetify from "@/plugins/vuetify";
 
 export class ApplicationService {
 
@@ -13,7 +13,13 @@ export class ApplicationService {
      *
      * @private
      */
-    private m_loading: Ref<boolean> = ref(true  );
+    private m_loading: Ref<boolean> = ref(true);
+
+    /**
+     *
+     * @private
+     */
+    private m_menu: Ref<boolean> = ref(true);
 
     /**
      *
@@ -45,12 +51,26 @@ export class ApplicationService {
      */
     private m_formats: Format[];
 
+    /**
+     * The max size allowed for the database in MB
+     * @private
+     */
+    private m_dbMaxSize: number;
+
+    /**
+     * The current size of the database in MB
+     * @private
+     */
+    private m_dbSize: number;
+
     public constructor() {
         this.m_error = null;
         this.m_user = null;
         this.m_languages = [];
         this.m_categories = [];
         this.m_formats = [];
+        this.m_dbMaxSize = 0;
+        this.m_dbSize = 0;
     }
 
     public async fetchPolicy() {
@@ -62,6 +82,12 @@ export class ApplicationService {
             this.m_categories = data.categories.map((category) => new Category(category));
             this.m_languages = data.languages.map((lang) => new Language(lang));
             this.m_formats = data.formats.map((format) => new Format(format));
+
+            this.m_dbMaxSize = data.maxSize;
+            this.m_dbSize = data.size;
+
+            // TODO: user config (primary, dark, ...)
+            vuetify.framework.theme.currentTheme.primary = "#2E68F6";
         } catch (e: any) {
             const error = e as Error;
             console.error("Error while fetching application policy.", e);
@@ -76,6 +102,20 @@ export class ApplicationService {
      */
     public isLoading(): boolean {
         return this.m_loading.value;
+    }
+
+    /**
+     *
+     */
+    public getMenu(): boolean {
+        return this.m_menu.value;
+    }
+
+    /**
+     *
+     */
+    public setMenu(value: boolean) {
+        this.m_menu.value = value;
     }
 
     /**
@@ -156,6 +196,20 @@ export class ApplicationService {
      */
     public getFormats(): Format[] {
         return this.m_formats;
+    }
+
+    /**
+     *
+     */
+    public getDatabaseMaxSize(): number {
+        return this.m_dbMaxSize;
+    }
+
+    /**
+     *
+     */
+    public getDatabaseSize(): number {
+        return this.m_dbSize;
     }
 }
 

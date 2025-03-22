@@ -3,6 +3,7 @@ import IBook from "@/types/book/IBook";
 import {applicationService} from "@/service/ApplicationService";
 import Format from "@/model/format/Format";
 import {bookService} from "@/service/book/BookService";
+import BookStock from "@/model/book/BookStock";
 
 export default class Book extends BookItem {
 
@@ -40,6 +41,12 @@ export default class Book extends BookItem {
      *
      * @private
      */
+    private m_stocks: BookStock[];
+
+    /**
+     *
+     * @private
+     */
     private readonly m_dateCreated: Date;
 
     /**
@@ -60,6 +67,8 @@ export default class Book extends BookItem {
         if (data.format_id) {
             this.m_format = applicationService.getFormat(data.format_id) || null;
         }
+
+        this.m_stocks = data.stocks.map((stock) => new BookStock(stock));
     }
 
     /**
@@ -179,6 +188,13 @@ export default class Book extends BookItem {
      */
     public setFormat(format: Format | null) {
         return this.m_format = format;
+    }
+
+    /**
+     *
+     */
+    public getStocks(): BookStock[] {
+        return this.m_stocks;
     }
 
     /**

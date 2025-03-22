@@ -216,7 +216,7 @@ export default defineComponent({
 					// TODO: CHECK IF BOOK EXIST
 					const id = await bookService.createBookFromIsbn(code);
 					if (id != null && !multiple.value) {
-						router.push(RoutePaths.BOOK.replace(":book_id", id))
+						router.push(RoutePaths.BOOK.replace(":book_id", id.toString()))
 						dialog.value = false;
 					}
 				} catch (e) {

@@ -27,7 +27,7 @@ const routes: Array<RouteConfig> = [
         component: () => import("@/views/overview/OverviewView.vue")
     },
     {
-        name: "Search books",
+        name: "Books",
         path: RoutePaths.SEARCH_BOOKS,
         component: () => import("@/views/search/BooksSearchView.vue")
     },

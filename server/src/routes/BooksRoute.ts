@@ -135,16 +135,25 @@ router.get('/:id', async (req: Request, res: Response) => {
                    books.date_updated,
                    books.pages,
                    books.format_id,
-                   COALESCE(
-                           json_agg(
-                                   json_build_object(
-                                           'id', authors.id,
-                                           'name', authors.name
-                                   )
-                           ) FILTER(WHERE authors.id IS NOT NULL),
-                           '[]'
-                   ) AS authors
+                   COALESCE(json_agg(
+                      DISTINCT jsonb_build_object(
+                           'id', book_stocks.id,
+                           'code', book_stocks.code,
+                           'status', book_stocks.status,
+                           'location', jsonb_build_object(
+                               'id', locations.id,
+                               'name', locations.name
+                          )
+                   )) FILTER(WHERE book_stocks.id IS NOT NULL),'[]') AS stocks,
+                   COALESCE(json_agg(
+                      DISTINCT jsonb_build_object(
+                            'id', authors.id,
+                            'name', authors.name
+                   )) FILTER(WHERE authors.id IS NOT NULL), '[]') AS authors
             FROM books
+                     LEFT JOIN book_stocks ON books.id = book_stocks.book_id
+                     LEFT JOIN book_stock_locations ON book_stocks.id = book_stock_locations.stock_id
+                     LEFT JOIN locations ON book_stock_locations.location_id = locations.id
                      LEFT JOIN book_authors ON books.id = book_authors.book_id
                      LEFT JOIN authors ON book_authors.author_id = authors.id
             WHERE books.id = $1
@@ -160,7 +169,7 @@ router.get('/:id', async (req: Request, res: Response) => {
                      books.date_created,
                      books.date_updated,
                      books.pages,
-                     books.format_id
+                     books.format_id;
         `, [id]);
 
         if (result.rows.length !== 1) {
@@ -296,34 +305,6 @@ router.put('/:id', async (req: Request, res: Response) => {
         res.status(500).send('Internal Server Error');
     } finally {
         client.release();
-    }
-});
-
-/**
- *
- */
-router.get('/:id/locations', async (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    console.log("Get locations for book, id:", id)
-    const pool = appService.getDatabasePool();
-    const client = await pool.connect();
-    try {
-        const result = await client.query(`
-            SELECT locations.id          as location_id,
-                   locations.name        as location_name,
-                   locations.description as location_desc,
-                   book_locations.quantity
-            FROM book_locations
-                     LEFT JOIN locations ON book_locations.location_id = locations.id
-            WHERE book_locations.book_id = $1
-        `, [id])
-
-        res.status(200).json(result.rows);
-    } catch (err: any) {
-        console.error('Error executing query', err.stack);
-        res.status(500).send('Internal Server Error');
-    } finally {
-        client.release()
     }
 });
 

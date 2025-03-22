@@ -1,5 +1,21 @@
 # client
 
+
+## TODO
+* handle database size
+* handle users
+* login
+* default admin user (dataload)
+* ENV vars for max size, default user name
+* snackabars
+* logs in fs
+* CRF in order to check if someone edits the book at the same time
+* locations, categories, ...
+* use file logger
+* book stock
+* book transactions
+
+
 ## Project setup
 ```
 npm install
@@ -14,11 +30,3 @@ npm run serve
 ```
 npm run build
 ```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

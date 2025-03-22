@@ -22,13 +22,12 @@
 				sm="6"
 				md="4"
 				lg="3"
-				class="pa-2"
+				class="pa-1"
 			>
 				<book-item :book="book"/>
 			</v-col>
 
 			<template v-if="loadingBooks">
-				{{$vuetify.breakpoint}}
 				<v-col
 					v-for="item in model.getLimit()"
 					:key="item"
@@ -99,11 +98,11 @@ export default defineComponent({
 
 		onMounted(async () => {
 			// Attach scroll listener
-			window.addEventListener("scroll", handleScroll);
+			document.getElementById("scroller")!.addEventListener("scroll", handleScroll);
 		});
 
 		onUnmounted(() => {
-			window.removeEventListener("scroll", handleScroll);
+			document.getElementById("scroller")!.removeEventListener("scroll", handleScroll);
 		});
 
 		return {

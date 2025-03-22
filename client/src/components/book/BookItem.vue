@@ -5,11 +5,10 @@
 			style="text-decoration: none; height: 125px; position: relative"
 		>
 			<v-list-item
-				style="border-radius: 8px; background-color: white"
+				style="border-radius: 8px; background-color: white;"
 				two-line
-				:color="hover ? 'primary' : ''"
-				class="pa-3"
-				:class="hover ? 'elevation-2' : ''"
+				class="pa-3 app-border-2"
+				:class="hover ? 'active' : ''"
 			>
 				<v-list-item-icon
 					class="mr-1 my-0"
@@ -124,7 +123,6 @@ export default defineComponent({
 	display: block;
 	font-size: 14px;
 	flex: none !important;
-
 }
 
 .ellipsis {
@@ -136,5 +134,9 @@ export default defineComponent({
 .book-subtitle {
 	padding: 0;
 	font-size: 12px;
+}
+
+.active {
+	border: 2px solid var(--v-primary-base)
 }
 </style>
