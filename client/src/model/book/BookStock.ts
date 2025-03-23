@@ -61,13 +61,8 @@ export default class BookStock {
         this.m_code     = stock.code;
         this.m_status   = stock.status;
 
-        this.m_locationId = null;
-        this.m_locationName = null;
-
-        if(stock.location) {
-            this.m_locationId = stock.location.id;
-            this.m_locationName = stock.location.name;
-        }
+        this.m_locationId = stock.location_id;
+        this.m_locationName = stock.location_name;
     }
 
     /**

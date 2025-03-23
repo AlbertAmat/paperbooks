@@ -490,23 +490,7 @@ router.post('/:id/stock', async (req: Request, res: Response) => {
         console.log(`Adding book stock with status ${status} in book id: ${bookId}`);
         await client.query("BEGIN");
 
-        let code;
-        let isUnique = false;
-
-        while (!isUnique) {
-            // Generate a random 10-character code
-            code = uuidv4().replace(/-/g, '').substring(0, 10);
-
-            // Check if the code already exists
-            const {rowCount} = await client.query(
-                "SELECT 1 FROM book_stocks WHERE code = $1",
-                [code]
-            );
-
-            if (rowCount === 0) {
-                isUnique = true;
-            }
-        }
+        const code = await generateBookStockCode();
 
         console.log("Stock code: " + code)
 
@@ -554,4 +538,31 @@ function formatPublishedDate(date: string | undefined): string | null {
     return parsedDate.toISOString().split('T')[0];
 }
 
+/**
+ *
+ */
+async function generateBookStockCode(): Promise<string> {
+    let code: string = "";
+    let isUnique = false;
+
+    const pool = appService.getDatabasePool();
+
+
+    while (!isUnique) {
+        // Generate a random 10-character code
+        code = uuidv4().replace(/-/g, '').substring(0, 10);
+
+        // Check if the code already exists
+        const {rowCount} = await pool.query(
+            "SELECT 1 FROM book_stocks WHERE code = $1",
+            [code]
+        );
+
+        if (rowCount === 0) {
+            isUnique = true;
+        }
+    }
+
+    return code;
+}
 export default router;

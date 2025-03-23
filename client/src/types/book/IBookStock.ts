@@ -2,7 +2,8 @@ export interface IBookStock {
     id: number;
     code: string;
     status:BookStockStatusEnum;
-    location: { id: number; name: string} | null;
+    location_id: number;
+    location_name: string;
 }
 
 export enum BookStockStatusEnum {

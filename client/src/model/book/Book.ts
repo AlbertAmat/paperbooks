@@ -202,13 +202,14 @@ export default class Book extends BookItem {
     /**
      *
      * @param status
+     * @param locationId
      * @param print
      */
     public async addBookStock(status: BookStockStatusEnum, locationId: number, print: boolean) {
         try {
             const data = await bookService.addBookStock(this.m_id, locationId, status);
             const stock = new BookStock(data)
-            this.m_stocks.value.push(stock);
+            this.m_stocks.value = [...this.m_stocks.value, stock];
 
             // TODO: snackbar message
 

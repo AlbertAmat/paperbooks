@@ -10,6 +10,7 @@
 
 		<template v-slot:default>
 			<v-data-table
+				:key="book.getStocks().length"
 				:headers="headers"
 				:items="stocks"
 				:items-per-page="20"
