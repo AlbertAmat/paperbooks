@@ -1,6 +1,7 @@
 import {Router, Request, Response} from 'express';
 import {appService} from "../AppService";
 import axios from "axios";
+import {v4 as uuidv4} from 'uuid';
 
 const router: Router = Router();
 
@@ -135,25 +136,27 @@ router.get('/:id', async (req: Request, res: Response) => {
                    books.date_updated,
                    books.pages,
                    books.format_id,
-                   COALESCE(json_agg(
-                      DISTINCT jsonb_build_object(
-                           'id', book_stocks.id,
-                           'code', book_stocks.code,
-                           'status', book_stocks.status,
-                           'location', jsonb_build_object(
-                               'id', locations.id,
-                               'name', locations.name
-                          )
-                   )) FILTER(WHERE book_stocks.id IS NOT NULL),'[]') AS stocks,
-                   COALESCE(json_agg(
-                      DISTINCT jsonb_build_object(
-                            'id', authors.id,
-                            'name', authors.name
-                   )) FILTER(WHERE authors.id IS NOT NULL), '[]') AS authors
+                   COALESCE(
+                           json_agg(
+                               DISTINCT jsonb_build_object(
+                   'id', book_stocks.id,
+                   'code', book_stocks.code,
+                   'status', book_stocks.status,
+                   'location_id', locations.id,  -- Using correct column from locations table
+                   'location_name', locations.name
+               )
+           ) FILTER(WHERE book_stocks.id IS NOT NULL), '[]'
+                   )                                                                    AS stocks,
+                   COALESCE(
+                           json_agg(
+                               DISTINCT jsonb_build_object(
+                   'id', authors.id,
+                   'name', authors.name
+               )
+           ) FILTER(WHERE authors.id IS NOT NULL), '[]') AS authors
             FROM books
                      LEFT JOIN book_stocks ON books.id = book_stocks.book_id
-                     LEFT JOIN book_stock_locations ON book_stocks.id = book_stock_locations.stock_id
-                     LEFT JOIN locations ON book_stock_locations.location_id = locations.id
+                     LEFT JOIN locations ON book_stocks.location_id = locations.id -- Ensure correct join condition
                      LEFT JOIN book_authors ON books.id = book_authors.book_id
                      LEFT JOIN authors ON book_authors.author_id = authors.id
             WHERE books.id = $1
@@ -184,7 +187,6 @@ router.get('/:id', async (req: Request, res: Response) => {
         client.release();
     }
 });
-
 
 /**
  * Path: /book/{id}
@@ -217,7 +219,7 @@ router.put('/:id', async (req: Request, res: Response) => {
         // Validate the existence of the book
         const bookCheck = await client.query('SELECT id FROM books WHERE id = $1', [id]);
         if (bookCheck.rowCount === 0) {
-            return res.status(404).send({ error: "Book not found" });
+            return res.status(404).send({error: "Book not found"});
         }
 
         // Start transaction
@@ -226,18 +228,17 @@ router.put('/:id', async (req: Request, res: Response) => {
         // Update the books table
         const updateQuery = `
             UPDATE books
-            SET 
-                name = $1,
-                description = $2,
-                image_url = $3,
-                isbn = $4,
-                category_id = $5,
-                format_id = $6,
-                publisher = $7,
+            SET name           = $1,
+                description    = $2,
+                image_url      = $3,
+                isbn           = $4,
+                category_id    = $5,
+                format_id      = $6,
+                publisher      = $7,
                 published_date = $8,
-                language_code = $9,
-                pages = $10,
-                date_updated = CURRENT_TIMESTAMP
+                language_code  = $9,
+                pages          = $10,
+                date_updated   = CURRENT_TIMESTAMP
             WHERE id = $11
         `;
         const updateValues = [
@@ -297,7 +298,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 
         // Commit transaction
         await client.query('COMMIT');
-        res.send({ message: "Book updated successfully" });
+        res.send({message: "Book updated successfully"});
     } catch (e) {
         // Rollback transaction in case of error
         await client.query('ROLLBACK');
@@ -454,7 +455,6 @@ router.post('/isbn/:isbn', async (req: Request, res: Response) => {
             }
 
             // Commit transaction
-            console.log("inside")
             await client.query("COMMIT");
             res.status(200).json(bookId);
         } catch (error) {
@@ -468,6 +468,75 @@ router.post('/isbn/:isbn', async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Error fetching book details:", error);
         res.status(500).send("Error fetching book details");
+    }
+});
+
+/**
+ *
+ */
+//@ts-ignore
+router.post('/:id/stock', async (req: Request, res: Response) => {
+    const bookId = req.params.id;
+    const status = req.body.status;
+    const locationId = req.body.location_id;
+    if (!bookId) {
+        return res.status(400).send('No book ID provided');
+    }
+
+    const pool = appService.getDatabasePool();
+    const client = await pool.connect();
+
+    try {
+        console.log(`Adding book stock with status ${status} in book id: ${bookId}`);
+        await client.query("BEGIN");
+
+        let code;
+        let isUnique = false;
+
+        while (!isUnique) {
+            // Generate a random 10-character code
+            code = uuidv4().replace(/-/g, '').substring(0, 10);
+
+            // Check if the code already exists
+            const {rowCount} = await client.query(
+                "SELECT 1 FROM book_stocks WHERE code = $1",
+                [code]
+            );
+
+            if (rowCount === 0) {
+                isUnique = true;
+            }
+        }
+
+        console.log("Stock code: " + code)
+
+        const insertStock = await client.query(
+            "INSERT INTO book_stocks (book_id, code, status, location_id) VALUES ($1, $2, $3, $4) RETURNING id",
+            [bookId, code, status, locationId]
+        );
+
+        await client.query("COMMIT");
+
+        // fetch new data
+        const result = await pool.query(`
+            SELECT book_stocks.id,
+                   book_stocks.code,
+                   book_stocks.status,
+                   book_stocks.location_id,
+                   locations.name as location_name
+            FROM book_stocks
+            LEFT JOIN locations ON book_stocks.location_id = locations.id
+            WHERE book_stocks.id = ${insertStock.rows[0].id}
+        `)
+
+        res.status(200).json(result.rows[0]);
+    } catch (error) {
+        // Rollback on error
+        await client.query("ROLLBACK");
+        console.error("Transaction error:", error);
+        res.status(500).send("Error processing the book");
+    } finally {
+        client.release();
     }
 });
 

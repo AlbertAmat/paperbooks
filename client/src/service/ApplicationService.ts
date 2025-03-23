@@ -4,6 +4,7 @@ import {PATH_PREFIX} from "@/Constants";
 import IPolicyResponse from "@/types/IPolicyResponse";
 import Language from "@/model/language/Language";
 import Category from "@/model/category/Category";
+import Location from "@/model/location/Location";
 import Format from "@/model/format/Format";
 import vuetify from "@/plugins/vuetify";
 
@@ -52,6 +53,12 @@ export class ApplicationService {
     private m_formats: Format[];
 
     /**
+     *
+     * @private
+     */
+    private m_locations: Location[];
+
+    /**
      * The max size allowed for the database in MB
      * @private
      */
@@ -67,6 +74,7 @@ export class ApplicationService {
         this.m_error = null;
         this.m_user = null;
         this.m_languages = [];
+        this.m_locations = [];
         this.m_categories = [];
         this.m_formats = [];
         this.m_dbMaxSize = 0;
@@ -82,6 +90,7 @@ export class ApplicationService {
             this.m_categories = data.categories.map((category) => new Category(category));
             this.m_languages = data.languages.map((lang) => new Language(lang));
             this.m_formats = data.formats.map((format) => new Format(format));
+            this.m_locations = data.locations.map((location) => new Location(location));
 
             this.m_dbMaxSize = data.maxSize;
             this.m_dbSize = data.size;
@@ -196,6 +205,13 @@ export class ApplicationService {
      */
     public getFormats(): Format[] {
         return this.m_formats;
+    }
+
+    /**
+     *
+     */
+    public getLocations(): Location[] {
+        return this.m_locations;
     }
 
     /**

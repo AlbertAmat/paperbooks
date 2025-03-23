@@ -33,6 +33,15 @@
 					v-model="selectedStatus"
 					:items="status"
 					label="Status"
+					hide-details
+				></v-select>
+
+				<v-select
+					v-model="selectedLocation"
+					:items="locations"
+					label="Locations"
+					hide-details
+					class="mt-3"
 				></v-select>
 			</v-card-text>
 
@@ -52,7 +61,7 @@
 					color="primary"
 					outlined
 					small
-					:disabled="selectedStatus === null || loading"
+					:disabled="selectedStatus === null || selectedLocation == null || loading"
 					:loading="loading"
 					@click="addStock()"
 					class="text-none"
@@ -62,7 +71,7 @@
 				<v-btn
 					color="primary"
 					small
-					:disabled="selectedStatus == null || loading"
+					:disabled="selectedStatus === null || selectedLocation == null || loading"
 					:loading="loading"
 					@click="addStock(true)"
 					class="text-none"
@@ -75,10 +84,11 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, Ref, ref} from 'vue'
+import {computed, defineComponent, Ref, ref} from 'vue'
 import Book from "@/model/book/Book";
 import {BookStockStatusEnum} from "@/types/book/IBookStock";
 import BookStock from "@/model/book/BookStock";
+import {applicationService} from "@/service/ApplicationService";
 
 export default defineComponent({
 	name: "AddBookStock",
@@ -104,26 +114,35 @@ export default defineComponent({
 		 */
 		const status = BookStock.BookStockStatus;
 
+		const locations = computed(() => {
+			return applicationService.getLocations().map((location) => {
+				return {
+					value: location.getId(),
+					text: location.getName()
+				}
+			})
+		})
+
 		/**
 		 *
 		 */
 		const selectedStatus: Ref<BookStockStatusEnum> = ref(BookStockStatusEnum.AVAILABLE);
 
+		const selectedLocation: Ref<number | null > = ref(null);
+
 		/**
 		 *
 		 * @param print
 		 */
-		function addStock(print: boolean = false) {
-			try {
-				loading.value = true;
-
-				if(print) {
-
+		async function addStock(print: boolean = false) {
+			if(selectedLocation.value != null) {
+				try {
+					loading.value = true;
+					await props.book.addBookStock(selectedStatus.value, selectedLocation.value, print);
+					closeDialog();
+				} finally {
+					loading.value = false;
 				}
-
-				closeDialog();
-			} finally {
-				loading.value = false;
 			}
 		}
 
@@ -132,6 +151,7 @@ export default defineComponent({
 		 */
 		function closeDialog() {
 			selectedStatus.value = BookStockStatusEnum.AVAILABLE;
+			selectedLocation.value = null;
 			dialog.value = false;
 		}
 
@@ -141,7 +161,9 @@ export default defineComponent({
 			status,
 			selectedStatus,
 			closeDialog,
-			addStock
+			addStock,
+			selectedLocation,
+			locations
 		}
 	}
 })

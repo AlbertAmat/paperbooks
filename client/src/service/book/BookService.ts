@@ -1,6 +1,7 @@
 import axios from "axios";
 import {PATH_PREFIX} from "@/Constants";
 import IBook from "@/types/book/IBook";
+import {BookStockStatusEnum, IBookStock} from "@/types/book/IBookStock";
 
 export class BookService {
 
@@ -54,6 +55,22 @@ export class BookService {
         const {data} = await axios.post(`${PATH_PREFIX}/book/isbn/${isbn}`, {});
         return data;
     }
+
+    /**
+     *
+     * @param id
+     * @param status
+     * @param print
+     */
+    public async addBookStock(id: number, locationId: number, status: BookStockStatusEnum): Promise<IBookStock> {
+        const {data} = await axios.post(`${PATH_PREFIX}/book/${id}/stock`, {
+            status: status,
+            location_id: locationId
+        });
+
+        return data;
+    }
+
 
 }
 

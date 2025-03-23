@@ -1,4 +1,5 @@
 import {BookStockStatusEnum, IBookStock} from "@/types/book/IBookStock";
+import JsBarcode from "jsbarcode";
 
 export default class BookStock {
 
@@ -98,6 +99,39 @@ export default class BookStock {
         return this.m_locationName;
     }
 
+    /**
+     *
+     * @param productCode
+     * @private
+     */
+    public printBarcode() {
+        // Create a temporary canvas
+        const canvas = document.createElement("canvas");
 
+        // Generate the barcode on the canvas
+        JsBarcode(canvas, this.m_code, { format: "CODE128" });
+
+        // Convert canvas to Base64 image
+        const barcodeImage = canvas.toDataURL("image/png");
+
+        // Open a new print window
+        const printWindow = window.open("", "_blank", "toolbar=no,menubar=no,scrollbars=no,resizable=no,status=no");
+
+        if (printWindow) {
+            printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Print Barcode</title>
+                </head>
+                <body>
+                    <img src="${barcodeImage}" alt="Barcode">
+                    <br>
+                    <button onclick="window.print();">Print</button>
+                </body>
+            </html>
+        `);
+            printWindow.document.close();
+        }
+    }
 
 }

@@ -4,6 +4,8 @@ import {applicationService} from "@/service/ApplicationService";
 import Format from "@/model/format/Format";
 import {bookService} from "@/service/book/BookService";
 import BookStock from "@/model/book/BookStock";
+import {BookStockStatusEnum} from "@/types/book/IBookStock";
+import {shallowRef, ShallowRef} from "vue";
 
 export default class Book extends BookItem {
 
@@ -41,7 +43,7 @@ export default class Book extends BookItem {
      *
      * @private
      */
-    private m_stocks: BookStock[];
+    private m_stocks: ShallowRef<BookStock[]>;
 
     /**
      *
@@ -68,7 +70,7 @@ export default class Book extends BookItem {
             this.m_format = applicationService.getFormat(data.format_id) || null;
         }
 
-        this.m_stocks = data.stocks.map((stock) => new BookStock(stock));
+        this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(stock)));
     }
 
     /**
@@ -194,7 +196,28 @@ export default class Book extends BookItem {
      *
      */
     public getStocks(): BookStock[] {
-        return this.m_stocks;
+        return this.m_stocks.value;
+    }
+
+    /**
+     *
+     * @param status
+     * @param print
+     */
+    public async addBookStock(status: BookStockStatusEnum, locationId: number, print: boolean) {
+        try {
+            const data = await bookService.addBookStock(this.m_id, locationId, status);
+            const stock = new BookStock(data)
+            this.m_stocks.value.push(stock);
+
+            // TODO: snackbar message
+
+            if(print) {
+                stock.printBarcode();
+            }
+        } catch (e) {
+            console.error("Error while adding book stock", e)
+        }
     }
 
     /**
@@ -217,8 +240,10 @@ export default class Book extends BookItem {
                 this.m_format ? this.m_format.getFormatId() : null
             )
             console.log(`Update book ${this.m_id} successfully`)
+            // TODO: snackbar message
         } catch (e) {
-            console.log("Error while updating book")
+            console.error("Error while updating book.", e)
         }
     }
+
 }

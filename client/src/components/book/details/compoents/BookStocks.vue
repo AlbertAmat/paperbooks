@@ -27,6 +27,7 @@
 
 				<template v-slot:item.actions="{ item }">
 					<v-icon
+						@click="printBarcode(item.id)"
 						small
 						class="mr-2"
 					>
@@ -84,6 +85,7 @@ export default defineComponent({
 				const status = BookStock.BookStockStatus.find((item) => item.value === stock.getStatus());
 
 				return {
+					id: stock.getId(),
 					code: stock.getCode(),
 					location_id: stock.getLocationId(),
 					location_name: stock.getLocationName() || '[No location]',
@@ -94,9 +96,17 @@ export default defineComponent({
 			})
 		})
 
+		function printBarcode(id: number) {
+			const stock = props.book.getStocks().find((stock) => stock.getId() === id);
+			if(stock) {
+				stock.printBarcode()
+			}
+		}
+
 		return {
 			headers,
-			stocks
+			stocks,
+			printBarcode
 		}
 	}
 })
