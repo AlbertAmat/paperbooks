@@ -71,6 +71,17 @@ export class BookService {
         return data;
     }
 
+    /**
+     *
+     * @param id
+     * @param stockId
+     */
+    public async removeBookStock(id: number, stockId: number): Promise<boolean> {
+        const {data} = await axios.delete(`${PATH_PREFIX}/book/${id}/stock/${stockId}`);
+
+        return data;
+    }
+
 
 }
 

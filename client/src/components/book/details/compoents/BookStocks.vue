@@ -40,12 +40,20 @@
 					>
 						mdi-pencil
 					</v-icon>
-					<v-icon
+					<v-btn
+						icon
 						small
-						color="red"
+						:loading="deleteLoading.includes(item.id)"
+						:disabled="deleteLoading.includes(item.id)"
+						@click="removeBookStock(item.id)"
 					>
-						mdi-delete
-					</v-icon>
+						<v-icon
+							small
+							color="red"
+						>
+							mdi-delete
+						</v-icon>
+					</v-btn>
 				</template>
 			</v-data-table>
 		</template>
@@ -53,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, computed} from 'vue'
+import {defineComponent, computed, Ref, ref} from 'vue'
 import Book from "@/model/book/Book";
 import BookStock from "@/model/book/BookStock";
 import AddBookStock from "@/components/book/details/compoents/AddBookStock.vue";
@@ -81,6 +89,8 @@ export default defineComponent({
 			{text: 'Actions', value: 'actions', align: 'end',}
 		];
 
+		const deleteLoading: Ref<number[]> = ref([]);
+
 		const stocks = computed(() => {
 			return props.book.getStocks().map((stock) => {
 				const status = BookStock.BookStockStatus.find((item) => item.value === stock.getStatus());
@@ -104,10 +114,26 @@ export default defineComponent({
 			}
 		}
 
+		/**
+		 *
+		 * @param stockId
+		 */
+		async function removeBookStock(stockId: number) {
+			try {
+				// TODO: Delete confirmation
+				deleteLoading.value.push(stockId);
+				await props.book.removeBookStock(stockId);
+			} finally {
+				deleteLoading.value.splice(deleteLoading.value.indexOf(stockId), 1);
+			}
+		}
+
 		return {
 			headers,
 			stocks,
-			printBarcode
+			printBarcode,
+			removeBookStock,
+			deleteLoading
 		}
 	}
 })

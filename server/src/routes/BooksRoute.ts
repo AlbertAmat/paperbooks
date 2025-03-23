@@ -518,9 +518,39 @@ router.post('/:id/stock', async (req: Request, res: Response) => {
         // Rollback on error
         await client.query("ROLLBACK");
         console.error("Transaction error:", error);
-        res.status(500).send("Error processing the book");
+        res.status(500).send("Error adding the book stock");
     } finally {
         client.release();
+    }
+});
+
+
+/**
+ *
+ */
+//@ts-ignore
+router.delete('/:id/stock/:stock_id', async (req: Request, res: Response) => {
+    const bookId = req.params.id;
+    const stockId = req.params.stock_id;
+    if (!bookId || !stockId) {
+        return res.status(400).send('No book ID or stock ID provided');
+    }
+
+    const pool = appService.getDatabasePool();
+
+    try {
+        console.log(`Removing book stock with status ${stockId} and book id: ${bookId}`);
+
+        const deleteQueryResult = await pool.query(
+            'DELETE FROM book_stocks WHERE book_id = $1 AND id = $2',
+            [bookId, stockId]
+        );
+
+        res.status(200).json(deleteQueryResult.rowCount === 1);
+    } catch (error) {
+        // Rollback on error
+        console.error("Transaction error:", error);
+        res.status(500).send("Error deleting the book stock");
     }
 });
 

@@ -12,9 +12,10 @@
 * CRF in order to check if someone edits the book at the same time
 * locations, categories, ...
 * use file logger
-* book stock
+* book stock: edit
 * book transactions
-
+* roles (admin, user, developer)
+* book stock booked: add column of booked_user_id 
 
 ## Project setup
 ```

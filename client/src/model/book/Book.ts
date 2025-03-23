@@ -221,6 +221,30 @@ export default class Book extends BookItem {
         }
     }
 
+    public async removeBookStock(stockId: number) {
+        try {
+            const result = await bookService.removeBookStock(this.m_id, stockId);
+
+            if(!result) {
+                throw "Unable to remove book stock";
+            }
+
+            const index = this.m_stocks.value.findIndex((stock) => stock.getId() === stockId);
+            if(index != -1) {
+                this.m_stocks.value.splice(index, 1);
+                this.m_stocks.value = [...this.m_stocks.value];
+
+                // TODO: snackbar message
+
+            } else {
+                console.warn("Unable to remove stock from array since index is -1")
+            }
+        } catch (e) {
+            console.error("Error while removing book stock", e)
+            // TODO: snackbar message
+        }
+    }
+
     /**
      *
      */
