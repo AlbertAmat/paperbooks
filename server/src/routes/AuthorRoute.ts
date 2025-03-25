@@ -1,9 +1,11 @@
 import { Router, Request, Response } from 'express';
 import {appService} from "../AppService";
+import {requireAuth} from "../middlewares/AuthMiddleware";
 
 const router = Router();
 
-router.get('/search', async (req: Request, res: Response) => {
+//@ts-ignore
+router.get('/search', requireAuth, async (req: Request, res: Response) => {
     const query = req.query.query;
     console.log("Search authors by ", query);
 

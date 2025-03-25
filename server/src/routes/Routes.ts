@@ -8,6 +8,5 @@ export const routes: Record<string, Router> = {
     "/app": AppRoute,
     "/book": BooksRoute,
     "/location": LocationRoute,
-    "/admin": AppRoute,
     "/author": AuthorRoute,
 }

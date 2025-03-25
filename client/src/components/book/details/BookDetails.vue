@@ -40,6 +40,7 @@
 				<card-component
 					title="Book"
 					icon="mdi-book"
+					dense
 				>
 					<template v-slot:default>
 						<div class="d-flex">

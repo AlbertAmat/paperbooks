@@ -5,6 +5,8 @@ import DatabaseConf from "./types/DatabaseConf";
 import pg from 'pg';
 import {routes} from "./routes/Routes";
 import { Logger } from "./utils/Logger";
+import AuthRoute from "./routes/AuthRoute";
+import crypto from "crypto";
 
 export class AppService {
     /**
@@ -55,6 +57,12 @@ export class AppService {
      */
     private m_logger!: Logger;
 
+    /**
+     *
+     * @private
+     */
+    private m_shaSecret: string;
+
     public constructor() {
         this.m_port = 8081;
 
@@ -68,6 +76,8 @@ export class AppService {
 
         // Default DB max size of 1000 MB
         this.m_dbMaxSize = 1000;
+
+        this.m_shaSecret = "";
     }
 
     /**
@@ -77,7 +87,8 @@ export class AppService {
         port: number,
         database: DatabaseConf,
         dbMaxSize: number,
-        loggerPath: string
+        loggerPath: string,
+        shaSecret: string
     ) {
         console.log(`
 888888b.                     888            .d8888b.  888                                              
@@ -131,6 +142,8 @@ export class AppService {
 
         this.m_server = server;
         this.m_logger = new Logger(loggerPath);
+
+        this.m_shaSecret = shaSecret;
 
         this.m_logger.info(`Server running on port ${this.m_port}; Database: ${JSON.stringify(database)}; Database max size: ${ this.m_dbMaxSize}`)
 
@@ -223,6 +236,11 @@ export class AppService {
     private __loadRoutes() {
         console.log("")
         console.log("Routes:")
+
+        // Add root route (for session and page render)
+        console.log(`Adding route ROOT [/]`)
+        this.m_app.use("/", AuthRoute);
+
         for(let route in routes) {
             const fullRoute = AppService.ROUTE_PREFIX + route;
             console.log(`Adding route [${fullRoute}]`)
@@ -235,6 +253,10 @@ export class AppService {
      */
     public getLogger(): Logger {
         return this.m_logger;
+    }
+
+    public hashPassword(plainPassword: string): string {
+       return crypto.createHmac("sha256", this.m_shaSecret).update(plainPassword).digest("hex");
     }
 
 }

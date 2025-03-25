@@ -1,32 +1,29 @@
 import { Router, Request, Response } from 'express';
+import {requireAuth} from "../middlewares/AuthMiddleware";
 
 const router = Router();
 
 /**
  * Path: /location
  */
-router.get('', async (req: Request, res: Response) => {
-    res.status(200).json("all ok");
-});
-
-/**
- * Path: /location
- */
-router.post('', async (req: Request, res: Response) => {
+//@ts-ignore
+router.get('', requireAuth, async (req: Request, res: Response) => {
     res.status(200).json("all ok");
 });
 
 /**
  *
  */
-router.put('/{id}', async (req: Request, res: Response) => {
+//@ts-ignore
+router.put('/{id}', requireAuth, async (req: Request, res: Response) => {
     res.status(200).json("all ok");
 });
 
 /**
  *
  */
-router.delete('/{id}', async (req: Request, res: Response) => {
+//@ts-ignore
+router.delete('/{id}', requireAuth, async (req: Request, res: Response) => {
     res.status(200).json("all ok");
 });
 

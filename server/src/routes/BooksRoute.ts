@@ -2,13 +2,15 @@ import {Router, Request, Response} from 'express';
 import {appService} from "../AppService";
 import axios from "axios";
 import {v4 as uuidv4} from 'uuid';
+import {requireAuth} from "../middlewares/AuthMiddleware";
 
 const router: Router = Router();
 
 /**
  * Path: /book/search
  */
-router.get('/search', async (req: Request, res: Response) => {
+//@ts-ignore
+router.get('/search', requireAuth, async (req: Request, res: Response) => {
     // Params
     const name = req.query.name;
     const isbn = req.query.isbn;
@@ -116,7 +118,8 @@ router.get('/search', async (req: Request, res: Response) => {
 /**
  * Path: /book/{id}
  */
-router.get('/:id', async (req: Request, res: Response) => {
+//@ts-ignore
+router.get('/:id', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     console.log("Get book, id:", id)
     const pool = appService.getDatabasePool();
@@ -192,7 +195,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  * Path: /book/{id}
  */
 //@ts-ignore
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     console.log("Update book, id:", id);
 
@@ -313,7 +316,7 @@ router.put('/:id', async (req: Request, res: Response) => {
  *
  */
 //@ts-ignore
-router.post('/isbn/:isbn', async (req: Request, res: Response) => {
+router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
     const isbnCode = req.params.isbn;
     if (!isbnCode) {
         return res.status(400).send('No ISBN code provided');
@@ -475,7 +478,7 @@ router.post('/isbn/:isbn', async (req: Request, res: Response) => {
  *
  */
 //@ts-ignore
-router.post('/:id/stock', async (req: Request, res: Response) => {
+router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
     const bookId = req.params.id;
     const status = req.body.status;
     const locationId = req.body.location_id;
@@ -524,12 +527,11 @@ router.post('/:id/stock', async (req: Request, res: Response) => {
     }
 });
 
-
 /**
  *
  */
 //@ts-ignore
-router.delete('/:id/stock/:stock_id', async (req: Request, res: Response) => {
+router.delete('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Response) => {
     const bookId = req.params.id;
     const stockId = req.params.stock_id;
     if (!bookId || !stockId) {

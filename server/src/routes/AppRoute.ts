@@ -1,11 +1,13 @@
 import { Router, Request, Response } from 'express';
 import {appService} from "../AppService";
+import {requireAuth} from "../middlewares/AuthMiddleware";
 
 const router = Router();
 
 // GET - policy conf
 // /app/policy
-router.get('/policy', async (req: Request, res: Response) => {
+//@ts-ignore
+router.get('/policy', requireAuth, async (req: Request, res: Response) => {
 
     let categories: Record<string, any>[] = [];
     let languages: Record<string, any>[] = [];
@@ -127,7 +129,5 @@ async function getLocations(): Promise<Record<string, any>[]> {
     // Return the result (found rows)
     return result.rows;
 }
-
-
 
 export default router;

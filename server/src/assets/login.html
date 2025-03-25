@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Storage - Login</title>
+    <style>
+        body {
+            background-color: rgb(250, 250, 250);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        .login-container h2 {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+            height: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>Book Storage</h2>
+    <form id="loginForm" action="/login" method="POST">
+        <div class="input-group">
+            <input type="text" name="username" placeholder="Username" required>
+        </div>
+        <div class="input-group">
+            <input type="password" name="password" id="password" placeholder="Password" required>
+            <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+        </div>
+
+        <div
+                class="error-message"
+                id="error-message"
+                style="display: none;"
+        >
+            Invalid username or password
+        </div>
+
+        <button type="submit" class="login-btn">Login</button>
+    </form>
+</div>
+<script>
+    function togglePassword() {
+        const passwordField = document.getElementById('password');
+        passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function (event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const form = this;
+        const username = form.username.value;
+        const password = form.password.value;
+        const errorMessage = document.getElementById('error-message');
+
+        try {
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({username, password})
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                errorMessage.innerText = data.message;
+                errorMessage.style.display = "block";
+                return;
+            }
+
+            // Hide error if login is successful
+            errorMessage.style.display = "none";
+
+            // Redirect on successful login
+            window.location.href = data.redirectUrl;
+
+        } catch (error) {
+            errorMessage.innerText = "An error occurred. Please try again.";
+            errorMessage.style.display = "block";
+            console.error("Login error:", error);
+        }
+    });
+</script>
+</body>
+</html>

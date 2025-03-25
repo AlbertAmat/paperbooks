@@ -4,7 +4,10 @@
 		class="pa-0"
 		:class="outline ? 'app-border-2' : ''"
 	>
-		<v-card-title class="d-flex align-center px-0 pt-0">
+		<v-card-title
+			v-if="!dense"
+			class="d-flex align-center px-0 pt-0"
+		>
 			<v-icon class="mr-2">{{icon}}</v-icon>
 
 			{{ title }}
@@ -20,7 +23,7 @@
 
 			<slot name="actions"></slot>
 		</v-card-title>
-		<v-card-text class="px-0 pb-0">
+		<v-card-text class="px-0 pb-0" :class="dense ? 'pt-0' : ''">
 			<slot></slot>
 		</v-card-text>
 	</v-card>
@@ -46,6 +49,10 @@ export default defineComponent({
 			type: Number,
 		},
 		outline: {
+			type: Boolean,
+			default: false
+		},
+		dense: {
 			type: Boolean,
 			default: false
 		},
