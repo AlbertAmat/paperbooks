@@ -21,17 +21,46 @@ router.use(
     })
 );
 
+
+// Handle root path ('/')
+router.get("/", (req: Request, res: Response) => {
+    // Check if the user is authenticated by looking at the session
+    //@ts-ignore
+    if (req.session.user) {
+        console.log("User already logged in, redirecting to /app...");
+        return res.redirect("/app"); // Redirect to /app if user is logged in
+    } else {
+        console.log("User not logged in, redirecting to /login...");
+        return res.redirect("/login"); // Redirect to login page if user is not logged in
+    }
+});
+
 // Serve the login page
 //@ts-ignore
 router.get("/login", (req: Request, res: Response) => {
     console.log("render login page")
+    //@ts-ignore
+    if (req.session.user) {
+        return res.redirect("/app");
+    }
     res.sendFile(path.join(__dirname, "..", "assets", "login.html"));
 });
 
+const distPath = path.join(__dirname, "..", "..", "..", "dist");
+
+router.use("/app/resources", express.static(path.join(distPath, "resources"), {
+    setHeaders: (res, path) => {
+        console.log("handle mime", path)
+        if (path.endsWith(".css")) {
+            res.set('Content-Type', 'text/css');
+        }
+    }
+}));
+
 //@ts-ignore
 router.get("/app", requireAuth, (req: Request, res: Response) => {
-    console.log("render APP page")
-    //res.sendFile(path.join(__dirname, "..", "assets", "login.html"));
+    console.log("render APP page from:", "index.html")
+    res.sendFile(path.join(distPath,"index.html" ));
     return res.status(200)
 });
 

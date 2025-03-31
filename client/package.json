@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "watch": "NODE_ENV=production vue-cli-service build --watch",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -26,6 +27,7 @@
     "@vue/cli-service": "~5.0.0",
     "sass": "~1.32.0",
     "sass-loader": "^10.0.0",
+    "terser-webpack-plugin": "^5.3.14",
     "typescript": "~4.5.5",
     "vue-cli-plugin-vuetify": "~2.5.8",
     "vue-template-compiler": "^2.6.14",
