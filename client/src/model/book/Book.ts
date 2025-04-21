@@ -6,6 +6,7 @@ import {bookService} from "@/service/book/BookService";
 import BookStock from "@/model/book/BookStock";
 import {BookStockStatusEnum} from "@/types/book/IBookStock";
 import {shallowRef, ShallowRef} from "vue";
+import router, {RoutePaths} from "@/router/Router";
 
 export default class Book extends BookItem {
 
@@ -70,7 +71,7 @@ export default class Book extends BookItem {
             this.m_format = applicationService.getFormat(data.format_id) || null;
         }
 
-        this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(stock)));
+        this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(this.m_id,stock)));
     }
 
     /**
@@ -208,7 +209,7 @@ export default class Book extends BookItem {
     public async addBookStock(status: BookStockStatusEnum, locationId: number, print: boolean) {
         try {
             const data = await bookService.addBookStock(this.m_id, locationId, status);
-            const stock = new BookStock(data)
+            const stock = new BookStock(this.m_id, data)
             this.m_stocks.value = [...this.m_stocks.value, stock];
 
             // TODO: snackbar message
@@ -264,10 +265,19 @@ export default class Book extends BookItem {
                 this.m_pages,
                 this.m_format ? this.m_format.getFormatId() : null
             )
-            console.log(`Update book ${this.m_id} successfully`)
             // TODO: snackbar message
         } catch (e) {
             console.error("Error while updating book.", e)
+        }
+    }
+
+    public async deleteBook() {
+        try {
+            await bookService.deleteBook(this.m_id)
+            // TODO: snackbar message
+            router.push(RoutePaths.SEARCH_BOOKS)
+        } catch (e) {
+            console.error("Error while deleting book.", e)
         }
     }
 

@@ -14,6 +14,9 @@
 			<v-btn
 				class="text-none mr-2"
 				color="error"
+				@click="deleteBook()"
+				:loading="loadingDelete"
+				:disabled="loadingDelete"
 				small
 				outlined
 			>
@@ -257,6 +260,7 @@ import BookStocks from "@/components/book/details/compoents/BookStocks.vue";
 import BookAuthor from "@/model/book/BookAuthor";
 import {authorService} from "@/service/author/AuthorService";
 import CardComponent from "@/components/card/CardComponent.vue";
+import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 
 export default defineComponent({
 	name: "BookDetails",
@@ -285,6 +289,11 @@ export default defineComponent({
 		 *
 		 */
 		const loadingUpdate: Ref<boolean> = ref(false);
+
+		/**
+		 *
+		 */
+		const loadingDelete: Ref<boolean> = ref(false);
 
 		/**
 		 *
@@ -422,9 +431,6 @@ export default defineComponent({
 			},
 			set(val: number[]) {
 				const items: BookAuthor[] = [];
-
-				console.log("val",val)
-				console.log("loadedAuthors",loadedAuthors.value)
 				val.forEach((id) => {
 					const item = loadedAuthors.value.find((a) => a.getAuthorId() === id);
 					if(item) {
@@ -468,6 +474,17 @@ export default defineComponent({
 			router.back()
 		}
 
+		function deleteBook() {
+			confirmationDialogController.showDialog(`Delete book '${props.book.getName()}'`, "Are you sure that you want to delete this book?", "Delete").then(async () => {
+				try {
+					loadingDelete.value = true;
+					await props.book.deleteBook();
+				} finally {
+					loadingDelete.value = false;
+				}
+			})
+		}
+
 		/**
 		 *
 		 */
@@ -507,6 +524,7 @@ export default defineComponent({
 			}
 		})
 
+
 		return {
 			showFallbackImage,
 			notFound,
@@ -531,7 +549,9 @@ export default defineComponent({
 			loadingAuthors,
 			loadingUpdate,
 			updateBook,
-			disableFields
+			disableFields,
+			deleteBook,
+			loadingDelete
 		}
 	}
 })

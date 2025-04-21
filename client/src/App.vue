@@ -37,6 +37,8 @@
 
 					<div id="scroller" style="flex: 1; overflow-y: auto; padding-top: 10px; margin-top: 4px">
 						<router-view></router-view>
+
+						<confirmation-dialog/>
 					</div>
 				</v-container>
 			</v-main>
@@ -49,10 +51,12 @@ import {defineComponent, onMounted} from 'vue';
 import AppBar from "@/components/app/AppBar.vue";
 import AppMenu from "@/components/app/AppMenu.vue";
 import {applicationService} from "@/service/ApplicationService";
+import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog.vue";
 
 export default defineComponent({
 	name: 'App',
 	components: {
+		ConfirmationDialog,
 		AppMenu,
 		AppBar,
 	},

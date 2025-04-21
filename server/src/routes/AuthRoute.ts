@@ -64,6 +64,13 @@ router.get("/app", requireAuth, (req: Request, res: Response) => {
     return res.status(200)
 });
 
+//@ts-ignore
+router.get("/app/*", requireAuth, (req: Request, res: Response) => {
+    console.log("render APP page from:", "index.html")
+    res.sendFile(path.join(distPath,"index.html" ));
+    return res.status(200)
+});
+
 // Login route
 //@ts-ignore
 router.post("/login", async (req: Request, res: Response) => {

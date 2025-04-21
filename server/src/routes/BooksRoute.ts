@@ -146,7 +146,9 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
                    'code', book_stocks.code,
                    'status', book_stocks.status,
                    'location_id', locations.id,  -- Using correct column from locations table
-                   'location_name', locations.name
+                   'location_name', locations.name,
+                   'customer_id', customers.id,
+                   'customer_name', customers.name
                )
            ) FILTER(WHERE book_stocks.id IS NOT NULL), '[]'
                    )                                                                    AS stocks,
@@ -159,7 +161,8 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
            ) FILTER(WHERE authors.id IS NOT NULL), '[]') AS authors
             FROM books
                      LEFT JOIN book_stocks ON books.id = book_stocks.book_id
-                     LEFT JOIN locations ON book_stocks.location_id = locations.id -- Ensure correct join condition
+                     LEFT JOIN locations ON book_stocks.location_id = locations.id 
+                     LEFT JOIN customers ON book_stocks.customer_id = customers.id 
                      LEFT JOIN book_authors ON books.id = book_authors.book_id
                      LEFT JOIN authors ON book_authors.author_id = authors.id
             WHERE books.id = $1
@@ -306,6 +309,36 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
         // Rollback transaction in case of error
         await client.query('ROLLBACK');
         console.error("Error while updating book", e);
+        res.status(500).send('Internal Server Error');
+    } finally {
+        client.release();
+    }
+});
+
+/**
+ * Path: /book/{id}
+ */
+//@ts-ignore
+router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    console.log("Delete book, id:", id);
+
+    // Database connection
+    const pool = appService.getDatabasePool();
+    const client = await pool.connect();
+
+    try {
+        // Validate the existence of the book
+        const bookCheck = await client.query('SELECT id FROM books WHERE id = $1', [id]);
+        if (bookCheck.rowCount === 0) {
+            return res.status(404).send({error: "Book not found"});
+        }
+
+        await client.query( 'DELETE FROM books WHERE id = $1', [id]);
+
+        res.send({message: "Book deleted successfully"});
+    } catch (e) {
+        console.error("Error while deleting book", e);
         res.status(500).send('Internal Server Error');
     } finally {
         client.release();
@@ -486,6 +519,11 @@ router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
         return res.status(400).send('No book ID provided');
     }
 
+    const BOOKED_STATUS = 2;
+    if (status == BOOKED_STATUS) {
+        return res.status(406).send('Status "booked" not allowed in add stock action');
+    }
+
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
 
@@ -549,6 +587,60 @@ router.delete('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Res
         );
 
         res.status(200).json(deleteQueryResult.rowCount === 1);
+    } catch (error) {
+        // Rollback on error
+        console.error("Transaction error:", error);
+        res.status(500).send("Error deleting the book stock");
+    }
+});
+
+/**
+ *
+ */
+//@ts-ignore
+router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Response) => {
+    const bookId = req.params.id;
+    const stockId = req.params.stock_id;
+    if (!bookId || !stockId) {
+        return res.status(400).send('No book ID or stock ID provided');
+    }
+
+    // Body params
+    const {
+        status,
+        location_id
+    } = req.body;
+
+    const pool = appService.getDatabasePool();
+
+    try {
+        console.log(`Updating book stock ${stockId}`);
+
+        const queryResult = await pool.query(
+            'UPDATE book_stocks SET status = $1, location_id = $2 WHERE book_id = $3 AND id = $4',
+            [status, location_id, bookId, stockId]
+        );
+
+        if(queryResult.rowCount != 1) {
+            res.status(500).send();
+        }
+
+        const stockQueryResult = await pool.query(
+            `SELECT book_stocks.id, 
+                    book_stocks.code, 
+                    book_stocks.status, 
+                    book_stocks.location_id,
+                    locations.name as location_name,
+                    customers.id as customer_id,
+                    customers.name as customer_name
+              FROM book_stocks
+                       LEFT JOIN customers ON book_stocks.customer_id = customers.id
+                       LEFT JOIN locations ON book_stocks.location_id = locations.id
+             WHERE book_stocks.id = $1`,
+            [stockId]
+        );
+
+        res.status(200).json(stockQueryResult.rows[0]);
     } catch (error) {
         // Rollback on error
         console.error("Transaction error:", error);

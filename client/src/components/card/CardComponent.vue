@@ -31,7 +31,7 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import AddBookStock from "@/components/book/details/compoents/AddBookStock.vue";
+import AddBookStock from "@/components/book/details/compoents/BookStockDialog.vue";
 
 export default defineComponent({
 	name: "CardComponent" ,

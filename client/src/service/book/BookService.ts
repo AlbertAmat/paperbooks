@@ -83,6 +83,31 @@ export class BookService {
     }
 
 
+    /**
+     *
+     * @param id
+     * @param stockId
+     * @param stockStatus
+     * @param stockLocationId
+     */
+    public async updateBookStock(id: number, stockId: number, stockStatus: BookStockStatusEnum, stockLocationId: number): Promise<IBookStock> {
+        const {data} = await axios.put(`${PATH_PREFIX}/book/${id}/stock/${stockId}`, {
+            status: stockStatus,
+            location_id: stockLocationId
+        });
+
+        return data;
+    }
+
+
+    /**
+     *
+     * @param id
+     */
+    public async deleteBook(id: number): Promise<void> {
+        await axios.delete(`${PATH_PREFIX}/book/${id}`);
+    }
+
 }
 
 export const bookService = new BookService();

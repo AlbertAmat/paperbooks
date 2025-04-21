@@ -139,6 +139,11 @@ export default defineComponent({
 				path: ""
 			},
 			{
+				name: "Customers",
+				icon: "mdi-account-school-outline",
+				path: ""
+			},
+			{
 				subheader: "Administration"
 			},
 			{

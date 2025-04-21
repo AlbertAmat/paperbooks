@@ -3,21 +3,9 @@
 		v-model="dialog"
 		width="500"
 	>
-		<template v-slot:activator="{ on, attrs }">
-			<v-btn
-				v-bind="attrs"
-				v-on="on"
-				small
-				color="primary"
-				class="text-none"
-			>
-				Add
-			</v-btn>
-		</template>
-
 		<v-card>
 			<v-card-title>
-				Add book stock
+				{{stock ? 'Edit book stock' : 'Add book stock'}}
 			</v-card-title>
 
 			<v-divider></v-divider>
@@ -66,9 +54,10 @@
 					@click="addStock()"
 					class="text-none"
 				>
-					Add
+					{{stock ? 'Update' : 'Add'}}
 				</v-btn>
 				<v-btn
+					v-if="!stock"
 					color="primary"
 					small
 					:disabled="selectedStatus === null || selectedLocation == null || loading"
@@ -91,18 +80,31 @@ import BookStock from "@/model/book/BookStock";
 import {applicationService} from "@/service/ApplicationService";
 
 export default defineComponent({
-	name: "AddBookStock",
+	name: "BookStockDialog",
 	props: {
+		value: {
+			type: Boolean,
+			required: true
+		},
 		book: {
 			type: Object as () => Book,
 			required: true
-		}
+		},
+		stock: {
+			type: Object as () => BookStock,
+		},
 	},
-	setup(props) {
+	setup(props, context) {
 		/**
 		 *
 		 */
-		const dialog: Ref<boolean> = ref(false);
+		const dialog = computed({
+			get() {
+				return props.value;
+			}, set(val: boolean) {
+				context.emit("input", val)
+			}
+		})
 
 		/**
 		 *
@@ -111,8 +113,10 @@ export default defineComponent({
 
 		/**
 		 * The list of book status
+		 * Removed booked status, since we are adding a book stock ord updating.
+		 * Booked status is added bya customer page
 		 */
-		const status = BookStock.BookStockStatus;
+		const status = BookStock.BookStockStatus.filter((item) => item.value != BookStockStatusEnum.BOOKED);
 
 		const locations = computed(() => {
 			return applicationService.getLocations().map((location) => {
@@ -126,9 +130,12 @@ export default defineComponent({
 		/**
 		 *
 		 */
-		const selectedStatus: Ref<BookStockStatusEnum> = ref(BookStockStatusEnum.AVAILABLE);
+		const selectedStatus: Ref<BookStockStatusEnum> = ref(props.stock ? props.stock.getStatus() : BookStockStatusEnum.AVAILABLE);
 
-		const selectedLocation: Ref<number | null > = ref(null);
+		/**
+		 *
+		 */
+		const selectedLocation: Ref<number | null > = ref(props.stock ? props.stock.getLocationId() : null);
 
 		/**
 		 *
@@ -138,7 +145,11 @@ export default defineComponent({
 			if(selectedLocation.value != null) {
 				try {
 					loading.value = true;
-					await props.book.addBookStock(selectedStatus.value, selectedLocation.value, print);
+					if(props.stock) {
+						await props.stock.update(selectedStatus.value, selectedLocation.value)
+					} else {
+						await props.book.addBookStock(selectedStatus.value, selectedLocation.value, print);
+					}
 					closeDialog();
 				} finally {
 					loading.value = false;
@@ -163,7 +174,7 @@ export default defineComponent({
 			closeDialog,
 			addStock,
 			selectedLocation,
-			locations
+			locations,
 		}
 	}
 })

@@ -1,5 +1,7 @@
 import {BookStockStatusEnum, IBookStock} from "@/types/book/IBookStock";
 import JsBarcode from "jsbarcode";
+import {bookService} from "@/service/book/BookService";
+import {ref, Ref} from "vue";
 
 export default class BookStock {
 
@@ -27,6 +29,12 @@ export default class BookStock {
     ]
 
     /**
+     * The book id as reference
+     * @private
+     */
+    private readonly m_bookId: number;
+
+    /**
      * The book stock id
      * @private
      */
@@ -42,13 +50,13 @@ export default class BookStock {
      *
      * @private
      */
-    private m_status: BookStockStatusEnum;
+    private m_status: Ref<BookStockStatusEnum>;
 
     /**
      *
      * @private
      */
-    private m_locationId: number | null;
+    private m_locationId: Ref<number | null>;
 
     /**
      *
@@ -56,13 +64,29 @@ export default class BookStock {
      */
     private m_locationName: string | null;
 
-    public constructor(stock: IBookStock) {
+    /**
+     * The customer id that has booked the book
+     * @private
+     */
+    private m_customerId: Ref<number | null>;
+
+    /**
+     * The customer name that has booked the book
+     * @private
+     */
+    private m_customerName: string | null;
+
+    public constructor(bookId: number, stock: IBookStock) {
+        this.m_bookId       = bookId;
         this.m_id       = stock.id;
         this.m_code     = stock.code;
-        this.m_status   = stock.status;
+        this.m_status   = ref(stock.status);
 
-        this.m_locationId = stock.location_id;
+        this.m_locationId = ref(stock.location_id);
         this.m_locationName = stock.location_name;
+
+        this.m_customerId = ref(stock.customer_id);
+        this.m_customerName = stock.customer_name;
     }
 
     /**
@@ -83,15 +107,23 @@ export default class BookStock {
      *
      */
     public getStatus(): BookStockStatusEnum {
-        return this.m_status;
+        return this.m_status.value;
     }
 
     public getLocationId(): number | null {
-        return this.m_locationId;
+        return this.m_locationId.value;
     }
 
     public getLocationName(): string | null {
         return this.m_locationName;
+    }
+
+    public getCustomerId(): number | null {
+        return this.m_customerId.value;
+    }
+
+    public getCustomerName(): string | null {
+        return this.m_customerName;
     }
 
     /**
@@ -126,6 +158,19 @@ export default class BookStock {
             </html>
         `);
             printWindow.document.close();
+        }
+    }
+
+    public async update(status: BookStockStatusEnum, locationId: number) {
+        try {
+            const data = await bookService.updateBookStock(this.m_bookId, this.m_id, status, locationId);
+            this.m_status.value = data.status;
+            this.m_locationId.value = data.location_id;
+            this.m_locationName = data.location_name;
+            this.m_customerId.value = data.customer_id;
+            this.m_customerName = data.customer_name;
+        } catch (e) {
+            console.error("Error while updating book stock", e)
         }
     }
 
