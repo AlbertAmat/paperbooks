@@ -94,9 +94,6 @@ export class ApplicationService {
 
             this.m_dbMaxSize = data.maxSize;
             this.m_dbSize = data.size;
-
-            // TODO: user config (primary, dark, ...)
-            vuetify.framework.theme.currentTheme.primary = "#2E68F6";
         } catch (e: any) {
             const error = e as Error;
             console.error("Error while fetching application policy.", e);

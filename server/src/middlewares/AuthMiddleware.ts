@@ -1,6 +1,22 @@
 import { Request, Response, NextFunction } from "express";
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    //@ts-ignore
+    req.session.user = {id: 1, code: "admin1"};
+
     //@ts-ignore
     if (!req.session || !req.session.user) {
         res.clearCookie("session_id"); // Clear expired session cookie

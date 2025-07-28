@@ -46,73 +46,57 @@
 	</page-component>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {defineComponent, Ref, ref, onMounted, onUnmounted} from "vue";
 import PageComponent from "@/views/PageComponent.vue";
 import SearchController from "@/controller/search/SearchController";
-import BookItem from "@/components/book/BookItem.vue";
-import BookItemSkeleton from "@/components/book/BookItemSkeleton.vue";
-import CreateBookIsbnDialog from "@/views/search/CreateBookIsbnDialog.vue";
+import BookItem from "@/views/search/components/BookItem.vue";
+import BookItemSkeleton from "@/views/search/components/BookItemSkeleton.vue";
+import CreateBookIsbnDialog from "@/views/search/components/CreateBookIsbnDialog.vue";
 
-export default defineComponent({
-	name: "BooksSearchView",
-	components: {CreateBookIsbnDialog, BookItemSkeleton, BookItem, PageComponent},
-	setup() {
+const model = new SearchController();
 
-		const model = new SearchController();
+/**
+ *
+ */
+const loadingBooks: Ref<boolean> = ref(false);
 
-		/**
-		 *
-		 */
-		const loadingBooks: Ref<boolean> = ref(false);
+/**
+ *
+ */
+const infiniteScrollTrigger: Ref<HTMLElement | null> = ref(null);
 
-		/**
-		 *
-		 */
-		const infiniteScrollTrigger: Ref<HTMLElement | null> = ref(null);
-
-		/**
-		 *
-		 */
-		async function loadMoreBooks() {
-			if (model.hasNextPage() && !loadingBooks.value) {
-				try {
-					loadingBooks.value = true;
-					model.nextPage(); // Increment page
-					await model.fetchBooks();
-				} finally {
-					loadingBooks.value = false;
-				}
-			}
-		}
-
-		function handleScroll() {
-			const trigger = infiniteScrollTrigger.value;
-			if (trigger) {
-				const rect = trigger.getBoundingClientRect();
-				if (rect.top < window.innerHeight) {
-					loadMoreBooks();
-				}
-			}
-		}
-
-		onMounted(async () => {
-			// Attach scroll listener
-			document.getElementById("scroller")!.addEventListener("scroll", handleScroll);
-		});
-
-		onUnmounted(() => {
-			document.getElementById("scroller")!.removeEventListener("scroll", handleScroll);
-		});
-
-		return {
-			model,
-			loadingBooks,
-			infiniteScrollTrigger
+/**
+ *
+ */
+async function loadMoreBooks() {
+	if (model.hasNextPage() && !loadingBooks.value) {
+		try {
+			loadingBooks.value = true;
+			model.nextPage(); // Increment page
+			await model.fetchBooks();
+		} finally {
+			loadingBooks.value = false;
 		}
 	}
+}
+
+function handleScroll() {
+	const trigger = infiniteScrollTrigger.value;
+	if (trigger) {
+		const rect = trigger.getBoundingClientRect();
+		if (rect.top < window.innerHeight) {
+			loadMoreBooks();
+		}
+	}
+}
+
+onMounted(async () => {
+	// Attach scroll listener
+	document.getElementById("scroller")!.addEventListener("scroll", handleScroll);
+});
+
+onUnmounted(() => {
+	document.getElementById("scroller")!.removeEventListener("scroll", handleScroll);
 });
 </script>
-
-<style scoped lang="scss">
-</style>

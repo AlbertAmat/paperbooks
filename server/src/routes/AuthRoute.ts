@@ -21,10 +21,10 @@ router.use(
     })
 );
 
-
 // Handle root path ('/')
 router.get("/", (req: Request, res: Response) => {
     // Check if the user is authenticated by looking at the session
+
     //@ts-ignore
     if (req.session.user) {
         console.log("User already logged in, redirecting to /app...");
@@ -46,11 +46,10 @@ router.get("/login", (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, "..", "assets", "login.html"));
 });
 
-const distPath = path.join(__dirname, "..", "..", "..", "dist");
+const distPath = path.join(__dirname, '../../../client/dist')
 
-router.use("/app/resources", express.static(path.join(distPath, "resources"), {
+router.use("/app/assets", express.static(path.join(distPath, "assets"), {
     setHeaders: (res, path) => {
-        console.log("handle mime", path)
         if (path.endsWith(".css")) {
             res.set('Content-Type', 'text/css');
         }

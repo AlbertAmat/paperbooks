@@ -7,24 +7,11 @@
 	</page-component>
 </template>
 
-<script lang="ts">
-import {defineComponent} from "vue";
+<script setup lang="ts">
 import PageComponent from "@/views/PageComponent.vue";
 import BookController from "@/controller/book/BookController";
-import BookDetails from "@/components/book/details/BookDetails.vue";
+import BookDetails from "@/views/book/BookDetails.vue";
 
-export default defineComponent({
-	name: "BookView",
-	components: {BookDetails, PageComponent},
-	setup() {
-		const model = new BookController();
-		return {
-			model,
-		}
-	}
-});
+const model = new BookController();
+
 </script>
-
-<style scoped lang="scss">
-
-</style>

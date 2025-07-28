@@ -10,7 +10,7 @@
 * locations, categories, ...
 * use file logger
 * book stock: edit
-* roles (admin, user, developer)
+* roles (admian, user, developer)
 * book stock booked: add column of booked_user_id 
 * search bar
 * user menu

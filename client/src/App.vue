@@ -46,64 +46,31 @@
 	</v-app>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {defineComponent, onMounted} from 'vue';
 import AppBar from "@/components/app/AppBar.vue";
 import AppMenu from "@/components/app/AppMenu.vue";
 import {applicationService} from "@/service/ApplicationService";
 import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog.vue";
 
-export default defineComponent({
-	name: 'App',
-	components: {
-		ConfirmationDialog,
-		AppMenu,
-		AppBar,
-	},
-	setup() {
-
-		onMounted(() => {
-			applicationService.fetchPolicy();
-		})
-
-		return {
-			applicationService
-		}
-	}
-});
+onMounted(() => {
+	applicationService.fetchPolicy();
+})
 </script>
 
 <style>
-html, body {
-	overflow-y: hidden;
-	overflow-x: hidden;
-	height: 100vh;
-}
-
 .app-main {
-	overflow: hidden;
-}
-
-.app-main,
-.app-content {
-	background-color: #FAFAFA;
-	overflow: hidden !important;
-	height: 100vh;
+	overflow: auto;
+	height: 100%;
 }
 
 .app-main  .v-main__wrap {
 	display: flex !important;
 	flex-direction: column;
 	flex: 1;
-	padding: 8px !important;
 }
 
-
 .app-content {
-	width: 100%;
-	border-radius: 8px;
-	background-color: white;
-	border: 1px solid #EFEFEF;
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -115,11 +82,4 @@ html, body {
 	height: 100%;
 }
 
-.app-border-1 {
-	border: 1px solid #EFEFEF;
-}
-
-.app-border-2 {
-	border: 2px solid #EFEFEF;
-}
 </style>

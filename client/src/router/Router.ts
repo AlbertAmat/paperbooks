@@ -1,66 +1,46 @@
-import Vue                                                    from "vue";
-import VueRouter, { RouteConfig } from "vue-router";
+// src/router/index.ts or router.ts
 
-/**
- * Tell Vue to user Vue router.
- */
-Vue.use(VueRouter);
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
 export enum RoutePaths {
-    OVERVIEW = "/overview",
-    SEARCH_BOOKS = "/books/search",
-    BOOK = "/book/:book_id",
-    NOT_FOUND = "*",
+    OVERVIEW = '/overview',
+    SEARCH_BOOKS = '/books/search',
+    BOOK = '/book/:book_id',
+    NOT_FOUND = '/:pathMatch(.*)*', // Vue Router 4 wildcard syntax
 }
 
-/**
- *
- */
-const routes: Array<RouteConfig> = [
+// Define your routes
+const routes: Array<RouteRecordRaw> = [
     {
-        path: "/",
+        path: '/',
         redirect: RoutePaths.OVERVIEW,
     },
     {
-        name: "Overview",
+        name: 'Overview',
         path: RoutePaths.OVERVIEW,
-        component: () => import("@/views/overview/OverviewView.vue")
+        component: () => import('@/views/overview/OverviewView.vue'),
     },
     {
-        name: "Books",
+        name: 'Books',
         path: RoutePaths.SEARCH_BOOKS,
-        component: () => import("@/views/search/BooksSearchView.vue")
+        component: () => import('@/views/search/BooksSearchView.vue'),
     },
     {
-        name: "Book",
+        name: 'Book',
         path: RoutePaths.BOOK,
-        component: () => import("@/views/book/BookView.vue")
+        component: () => import('@/views/book/BookView.vue'),
     },
-
-    // ========================================================================
-    // Error route
-    // ========================================================================
-
-    // ========================================================================
-    // Not Found route
-    // ========================================================================
     {
-        name: "Not found",
+        name: 'Not found',
         path: RoutePaths.NOT_FOUND,
-        component: () => import("@/views/notFound/NotFoundView.vue")
-    }
-];
+        component: () => import('@/views/notFound/NotFoundView.vue'),
+    },
+]
 
-/**
- *
- */
-const router = new VueRouter({
-    mode: "history",
-    base: "app",
-    routes
-});
+// Create the router instance
+const router = createRouter({
+    history: createWebHistory('/app'), // 👈 replaces mode + base
+    routes,
+})
 
-/**
- * Export router instance.
- */
-export default router;
+export default router

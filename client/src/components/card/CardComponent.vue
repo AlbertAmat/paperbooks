@@ -29,37 +29,18 @@
 	</v-card>
 </template>
 
-<script lang="ts">
-import {defineComponent} from 'vue'
-import AddBookStock from "@/components/book/details/compoents/BookStockDialog.vue";
+<script setup lang="ts">
 
-export default defineComponent({
-	name: "CardComponent" ,
-	components: {AddBookStock},
-	props: {
-		title: {
-			type: String,
-			required: true
-		},
-		icon: {
-			type: String,
-			required: true
-		},
-		counter: {
-			type: Number,
-		},
-		outline: {
-			type: Boolean,
-			default: false
-		},
-		dense: {
-			type: Boolean,
-			default: false
-		},
-	}
+interface Props {
+	title:  string;
+	icon:  string;
+	counter?: number;
+	outline?: boolean
+	dense?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	outline: false,  // ✅ no function needed for primitive
+	dense: false
 })
 </script>
-
-<style scoped lang="scss">
-
-</style>

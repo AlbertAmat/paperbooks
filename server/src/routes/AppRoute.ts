@@ -9,6 +9,22 @@ const router = Router();
 //@ts-ignore
 router.get('/policy', requireAuth, async (req: Request, res: Response) => {
 
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    // TODO: UST FOR DEV: REMOOOOVE!!!!
+    //@ts-ignore
+    req.session.user = {id: 1, code: "admin1"};
+
     let categories: Record<string, any>[] = [];
     let languages: Record<string, any>[] = [];
     let formats: Record<string, any>[] = [];

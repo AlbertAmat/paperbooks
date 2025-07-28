@@ -1,5 +1,5 @@
 <template>
-	<div style="position: relative; overflow-y: auto">
+	<div style="position: relative; height: 100%">
 		<v-overlay
 			v-if="model.isLoading()"
 			:opacity="0"
@@ -24,28 +24,13 @@
 	</div>
 </template>
 
-<script lang="ts">
-import {defineComponent} from "vue";
+<script setup lang="ts">
 import {BaseController} from "@/controller/BaseController";
 
-export default defineComponent({
-	name: "PageComponent",
-	props: {
-		model: {
-			type: Object as () => BaseController<any>,
-			required: true
-		}
-	},
-	setup() {
+interface Props {
+	model: BaseController<any>
+}
 
+const props = defineProps<Props>()
 
-		return {
-
-		}
-	}
-});
 </script>
-
-<style scoped lang="scss">
-
-</style>

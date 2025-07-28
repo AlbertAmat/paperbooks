@@ -6,13 +6,13 @@
 	>
 		<v-card>
 			<v-card-title>
-				{{controller.getTitle()}}
+				{{ controller.getTitle() }}
 			</v-card-title>
 
 			<v-divider/>
 
 			<v-card-text style="min-height: 60px; padding-top: 10px">
-				{{controller.getDescription()}}
+				{{ controller.getDescription() }}
 			</v-card-text>
 
 			<v-divider></v-divider>
@@ -42,57 +42,39 @@
 	</v-dialog>
 </template>
 
-<script lang="ts">
-import {computed, defineComponent, ref, Ref} from 'vue'
-import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
+<script setup lang="ts">
+import {computed, ref, Ref} from 'vue'
+import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController"
 
-export default defineComponent({
-	name: "ConfirmationDialog",
-	setup() {
-		const controller = confirmationDialogController;
+const controller = confirmationDialogController;
 
-		const acceptLoading: Ref<boolean> = ref(false);
-		const cancelLoading: Ref<boolean> = ref(false);
+const acceptLoading: Ref<boolean> = ref(false);
+const cancelLoading: Ref<boolean> = ref(false);
 
-		const model = computed({
-			get() {
-				return controller.isVisible();
-			},
-			set(value: boolean) {
-				controller.setVisible(value);
-			}
-		})
-
-		async function accept() {
-			try {
-				acceptLoading.value = true;
-				await controller.executeAction();
-			} finally {
-				acceptLoading.value = false;
-			}
-		}
-
-		async function cancel() {
-			try {
-				cancelLoading.value = true;
-				await controller.cancelAction();
-			} finally {
-				cancelLoading.value = false;
-			}
-		}
-
-		return {
-			controller,
-			model,
-			accept,
-			cancel,
-			acceptLoading,
-			cancelLoading
-		}
+const model = computed({
+	get() {
+		return controller.isVisible();
+	},
+	set(value: boolean) {
+		controller.setVisible(value);
 	}
 })
+
+async function accept() {
+	try {
+		acceptLoading.value = true;
+		await controller.executeAction();
+	} finally {
+		acceptLoading.value = false;
+	}
+}
+
+async function cancel() {
+	try {
+		cancelLoading.value = true;
+		await controller.cancelAction();
+	} finally {
+		cancelLoading.value = false;
+	}
+}
 </script>
-
-<style scoped lang="scss">
-
-</style>

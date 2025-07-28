@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.7.9",
+    "axios": "^1.11.0",
     "body-parser": "^1.20.3",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
@@ -27,6 +27,7 @@
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.1",
     "@types/pg": "^8.11.10",
+    "nodemon": "^3.1.10",
     "typescript": "^5.7.2"
   }
 }
