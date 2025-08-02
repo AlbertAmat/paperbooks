@@ -1,82 +1,72 @@
 <template>
-	<v-hover v-slot="{ hover }">
-		<router-link
+	<v-hover v-slot="{ isHovering }">
+		<v-card
 			:to="book.getUrl()"
-			style="text-decoration: none; height: 125px; position: relative"
+			elevation="0"
+			class="d-flex px-1"
+			height="125px"
+			:class="isHovering ? 'active' : ''"
+			color="background"
+			style=" align-items: center"
 		>
-			<v-list-item
-				style="border-radius: 8px; background-color: white;"
-				two-line
-				class="pa-3 app-border-2"
-				:class="hover ? 'active' : ''"
-			>
-				<v-list-item-icon
-					class="mr-1 my-0"
+			<img
+				:src="showFallback ? notFound : book.getImageUrl()"
+				@error="showFallback = true"
+				class="mr-2 my-0"
+				style="border-radius: 6px; height: 110px; width: 75px; object-fit: cover"
+			/>
+
+			<div>
+				<!-- Book name -->
+				<v-list-item-title
+					:title="book.getName() "
+					class="book-title ellipsis"
 				>
-					<img
-						:src="showFallback ? notFound : book.getImageUrl()"
-						@error="showFallback = true"
-						style="border-radius: 6px; height: 110px; width: 75px; object-fit: cover"
-					/>
-				</v-list-item-icon>
-				<v-list-item-content
-					class="pt-0 pb-2 px-2"
-					style="align-self: start; flex: 1"
+					{{ book.getName() }}
+				</v-list-item-title>
+
+				<!-- Book author-->
+				<v-list-item-subtitle
+					v-if="book.hasAuthors()"
+					:title="book.getAuthors()[0].getAuthorName()"
+					class="book-subtitle ellipsis"
 				>
-					<div style="width: 100%;">
-						<!-- Book name -->
-						<v-list-item-title
-							:title="book.getName() "
-							class="book-title ellipsis"
-						>
-							{{ book.getName() }}
-						</v-list-item-title>
+					{{ book.getAuthors()[0].getAuthorName() }}
+				</v-list-item-subtitle>
 
-						<!-- Book author-->
-						<v-list-item-subtitle
-							v-if="book.hasAuthors()"
-							:title="book.getAuthors()[0].getAuthorName()"
-							class="book-subtitle ellipsis"
-						>
-							{{ book.getAuthors()[0].getAuthorName() }}
-						</v-list-item-subtitle>
+				<!-- Book isbn -->
+				<v-list-item-subtitle
+					v-if="book.hasIsbn()"
+					:title="book.getIsbn()"
+					class="book-subtitle ellipsis mb-2"
+				>
+					<b>ISBN: </b> {{ book.getIsbn() }}
+				</v-list-item-subtitle>
 
-						<!-- Book isbn -->
-						<v-list-item-subtitle
-							v-if="book.hasIsbn()"
-							:title="book.getIsbn()"
-							class="book-subtitle ellipsis"
-						>
-							<b>ISBN: </b> {{ book.getIsbn() }}
-						</v-list-item-subtitle>
-					</div>
+				<v-chip
+					v-if="category"
+					density="compact"
+					variant="outlined"
+					class="px-2 mb-1 mr-1 ellipsis"
+					style="display: block; width: fit-content"
+				>
+					<v-icon small class="mr-2">mdi-shape-outline</v-icon>
+					{{ category.getCategoryName() }}
+				</v-chip>
 
-					<v-chip
-						v-if="category"
-						x-small
-						outlined
-						color="primary"
-						class="px-2 mb-1 mr-1 ellipsis"
-						style="flex: none"
-					>
-						<v-icon small class="mr-2">mdi-shape-outline</v-icon>
-						{{ category.getCategoryName() }}
-					</v-chip>
-
-					<v-chip
-						v-if="language"
-						x-small
-						outlined
-						color="green"
-						class="px-2 mb-1 ellipsis"
-						style="flex: none"
-					>
-						<v-icon small class="mr-2">mdi-flag-outline</v-icon>
-						{{ language.getLanguageName() }}
-					</v-chip>
-				</v-list-item-content>
-			</v-list-item>
-		</router-link>
+				<v-chip
+					v-if="language"
+					density="compact"
+					variant="outlined"
+					color="green"
+					class="px-2 mb-1 ellipsis"
+					style="display: block; width: fit-content"
+				>
+					<v-icon small class="mr-2">mdi-flag-outline</v-icon>
+					{{ language.getLanguageName() }}
+				</v-chip>
+			</div>
+		</v-card>
 	</v-hover>
 </template>
 

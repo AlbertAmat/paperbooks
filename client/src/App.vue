@@ -1,5 +1,5 @@
 <template>
-	<v-app style="height: 100%">
+	<v-app>
 
 		<v-overlay
 			v-if="applicationService.isLoading()"
@@ -26,21 +26,23 @@
 			<app-menu></app-menu>
 
 			<v-main class="app-main">
-				<v-container
-					class="app-content pt-2"
-					fluid
-				>
+				<v-card class="app-content my-2 mr-2">
 					<!-- ================================================== -->
 					<!-- APP BAR											-->
 					<!-- ================================================== -->
-					<app-bar/>
+					<v-card-title style="display: flex; align-items: center; font-size: 14px">
+						<app-bar/>
+					</v-card-title>
 
-					<div id="scroller" style="flex: 1; overflow-y: auto; padding-top: 10px; margin-top: 4px">
-						<router-view></router-view>
+					<v-card-text style="overflow: auto; display: flex; flex-direction: column; flex: 1">
 
-						<confirmation-dialog/>
-					</div>
-				</v-container>
+						<div id="scroller" style="flex: 1; overflow-y: auto; padding-top: 10px; margin-top: 4px">
+							<router-view></router-view>
+
+							<confirmation-dialog/>
+						</div>
+					</v-card-text>
+				</v-card>
 			</v-main>
 		</template>
 	</v-app>
@@ -59,12 +61,23 @@ onMounted(() => {
 </script>
 
 <style>
-.app-main {
-	overflow: auto;
+html, body {
+	height: 100vh;
+	overflow: hidden;
+}
+
+#app {
 	height: 100%;
 }
 
-.app-main  .v-main__wrap {
+.app-main {
+	overflow: auto;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.app-main .v-main__wrap {
 	display: flex !important;
 	flex-direction: column;
 	flex: 1;
@@ -72,14 +85,21 @@ onMounted(() => {
 
 .app-content {
 	position: relative;
-	display: flex;
-	flex-direction: column;
+	display: flex !important;
+	flex-direction: column !important;
+	flex: 1;
+	overflow-y: auto !important;
+	border: 1px solid #ECECEC
 }
 
 .error-container {
 	background-color: red;
 	color: white;
 	height: 100%;
+}
+
+.gradient {
+	background: linear-gradient(135deg, #C8FFB4, #F9FFB7) !important;
 }
 
 </style>

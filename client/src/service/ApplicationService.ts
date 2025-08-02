@@ -21,12 +21,6 @@ export class ApplicationService {
      *
      * @private
      */
-    private m_menu: Ref<boolean> = ref(true);
-
-    /**
-     *
-     * @private
-     */
     private m_error: Error | null;
 
     /**
@@ -59,18 +53,6 @@ export class ApplicationService {
      */
     private m_locations: Location[];
 
-    /**
-     * The max size allowed for the database in MB
-     * @private
-     */
-    private m_dbMaxSize: number;
-
-    /**
-     * The current size of the database in MB
-     * @private
-     */
-    private m_dbSize: number;
-
     public constructor() {
         this.m_error = null;
         this.m_user = null;
@@ -78,8 +60,6 @@ export class ApplicationService {
         this.m_locations = [];
         this.m_categories = [];
         this.m_formats = [];
-        this.m_dbMaxSize = 0;
-        this.m_dbSize = 0;
     }
 
     public async fetchPolicy() {
@@ -92,9 +72,6 @@ export class ApplicationService {
             this.m_languages = data.languages.map((lang) => new Language(lang));
             this.m_formats = data.formats.map((format) => new Format(format));
             this.m_locations = data.locations.map((location) => new Location(location));
-
-            this.m_dbMaxSize = data.maxSize;
-            this.m_dbSize = data.size;
         } catch (e: any) {
             const error = e as Error;
             console.error("Error while fetching application policy.", e);
@@ -109,20 +86,6 @@ export class ApplicationService {
      */
     public isLoading(): boolean {
         return this.m_loading.value;
-    }
-
-    /**
-     *
-     */
-    public getMenu(): boolean {
-        return this.m_menu.value;
-    }
-
-    /**
-     *
-     */
-    public setMenu(value: boolean) {
-        this.m_menu.value = value;
     }
 
     /**
@@ -210,20 +173,6 @@ export class ApplicationService {
      */
     public getLocations(): Location[] {
         return this.m_locations;
-    }
-
-    /**
-     *
-     */
-    public getDatabaseMaxSize(): number {
-        return this.m_dbMaxSize;
-    }
-
-    /**
-     *
-     */
-    public getDatabaseSize(): number {
-        return this.m_dbSize;
     }
 }
 

@@ -48,12 +48,6 @@ export class AppService {
     private m_databasePool: pg.Pool | null;
 
     /**
-     * The database max size allowed for the application
-     * @private
-     */
-    private m_dbMaxSize: number;
-
-    /**
      *
      * @private
      */
@@ -95,9 +89,6 @@ export class AppService {
         this.m_databaseConf = null;
         this.m_databasePool = null;
 
-        // Default DB max size of 1000 MB
-        this.m_dbMaxSize = 1000;
-
         this.m_shaSecret = "";
         this.m_jwtSecret = "";
         this.m_frontEndUrl = "";
@@ -110,7 +101,6 @@ export class AppService {
     public init(
         port: number,
         database: DatabaseConf,
-        dbMaxSize: number,
         loggerPath: string,
         shaSecret: string,
         jwtSecret: string,
@@ -169,10 +159,6 @@ export class AppService {
             connectionTimeoutMillis: 2000,
         });
 
-        // DB max size
-        this.m_dbMaxSize = dbMaxSize;
-        console.log(`Database max size allowed: ${this.m_dbMaxSize} MB`)
-
         // routes
         this.__loadRoutes();
 
@@ -185,12 +171,7 @@ export class AppService {
 
         this.m_shaSecret = shaSecret;
 
-        this.m_logger.info(`Server running on port ${this.m_port}; Database: ${JSON.stringify(database)}; Database max size: ${ this.m_dbMaxSize}`)
-
-        /**
-         * Check database space and create a log only if its critical
-         */
-        this.checkDatabaseSpace();
+        this.m_logger.info(`Server running on port ${this.m_port}; Database: ${JSON.stringify(database)};`)
     }
 
     /**
@@ -237,50 +218,6 @@ export class AppService {
         }
 
         return this.m_databasePool;
-    }
-
-    /**
-     * Checks the database space usage.
-     * - If space is **full**, logs a warning and returns `false`.
-     * - If space is **low** (e.g., above 90% usage), logs a warning but returns `true`.
-     * - If space is OK, returns `true` with no log.
-     */
-    public async checkDatabaseSpace(): Promise<boolean> {
-        const currentSize = await this.getDatabaseSize();
-        const threshold = this.m_dbMaxSize * 0.9; // 90% warning threshold
-
-        if (currentSize >= this.m_dbMaxSize) {
-            this.m_logger.warn(`No more database space! Increase the limit for ${this.m_databaseConf ? this.m_databaseConf.name : ''}.`);
-            return false;
-        }
-
-        if (currentSize >= threshold) {
-            this.m_logger.warn(`Database space for ${this.m_databaseConf ? this.m_databaseConf.name : ''} is running low (${((currentSize / this.m_dbMaxSize) * 100).toFixed(2)}% used).`);
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     */
-    public getDatabaseMaxSize(): number {
-        return this.m_dbMaxSize;
-    }
-
-    /**
-     *
-     */
-    public async getDatabaseSize(): Promise<number> {
-        try {
-            const pool = this.getDatabasePool();
-            const query = "SELECT pg_database_size(current_database()) / 1024 / 1024 AS size_mb;";
-            const res = await pool.query(query);
-            return Number(res.rows[0].size_mb)
-        } catch (err) {
-            console.error('Error executing query', err);
-            return -1;
-        }
     }
 
     /**

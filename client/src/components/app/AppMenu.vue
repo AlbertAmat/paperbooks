@@ -1,76 +1,69 @@
 <template>
 	<v-navigation-drawer
-		v-model="menu"
+		:rail="rail"
 		app
-		:mini-variant.sync="mini"
-		width="235"
-		color="#FAFAFA"
+		border="0"
+		width="230"
 		class="app-menu"
 	>
-		<div class="d-flex align-center px-3 py-3 ml-1">
-			<v-icon
-				color="primary"
-			>
-				mdi-book-open
-			</v-icon>
+		<div class="d-flex align-center py-3 ml-1" :class="rail ? 'px-1' : 'px-3'">
+			<v-avatar class="gradient" rounded>
+				<v-icon color="#4b4b4b">
+					mdi-book-open
+				</v-icon>
+			</v-avatar>
 
 			<!-- APP TITLE -->
 			<span
-				v-if="!mini"
+				v-if="!rail"
 				class="mx-2"
 				style="font-weight: bold"
 			>
-				Book Storage
+				Paper Book
 			</span>
 
 			<v-spacer/>
 
-			<span style="font-size: 12px; color: grey">v1.0</span>
+			<v-btn
+				v-if="!rail"
+				@click="rail = true"
+				icon
+				variant="text"
+				density="compact"
+			>
+				<v-icon>mdi-arrow-collapse-horizontal</v-icon>
+			</v-btn>
 		</div>
 
 		<v-list
 			v-model="selectedItem"
-			color="primary"
-			nav
+			color="#5b5b5b"
+			:lines="false"
 			density="compact"
-			style="flex: 1; overflow: auto"
+			nav
+			style="flex: 1; overflow-y: auto; display: flex; flex-direction: column"
 		>
-			<template v-for="(item, index) in items">
-				<v-list-subheader
-					v-if="item.subheader"
-					:key="index"
-					style="font-size: 12px"
-				>
-					{{ item.subheader }}
-				</v-list-subheader>
+			<v-list-item
+				v-for="(item, index) in items"
+				:key="index+'-router'"
+				nav
+				:to="item.path"
+				:value="item.path"
+				:title="item.name"
+				:prepend-icon="item.icon"
+				density="compact"
+				:style="{color: selectedItem === item.path ? 'black' : ''}"
+			/>
 
-				<v-list-item
-					v-else
-					:key="index+'-router'"
-					:to="item.path"
-					:value="item.path"
-					:title="item.name"
-					:prepend-icon="item.icon"
-				/>
-			</template>
+			<div style="flex: 1"></div>
+			<v-list-item
+				nav
+				to="xxxx"
+				value="xxxx"
+				title="Settings"
+				prepend-icon="mdi-cog-outline"
+			/>
 		</v-list>
-
-		<!-- App storage -->
-		<div
-			class="app-border-1 mx-2 mb-2 mt-2 pa-2"
-			style="background-color: white; border-radius: 8px"
-		>
-			<h4 class="mb-3">Storage</h4>
-			<v-progress-linear
-				:value="size"
-				height="10px"
-				style="border-radius: 6px"
-			></v-progress-linear>
-
-			<p class="mt-2 mb-0" style="font-size: 12px; color: grey">
-				{{ formatSizeMB(applicationService.getDatabaseSize()) }} of
-				{{ formatSizeMB(applicationService.getDatabaseMaxSize()) }} used</p>
-		</div>
 	</v-navigation-drawer>
 </template>
 
@@ -94,7 +87,7 @@ const selectedItem: Ref<string | null> = ref(null);
 /**
  *
  */
-const mini: Ref<boolean> = ref(false);
+const rail: Ref<boolean> = ref(false);
 
 /**
  *
@@ -129,65 +122,19 @@ const items = [
 		name: "Customers",
 		icon: "mdi-account-school-outline",
 		path: RoutePaths.NOT_FOUND
-	},
-	{
-		subheader: "Administration"
-	},
-	{
-		name: "Users",
-		icon: "mdi-account-group-outline",
-		path: RoutePaths.NOT_FOUND
-	},
-	{
-		name: "Settings",
-		icon: "mdi-cog-outline",
-		path: RoutePaths.NOT_FOUND
-	},
+	}
 ]
-
-const menu = computed({
-	get() {
-		return applicationService.getMenu();
-	},
-	set(val: boolean) {
-		applicationService.setMenu(val);
-	}
-})
-
-const size = computed(() => {
-	const currentSize = applicationService.getDatabaseSize();
-	const maxSize = applicationService.getDatabaseMaxSize();
-
-	// Avoid division by zero
-	if (!currentSize || !maxSize || maxSize === 0) {
-		return 0;
-	}
-
-	return (currentSize / maxSize) * 100;
-})
-
-function formatSizeMB(sizeMB: number) {
-	const units = ["MB", "GB", "TB", "PB", "EB"];
-	let unitIndex = 0;
-
-	while (sizeMB >= 1024 && unitIndex < units.length - 1) {
-		sizeMB /= 1024;
-		unitIndex++;
-	}
-
-	return `${sizeMB.toFixed(0)} ${units[unitIndex]}`;
-}
 
 watch(() => route.path, (path) => {
 	selectedItem.value = path || null;
 }, {immediate: true})
 
-watch(() => width.value, (width) => {
-	mini.value = width ? width < 900 : false;
-}, {immediate: true})
 </script>
 
 <style scoped>
+.app-menu {
+	background-color: transparent !important;
+}
 .app-menu >>> .v-navigation-drawer__border {
 	display: none;
 }

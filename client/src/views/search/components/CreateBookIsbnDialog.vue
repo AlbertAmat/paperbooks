@@ -7,7 +7,7 @@
 		<template v-slot:activator="{ on, attrs }">
 			<v-btn
 				color="primary"
-				class="text-none"
+				class="text-none gradient"
 				small
 				v-bind="attrs"
 				v-on="on"

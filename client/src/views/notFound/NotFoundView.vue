@@ -5,10 +5,9 @@
 			<p>The page was not found.</p>
 			<v-btn
 				@click="goToHome()"
-				text
-				block
 				color="primary"
-				class="text-none"
+				block
+				class="text-none mt-4 gradient"
 			>
 				Go to home
 			</v-btn>

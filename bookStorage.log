@@ -129,3 +129,10 @@
 [2025-08-02T09:21:38.032Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"}; Database max size: 100
 [2025-08-02T09:22:41.722Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"}; Database max size: 100
 [2025-08-02T09:23:21.372Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"}; Database max size: 100
+[2025-08-02T11:21:45.220Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"}; Database max size: 100
+[2025-08-02T11:27:21.889Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"}; Database max size: 100
+[2025-08-02T12:09:17.644Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"}; Database max size: 100
+[2025-08-02T12:09:39.265Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"}; Database max size: 100
+[2025-08-02T12:35:35.912Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"}; Database max size: 50
+[2025-08-02T12:36:05.274Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"}; Database max size: 20
+[2025-08-02T12:50:09.533Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"};

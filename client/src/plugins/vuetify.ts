@@ -8,7 +8,18 @@ export default createVuetify({
     components,
     directives,
     theme: {
-        defaultTheme: 'light',
+        defaultTheme: 'custom',
+        themes: {
+            custom: {
+                dark: false,
+                colors: {
+                    background: '#F8F8F8',
+                    primary: '#a1f682',
+                    secondary: '#787878',
+                    accent: '#f5fb7b'
+                }
+            },
+        },
     },
     icons: {
         defaultSet: 'mdi',
