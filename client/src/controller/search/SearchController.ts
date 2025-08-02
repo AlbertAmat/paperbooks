@@ -16,7 +16,7 @@ export default class SearchController extends BaseController<ISearchResponse> {
      *
      * @private
      */
-    private m_totalBooks: number = 0;
+    private m_totalBooks: Ref<number> = ref(0);
 
     /**
      *
@@ -48,7 +48,7 @@ export default class SearchController extends BaseController<ISearchResponse> {
 
     setData(data: ISearchResponse | null) {
         if(data) {
-            this.m_totalBooks = data.total;
+            this.m_totalBooks.value = data.total;
             this.m_limit = data.limit;
             this.m_books.value = data.books.map((book) => new BookItem(book));
         }
@@ -68,7 +68,7 @@ export default class SearchController extends BaseController<ISearchResponse> {
                 this.m_page.value
             );
 
-            this.m_books.value.push(...data.books.map((book) => new BookItem(book)));
+            this.m_books.value = [...this.m_books.value, ...data.books.map((book) => new BookItem(book))];
         } catch (e) {
             console.log("Error while fetching books", e)
         }
@@ -78,7 +78,7 @@ export default class SearchController extends BaseController<ISearchResponse> {
      *
      */
     public getTotalBooks(): number {
-        return this.m_totalBooks;
+        return this.m_totalBooks.value;
     }
 
     /**
@@ -115,7 +115,7 @@ export default class SearchController extends BaseController<ISearchResponse> {
      *
      */
     public hasNextPage():boolean {
-        return this.m_totalBooks > (this.m_page.value + 1) * this.m_limit;
+        return this.m_totalBooks.value > (this.m_page.value + 1) * this.m_limit;
     }
 
     /**
@@ -123,6 +123,13 @@ export default class SearchController extends BaseController<ISearchResponse> {
      */
     public nextPage() {
         return this.m_page.value++;
+    }
+
+    /**
+     *
+     */
+    public setPage(page: number) {
+        return this.m_page.value = page;
     }
 
     /**

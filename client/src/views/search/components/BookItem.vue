@@ -7,7 +7,7 @@
 			height="125px"
 			:class="isHovering ? 'active' : ''"
 			color="background"
-			style=" align-items: center"
+			style=" align-items: center; border: 1px solid #ECECEC"
 		>
 			<img
 				:src="showFallback ? notFound : book.getImageUrl()"

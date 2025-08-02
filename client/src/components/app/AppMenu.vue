@@ -17,12 +17,10 @@
 			<span
 				v-if="!rail"
 				class="mx-2"
-				style="font-weight: bold"
+				style="font-weight: bold; flex: 1"
 			>
 				Paper Book
 			</span>
-
-			<v-spacer/>
 
 			<v-btn
 				v-if="!rail"
@@ -40,6 +38,7 @@
 			color="#5b5b5b"
 			:lines="false"
 			density="compact"
+			slim
 			nav
 			style="flex: 1; overflow-y: auto; display: flex; flex-direction: column"
 		>

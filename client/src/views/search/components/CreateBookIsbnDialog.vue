@@ -4,15 +4,14 @@
 		width="700"
 		scrollable
 	>
-		<template v-slot:activator="{ on, attrs }">
+		<template v-slot:activator="{ props: activatorProps }">
 			<v-btn
+				v-bind="activatorProps"
 				color="primary"
 				class="text-none gradient"
 				small
-				v-bind="attrs"
-				v-on="on"
 			>
-				Add book (ISBN)
+				Add book
 			</v-btn>
 		</template>
 
@@ -77,9 +76,7 @@
 						dense
 						class="px-0"
 					>
-						<v-list-item-avatar class="mr-2">
-							<v-icon>mdi-book</v-icon>
-						</v-list-item-avatar>
+						<v-icon class="mr-2">mdi-book</v-icon>
 						<v-list-item-title style="font-size: 14px">{{ item }}</v-list-item-title>
 						<v-list-item-action>
 							<v-progress-circular

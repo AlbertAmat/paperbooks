@@ -1,20 +1,25 @@
 <template>
 	<!-- Page name -->
-	<h4 style="font-size: 16px">{{ pageName }}</h4>
+	<h4 style="font-size: 18px">{{ pageName }}</h4>
+
+	<slot name="prepend"></slot>
 
 	<v-spacer></v-spacer>
 
-	<v-autocomplete
+	<v-text-field
+		placeholder="Search"
+		density="compact"
+		:details="false"
 		hide-details
 		prepend-inner-icon="mdi-magnify"
-		density="compact"
-		style="max-width: 30%"
-		placeholder="Search book..."
-		class="mx-4"
-	></v-autocomplete>
+		variant="solo-filled"
+	></v-text-field>
 
+	<v-spacer></v-spacer>
 
-	<div class="d-flex align-center" style="font-weight: 400">
+	<slot name="append"></slot>
+
+	<div class="d-flex align-center ml-3" style="font-weight: 400">
 		<v-avatar
 			class="mr-2"
 			size="30"

@@ -26,23 +26,9 @@
 			<app-menu></app-menu>
 
 			<v-main class="app-main">
-				<v-card class="app-content my-2 mr-2">
-					<!-- ================================================== -->
-					<!-- APP BAR											-->
-					<!-- ================================================== -->
-					<v-card-title style="display: flex; align-items: center; font-size: 14px">
-						<app-bar/>
-					</v-card-title>
+				<router-view/>
 
-					<v-card-text style="overflow: auto; display: flex; flex-direction: column; flex: 1">
-
-						<div id="scroller" style="flex: 1; overflow-y: auto; padding-top: 10px; margin-top: 4px">
-							<router-view></router-view>
-
-							<confirmation-dialog/>
-						</div>
-					</v-card-text>
-				</v-card>
+				<confirmation-dialog/>
 			</v-main>
 		</template>
 	</v-app>
@@ -81,15 +67,6 @@ html, body {
 	display: flex !important;
 	flex-direction: column;
 	flex: 1;
-}
-
-.app-content {
-	position: relative;
-	display: flex !important;
-	flex-direction: column !important;
-	flex: 1;
-	overflow-y: auto !important;
-	border: 1px solid #ECECEC
 }
 
 .error-container {
