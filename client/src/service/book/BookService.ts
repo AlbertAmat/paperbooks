@@ -2,6 +2,7 @@ import axios from "axios";
 import {PATH_PREFIX} from "@/Constants";
 import IBook from "@/types/book/IBook";
 import {BookStockStatusEnum, IBookStock} from "@/types/book/IBookStock";
+import axiosInstance from "@/plugins/axiosInstance";
 
 export class BookService {
 
@@ -10,7 +11,7 @@ export class BookService {
      * @param isbn
      */
     public async getBook(id: number): Promise<IBook> {
-        const {data} = await axios.get(`${PATH_PREFIX}/book/${id}`, {});
+        const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/${id}`, {});
         return data;
     }
 
@@ -31,7 +32,7 @@ export class BookService {
         pages: number,
         format_id: number | null
     ): Promise<void> {
-        const {data} = await axios.put(`${PATH_PREFIX}/book/${id}`, {
+        const {data} = await axiosInstance.put(`${PATH_PREFIX}/book/${id}`, {
             name: name,
             image_url,
             isbn,
@@ -52,7 +53,7 @@ export class BookService {
      * @param isbn
      */
     public async createBookFromIsbn(isbn: string): Promise<number> {
-        const {data} = await axios.post(`${PATH_PREFIX}/book/isbn/${isbn}`, {});
+        const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/isbn/${isbn}`, {});
         return data;
     }
 
@@ -63,7 +64,7 @@ export class BookService {
      * @param print
      */
     public async addBookStock(id: number, locationId: number, status: BookStockStatusEnum): Promise<IBookStock> {
-        const {data} = await axios.post(`${PATH_PREFIX}/book/${id}/stock`, {
+        const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/${id}/stock`, {
             status: status,
             location_id: locationId
         });
@@ -77,11 +78,10 @@ export class BookService {
      * @param stockId
      */
     public async removeBookStock(id: number, stockId: number): Promise<boolean> {
-        const {data} = await axios.delete(`${PATH_PREFIX}/book/${id}/stock/${stockId}`);
+        const {data} = await axiosInstance.delete(`${PATH_PREFIX}/book/${id}/stock/${stockId}`);
 
         return data;
     }
-
 
     /**
      *
@@ -91,7 +91,7 @@ export class BookService {
      * @param stockLocationId
      */
     public async updateBookStock(id: number, stockId: number, stockStatus: BookStockStatusEnum, stockLocationId: number): Promise<IBookStock> {
-        const {data} = await axios.put(`${PATH_PREFIX}/book/${id}/stock/${stockId}`, {
+        const {data} = await axiosInstance.put(`${PATH_PREFIX}/book/${id}/stock/${stockId}`, {
             status: stockStatus,
             location_id: stockLocationId
         });
@@ -99,13 +99,12 @@ export class BookService {
         return data;
     }
 
-
     /**
      *
      * @param id
      */
     public async deleteBook(id: number): Promise<void> {
-        await axios.delete(`${PATH_PREFIX}/book/${id}`);
+        await axiosInstance.delete(`${PATH_PREFIX}/book/${id}`);
     }
 
 }

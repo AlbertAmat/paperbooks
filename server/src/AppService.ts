@@ -7,6 +7,8 @@ import {routes} from "./routes/Routes";
 import { Logger } from "./utils/Logger";
 import AuthRoute from "./routes/AuthRoute";
 import crypto from "crypto";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
 export class AppService {
     /**
@@ -63,12 +65,31 @@ export class AppService {
      */
     private m_shaSecret: string;
 
+    /**
+     *
+     * @private
+     */
+    private m_jwtSecret: string;
+
+    /**
+     *
+     * @private
+     */
+    private m_frontEndUrl: string;
+
+    /**
+     *
+     * @private
+     */
+    private m_sessionTime: number;
+
     public constructor() {
         this.m_port = 8081;
 
         this.m_app = express();
         this.m_app.use(bodyParser.json());
         this.m_app.use(bodyParser.urlencoded({ extended: true }));
+        this.m_app.use(cookieParser());
 
         this.m_server = null;
         this.m_databaseConf = null;
@@ -78,6 +99,9 @@ export class AppService {
         this.m_dbMaxSize = 1000;
 
         this.m_shaSecret = "";
+        this.m_jwtSecret = "";
+        this.m_frontEndUrl = "";
+        this.m_sessionTime = 0;
     }
 
     /**
@@ -88,7 +112,10 @@ export class AppService {
         database: DatabaseConf,
         dbMaxSize: number,
         loggerPath: string,
-        shaSecret: string
+        shaSecret: string,
+        jwtSecret: string,
+        frontEndUrl: string,
+        sessionTime: number,
     ) {
         console.log(`
 888888b.                     888            .d8888b.  888                                              
@@ -103,6 +130,19 @@ export class AppService {
                                                                                      Y8b d88P          
                                                                                       "Y88P"             
         `);
+
+        this.m_jwtSecret = jwtSecret;
+
+        // Start services and plugins than needs config
+        this.m_frontEndUrl = frontEndUrl;
+
+        this.m_sessionTime = sessionTime;
+
+        // Set cors protection
+        this.m_app.use(cors({
+            origin: this.m_frontEndUrl, // your frontend URL
+            credentials: true
+        }));
 
         /**
          * App
@@ -177,6 +217,20 @@ export class AppService {
     /**
      *
      */
+    public getJwtSecret(): string {
+        return this.m_jwtSecret;
+    }
+
+    /**
+     *
+     */
+    public getSessionTime(): number {
+        return this.m_sessionTime;
+    }
+
+    /**
+     *
+     */
     public getDatabasePool(): pg.Pool {
         if(!this.m_databasePool) {
             throw "No database pool";
@@ -237,15 +291,18 @@ export class AppService {
         console.log("")
         console.log("Routes:")
 
+        const consoleRoutesArr = ["/"];
+
         // Add root route (for session and page render)
-        console.log(`Adding route ROOT [/]`)
         this.m_app.use("/", AuthRoute);
 
         for(let route in routes) {
             const fullRoute = AppService.ROUTE_PREFIX + route;
-            console.log(`Adding route [${fullRoute}]`)
             this.m_app.use(fullRoute, routes[route]);
+            consoleRoutesArr.push(fullRoute)
         }
+
+        console.table(consoleRoutesArr)
     }
 
     /**
@@ -255,10 +312,10 @@ export class AppService {
         return this.m_logger;
     }
 
+    // TODO: MOVE TO bcrypt
     public hashPassword(plainPassword: string): string {
        return crypto.createHmac("sha256", this.m_shaSecret).update(plainPassword).digest("hex");
     }
-
 }
 
 export const appService = new AppService();

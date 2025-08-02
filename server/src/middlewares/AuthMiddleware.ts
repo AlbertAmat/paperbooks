@@ -1,29 +1,61 @@
 import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import {appService} from "../AppService";
 
-export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    //@ts-ignore
-    req.session.user = {id: 1, code: "admin1"};
+export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
 
-    //@ts-ignore
-    if (!req.session || !req.session.user) {
-        res.clearCookie("session_id"); // Clear expired session cookie
-        return res.redirect("/login"); // Redirect to login
+    // development
+    if (process.env.NODE_ENV === "development") {
+        // Fake decoded token for dev
+        req.cookies.token = jwt.sign(
+            { user_id: 1 }, // fake user ID
+            appService.getJwtSecret(),
+            { expiresIn: Math.floor(appService.getSessionTime() / 1000) }
+        );
     }
 
-    // Extend session expiration on activity
-    req.session.cookie.maxAge = 15 * 60 * 1000; // Reset expiration time
+    const token = req.cookies.token;
+    if (!token) {
+        return res.redirect("/login"); // Redirect to login;
+    }
+
+    let decoded;
+    try {
+        decoded = jwt.verify(token, appService.getJwtSecret()) as { user_id: number; exp: number };
+    } catch (err) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const pool = appService.getDatabasePool();
+    const result = await pool.query({
+        name: "user-prep-stmt",
+        text: "SELECT id FROM users WHERE id = $1",
+        values: [decoded.user_id]
+    });
+
+    if (!result.rowCount) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Check if token is near expiry (e.g., less than 5 minutes left)
+    const now = Math.floor(Date.now() / 1000);
+    const timeLeft = decoded.exp - now;
+
+    if (timeLeft < 5 * 60) {
+        // Issue new token with extended expiration
+        const newToken = jwt.sign(
+            { user_id: decoded.user_id },
+            appService.getJwtSecret(),
+            { expiresIn: Math.floor(appService.getSessionTime() / 1000)}
+        );
+
+        res.cookie("token", newToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: appService.getSessionTime()
+        });
+    }
+
     next();
 };

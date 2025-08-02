@@ -1,6 +1,7 @@
-import { Router, Request, Response } from 'express';
+import express, { Router, Request, Response } from 'express';
 import {appService} from "../AppService";
 import {requireAuth} from "../middlewares/AuthMiddleware";
+import path from "path";
 
 const router = Router();
 
@@ -8,23 +9,6 @@ const router = Router();
 // /app/policy
 //@ts-ignore
 router.get('/policy', requireAuth, async (req: Request, res: Response) => {
-
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    // TODO: UST FOR DEV: REMOOOOVE!!!!
-    //@ts-ignore
-    req.session.user = {id: 1, code: "admin1"};
-
     let categories: Record<string, any>[] = [];
     let languages: Record<string, any>[] = [];
     let formats: Record<string, any>[] = [];

@@ -2,6 +2,7 @@
 
 
 ## TODO
+* multiple users app so ->  book, authors, etc must jave the user or a workspace
 * handle database size - mirar al crear o afegir dades si hi ha espai
 * handle users
 * default admin user (dataload)

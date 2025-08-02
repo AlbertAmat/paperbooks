@@ -16,4 +16,7 @@ appService.init(
     parseInt(process.env.DB_MAX_SIZE || '2000'),
     String(process.env.LOGGER_PATH),
     String(process.env.SHA_SECRET),
+    String(process.env.JWT_SECRET),
+    String(process.env.FRONT_END_URL),
+    Number(process.env.SESSION_TIME),
 );

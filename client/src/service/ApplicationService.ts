@@ -7,6 +7,7 @@ import Category from "@/model/category/Category";
 import Location from "@/model/location/Location";
 import Format from "@/model/format/Format";
 import vuetify from "@/plugins/vuetify";
+import axiosInstance from "@/plugins/axiosInstance";
 
 export class ApplicationService {
 
@@ -84,7 +85,7 @@ export class ApplicationService {
     public async fetchPolicy() {
         try {
             this.m_loading.value = true;
-            const response = await axios.get(`${PATH_PREFIX}/app/policy`);
+            const response = await axiosInstance.get(`${PATH_PREFIX}/app/policy`);
             const data = response.data as IPolicyResponse;
             this.m_user = data.user;
             this.m_categories = data.categories.map((category) => new Category(category));

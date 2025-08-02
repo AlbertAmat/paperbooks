@@ -1,32 +1,31 @@
 import express, {Request, Response} from "express";
-import session from "express-session";
 import {appService} from "../AppService";
-import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import path from "path";
-import {requireAuth} from "../middlewares/AuthMiddleware";
 
 const router = express.Router();
 
-// Session middleware
-router.use(
-    session({
-        secret: "your_secret_key", // TODO: CREATE ENV VARIABLE
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,  // Prevents client-side JS access
-            secure: false,   // Set to true in production with HTTPS // TODO: CREATE ENV VARIABLE
-            maxAge: 45 * 60 * 1000, // Session expires in 15 minutes // TODO: CREATE ENV VARIABLE
-        }, // Set to true if using HTTPS
-    })
-);
+// Helper: Create token
+function createToken(userId: number) {
+    return jwt.sign({ user_id: userId }, appService.getJwtSecret(), { expiresIn: Math.floor(appService.getSessionTime() / 1000) });
+}
+
+// TODO: REVIEW IF THIS ENDPOINT SHOULD BE IN HEARE
+const distPath = path.join(__dirname, '../../../client/dist')
+router.use("/assets", express.static(path.join(distPath, "assets"), {
+    setHeaders: (res, path) => {
+        if (path.endsWith(".css")) {
+            res.set('Content-Type', 'text/css');
+        }
+    }
+}));
 
 // Handle root path ('/')
 router.get("/", (req: Request, res: Response) => {
     // Check if the user is authenticated by looking at the session
 
     //@ts-ignore
-    if (req.session.user) {
+    if (req.cookies.token) {
         console.log("User already logged in, redirecting to /app...");
         return res.redirect("/app"); // Redirect to /app if user is logged in
     } else {
@@ -40,34 +39,10 @@ router.get("/", (req: Request, res: Response) => {
 router.get("/login", (req: Request, res: Response) => {
     console.log("render login page")
     //@ts-ignore
-    if (req.session.user) {
+    if (req.cookies.token) {
         return res.redirect("/app");
     }
     res.sendFile(path.join(__dirname, "..", "assets", "login.html"));
-});
-
-const distPath = path.join(__dirname, '../../../client/dist')
-
-router.use("/app/assets", express.static(path.join(distPath, "assets"), {
-    setHeaders: (res, path) => {
-        if (path.endsWith(".css")) {
-            res.set('Content-Type', 'text/css');
-        }
-    }
-}));
-
-//@ts-ignore
-router.get("/app", requireAuth, (req: Request, res: Response) => {
-    console.log("render APP page from:", "index.html")
-    res.sendFile(path.join(distPath,"index.html" ));
-    return res.status(200)
-});
-
-//@ts-ignore
-router.get("/app/*", requireAuth, (req: Request, res: Response) => {
-    console.log("render APP page from:", "index.html")
-    res.sendFile(path.join(distPath,"index.html" ));
-    return res.status(200)
 });
 
 // Login route
@@ -97,8 +72,6 @@ router.post("/login", async (req: Request, res: Response) => {
             return res.status(401).json({ message: "Invalid username or password." });
         }
 
-        console.log("correct password for user:" + username);
-
         console.log("Updating last login date for user:" + username);
         // Update the last login date
         const updateLoginQuery = `
@@ -110,15 +83,15 @@ router.post("/login", async (req: Request, res: Response) => {
 
         console.log("Setting session and cookie for user:" + username);
 
-        // Store user in session
-        //@ts-ignore
-        req.session.user = {id: user.id, code: user.code};
+        const userToken = createToken(user.id);
+        console.log("userToken", userToken)
 
-        // Set cookie
-        res.cookie("session_id", req.sessionID, {
+        // Send JWT in cookie
+        res.cookie("token", userToken, {
             httpOnly: true,
-            secure: false,   // Set to true in production with HTTPS // TODO: CREATE ENV VARIABLE
-            maxAge: 45 * 60 * 1000, // Session expires in 15 minutes // TODO: CREATE ENV VARIABLE
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: appService.getSessionTime()
         });
 
         console.log("Redirecting to /app for user:" + username);
@@ -132,12 +105,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
 // Logout route
 router.post("/logout", (req: Request, res: Response) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({message: "Logout failed"});
-        }
-        res.json({message: "Logged out successfully"});
-    });
+    res.clearCookie("token");
 });
 
 // Session check route

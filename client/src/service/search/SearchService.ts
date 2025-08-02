@@ -1,7 +1,6 @@
-import axios from "axios";
 import {PATH_PREFIX} from "@/Constants";
-import IBookItem from "@/types/book/IBookItem";
 import {ISearchResponse} from "@/types/search/ISearchResponse";
+import axiosInstance from "@/plugins/axiosInstance";
 
 class SearchService {
 
@@ -13,7 +12,7 @@ class SearchService {
         page: number
     ): Promise<ISearchResponse> {
 
-        const {data} = await axios.get(`${PATH_PREFIX}/book/search`, {
+        const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/search`, {
             params: {
                 name: name,
                 isb: isbn,
