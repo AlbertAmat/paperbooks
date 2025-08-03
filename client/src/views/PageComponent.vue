@@ -34,7 +34,7 @@
 				{{ model.getError().message }}
 			</v-alert>
 
-			<template v-else>
+			<template v-else-if="model.hasData()">
 				<slot></slot>
 			</template>
 		</v-card-text>

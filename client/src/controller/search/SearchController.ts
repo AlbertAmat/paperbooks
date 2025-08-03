@@ -3,6 +3,8 @@ import {searchService} from "@/service/search/SearchService";
 import {ref, Ref, shallowRef, ShallowRef} from "vue";
 import BookItem from "@/model/book/BookItem";
 import {ISearchResponse} from "@/types/search/ISearchResponse";
+import router from "@/router/Router";
+import {SearchRoute} from "@/router/routes/SearchRoute";
 
 export default class SearchController extends BaseController<ISearchResponse> {
 
@@ -37,8 +39,11 @@ export default class SearchController extends BaseController<ISearchResponse> {
     }
 
     async fetchData(): Promise<ISearchResponse> {
+        const params = router.currentRoute.value.query;
+        const query = params[SearchRoute.QUERY_PARAM] ? params[SearchRoute.QUERY_PARAM] as string : null;
+
         return await searchService.searchBooks(
-            null,
+            query,
             null,
             null,
             null,
@@ -60,8 +65,10 @@ export default class SearchController extends BaseController<ISearchResponse> {
      */
     public async fetchBooks() {
         try {
+            const params = router.currentRoute.value.query;
+            const query = params[SearchRoute.QUERY_PARAM] ? params[SearchRoute.QUERY_PARAM] as string : null;
             const data = await searchService.searchBooks(
-                null,
+                query,
                 null,
                 null,
                 null,

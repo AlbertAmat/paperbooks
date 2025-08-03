@@ -123,11 +123,12 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineComponent, ref, Ref, watch} from "vue";
+import {computed, ref, Ref, watch} from "vue";
 import {validateIsbn10, validateIsbn13} from "@/utils/IsbnVerification";
 import {bookService} from "@/service/book/BookService";
-import router, {RoutePaths} from "@/router/Router";
+import router from "@/router/Router";
 import {AxiosError} from "axios";
+import {bookRoute} from "@/router/routes/BookRoute";
 
 /**
  *
@@ -210,7 +211,7 @@ async function createBook(code: string) {
 			// TODO: CHECK IF BOOK EXIST
 			const id = await bookService.createBookFromIsbn(code);
 			if (id != null && !multiple.value) {
-				router.push(RoutePaths.BOOK.replace(":book_id", id.toString()))
+				router.push(bookRoute.getPath(id));
 				dialog.value = false;
 			}
 		} catch (e) {

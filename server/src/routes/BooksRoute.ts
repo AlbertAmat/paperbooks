@@ -12,7 +12,7 @@ const router: Router = Router();
 //@ts-ignore
 router.get('/search', requireAuth, async (req: Request, res: Response) => {
     // Params
-    const name = req.query.name;
+    const query = req.query.query ? String(req.query.query) : undefined;
     const isbn = req.query.isbn;
     const author = req.query.author;
     // Array of categories
@@ -28,7 +28,7 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         const params = [];
         const conditions: Array<String> = [];
 
-        let query = `
+        let sqlStatement = `
             SELECT books.id,
                    books.name,
                    books.image_url,
@@ -49,9 +49,9 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
                      LEFT JOIN authors ON book_authors.author_id = authors.id
         `;
 
-        if (name) {
-            conditions.push(`name ILIKE $${conditions.length + 1}`);
-            params.push(`%${name}%`);
+        if (query) {
+            conditions.push(`LOWER(books.name) ILIKE $${conditions.length + 1}`);
+            params.push(`%${query.toLocaleLowerCase()}%`);
         }
 
         if (isbn) {
@@ -70,7 +70,7 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         }
 
         if (conditions.length > 0) {
-            query += ` WHERE ${conditions.join(' AND ')}`;
+            sqlStatement += ` WHERE ${conditions.join(' AND ')}`;
         }
 
         /**
@@ -85,7 +85,7 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         /**
          * Results
          */
-        query += `
+        sqlStatement += `
             GROUP BY 
                 books.id,
                 books.name,
@@ -98,8 +98,8 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         `;
 
         // Use a prepared statement to fetch items by name
-        console.log("executing query: ", query);
-        const result = await client.query(query, params);
+        console.log("executing query: ", sqlStatement);
+        const result = await client.query(sqlStatement, params);
 
         // Return the result (found rows)
         res.status(200).json({

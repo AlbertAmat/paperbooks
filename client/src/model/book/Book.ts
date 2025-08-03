@@ -6,7 +6,8 @@ import {bookService} from "@/service/book/BookService";
 import BookStock from "@/model/book/BookStock";
 import {BookStockStatusEnum} from "@/types/book/IBookStock";
 import {shallowRef, ShallowRef} from "vue";
-import router, {RoutePaths} from "@/router/Router";
+import router from "@/router/Router";
+import {searchRoute} from "@/router/routes/SearchRoute";
 
 export default class Book extends BookItem {
 
@@ -72,6 +73,26 @@ export default class Book extends BookItem {
         }
 
         this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(this.m_id,stock)));
+    }
+
+    public static empty(): Book {
+        return new Book({
+            id: -1,
+            name: "",
+            image_url: null,
+            isbn: null,
+            category_id: null,
+            language_code: null,
+            authors: [],
+            description: null,
+            publisher: null,
+            published_date: null,
+            pages: null,
+            stocks: [],
+            format_id: null,
+            date_created: "",
+            date_updated: "",
+        })
     }
 
     /**
@@ -275,7 +296,7 @@ export default class Book extends BookItem {
         try {
             await bookService.deleteBook(this.m_id)
             // TODO: snackbar message
-            router.push(RoutePaths.SEARCH_BOOKS)
+            router.push(searchRoute.getPath())
         } catch (e) {
             console.error("Error while deleting book.", e)
         }

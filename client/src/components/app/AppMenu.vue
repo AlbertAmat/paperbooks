@@ -44,7 +44,7 @@
 		>
 			<v-list-item
 				v-for="(item, index) in items"
-				:key="index+'-router'"
+				:key="index"
 				nav
 				:to="item.path"
 				:value="item.path"
@@ -67,16 +67,14 @@
 </template>
 
 <script setup lang="ts">
-import {computed, getCurrentInstance, Ref, ref, watch} from "vue";
-import {RoutePaths} from "@/router/Router";
-import {applicationService} from "@/service/ApplicationService";
+import { Ref, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useDisplay} from "vuetify";
-
-const root = getCurrentInstance();
+import {overviewRoute} from "@/router/routes/OverviewRoute";
+import {searchRoute} from "@/router/routes/SearchRoute";
+import {notFoundRoute} from "@/router/routes/NotFoundRoute";
 
 const route = useRoute()
-const {width} = useDisplay()
 
 /**
  *
@@ -95,32 +93,32 @@ const items = [
 	{
 		name: "Overview",
 		icon: "mdi-chart-box-outline",
-		path: RoutePaths.OVERVIEW
+		path: overviewRoute.getPath()
 	},
 	{
 		name: "Books",
 		icon: "mdi-bookshelf",
-		path: RoutePaths.SEARCH_BOOKS
+		path: searchRoute.getPath()
 	},
 	{
 		name: "Locations",
 		icon: "mdi-map-marker-radius",
-		path: RoutePaths.NOT_FOUND
+		path: notFoundRoute.getPath()
 	},
 	{
 		name: "Languages",
 		icon: "mdi-flag-outline",
-		path: RoutePaths.NOT_FOUND
+		path:  notFoundRoute.getPath()
 	},
 	{
 		name: "Categories",
 		icon: "mdi-shape-outline",
-		path: RoutePaths.NOT_FOUND
+		path: notFoundRoute.getPath()
 	},
 	{
 		name: "Customers",
 		icon: "mdi-account-school-outline",
-		path: RoutePaths.NOT_FOUND
+		path:  notFoundRoute.getPath()
 	}
 ]
 

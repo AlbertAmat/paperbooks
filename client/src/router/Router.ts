@@ -1,45 +1,24 @@
-// src/router/index.ts or router.ts
-
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-
-export enum RoutePaths {
-    OVERVIEW = '/overview',
-    SEARCH_BOOKS = '/books/search',
-    BOOK = '/book/:book_id',
-    NOT_FOUND = '/:pathMatch(.*)*', // Vue Router 4 wildcard syntax
-}
+import {searchRoute} from "@/router/routes/SearchRoute";
+import {OverviewRoute, overviewRoute} from "@/router/routes/OverviewRoute";
+import {bookRoute} from "@/router/routes/BookRoute";
+import {notFoundRoute} from "@/router/routes/NotFoundRoute";
 
 // Define your routes
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect: RoutePaths.OVERVIEW,
+        redirect: OverviewRoute.PATH,
     },
-    {
-        name: 'Overview',
-        path: RoutePaths.OVERVIEW,
-        component: () => import('@/views/overview/OverviewView.vue'),
-    },
-    {
-        name: 'Books',
-        path: RoutePaths.SEARCH_BOOKS,
-        component: () => import('@/views/search/BooksSearchView.vue'),
-    },
-    {
-        name: 'Book',
-        path: RoutePaths.BOOK,
-        component: () => import('@/views/book/BookView.vue'),
-    },
-    {
-        name: 'Not found',
-        path: RoutePaths.NOT_FOUND,
-        component: () => import('@/views/notFound/NotFoundView.vue'),
-    },
+    overviewRoute.getRoute(),
+    searchRoute.getRoute(),
+    bookRoute.getRoute(),
+    notFoundRoute.getRoute(),
 ]
 
 // Create the router instance
 const router = createRouter({
-    history: createWebHistory('/app'), // 👈 replaces mode + base
+    history: createWebHistory('/app'),
     routes,
 })
 

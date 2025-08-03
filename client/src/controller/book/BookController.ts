@@ -11,13 +11,14 @@ export default class BookController extends BaseController<IBook>{
      *
      * @private
      */
-    private m_book: ShallowRef<Book |null> = shallowRef(null);
+    private m_book: ShallowRef<Book> = shallowRef(Book.empty());
 
     public constructor() {
         super("Book");
     }
 
     async fetchData(): Promise<IBook> {
+        console.log("router.currentRoute", router.currentRoute.value.params)
         const bookId = Number(router.currentRoute.value.params.book_id);
         return await bookService.getBook(bookId);
     }
@@ -36,7 +37,7 @@ export default class BookController extends BaseController<IBook>{
     /**
      *
      */
-    public getBook(): Book | null {
+    public getBook(): Book {
         return this.m_book.value;
     }
 }

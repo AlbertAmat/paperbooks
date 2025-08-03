@@ -70,6 +70,10 @@ export abstract class BaseController<I> {
         return this.m_data.value;
     }
 
+    public hasData(): boolean {
+        return this.m_data.value != null
+    }
+
     private async __fetchData() {
         try {
             this.m_loading.value = false;

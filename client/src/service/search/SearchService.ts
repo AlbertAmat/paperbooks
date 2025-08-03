@@ -5,7 +5,7 @@ import axiosInstance from "@/plugins/axiosInstance";
 class SearchService {
 
     public async searchBooks(
-        name: string | null,
+        query: string | null,
         isbn: string | null,
         author: string | null,
         category_id: number | null,
@@ -14,7 +14,7 @@ class SearchService {
 
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/search`, {
             params: {
-                name: name,
+                query: query,
                 isb: isbn,
                 author: author,
                 category_id: category_id,

@@ -1,6 +1,6 @@
 import IBookItem from "@/types/book/IBookItem";
-import router, {RoutePaths} from "@/router/Router";
 import BookAuthor from "@/model/book/BookAuthor";
+import {bookRoute} from "@/router/routes/BookRoute";
 
 export default abstract class ABook {
 
@@ -159,7 +159,7 @@ export default abstract class ABook {
      *
      */
     public getUrl(): string {
-        return RoutePaths.BOOK.replace(":book_id", this.m_id.toString());
+        return bookRoute.getPath(this.m_id)
     }
 
 }

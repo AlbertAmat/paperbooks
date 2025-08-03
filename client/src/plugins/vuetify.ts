@@ -16,7 +16,8 @@ export default createVuetify({
                     background: '#F8F8F8',
                     primary: '#a1f682',
                     secondary: '#787878',
-                    accent: '#f5fb7b'
+                    accent: '#f5fb7b',
+                    error: '#ff3535',
                 }
             },
         },

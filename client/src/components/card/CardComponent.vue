@@ -1,12 +1,13 @@
 <template>
 	<v-card
-		flat
+		variant="flat"
 		class="pa-0"
 		:class="outline ? 'app-border-2' : ''"
 	>
 		<v-card-title
 			v-if="!dense"
 			class="d-flex align-center px-0 pt-0"
+			style="font-size: 16px"
 		>
 			<v-icon class="mr-2">{{icon}}</v-icon>
 

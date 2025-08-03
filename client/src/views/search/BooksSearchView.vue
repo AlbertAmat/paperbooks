@@ -86,13 +86,14 @@
 </template>
 
 <script setup lang="ts">
-import { Ref, ref, onMounted, onUnmounted, computed} from "vue";
+import {Ref, ref, onMounted, onUnmounted, computed, watch} from "vue";
 import PageComponent from "@/views/PageComponent.vue";
 import SearchController from "@/controller/search/SearchController";
 import BookItem from "@/views/search/components/BookItem.vue";
 import BookItemSkeleton from "@/views/search/components/BookItemSkeleton.vue";
 import CreateBookIsbnDialog from "@/views/search/components/CreateBookIsbnDialog.vue";
 import {applicationService} from "@/service/ApplicationService";
+import router from "@/router/Router";
 
 const model = new SearchController();
 
@@ -173,4 +174,8 @@ onMounted(async () => {
 onUnmounted(() => {
 	document.getElementById("scroller")!.removeEventListener("scroll", handleScroll);
 });
+
+watch(() => router.currentRoute.value.query, () => {
+	model.fetchBooks();
+})
 </script>
