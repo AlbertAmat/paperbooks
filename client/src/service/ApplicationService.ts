@@ -1,12 +1,10 @@
 import {ref, Ref} from "vue";
-import axios from "axios";
 import {PATH_PREFIX} from "@/Constants";
 import IPolicyResponse from "@/types/IPolicyResponse";
 import Language from "@/model/language/Language";
 import Category from "@/model/category/Category";
 import Location from "@/model/location/Location";
 import Format from "@/model/format/Format";
-import vuetify from "@/plugins/vuetify";
 import axiosInstance from "@/plugins/axiosInstance";
 
 export class ApplicationService {
@@ -173,6 +171,13 @@ export class ApplicationService {
      */
     public getLocations(): Location[] {
         return this.m_locations;
+    }
+
+    /**
+     *
+     */
+    public setLocations(items: Location[]) {
+        this.m_locations = items;
     }
 }
 

@@ -1,14 +1,16 @@
 import ILocation from "@/types/location/ILocation";
+import {locationsService} from "@/service/locations/LocationsService";
+import {ref, Ref} from "vue";
 
 export default class Location {
     private readonly m_id: number;
-    private readonly m_name: string;
-    private readonly m_description: string | null;
+    private m_name: Ref<string>;
+    private m_description: Ref<string | null>;
 
     public constructor(location: ILocation) {
         this.m_id = location.id;
-        this.m_name = location.name;
-        this.m_description = location.description;
+        this.m_name = ref(location.name);
+        this.m_description = ref(location.description);
     }
 
     public getId(): number {
@@ -16,10 +18,16 @@ export default class Location {
     }
 
     public getName(): string {
-        return this.m_name
+        return this.m_name.value;
     }
 
     public getDescription(): string | null {
-        return this.m_description;
+        return this.m_description.value;
+    }
+
+    public async update(name: string, description: string | null) {
+        await locationsService.updateLocation(this.m_id, name, description)
+        this.m_name.value = name;
+        this.m_description.value = description;
     }
 }
