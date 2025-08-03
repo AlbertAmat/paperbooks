@@ -134,6 +134,13 @@ export class ApplicationService {
 
     /**
      *
+     */
+    public setLanguages(items: Language[]) {
+        this.m_languages = items;
+    }
+
+    /**
+     *
      * @param id
      * @param id
      */

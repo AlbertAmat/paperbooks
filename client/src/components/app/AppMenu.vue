@@ -74,6 +74,7 @@ import {overviewRoute} from "@/router/routes/OverviewRoute";
 import {searchRoute} from "@/router/routes/SearchRoute";
 import {notFoundRoute} from "@/router/routes/NotFoundRoute";
 import {locationsRoute} from "@/router/routes/LocationsRoute";
+import {languagesRoute} from "@/router/routes/LanguagesRoute";
 
 const route = useRoute()
 
@@ -109,7 +110,7 @@ const items = [
 	{
 		name: "Languages",
 		icon: "mdi-flag-outline",
-		path:  notFoundRoute.getPath()
+		path:  languagesRoute.getPath()
 	},
 	{
 		name: "Categories",
