@@ -7,7 +7,7 @@
 		<template v-slot:actions>
 			<v-btn
 				@click="showAddStockDialog"
-				small
+				density="comfortable"
 				color="primary"
 				class="text-none"
 			>
@@ -16,12 +16,11 @@
 		</template>
 
 		<template v-slot:default>
-			<v-data-table
+			<v-data-table-virtual
 				:key="book.getStocks().length"
 				:headers="headers"
+				density="compact"
 				:items="stocks"
-				:items-per-page="20"
-				dense
 			>
 				<template v-slot:item.status="{item}">
 					<v-chip
@@ -50,7 +49,8 @@
 					</v-icon>
 					<v-btn
 						icon
-						small
+						variant="text"
+						density="compact"
 						:loading="deleteLoading.includes(item.id)"
 						:disabled="deleteLoading.includes(item.id)"
 						@click="removeBookStock(item)"
@@ -64,7 +64,7 @@
 						</v-icon>
 					</v-btn>
 				</template>
-			</v-data-table>
+			</v-data-table-virtual>
 
 			<book-stock-dialog
 				v-if="stockDialog"
@@ -92,15 +92,15 @@ const props = defineProps<Props>()
 
 const headers = [
 	{
-		text: 'Code',
+		title: 'Code',
 		align: 'start',
 		sortable: false,
 		value: 'code',
 	},
-	{text: 'Location', value: 'location_name'},
-	{text: 'Status', value: 'status'},
-	{text: 'Booked by', value: 'booked_user'},
-	{text: 'Actions', value: 'actions', align: 'end',}
+	{title: 'Location', value: 'location_name'},
+	{title: 'Status', value: 'status'},
+	{title: 'Booked by', value: 'booked_user'},
+	{title: 'Actions', value: 'actions', align: 'end',}
 ];
 
 const stockDialog: Ref<boolean> = ref(false);

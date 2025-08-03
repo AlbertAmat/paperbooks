@@ -279,7 +279,7 @@ export default class Book extends BookItem {
                 this.m_isbn,
                 this.m_categoryId,
                 this.m_languageCode,
-                this.m_authors.map((author) => author.getAuthorId()),
+                this.m_authors.value.map((author) => author.getAuthorId()),
                 this.m_description,
                 this.m_publisher,
                 this.m_publishedDate,

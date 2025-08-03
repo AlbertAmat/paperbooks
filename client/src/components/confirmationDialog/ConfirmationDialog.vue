@@ -11,7 +11,7 @@
 
 			<v-divider/>
 
-			<v-card-text style="min-height: 60px; padding-top: 10px">
+			<v-card-text style="min-height: 60px; padding-top: 20px">
 				{{ controller.getDescription() }}
 			</v-card-text>
 
@@ -20,7 +20,7 @@
 			<v-card-actions>
 				<v-spacer></v-spacer>
 				<v-btn
-					text
+					variant="text"
 					@click="cancel()"
 					class="text-none"
 					:loading="cancelLoading"
@@ -30,6 +30,7 @@
 				</v-btn>
 				<v-btn
 					color="primary"
+					density="comfortable"
 					@click="accept"
 					:loading="acceptLoading"
 					:disabled="acceptLoading || cancelLoading"

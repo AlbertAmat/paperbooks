@@ -78,7 +78,7 @@
 					/>
 				</template>
 				<template v-slot:item.name="data">
-					<a :href="data.item.url">{{data.item.name}}</a>
+					<a :href="data.item.url">{{ data.item.name }}</a>
 				</template>
 			</v-data-table-server>
 		</template>
@@ -113,11 +113,11 @@ const loadingBooks: Ref<boolean> = ref(false);
 const infiniteScrollTrigger: Ref<HTMLElement | null> = ref(null);
 
 const headers = [
-	{ title: 'Image', key: 'image' },
-	{ title: 'Name', key: 'name' },
-	{ title: 'ISBN', key: 'isbn' },
-	{ title: 'Category', key: 'category' },
-	{ title: 'Language', key: 'language' },
+	{title: 'Image', 	key: 'image', 	sortable: false,},
+	{title: 'Name',	 	key: 'name', 	sortable: false,},
+	{title: 'ISBN', 	key: 'isbn',	 sortable: false,},
+	{title: 'Category', key: 'category', sortable: false,},
+	{title: 'Language', key: 'language', sortable: false,},
 ]
 
 const itemsJson = computed(() => {
@@ -142,8 +142,8 @@ async function loadMoreBooks(page?: number) {
 	if (model.hasNextPage() && !loadingBooks.value) {
 		try {
 			loadingBooks.value = true;
-			if(page != undefined) {
-				model.setPage(page-1);
+			if (page != undefined) {
+				model.setPage(page - 1);
 			} else {
 				model.nextPage(); // Increment page
 			}

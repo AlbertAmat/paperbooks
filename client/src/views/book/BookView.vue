@@ -27,13 +27,11 @@
 		</template>
 
 		<template v-slot:default>
-			<div style="height: 100%">
+			<div style="height: 100%;">
 				<v-row no-gutters>
 					<v-col class="px-1">
 						<!-- ================================================================== -->
-						<!-- 																  	-->
 						<!-- BOOK														-->
-						<!-- 																  	-->
 						<!-- ================================================================== -->
 						<card-component
 							title="Book"
@@ -41,14 +39,14 @@
 							dense
 						>
 							<template v-slot:default>
-								<div class="d-flex">
+								<div class="d-flex pt-2">
 									<!-- Name -->
 									<v-text-field
 										v-model="name"
 										:disabled="disableFields"
 										label="Name"
-										dense
-										outlined
+										density="compact"
+										variant="outlined"
 										class="mr-1"
 									></v-text-field>
 
@@ -57,8 +55,8 @@
 										v-model="isbn"
 										:disabled="disableFields"
 										label="ISBN"
-										dense
-										outlined
+										density="compact"
+										variant="outlined"
 										class="ml-1"
 									></v-text-field>
 								</div>
@@ -70,8 +68,10 @@
 										:disabled="disableFields"
 										:items="categoriesJson()"
 										label="Category"
-										outlined
-										dense
+										density="compact"
+										variant="outlined"
+										item-value="value"
+										item-title="text"
 										clearable
 										class="mr-1"
 										style="width: 50%"
@@ -83,8 +83,10 @@
 										:disabled="disableFields"
 										:items="languagesJson()"
 										label="Language"
-										outlined
-										dense
+										density="compact"
+										variant="outlined"
+										item-value="value"
+										item-title="text"
 										clearable
 										class="ml-1"
 										style="width: 50%"
@@ -98,8 +100,10 @@
 										:disabled="disableFields"
 										:items="formatsJson()"
 										label="Format"
-										outlined
-										dense
+										density="compact"
+										variant="outlined"
+										item-value="value"
+										item-title="text"
 										clearable
 										class="mr-1"
 										style="width: 50%"
@@ -111,8 +115,8 @@
 										:disabled="disableFields"
 										label="Pages"
 										type="number"
-										dense
-										outlined
+										density="compact"
+										variant="outlined"
 										class="ml-1"
 										style="width: 50%"
 									></v-text-field>
@@ -123,12 +127,12 @@
 									v-model="authors"
 									:items="loadedAuthorsJSON"
 									:loading="loadingAuthors"
-									:search-input.sync="searchAuthors"
+									@update:search="searchAuthors"
 									:disabled="disableFields"
-									item-text="text"
+									density="compact"
+									variant="outlined"
 									item-value="value"
-									chips
-									outlined
+									item-title="text"
 									label="Authors"
 									color="primary"
 									placeholder="Add authors.."
@@ -142,8 +146,8 @@
 										v-model="publisher"
 										label="Publisher"
 										:disabled="disableFields"
-										dense
-										outlined
+										density="compact"
+										variant="outlined"
 										class="mr-1"
 										style="width: 50%"
 									></v-text-field>
@@ -154,31 +158,22 @@
 										label="Published date"
 										:disabled="disableFields"
 										type="date"
-										dense
-										outlined
+										density="compact"
+										variant="outlined"
 										class="ml-1"
 										style="width: 50%"
 									></v-text-field>
 								</div>
-							</template>
-						</card-component>
 
-						<!-- ================================================================== -->
-						<!-- 																  	-->
-						<!-- DESCRIPTION														-->
-						<!-- 																  	-->
-						<!-- ================================================================== -->
-						<card-component
-							title="Description"
-							icon="mdi-text-long"
-						>
-							<v-textarea
-								v-model="description"
-								:disabled="disableFields"
-								dense
-								outlined
-								label="Description"
-							></v-textarea>
+								<!-- Description -->
+								<v-textarea
+									v-model="description"
+									:disabled="disableFields"
+									density="compact"
+									variant="outlined"
+									label="Description"
+								></v-textarea>
+							</template>
 						</card-component>
 					</v-col>
 
@@ -194,9 +189,7 @@
 				</v-row>
 
 				<!-- ================================================================== -->
-				<!-- 																  	-->
 				<!-- STOCKS																-->
-				<!-- 																  	-->
 				<!-- ================================================================== -->
 				<book-stocks :book="model.getBook()"/>
 			</div>
@@ -210,7 +203,7 @@ import BookController from "@/controller/book/BookController";
 import notFound from "@/assets/images/notFound.jpg";
 import CardComponent from "@/components/card/CardComponent.vue";
 import BookStocks from "@/views/book/compoents/BookStocks.vue";
-import {computed, ref, Ref, shallowRef, ShallowRef, watch} from "vue";
+import {computed, ref, Ref, shallowRef, ShallowRef} from "vue";
 import BookAuthor from "@/model/book/BookAuthor";
 import {applicationService} from "@/service/ApplicationService";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
@@ -239,11 +232,6 @@ const loadingDelete: Ref<boolean> = ref(false);
  *
  */
 const loadingAuthors: Ref<boolean> = ref(false);
-
-/**
- *
- */
-const searchAuthors: Ref<string> = ref("");
 
 const loadedAuthors: ShallowRef<BookAuthor[]> = shallowRef(model.getBook().getAuthors())
 
@@ -367,7 +355,12 @@ const isbn = computed({
 
 const authors = computed({
 	get() {
-		return model.getBook().getAuthors().map((author) => author.getAuthorId());
+		return model.getBook().getAuthors().map((author) => {
+			return {
+				value: author.getAuthorId(),
+				text: author.getAuthorName()
+			}
+		});
 	},
 	set(val: number[]) {
 		const items: BookAuthor[] = [];
@@ -435,7 +428,7 @@ async function updateBook() {
 	}
 }
 
-watch(() => searchAuthors.value, async (prompt: string | null) => {
+async function searchAuthors(prompt: string) {
 	// prompt is empty
 	if (prompt == null || prompt.trim().length === 0) return;
 
@@ -444,7 +437,7 @@ watch(() => searchAuthors.value, async (prompt: string | null) => {
 
 	try {
 		loadingAuthors.value = true;
-		const data = await authorService.searchAuthors(searchAuthors.value)
+		const data = await authorService.searchAuthors(prompt)
 		if (data) {
 			data.forEach((author) => {
 				const index = loadedAuthors.value.findIndex((item) => item.getAuthorId() === author.id)
@@ -458,5 +451,5 @@ watch(() => searchAuthors.value, async (prompt: string | null) => {
 	} finally {
 		loadingAuthors.value = false;
 	}
-})
+}
 </script>

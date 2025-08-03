@@ -15,8 +15,8 @@
 
 			<v-chip
 				v-if="counter != undefined"
-				small
-				class="px-2 ml-2">
+				density="compact"
+				class="px-2 ml-2 gradient">
 				{{ counter }}
 			</v-chip>
 

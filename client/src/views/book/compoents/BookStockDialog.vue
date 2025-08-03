@@ -11,7 +11,7 @@
 			<v-divider></v-divider>
 
 			<v-card-text>
-				<p class="mb-4 mt-1">
+				<p class="mb-8 mt-1" style="font-size: 14px">
 					Book stock represents individual copies of a book, allowing you to track quantity and status.
 					Each book stock has a unique barcode for identification.
 					Please ensure the stock barcode is added to the book.
@@ -21,6 +21,10 @@
 					v-model="selectedStatus"
 					:items="status"
 					label="Status"
+					density="compact"
+					variant="outlined"
+					item-value="value"
+					item-title="text"
 					hide-details
 				></v-select>
 
@@ -28,6 +32,10 @@
 					v-model="selectedLocation"
 					:items="locations"
 					label="Locations"
+					density="compact"
+					variant="outlined"
+					item-value="value"
+					item-title="text"
 					hide-details
 					class="mt-3"
 				></v-select>

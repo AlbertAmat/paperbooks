@@ -1,6 +1,7 @@
 import IBookItem from "@/types/book/IBookItem";
 import BookAuthor from "@/model/book/BookAuthor";
 import {bookRoute} from "@/router/routes/BookRoute";
+import {ref, Ref} from "vue";
 
 export default abstract class ABook {
 
@@ -20,7 +21,7 @@ export default abstract class ABook {
      *
      * @private
      */
-    protected m_authors: BookAuthor[];
+    protected m_authors: Ref<BookAuthor[]> = ref([]);
 
     /**
      *
@@ -49,7 +50,7 @@ export default abstract class ABook {
     public constructor(data: IBookItem) {
         this.m_id = data.id;
         this.m_name = data.name;
-        this.m_authors = data.authors.map((author) => new BookAuthor(author));
+        this.m_authors.value = data.authors.map((author) => new BookAuthor(author));
         this.m_imageUrl = data.image_url;
         this.m_isbn = data.isbn;
         this.m_categoryId = data.category_id;
@@ -82,21 +83,21 @@ export default abstract class ABook {
      *
      */
     public hasAuthors(): boolean {
-        return this.m_authors.length > 0;
+        return this.m_authors.value.length > 0;
     }
 
     /**
      *
      */
     public getAuthors(): BookAuthor[] {
-        return this.m_authors;
+        return this.m_authors.value;
     }
 
     /**
      *
      */
     public setAuthors(authors: BookAuthor[]) {
-        this.m_authors = authors;
+        this.m_authors.value = authors;
     }
 
     /**

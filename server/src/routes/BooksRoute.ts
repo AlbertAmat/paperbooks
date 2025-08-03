@@ -60,13 +60,17 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         }
 
         if (author) {
-            conditions.push(`author ILIKE $${conditions.length + 1}`);
-            params.push(`%${author}%`); // Use ILIKE for case-insensitive search with partial match
+            conditions.push(`authors.name ILIKE $${conditions.length + 1}`);
+            params.push(`%${author}%`);
         }
 
         if (category_id) {
-            conditions.push(`category_id IN $${conditions.length + 1}`);
-            params.push(`[${category_id}]`); // Use ILIKE for case-insensitive search with partial match
+            const ids = Array.isArray(category_id)
+                ? category_id.map(Number)
+                : String(category_id).split(',').map(Number);
+
+            conditions.push(`category_id = ANY($${conditions.length + 1})`);
+            params.push(ids);
         }
 
         if (conditions.length > 0) {

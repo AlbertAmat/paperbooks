@@ -96,28 +96,6 @@ CREATE TABLE book_authors (
       FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
 );
 
--- Roles table
-CREATE TABLE roles (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    description TEXT
-);
-
--- User Roles table
-CREATE TABLE user_roles (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-);
-
--- User-Role Association table
-CREATE TABLE user_roles_mapping (
-    user_id INT,
-    role_id INT,
-    PRIMARY KEY (user_id, role_id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES user_roles(id) ON DELETE CASCADE
-);
-
 -- triggers
 CREATE OR REPLACE FUNCTION enforce_customer_id_null()
 RETURNS TRIGGER AS $$

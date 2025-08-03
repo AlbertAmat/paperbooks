@@ -3,16 +3,11 @@
 
 ## TODO
 * multiple users app so ->  book, authors, etc must jave the user or a workspace
-* handle database size - mirar al crear o afegir dades si hi ha espai
-* handle users
-* default admin user (dataload)
+* improve password crypto
 * snackabars
-* CRF in order to check if someone edits the book at the same time
 * locations, categories, ...
 * use file logger
-* book stock: edit
-* roles (admian, user, developer)
-* book stock booked: add column of booked_user_id 
+* book stock booked: use column customer_id
 * search bar
 * user menu
 * handle axios errros

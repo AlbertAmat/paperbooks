@@ -3,6 +3,7 @@ import {searchRoute} from "@/router/routes/SearchRoute";
 import {OverviewRoute, overviewRoute} from "@/router/routes/OverviewRoute";
 import {bookRoute} from "@/router/routes/BookRoute";
 import {notFoundRoute} from "@/router/routes/NotFoundRoute";
+import {locationsRoute} from "@/router/routes/LocationsRoute";
 
 // Define your routes
 const routes: Array<RouteRecordRaw> = [
@@ -13,6 +14,7 @@ const routes: Array<RouteRecordRaw> = [
     overviewRoute.getRoute(),
     searchRoute.getRoute(),
     bookRoute.getRoute(),
+    locationsRoute.getRoute(),
     notFoundRoute.getRoute(),
 ]
 

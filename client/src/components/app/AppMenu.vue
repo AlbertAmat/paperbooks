@@ -73,6 +73,7 @@ import {useDisplay} from "vuetify";
 import {overviewRoute} from "@/router/routes/OverviewRoute";
 import {searchRoute} from "@/router/routes/SearchRoute";
 import {notFoundRoute} from "@/router/routes/NotFoundRoute";
+import {locationsRoute} from "@/router/routes/LocationsRoute";
 
 const route = useRoute()
 
@@ -103,7 +104,7 @@ const items = [
 	{
 		name: "Locations",
 		icon: "mdi-map-marker-radius",
-		path: notFoundRoute.getPath()
+		path: locationsRoute.getPath()
 	},
 	{
 		name: "Languages",
