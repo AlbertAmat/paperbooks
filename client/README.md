@@ -10,6 +10,7 @@
 * book stock booked: use column customer_id
 * search bar
 * user menu
+* register: create register, recapchat + verification
 * handle axios errros
 * dashboard - grapgh + quick actions (unbook, add books)
 

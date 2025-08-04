@@ -128,6 +128,13 @@ export class ApplicationService {
     /**
      *
      */
+    public setCategories(items: Category[]) {
+        this.m_categories = items;
+    }
+
+    /**
+     *
+     */
     public getLanguages(): Language[] {
         return this.m_languages;
     }

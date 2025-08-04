@@ -1,4 +1,6 @@
 import ICategory from "@/types/category/ICategory";
+import {categoriesService} from "@/service/categories/CategoriesService";
+import {Ref, ref} from "vue";
 
 export default class Category {
     /**
@@ -11,11 +13,11 @@ export default class Category {
      *
      * @private
      */
-    private readonly m_categoryName: string;
+    private readonly m_categoryName: Ref<string>;
 
     public constructor(data: ICategory) {
         this.m_categoryId = data.id;
-        this.m_categoryName = data.name;
+        this.m_categoryName = ref(data.name);
     }
 
     /**
@@ -29,6 +31,11 @@ export default class Category {
      *
      */
     public getCategoryName(): string {
-        return this.m_categoryName;
+        return this.m_categoryName.value;
+    }
+
+    public async update(name: string) {
+        await categoriesService.updateCategory(this.m_categoryId, name)
+        this.m_categoryName.value = name;
     }
 }

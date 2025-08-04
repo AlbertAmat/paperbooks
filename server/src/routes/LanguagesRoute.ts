@@ -45,6 +45,15 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
 
+    const existResult = await pool.query(
+        'SELECT code FROM languages WHERE code = $1',
+        [code]
+    );
+
+    if(existResult.rowCount && existResult.rowCount > 0) {
+        res.status(400).send("Language code already exist");
+    }
+
     try {
         console.log(`Adding language with name ${name}`);
         await client.query(

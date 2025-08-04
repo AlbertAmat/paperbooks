@@ -5,6 +5,7 @@ import {bookRoute} from "@/router/routes/BookRoute";
 import {notFoundRoute} from "@/router/routes/NotFoundRoute";
 import {locationsRoute} from "@/router/routes/LocationsRoute";
 import {languagesRoute} from "@/router/routes/LanguagesRoute";
+import {categoriesRoute} from "@/router/routes/CategoriesRoute";
 
 // Define your routes
 const routes: Array<RouteRecordRaw> = [
@@ -17,6 +18,7 @@ const routes: Array<RouteRecordRaw> = [
     bookRoute.getRoute(),
     locationsRoute.getRoute(),
     languagesRoute.getRoute(),
+    categoriesRoute.getRoute(),
 
     // Not found
     notFoundRoute.getRoute(),

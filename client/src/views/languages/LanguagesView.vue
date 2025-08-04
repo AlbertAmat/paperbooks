@@ -135,7 +135,7 @@ function createLanguage() {
 async function deleteItem(code: string) {
 	const location = controller.getLanguage(code);
 	confirmationDialogController.showDialog(
-		`Delete stock ${location ? location.getLanguageName() : ''}`,
+		`Delete language ${location ? location.getLanguageName() : ''}`,
 		"Are you sure that you want to remove this language?",
 		"Delete"
 	).then(async () => {

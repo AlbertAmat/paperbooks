@@ -2,7 +2,7 @@
 	<page-component :model="controller">
 		<template v-slot:append>
 			<v-btn
-				@click="createLocation()"
+				@click="createCategory()"
 				class="text-none gradient"
 				color="primary"
 				small
@@ -15,11 +15,11 @@
 			<v-data-table-virtual
 				:headers="headers"
 				density="compact"
-				:items="locations"
+				:items="categories"
 			>
 				<template v-slot:item.actions="{ item }">
 					<v-icon
-						@click="editLocation(item.id)"
+						@click="editCategory(item.id)"
 						small
 						class="mx-1"
 					>
@@ -44,10 +44,10 @@
 				</template>
 			</v-data-table-virtual>
 
-			<location-dialog
+			<category-dialog
 				v-if="dialog"
 				v-model="dialog"
-				:location="selectedLocation"
+				:category="selectedCategory"
 				:controller="controller"
 			/>
 		</template>
@@ -56,14 +56,14 @@
 
 <script setup lang="ts">
 import PageComponent from "@/views/PageComponent.vue";
-import LocationsController from "@/controller/locations/LocationsController";
 import {computed, ref, Ref, ShallowRef, shallowRef} from "vue";
-import LocationDialog from "@/views/locations/LocationDialog.vue";
-import Location from "@/model/location/Location";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import {applicationService} from "@/service/ApplicationService";
-
-const controller = new LocationsController();
+import CategoriesController from "@/controller/categories/CategoriesController";
+import Category from "@/model/category/Category";
+import CategoryDialog from "./CategoryDialog.vue"
+	""
+const controller = new CategoriesController();
 
 /**
  *
@@ -73,7 +73,7 @@ const dialog: Ref<boolean> = ref(false);
 /**
  *
  */
-const selectedLocation: ShallowRef<Location | undefined> = shallowRef(undefined);
+const selectedCategory: ShallowRef<Category | undefined> = shallowRef(undefined);
 
 /**
  *
@@ -85,31 +85,29 @@ const headers = [
 		title: 'Name',
 		value: 'name',
 	},
-	{title: 'Description', value: 'description'},
 	{title: 'Actions', value: 'actions', align: 'end',}
 ];
 
 /**
  *
  */
-const locations = computed(() => {
-	return controller.getLocations().map(location => {
+const categories = computed(() => {
+	return controller.getCategories().map(category => {
 		return {
-			id: location.getId(),
-			name: location.getName(),
-			description: location.getDescription()
+			id: category.getCategoryId(),
+			name: category.getCategoryName(),
 		}
 	})
 })
 
 /**
  *
- * @param locationId
+ * @param id
  */
-function editLocation(locationId: number) {
-	const location =  controller.getLocations().find(location => location.getId() === locationId);
-	if(location) {
-		selectedLocation.value = location;
+function editCategory(id: number) {
+	const category =  controller.getCategories().find(category => category.getCategoryId() === id);
+	if(category) {
+		selectedCategory.value = category;
 		dialog.value = true;
 	}
 }
@@ -117,28 +115,28 @@ function editLocation(locationId: number) {
 /**
  *
  */
-function createLocation() {
-	selectedLocation.value = undefined;
+function createCategory() {
+	selectedCategory.value = undefined;
 	dialog.value = true;
 }
 
 /**
  *
- * @param locationId
+ * @param id
  */
-async function deleteItem(locationId: number) {
-	const location = controller.getLocation(locationId);
+async function deleteItem(id: number) {
+	const category = controller.getCategory(id);
 	confirmationDialogController.showDialog(
-		`Delete location ${location ? location.getName() : ''}`,
-		"Are you sure that you want to remove this location?",
+		`Delete category ${category ? category.getCategoryName() : ''}`,
+		"Are you sure that you want to remove this category?",
 		"Delete"
 	).then(async () => {
 		try {
-			deleteLoading.value.push(locationId);
-			await controller.deleteLocation(locationId);
-			applicationService.setLocations(controller.getLocations())
+			deleteLoading.value.push(id);
+			await controller.deleteCategory(id);
+			applicationService.setCategories(controller.getCategories())
 		} finally {
-			deleteLoading.value.splice(deleteLoading.value.indexOf(locationId), 1);
+			deleteLoading.value.splice(deleteLoading.value.indexOf(id), 1);
 		}
 	});
 }
