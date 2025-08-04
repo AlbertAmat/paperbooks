@@ -2,6 +2,7 @@ import express, { Router, Request, Response } from 'express';
 import {appService} from "../AppService";
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import path from "path";
+import jwt from "jsonwebtoken";
 
 const router = Router();
 
@@ -38,8 +39,10 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
         console.error("Error when getting locations. ", e)
     }
 
+    const user = await  getUser(req);
+
     res.status(200).json({
-        user: null,
+        user:user,
         categories: categories,
         languages: languages,
         formats: formats,
@@ -123,5 +126,33 @@ async function getLocations(): Promise<Record<string, any>[]> {
     // Return the result (found rows)
     return result.rows;
 }
+
+/**
+ *
+ */
+async function getUser(req: Request): Promise<Record<string, any>[]> {
+   const userId = appService.getSessionUser(req);
+
+    const pool = appService.getDatabasePool();
+
+    const query = `
+        SELECT code,
+               name,
+               email, 
+            language, 
+            region, 
+            image
+        FROM users
+        WHERE id = $1
+    `
+    // Use a prepared statement to fetch items by name
+    console.log("executing query: ", query);
+    const result = await pool.query(query, [userId]);
+
+    console.log(" result.rows[0]", result.rows[0])
+    // Return the result (found rows)
+    return result.rows[0];
+}
+
 
 export default router;

@@ -8,7 +8,7 @@
 
 	<v-text-field
 		v-model="searchInput"
-		placeholder="Search"
+		placeholder="Search books"
 		density="compact"
 		:details="false"
 		hide-details
@@ -21,17 +21,7 @@
 
 	<slot name="append"></slot>
 
-	<div class="d-flex align-center ml-3" style="font-weight: 400">
-		<v-avatar
-			class="mr-2"
-			size="30"
-			color="primary"
-		>
-			<v-icon dark>mdi-account</v-icon>
-		</v-avatar>
-
-		James sparrow
-	</div>
+	<user-menu/>
 </template>
 
 <script setup lang="ts">
@@ -40,6 +30,7 @@ import {applicationService} from "@/service/ApplicationService";
 import {useRoute} from "vue-router";
 import {SearchRoute, searchRoute} from "@/router/routes/SearchRoute";
 import router from "@/router/Router";
+import UserMenu from "@/components/app/UserMenu.vue";
 
 const route = useRoute()
 

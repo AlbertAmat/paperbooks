@@ -21,16 +21,6 @@
 			>
 				Paper Book
 			</span>
-
-			<v-btn
-				v-if="!rail"
-				@click="rail = true"
-				icon
-				variant="text"
-				density="compact"
-			>
-				<v-icon>mdi-arrow-collapse-horizontal</v-icon>
-			</v-btn>
 		</div>
 
 		<v-list
@@ -53,21 +43,26 @@
 				density="compact"
 				:style="{color: selectedItem === item.path ? 'black' : ''}"
 			/>
-
-			<div style="flex: 1"></div>
-			<v-list-item
-				nav
-				to="xxxx"
-				value="xxxx"
-				title="Settings"
-				prepend-icon="mdi-cog-outline"
-			/>
 		</v-list>
+
+		<div style="display: flex; width: 100%; justify-content: center">
+			<v-spacer v-if="!rail"></v-spacer>
+			<v-btn
+				icon
+				variant="text"
+				density="comfortable"
+				@click="rail = !rail"
+				:class="!rail ? 'mr-3' : ''"
+				nav
+			>
+				<v-icon size="25">{{ rail ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
+			</v-btn>
+		</div>
 	</v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
-import { Ref, ref, watch} from "vue";
+import {Ref, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useDisplay} from "vuetify";
 import {overviewRoute} from "@/router/routes/OverviewRoute";
@@ -99,7 +94,7 @@ const items = [
 		path: overviewRoute.getPath()
 	},
 	{
-		name: "Books",
+		name: "Library",
 		icon: "mdi-bookshelf",
 		path: searchRoute.getPath()
 	},
@@ -111,7 +106,7 @@ const items = [
 	{
 		name: "Languages",
 		icon: "mdi-flag-outline",
-		path:  languagesRoute.getPath()
+		path: languagesRoute.getPath()
 	},
 	{
 		name: "Categories",
@@ -121,7 +116,7 @@ const items = [
 	{
 		name: "Customers",
 		icon: "mdi-account-school-outline",
-		path:  notFoundRoute.getPath()
+		path: notFoundRoute.getPath()
 	}
 ]
 
@@ -135,6 +130,7 @@ watch(() => route.path, (path) => {
 .app-menu {
 	background-color: transparent !important;
 }
+
 .app-menu >>> .v-navigation-drawer__border {
 	display: none;
 }

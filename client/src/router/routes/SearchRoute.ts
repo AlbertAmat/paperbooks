@@ -2,9 +2,9 @@ import {ARoute} from "@/router/ARoute";
 
 export class SearchRoute extends ARoute {
 
-    public static PATH = "/books/search";
+    public static PATH = "/library/search";
 
-    private m_name: string = "Books";
+    private m_name: string = "Library";
 
     public static QUERY_PARAM = "query";
 

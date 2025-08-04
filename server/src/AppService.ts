@@ -1,4 +1,4 @@
-import express, {Express} from "express";
+import express, {Express, Request} from "express";
 import bodyParser from "body-parser";
 import http, {Server} from "http";
 import DatabaseConf from "./types/DatabaseConf";
@@ -9,6 +9,7 @@ import AuthRoute from "./routes/AuthRoute";
 import crypto from "crypto";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
 
 export class AppService {
     /**
@@ -247,6 +248,26 @@ export class AppService {
      */
     public getLogger(): Logger {
         return this.m_logger;
+    }
+
+    /**
+     *
+     * @param request
+     */
+    public getSessionUser(req: Request) {
+        const token = req.cookies.token;
+        if (!token) {
+            throw Error("No session")
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, this.getJwtSecret()) as { user_id: number; exp: number };
+        } catch (err) {
+            throw err;
+        }
+
+        return decoded.user_id;
     }
 
     // TODO: MOVE TO bcrypt

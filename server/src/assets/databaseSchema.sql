@@ -13,7 +13,9 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     last_login_date TIMESTAMP,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    image BYTEA,
     language CHAR(2) DEFAULT 'en',
+    region CHAR(2) DEFAULT 'US',
     FOREIGN KEY (language) REFERENCES languages(code) ON DELETE SET NULL
 );
 

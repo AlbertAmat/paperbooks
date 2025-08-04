@@ -6,6 +6,7 @@ import Category from "@/model/category/Category";
 import Location from "@/model/location/Location";
 import Format from "@/model/format/Format";
 import axiosInstance from "@/plugins/axiosInstance";
+import User from "@/model/user/User";
 
 export class ApplicationService {
 
@@ -25,7 +26,7 @@ export class ApplicationService {
      *
      * @private
      */
-    private m_user: Record<string, any> | null;
+    private m_user!: User;
 
     /**
      *
@@ -53,7 +54,6 @@ export class ApplicationService {
 
     public constructor() {
         this.m_error = null;
-        this.m_user = null;
         this.m_languages = [];
         this.m_locations = [];
         this.m_categories = [];
@@ -65,7 +65,7 @@ export class ApplicationService {
             this.m_loading.value = true;
             const response = await axiosInstance.get(`${PATH_PREFIX}/app/policy`);
             const data = response.data as IPolicyResponse;
-            this.m_user = data.user;
+            this.m_user = new User(data.user);
             this.m_categories = data.categories.map((category) => new Category(category));
             this.m_languages = data.languages.map((lang) => new Language(lang));
             this.m_formats = data.formats.map((format) => new Format(format));
@@ -103,7 +103,7 @@ export class ApplicationService {
     /**
      *
      */
-    public getUser(): Record<string, any> | null {
+    public getUser(): User {
         return this.m_user;
     }
 

@@ -16,7 +16,7 @@
 				style="border-radius: 6px; height: 110px; width: 75px; object-fit: cover"
 			/>
 
-			<div>
+			<div style="min-width: 0;">
 				<!-- Book name -->
 				<v-list-item-title
 					:title="book.getName() "

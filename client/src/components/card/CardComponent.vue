@@ -1,8 +1,7 @@
 <template>
 	<v-card
-		variant="flat"
 		class="pa-0"
-		:class="outline ? 'app-border-2' : ''"
+		:variant="outline ? 'outlined' : 'flat'"
 	>
 		<v-card-title
 			v-if="!dense"

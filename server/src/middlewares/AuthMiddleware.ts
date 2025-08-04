@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import {appService} from "../AppService";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-
     // development
     if (process.env.NODE_ENV === "development") {
         // Fake decoded token for dev

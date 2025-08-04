@@ -104,8 +104,9 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 // Logout route
-router.post("/logout", (req: Request, res: Response) => {
+router.get("/logout", (req: Request, res: Response) => {
     res.clearCookie("token");
+    return res.redirect("/login"); // Redirect to login;
 });
 
 // Session check route
