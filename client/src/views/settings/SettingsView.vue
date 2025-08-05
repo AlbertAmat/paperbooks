@@ -124,7 +124,7 @@
 								current password and choose a new one that meets security requirements.
 							</p>
 						</div>
-						<v-btn variant="tonal" class="text-none">Change password</v-btn>
+						<change-password-dialog :controller="controller"/>
 					</div>
 				</settings-card>
 
@@ -162,6 +162,7 @@ import SettingsController from "@/controller/settings/SettingsController";
 import {Ref, ref, computed} from "vue";
 import SettingsCard from "@/views/settings/SettingsCard.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
+import ChangePasswordDialog from "@/views/settings/ChangePasswordDialog.vue";
 
 const controller = new SettingsController();
 
