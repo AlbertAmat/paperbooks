@@ -254,7 +254,7 @@ async function deleteUser() {
 		"This will permanently remove your account and all associated content.", "Delete").then(async () => {
 		try {
 			loadingDelete.value = true;
-			await model.getBook().deleteBook();
+			await controller.getUser().delete();
 		} finally {
 			loadingDelete.value = false;
 		}

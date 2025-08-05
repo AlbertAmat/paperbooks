@@ -11,12 +11,15 @@ const router = Router();
 router.get('', requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
+    const userId = appService.getSessionUser(req);
+
     try {
         const result = await client.query(`
             SELECT id, 
                    name
               FROM categories
-        `);
+             WHERE user_id = $1
+        `, [userId]);
         res.status(200).json(result.rows);
     } catch (err: any) {
         console.error('Error executing query', err.stack);

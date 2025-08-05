@@ -447,6 +447,8 @@ router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
                     "SELECT id FROM categories WHERE name = $1 AND user_id = $2",
                     [categoryName, userId]
                 );
+                console.log("")
+                console.log("category", categoryResult.rows)
                 if (categoryResult.rowCount === 0) {
                     const insertCategoryResult = await client.query(
                         "INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING id",
@@ -469,7 +471,7 @@ router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
                 const insertBookResult = await client.query(
                     `INSERT INTO books (name, description, image_url, isbn, category_id,
                                         publisher, published_date, language_code, pages, user_id)
-                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9) RETURNING id`,
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
                     [
                         name, description, imageUrl, isbnCode, categoryId,
                         publisher, formattedPublishedDate, languageCode, pages, userId

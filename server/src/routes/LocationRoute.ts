@@ -11,13 +11,16 @@ const router = Router();
 router.get('', requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
+    const userId = appService.getSessionUser(req);
+
     try {
         const result = await client.query(`
             SELECT id, 
                    name, 
                    description
               FROM locations
-        `);
+               WHERE user_id = $1
+        `, [userId]);
         res.status(200).json(result.rows);
     } catch (err: any) {
         console.error('Error executing query', err.stack);
@@ -37,12 +40,13 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
 
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
+    const userId = appService.getSessionUser(req);
 
     try {
         console.log(`Adding location with name ${name}`);
         const insertLocation = await client.query(
-            "INSERT INTO locations (name, description) VALUES ($1, $2) RETURNING id",
-            [name, description]
+            "INSERT INTO locations (name, description, user_id) VALUES ($1, $2, $3) RETURNING id",
+            [name, description, userId]
         );
 
         // fetch new data
@@ -52,7 +56,8 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
                    locations.description
             FROM locations
             WHERE locations.id = ${insertLocation.rows[0].id}
-        `)
+            AND locations.user_id = $1
+        `, [userId])
 
         res.status(200).json(result.rows[0]);
     } catch (error) {

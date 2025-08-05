@@ -10,7 +10,7 @@ function createToken(userId: number) {
     return jwt.sign({ user_id: userId }, appService.getJwtSecret(), { expiresIn: Math.floor(appService.getSessionTime() / 1000) });
 }
 
-// TODO: REVIEW IF THIS ENDPOINT SHOULD BE IN HEARE
+// TODO: REVIEW IF THIS ENDPOINT SHOULD BE IN HERE
 const distPath = path.join(__dirname, '../../../client/dist')
 router.use("/assets", express.static(path.join(distPath, "assets"), {
     setHeaders: (res, path) => {
