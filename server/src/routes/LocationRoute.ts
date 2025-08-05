@@ -74,6 +74,8 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
         return res.status(400).send('No location ID provided');
     }
 
+    const userId = appService.getSessionUser(req);
+
     // Body params
     const {
         name,
@@ -86,8 +88,8 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
         console.log(`Updating location ${locationId}`);
 
         const queryResult = await pool.query(
-            'UPDATE locations SET name = $1, description = $2 WHERE id = $3',
-            [name, description, locationId]
+            'UPDATE locations SET name = $1, description = $2 WHERE id = $3 AND user_id = $4',
+            [name, description, locationId, userId]
         );
 
         if(queryResult.rowCount != 1) {
@@ -99,8 +101,10 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
                     locations.name,
                     locations.description
               FROM locations
-             WHERE locations.id = $1`,
-            [locationId]
+             WHERE locations.id = $1
+               AND locations.user_id = $2
+               `,
+            [locationId, userId]
         );
 
         res.status(200).json(locationQueryResult.rows[0]);
@@ -123,14 +127,16 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
 
+    const userId = appService.getSessionUser(req);
+
     try {
         // Validate the existence of the book
-        const locationCheck = await client.query('SELECT id FROM locations WHERE id = $1', [id]);
+        const locationCheck = await client.query('SELECT id FROM locations WHERE id = $1 AND user_id = $2', [id, userId]);
         if (locationCheck.rowCount === 0) {
             return res.status(404).send({error: "Location not found"});
         }
 
-        await client.query( 'DELETE FROM locations WHERE id = $1', [id]);
+        await client.query( 'DELETE FROM locations WHERE id = $1 AND user_id = $2', [id, userId]);
 
         res.send({message: "Location deleted successfully"});
     } catch (e) {

@@ -1,8 +1,6 @@
-import express, { Router, Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import {appService} from "../AppService";
 import {requireAuth} from "../middlewares/AuthMiddleware";
-import path from "path";
-import jwt from "jsonwebtoken";
 
 const router = Router();
 
@@ -16,7 +14,7 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
     let locations: Record<string, any>[] = [];
 
     try {
-        categories = await getCategories();
+        categories = await getCategories(req);
     } catch (e) {
         console.error("Error when getting categories. ", e)
     }
@@ -34,7 +32,7 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
     }
 
     try {
-        locations = await getLocations();
+        locations = await getLocations(req);
     } catch (e) {
         console.error("Error when getting locations. ", e)
     }
@@ -53,17 +51,20 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
 /**
  *
  */
-async function getCategories(): Promise<Record<string, any>[]> {
+async function getCategories(req: Request): Promise<Record<string, any>[]> {
     const pool = appService.getDatabasePool();
+
+    const userId = appService.getSessionUser(req);
 
     const query = `
         SELECT id,
                name
         FROM categories
+        WHERE user_id = $1
     `
     // Use a prepared statement to fetch items by name
     console.log("executing query: ", query);
-    const result = await pool.query(query);
+    const result = await pool.query(query, [userId]);
 
     // Return the result (found rows)
      return result.rows;
@@ -110,17 +111,18 @@ async function getFormats(): Promise<Record<string, any>[]> {
 /**
  *
  */
-async function getLocations(): Promise<Record<string, any>[]> {
+async function getLocations(req: Request): Promise<Record<string, any>[]> {
     const pool = appService.getDatabasePool();
-
+    const userId = appService.getSessionUser(req)
     const query = `
         SELECT id,
                name,
                description
         FROM locations
+        WHERE user_id = $1
     `
     // Use a prepared statement to fetch items by name
-    console.log("executing query: ", query);
+    console.log("executing query: ", query, [userId]);
     const result = await pool.query(query);
 
     // Return the result (found rows)
@@ -130,29 +132,41 @@ async function getLocations(): Promise<Record<string, any>[]> {
 /**
  *
  */
-async function getUser(req: Request): Promise<Record<string, any>[]> {
-   const userId = appService.getSessionUser(req);
-
+async function getUser(req: Request): Promise<Record<string, any>> {
+    const userId = appService.getSessionUser(req);
     const pool = appService.getDatabasePool();
 
     const query = `
         SELECT code,
                name,
-               email, 
-            language, 
-            region, 
+               email,
+            language,
+            region,
             image
         FROM users
         WHERE id = $1
-    `
-    // Use a prepared statement to fetch items by name
-    console.log("executing query: ", query);
+    `;
+
     const result = await pool.query(query, [userId]);
 
-    console.log(" result.rows[0]", result.rows[0])
-    // Return the result (found rows)
-    return result.rows[0];
-}
+    if (result.rows.length === 0) {
+        throw new Error("User not found");
+    }
 
+    const user = result.rows[0];
+
+    if (user.image) {
+        // Convert Buffer to base64 string with data URL prefix
+        const base64Image = user.image.toString('base64');
+
+        // You can detect the mime type or hardcode it if you know it’s PNG or JPEG
+        // For example, assume PNG here:
+        user.image = `data:image/png;base64,${base64Image}`;
+    } else {
+        user.image = null; // or a default image URL/base64 string
+    }
+
+    return user;
+}
 
 export default router;

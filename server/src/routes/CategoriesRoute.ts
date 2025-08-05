@@ -35,12 +35,13 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
 
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
+    const userId = appService.getSessionUser(req);
 
     try {
         console.log(`Adding category with name ${name}`);
         const insertCategory = await client.query(
-            "INSERT INTO categories (name) VALUES ($1) RETURNING id",
-            [name]
+            "INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING id",
+            [name, userId]
         );
 
         // fetch new data
@@ -48,8 +49,9 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
             SELECT categories.id,
                    categories.name
             FROM categories
-            WHERE categories.id = ${insertCategory.rows[0].id}
-        `)
+            WHERE categories.id = $1
+              AND categories.user_id = $2
+        `, [insertCategory.rows[0].id, userId])
 
         res.status(200).json(result.rows[0]);
     } catch (error) {
@@ -71,6 +73,8 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
         return res.status(400).send('No category ID provided');
     }
 
+    const userId = appService.getSessionUser(req);
+
     // Body params
     const {
         name
@@ -82,8 +86,8 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
         console.log(`Updating category ${categoryId}`);
 
         const queryResult = await pool.query(
-            'UPDATE categories SET name = $1 WHERE id = $2',
-            [name, categoryId]
+            'UPDATE categories SET name = $1 WHERE id = $2 AND user_id = $3',
+            [name, categoryId, userId]
         );
 
         if(queryResult.rowCount != 1) {
@@ -94,8 +98,10 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
             `SELECT categories.id,
                     categories.name
               FROM categories
-             WHERE categories.id = $1`,
-            [categoryId]
+             WHERE categories.id = $1
+               AND categories.user_id = $2
+             `,
+            [categoryId, userId]
         );
 
         res.status(200).json(categoryQueryResult.rows[0]);
@@ -118,14 +124,19 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
 
+    const userId = appService.getSessionUser(req);
+
     try {
         // Validate the existence of the book
-        const categoryCheck = await client.query('SELECT id FROM categories WHERE id = $1', [id]);
+        const categoryCheck = await client.query(
+            'SELECT id FROM categories WHERE id = $1 AND user_id = $2',
+            [id, userId]
+        );
         if (categoryCheck.rowCount === 0) {
             return res.status(404).send({error: "Category not found"});
         }
 
-        await client.query( 'DELETE FROM categories WHERE id = $1', [id]);
+        await client.query( 'DELETE FROM categories WHERE id = $1 AND user_id = $2', [id, userId]);
 
         res.send({message: "Category deleted successfully"});
     } catch (e) {

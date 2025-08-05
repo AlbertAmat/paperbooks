@@ -64,12 +64,10 @@
 <script setup lang="ts">
 import {Ref, ref, watch} from "vue";
 import {useRoute} from "vue-router";
-import {useDisplay} from "vuetify";
 import {overviewRoute} from "@/router/routes/OverviewRoute";
 import {searchRoute} from "@/router/routes/SearchRoute";
 import {notFoundRoute} from "@/router/routes/NotFoundRoute";
 import {locationsRoute} from "@/router/routes/LocationsRoute";
-import {languagesRoute} from "@/router/routes/LanguagesRoute";
 import {categoriesRoute} from "@/router/routes/CategoriesRoute";
 
 const route = useRoute()
@@ -102,11 +100,6 @@ const items = [
 		name: "Locations",
 		icon: "mdi-map-marker-radius",
 		path: locationsRoute.getPath()
-	},
-	{
-		name: "Languages",
-		icon: "mdi-flag-outline",
-		path: languagesRoute.getPath()
 	},
 	{
 		name: "Categories",

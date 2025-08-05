@@ -23,13 +23,34 @@
 			</v-btn>
 		</template>
 		<v-card width="250px">
-			<v-list nav class="py-0">
+			<v-card-title class="d-flex align-center py-0 pl-2">
+				<v-avatar
+					class="mr-3"
+					size="30"
+					color="primary"
+				>
+					<img
+						v-if="user.hasImage()"
+						:src="user.getImage()"
+						style="width: 100%; height: 100%; object-fit: cover"
+					/>
+					<v-icon v-else dark size="30">mdi-account</v-icon>
+				</v-avatar>
+				<div>
+					<span style="font-size: 14px">{{user.getName()}}</span>
+					<span class="v-card-subtitle pl-0" style="font-size: 12px">{{user.getEmail()}}</span>
+				</div>
+			</v-card-title>
+			<v-list nav slim class="pa-0">
 				<v-list-item
 					v-for="(item, index) in items"
 					:to="item.to"
 					:href="item.href"
 					:key="index"
 					:value="index"
+					density="compact"
+					class="py-0"
+					nav
 				>
 					<v-list-item-title>{{ item.title }}</v-list-item-title>
 				</v-list-item>

@@ -4,7 +4,6 @@ import {OverviewRoute, overviewRoute} from "@/router/routes/OverviewRoute";
 import {bookRoute} from "@/router/routes/BookRoute";
 import {notFoundRoute} from "@/router/routes/NotFoundRoute";
 import {locationsRoute} from "@/router/routes/LocationsRoute";
-import {languagesRoute} from "@/router/routes/LanguagesRoute";
 import {categoriesRoute} from "@/router/routes/CategoriesRoute";
 import {settingsRoute} from "@/router/routes/SettingsRoute";
 
@@ -18,7 +17,6 @@ const routes: Array<RouteRecordRaw> = [
     searchRoute.getRoute(),
     bookRoute.getRoute(),
     locationsRoute.getRoute(),
-    languagesRoute.getRoute(),
     categoriesRoute.getRoute(),
     settingsRoute.getRoute(),
 

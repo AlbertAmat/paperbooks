@@ -141,15 +141,7 @@ export class ApplicationService {
 
     /**
      *
-     */
-    public setLanguages(items: Language[]) {
-        this.m_languages = items;
-    }
-
-    /**
-     *
-     * @param id
-     * @param id
+     * @param code
      */
     public getLanguage(code: string | null): Language | undefined {
         if(!code) {

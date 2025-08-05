@@ -1,18 +1,20 @@
 # Paper book
 
-
 ## TODO
-* multiple users app so ->  book, authors, etc must jave the user or a workspace
 * improve password crypto
+* app labels + use table
 * snackabars
+* authors view
 * settings
 * imporve search. search also isbn code and stookc code
-* use file logger
 * book stock booked: use column customer_id
-* user menu
-* register: create register, recapchat + verification
 * handle axios errros
 * dashboard - grapgh + quick actions (unbook, add books)
+
+## backlog
+* multiple users app so ->  book, authors, etc must have the user or a workspace
+* use file logger
+* register: create register, recapchat + verification
 
 ## Project setup
 ```
