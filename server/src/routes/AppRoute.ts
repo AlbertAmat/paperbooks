@@ -122,8 +122,8 @@ async function getLocations(req: Request): Promise<Record<string, any>[]> {
         WHERE user_id = $1
     `
     // Use a prepared statement to fetch items by name
-    console.log("executing query: ", query, [userId]);
-    const result = await pool.query(query);
+    console.log("executing query: ", query);
+    const result = await pool.query(query, [userId]);
 
     // Return the result (found rows)
     return result.rows;

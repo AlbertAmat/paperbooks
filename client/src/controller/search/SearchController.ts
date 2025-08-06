@@ -45,8 +45,6 @@ export default class SearchController extends BaseController<ISearchResponse> {
         return await searchService.searchBooks(
             query,
             null,
-            null,
-            null,
             0
         )
     }
@@ -69,8 +67,6 @@ export default class SearchController extends BaseController<ISearchResponse> {
             const query = params[SearchRoute.QUERY_PARAM] ? params[SearchRoute.QUERY_PARAM] as string : null;
             const data = await searchService.searchBooks(
                 query,
-                null,
-                null,
                 null,
                 this.m_page.value
             );

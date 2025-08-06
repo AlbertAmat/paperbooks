@@ -13,8 +13,6 @@ const router: Router = Router();
 router.get('/search', requireAuth, async (req: Request, res: Response) => {
     // Params
     const query = req.query.query ? String(req.query.query) : undefined;
-    const isbn = req.query.isbn;
-    const author = req.query.author;
     // Array of categories
     const category_id = req.query.category_id;
     const page = Math.max(0, Number(req.query.page)) || 0;
@@ -27,8 +25,10 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         const MAX_ROWS = 50;
         const skip = MAX_ROWS * page;
 
-        const params = [];
-        const conditions: Array<String> = [];
+        const params: any[] = [userId];
+        const conditions: Array<String> = [
+            `books.user_id = $1`
+        ];
 
         let sqlStatement = `
             SELECT books.id,
@@ -51,19 +51,9 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
                      LEFT JOIN authors ON book_authors.author_id = authors.id
         `;
 
+
         if (query) {
-            conditions.push(`LOWER(books.name) ILIKE $${conditions.length + 1}`);
-            params.push(`%${query.toLocaleLowerCase()}%`);
-        }
-
-        if (isbn) {
-            conditions.push(`isbn ILIKE $${conditions.length + 1}`);
-            params.push(`%${isbn}%`); // Use ILIKE for case-insensitive search with partial match
-        }
-
-        if (author) {
-            conditions.push(`authors.name ILIKE $${conditions.length + 1}`);
-            params.push(`%${author}%`);
+            conditions.push(`LOWER(books.name) ILIKE $${params.push(`%${query.toLocaleLowerCase()}%`)} OR LOWER(books.isbn) ILIKE $${params.push(`%${query.toLocaleLowerCase()}%`)}`);
         }
 
         if (category_id) {
@@ -74,9 +64,6 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
             conditions.push(`category_id = ANY($${conditions.length + 1})`);
             params.push(ids);
         }
-
-        conditions.push(`books.user_id = $${conditions.length + 1}`);
-        params.push(userId);
 
         if (conditions.length > 0) {
             sqlStatement += ` WHERE ${conditions.join(' AND ')}`;
@@ -89,6 +76,7 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         if (conditions.length > 0) {
             totalQuery += ` WHERE ${conditions.join(' AND ')}`;
         }
+        console.log("execute total results query: ", totalQuery)
         const totalResults = await client.query(totalQuery, params);
 
         /**

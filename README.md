@@ -4,12 +4,15 @@
 * improve password crypto
 * app labels + use table
 * snackabars
-* authors view
+* fix styles in create book
+* create book manually (only required fill)
+* allow to change book image
 * batch load of books in a location
 * batch load of books to a customer
-* imporve search. search also isbn code and stookc code
-* book stock booked: use column customer_id
 * handle axios errros
+* 
+*  book stock booked: use column customer_id
+* authors view
 * dashboard - grapgh + quick actions (unbook, add books)
 
 ## backlog
