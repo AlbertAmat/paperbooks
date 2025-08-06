@@ -8,7 +8,7 @@
 			class="d-flex align-center px-0 pt-0"
 			style="font-size: 16px"
 		>
-			<v-icon class="mr-2">{{icon}}</v-icon>
+			<v-icon v-if="icon" class="mr-2">{{icon}}</v-icon>
 
 			{{ title }}
 
@@ -33,7 +33,7 @@
 
 interface Props {
 	title:  string;
-	icon:  string;
+	icon?:  string;
 	counter?: number;
 	outline?: boolean
 	dense?: boolean

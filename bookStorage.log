@@ -237,3 +237,8 @@
 [2025-08-06T12:42:14.565Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"};
 [2025-08-06T12:43:11.448Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"};
 [2025-08-06T12:45:46.215Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"};
+[2025-08-06T19:03:07.960Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"};
+[2025-08-06T19:11:34.467Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"};
+[2025-08-06T19:19:46.429Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"};
+[2025-08-06T19:20:37.906Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"};
+[2025-08-06T19:25:28.644Z] [INFO]: Server running on port 3000; Database: {"host":"localhost","port":5432,"name":"bookStorage","user":"postgres","password":"gold23"};

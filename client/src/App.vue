@@ -76,7 +76,7 @@ html, body {
 }
 
 .gradient {
-	background: linear-gradient(135deg, #C8FFB4, #F9FFB7) !important;
+	background: linear-gradient(135deg, #9eef83, #FCFF7F) !important;
 }
 
 </style>

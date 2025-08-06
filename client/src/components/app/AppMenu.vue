@@ -64,7 +64,7 @@
 <script setup lang="ts">
 import {Ref, ref, watch} from "vue";
 import {useRoute} from "vue-router";
-import {overviewRoute} from "@/router/routes/OverviewRoute";
+import {dashboardRoute} from "@/router/routes/DashboardRoute";
 import {searchRoute} from "@/router/routes/SearchRoute";
 import {notFoundRoute} from "@/router/routes/NotFoundRoute";
 import {locationsRoute} from "@/router/routes/LocationsRoute";
@@ -87,9 +87,9 @@ const rail: Ref<boolean> = ref(false);
  */
 const items = [
 	{
-		name: "Overview",
+		name: "Dashboard",
 		icon: "mdi-chart-box-outline",
-		path: overviewRoute.getPath()
+		path: dashboardRoute.getPath()
 	},
 	{
 		name: "Library",

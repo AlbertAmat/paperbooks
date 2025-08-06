@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import {searchRoute} from "@/router/routes/SearchRoute";
-import {OverviewRoute, overviewRoute} from "@/router/routes/OverviewRoute";
+import {DashboardRoute, dashboardRoute} from "@/router/routes/DashboardRoute";
 import {bookRoute} from "@/router/routes/BookRoute";
 import {notFoundRoute} from "@/router/routes/NotFoundRoute";
 import {locationsRoute} from "@/router/routes/LocationsRoute";
@@ -11,9 +11,9 @@ import {settingsRoute} from "@/router/routes/SettingsRoute";
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect: OverviewRoute.PATH,
+        redirect: DashboardRoute.PATH,
     },
-    overviewRoute.getRoute(),
+    dashboardRoute.getRoute(),
     searchRoute.getRoute(),
     bookRoute.getRoute(),
     locationsRoute.getRoute(),
