@@ -31,7 +31,7 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
                     WHERE b.user_id = $1
                       AND b.date_created >= NOW() - INTERVAL '30 days'
                     ORDER BY b.date_created DESC
-                        LIMIT 30;
+                        LIMIT 10;
             `,  [userId]),
             pool.query(`SELECT COUNT(*) AS count FROM books WHERE user_id = $1`, [userId]),
             pool.query(`SELECT COUNT(*) AS count FROM books WHERE user_id = $1 AND date_created >= date_trunc('month', CURRENT_DATE)`, [userId]),
