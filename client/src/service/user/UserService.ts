@@ -27,6 +27,13 @@ class UserService {
         await axiosInstance.delete(`${PATH_PREFIX}/user`)
     }
 
+    public async changePassword(currentPassword: string, newPassword: string) {
+        await axiosInstance.post(`${PATH_PREFIX}/user/password`, {
+            currentPassword: currentPassword,
+            newPassword : newPassword,
+        })
+    }
+
     public async update(name: string, email: string, language: string, region: string) {
         await axiosInstance.put(`${PATH_PREFIX}/user`, {
             name: name,

@@ -117,4 +117,65 @@ router.delete("", requireAuth, async (req: Request, res: Response) => {
     }
 });
 
+router.post("/password", requireAuth, async (req: Request, res: Response) => {
+    const { currentPassword, newPassword } = req.body;
+
+    const pool = appService.getDatabasePool();
+    const client = await pool.connect();
+
+    const userId = appService.getSessionUser(req);
+    try {
+        const userQuery = "SELECT password FROM users WHERE id = $1";
+        const userResult = await pool.query(userQuery, [userId]);
+
+        if (userResult.rows.length === 0) {
+            console.log("No user found for:" + currentPassword);
+            return res.status(401).json({message: "Invalid username or password."});
+        }
+
+        const user = userResult.rows[0];
+        const hashedInputPassword = appService.hashPassword(currentPassword);
+
+        if (hashedInputPassword !== user.password) {
+            return res.status(401).json({ message: "Invalid current password." });
+        }
+        console.log("newPassword", newPassword)
+
+        // Password rules
+        const hasMinLength = newPassword.length >= 8;
+        const hasUppercase = /[A-Z]/.test(newPassword);
+        const hasNumber = /[0-9]/.test(newPassword);
+        const hasSpecialChar = /[^A-Za-z0-9]/.test(newPassword);
+
+        const errors: string[] = [];
+        if (!hasMinLength) errors.push("At least 8 characters");
+        if (!hasUppercase) errors.push("At least one uppercase letter");
+        if (!hasNumber) errors.push("At least one number");
+        if (!hasSpecialChar) errors.push("At least one special character");
+
+        if (errors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Password does not meet the requirements",
+                missing: errors
+            });
+        }
+
+        await client.query(
+            `UPDATE users SET password = $1 WHERE id = $2`,
+            [appService.hashPassword(newPassword), userId]
+        );
+
+        return res.json({
+            success: true,
+            message: "Password updated successfully"
+        });
+    } catch (err: any) {
+        console.error("Error executing query", err.stack);
+        res.status(500).send("Internal Server Error");
+    } finally {
+        client.release();
+    }
+});
+
 export default router;

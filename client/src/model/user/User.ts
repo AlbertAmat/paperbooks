@@ -93,16 +93,6 @@ export default class User {
         }
     }
 
-    public async changePassword(currentPassword: string, newPassword: string) {
-        try {
-            await userService.uploadImage(image);
-            const base64 = await this.__toBase64(image);
-            this.m_image.value = base64;
-        } catch (e) {
-            console.error("error while uploading image. ", e)
-        }
-    }
-
     private __toBase64(file: File): Promise<string | null> {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();

@@ -5,7 +5,6 @@
 * app labels + use table
 * snackabars
 * authors view
-* settings
 * batch load of books in a location
 * batch load of books to a customer
 * imporve search. search also isbn code and stookc code

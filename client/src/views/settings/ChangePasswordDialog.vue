@@ -2,6 +2,7 @@
 	<v-dialog
 		v-model="dialog"
 		max-width="500"
+		:close-on-content-click="false"
 	>
 		<template v-slot:activator="{ props: activatorProps }">
 			<v-btn
@@ -16,6 +17,15 @@
 		<template v-slot:default="{ isActive }">
 			<v-card title="Change password">
 				<v-card-text class="pb-2">
+					<v-alert
+						v-if="error != null"
+						type="error"
+						density="compact"
+						class="mb-4"
+					>
+						{{error}}
+					</v-alert>
+
 					<v-text-field
 						v-model="currentPassword"
 						:append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -104,6 +114,8 @@
 <script setup lang="ts">
 import SettingsController from "@/controller/settings/SettingsController";
 import {ref, computed} from "vue";
+import {AxiosError} from "axios";
+import {userService} from "@/service/user/UserService";
 
 interface Props {
 	controller: SettingsController,
@@ -118,6 +130,9 @@ const loading = ref(false);
 const show1 = ref(false);
 const show2 = ref(false);
 const show3 = ref(false);
+
+const error = ref(null);
+
 
 const currentPassword = ref("");
 const newPassword1 = ref("");
@@ -151,7 +166,7 @@ async function changePassword() {
 
 	try {
 		loading.value = true;
-		await props.controller.getUser().changePassword(
+		await userService.changePassword(
 			currentPassword.value,
 			newPassword1.value
 		);
@@ -159,6 +174,9 @@ async function changePassword() {
 		currentPassword.value = "";
 		newPassword1.value = "";
 		newPassword2.value = "";
+	} catch (e: AxiosError) {
+		console.log(e)
+		error.value = e.response.data.message
 	} finally {
 		loading.value = false;
 	}
