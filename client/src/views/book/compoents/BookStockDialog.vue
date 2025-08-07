@@ -39,6 +39,19 @@
 					hide-details
 					class="mt-3"
 				></v-select>
+
+				<v-select
+					v-if="selectedStatus == BookStockStatusEnum.BOOKED"
+					v-model="selectedCustomer"
+					:items="customers"
+					label="Booked by"
+					density="compact"
+					variant="outlined"
+					item-value="value"
+					item-title="text"
+					hide-details
+					class="mt-3"
+				></v-select>
 			</v-card-text>
 
 			<v-divider></v-divider>
@@ -81,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineComponent, Ref, ref} from 'vue'
+import {computed, Ref, ref, watch} from 'vue'
 import Book from "@/model/book/Book";
 import {BookStockStatusEnum} from "@/types/book/IBookStock";
 import BookStock from "@/model/book/BookStock";
@@ -114,10 +127,8 @@ const loading: Ref<boolean> = ref(false);
 
 /**
  * The list of book status
- * Removed booked status, since we are adding a book stock ord updating.
- * Booked status is added bya customer page
  */
-const status = BookStock.BookStockStatus.filter((item) => item.value != BookStockStatusEnum.BOOKED);
+const status = BookStock.BookStockStatus;
 
 const locations = computed(() => {
 	return applicationService.getLocations().map((location) => {
@@ -140,6 +151,20 @@ const selectedLocation: Ref<number | null> = ref(props.stock ? props.stock.getLo
 
 /**
  *
+ */
+const selectedCustomer: Ref<number | null> = ref(props.stock ? props.stock.getCustomerId() : null);
+
+const customers = computed(() => {
+	return applicationService.getCustomers().map((customer) => {
+		return {
+			value: customer.getCustomerId(),
+			text: customer.getCustomerName()
+		}
+	})
+})
+
+/**
+ *
  * @param print
  */
 async function addStock(print: boolean = false) {
@@ -147,9 +172,9 @@ async function addStock(print: boolean = false) {
 		try {
 			loading.value = true;
 			if (props.stock) {
-				await props.stock.update(selectedStatus.value, selectedLocation.value)
+				await props.stock.update(selectedStatus.value, selectedLocation.value, selectedCustomer.value)
 			} else {
-				await props.book.addBookStock(selectedStatus.value, selectedLocation.value, print);
+				await props.book.addBookStock(selectedStatus.value, selectedLocation.value,  selectedCustomer.value, print);
 			}
 			closeDialog();
 		} finally {
@@ -166,4 +191,10 @@ function closeDialog() {
 	selectedLocation.value = null;
 	dialog.value = false;
 }
+
+watch(() => selectedStatus.value, () => {
+	if(selectedStatus.value != BookStockStatusEnum.BOOKED) {
+		selectedCustomer.value = null;
+	}
+})
 </script>

@@ -8,13 +8,16 @@ const router = Router();
 // /app/policy
 //@ts-ignore
 router.get('/policy', requireAuth, async (req: Request, res: Response) => {
+    const userId = appService.getSessionUser(req)
+
     let categories: Record<string, any>[] = [];
     let languages: Record<string, any>[] = [];
     let formats: Record<string, any>[] = [];
     let locations: Record<string, any>[] = [];
+    let customers: Record<string, any>[] = [];
 
     try {
-        categories = await getCategories(req);
+        categories = await getCategories(userId);
     } catch (e) {
         console.error("Error when getting categories. ", e)
     }
@@ -32,12 +35,19 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
     }
 
     try {
-        locations = await getLocations(req);
+        locations = await getLocations(userId);
     } catch (e) {
         console.error("Error when getting locations. ", e)
     }
 
-    const user = await  getUser(req);
+    try {
+        customers = await getCustomers(userId);
+    } catch (e) {
+        console.error("Error when getting customers. ", e)
+    }
+
+
+    const user = await  getUser(userId);
 
     res.status(200).json({
         user:user,
@@ -45,16 +55,36 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
         languages: languages,
         formats: formats,
         locations: locations,
+        customers: customers,
     });
 });
 
 /**
  *
  */
-async function getCategories(req: Request): Promise<Record<string, any>[]> {
+async function getCustomers(userId: number): Promise<Record<string, any>[]> {
     const pool = appService.getDatabasePool();
 
-    const userId = appService.getSessionUser(req);
+    const query = `
+        SELECT id,
+               name
+        FROM customers
+        WHERE user_id = $1
+    `
+    // Use a prepared statement to fetch items by name
+    console.log("executing query: ", query);
+    const result = await pool.query(query, [userId]);
+
+    // Return the result (found rows)
+    return result.rows;
+}
+
+
+/**
+ *
+ */
+async function getCategories(userId: number): Promise<Record<string, any>[]> {
+    const pool = appService.getDatabasePool();
 
     const query = `
         SELECT id,
@@ -111,9 +141,8 @@ async function getFormats(): Promise<Record<string, any>[]> {
 /**
  *
  */
-async function getLocations(req: Request): Promise<Record<string, any>[]> {
+async function getLocations(userId: number): Promise<Record<string, any>[]> {
     const pool = appService.getDatabasePool();
-    const userId = appService.getSessionUser(req)
     const query = `
         SELECT id,
                name,
@@ -132,8 +161,7 @@ async function getLocations(req: Request): Promise<Record<string, any>[]> {
 /**
  *
  */
-async function getUser(req: Request): Promise<Record<string, any>> {
-    const userId = appService.getSessionUser(req);
+async function getUser(userId: number): Promise<Record<string, any>> {
     const pool = appService.getDatabasePool();
 
     const query = `

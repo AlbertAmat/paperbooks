@@ -161,9 +161,9 @@ export default class BookStock {
         }
     }
 
-    public async update(status: BookStockStatusEnum, locationId: number) {
+    public async update(status: BookStockStatusEnum, locationId: number, customerId: number | null) {
         try {
-            const data = await bookService.updateBookStock(this.m_bookId, this.m_id, status, locationId);
+            const data = await bookService.updateBookStock(this.m_bookId, this.m_id, status, locationId, customerId);
             this.m_status.value = data.status;
             this.m_locationId.value = data.location_id;
             this.m_locationName = data.location_name;

@@ -11,9 +11,7 @@
 * batch load of books to a customer
 * handle axios errros
 * 
-*  book stock booked: use column customer_id
 * authors view
-* dashboard - grapgh + quick actions (unbook, add books)
 
 ## backlog
 * multiple users app so ->  book, authors, etc must have the user or a workspace

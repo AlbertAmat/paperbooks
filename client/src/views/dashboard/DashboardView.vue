@@ -5,7 +5,7 @@
 			class="mt-3"
 			style="height: 100%"
 		>
-			<v-col cols="9" class="pl-0 pr-2">
+			<v-col cols="9" class="pl-0 pr-0">
 				<v-row no-gutters class="pa-0">
 					<v-col cols="4"  class="px-1 pb-1">
 						<dashboard-card title="Overview" class="gradient">
@@ -42,10 +42,9 @@
 						</dashboard-card>
 					</v-col>
 				</v-row>
-
 			</v-col>
 
-			<v-col class="pl-2 pr-0">
+			<v-col class="pl-1 pr-0">
 				<dashboard-card title="Last books" style="height: 100%; max-height: 100%">
 					<v-list slim style="padding: 0;">
 						<v-list-item

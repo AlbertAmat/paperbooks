@@ -521,6 +521,7 @@ router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
 router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
     const bookId = req.params.id;
     const status = req.body.status;
+    const customerId = req.body.customer_id;
     const locationId = req.body.location_id;
     if (!bookId) {
         return res.status(400).send('No book ID provided');
@@ -538,7 +539,7 @@ router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
 
     try {
         const existLocation = await pool.query(
-            'SELECT id locations WHERE id = $1 AND user_id =$2',
+            'SELECT id FROM locations WHERE id = $1 AND user_id =$2',
             [locationId, userId]
         );
         if(existLocation.rowCount != 1) {
@@ -551,24 +552,30 @@ router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
         const code = await generateBookStockCode();
 
         const insertStock = await client.query(
-            "INSERT INTO book_stocks (book_id, code, status, location_id, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-            [bookId, code, status, locationId, userId]
+            "INSERT INTO book_stocks (book_id, code, status, location_id, customer_id, user_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+            [bookId, code, status, locationId, customerId, userId]
         );
 
         await client.query("COMMIT");
 
         // fetch new data
-        const result = await pool.query(`
-            SELECT book_stocks.id,
-                   book_stocks.code,
-                   book_stocks.status,
-                   book_stocks.location_id,
-                   locations.name as location_name
-            FROM book_stocks
-            LEFT JOIN locations ON book_stocks.location_id = locations.id
-            WHERE book_stocks.id = ${insertStock.rows[0].id}
-            AND book_stocks.user_id = $1
-        `, [userId])
+        const result = await pool.query(
+            `SELECT book_stocks.id, 
+                    book_stocks.code, 
+                    book_stocks.status, 
+                    book_stocks.location_id,
+                    locations.name as location_name,
+                    customers.id as customer_id,
+                    customers.name as customer_name
+              FROM book_stocks
+                       LEFT JOIN customers ON book_stocks.customer_id = customers.id
+                       LEFT JOIN locations ON book_stocks.location_id = locations.id
+             WHERE book_stocks.id = $1
+               AND book_stocks.user_id = $2
+             `,
+            [insertStock.rows[0].id, userId]
+        );
+
 
         res.status(200).json(result.rows[0]);
     } catch (error) {
@@ -628,7 +635,8 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
     // Body params
     const {
         status,
-        location_id
+        location_id,
+        customer_id
     } = req.body;
 
     const pool = appService.getDatabasePool();
@@ -637,7 +645,7 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
         console.log(`Updating book stock ${stockId}`);
 
         const existLocation = await pool.query(
-            'SELECT id locations WHERE id = $1 AND user_id =$2',
+            'SELECT id FROM locations WHERE id = $1 AND user_id = $2',
             [location_id, userId]
         );
         if(existLocation.rowCount != 1) {
@@ -645,8 +653,8 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
         }
 
         const queryResult = await pool.query(
-            'UPDATE book_stocks SET status = $1, location_id = $2 WHERE book_id = $3 AND id = $4 AND user_id = $5',
-            [status, location_id, bookId, stockId, userId]
+            'UPDATE book_stocks SET status = $1, location_id = $2, customer_id = $3 WHERE book_id = $4 AND id = $5 AND user_id = $6',
+            [status, location_id, customer_id, bookId, stockId, userId]
         );
 
         if(queryResult.rowCount != 1) {

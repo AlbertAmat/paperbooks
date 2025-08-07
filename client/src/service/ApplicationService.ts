@@ -7,6 +7,7 @@ import Location from "@/model/location/Location";
 import Format from "@/model/format/Format";
 import axiosInstance from "@/plugins/axiosInstance";
 import User from "@/model/user/User";
+import Customer from "@/model/customer/Customer";
 
 export class ApplicationService {
 
@@ -27,6 +28,12 @@ export class ApplicationService {
      * @private
      */
     private m_user!: User;
+
+    /**
+     *
+     * @private
+     */
+    private m_customer: Customer[];
 
     /**
      *
@@ -54,6 +61,7 @@ export class ApplicationService {
 
     public constructor() {
         this.m_error = null;
+        this.m_customer = [];
         this.m_languages = [];
         this.m_locations = [];
         this.m_categories = [];
@@ -66,6 +74,7 @@ export class ApplicationService {
             const response = await axiosInstance.get(`${PATH_PREFIX}/app/policy`);
             const data = response.data as IPolicyResponse;
             this.m_user = new User(data.user);
+            this.m_customer = data.customers.map((customer) => new Customer(customer));
             this.m_categories = data.categories.map((category) => new Category(category));
             this.m_languages = data.languages.map((lang) => new Language(lang));
             this.m_formats = data.formats.map((format) => new Format(format));
@@ -74,7 +83,7 @@ export class ApplicationService {
             const error = e as Error;
             console.error("Error while fetching application policy.", e);
             this.m_error = error;
-        }  finally {
+        } finally {
             this.m_loading.value = false;
         }
     }
@@ -110,6 +119,13 @@ export class ApplicationService {
     /**
      *
      */
+    public getCustomers(): Customer[] {
+        return this.m_customer;
+    }
+
+    /**
+     *
+     */
     public getCategories(): Category[] {
         return this.m_categories;
     }
@@ -119,7 +135,7 @@ export class ApplicationService {
      * @param id
      */
     public getCategory(id: number | null): Category | undefined {
-        if(!id) {
+        if (!id) {
             return undefined;
         }
         return this.m_categories.find((category) => category.getCategoryId() === id);
@@ -144,7 +160,7 @@ export class ApplicationService {
      * @param code
      */
     public getLanguage(code: string | null): Language | undefined {
-        if(!code) {
+        if (!code) {
             return undefined;
         }
         return this.m_languages.find((language) => language.getLanguageCode() === code);

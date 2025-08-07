@@ -227,9 +227,9 @@ export default class Book extends BookItem {
      * @param locationId
      * @param print
      */
-    public async addBookStock(status: BookStockStatusEnum, locationId: number, print: boolean) {
+    public async addBookStock(status: BookStockStatusEnum, locationId: number, customerId: number | null, print: boolean) {
         try {
-            const data = await bookService.addBookStock(this.m_id, locationId, status);
+            const data = await bookService.addBookStock(this.m_id, locationId, status, customerId);
             const stock = new BookStock(this.m_id, data)
             this.m_stocks.value = [...this.m_stocks.value, stock];
 

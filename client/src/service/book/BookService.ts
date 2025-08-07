@@ -63,10 +63,11 @@ export class BookService {
      * @param status
      * @param print
      */
-    public async addBookStock(id: number, locationId: number, status: BookStockStatusEnum): Promise<IBookStock> {
+    public async addBookStock(id: number, locationId: number, status: BookStockStatusEnum, customerId: number |null): Promise<IBookStock> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/${id}/stock`, {
             status: status,
-            location_id: locationId
+            location_id: locationId,
+            customer_id: customerId,
         });
 
         return data;
@@ -90,10 +91,11 @@ export class BookService {
      * @param stockStatus
      * @param stockLocationId
      */
-    public async updateBookStock(id: number, stockId: number, stockStatus: BookStockStatusEnum, stockLocationId: number): Promise<IBookStock> {
+    public async updateBookStock(id: number, stockId: number, stockStatus: BookStockStatusEnum, stockLocationId: number, customerId: number | null): Promise<IBookStock> {
         const {data} = await axiosInstance.put(`${PATH_PREFIX}/book/${id}/stock/${stockId}`, {
             status: stockStatus,
-            location_id: stockLocationId
+            location_id: stockLocationId,
+            customer_id: customerId
         });
 
         return data;
