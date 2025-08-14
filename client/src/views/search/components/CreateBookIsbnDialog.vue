@@ -46,24 +46,30 @@
 					including title, author, description, and more, and seamlessly add it to your collection.
 				</v-card-subtitle>
 
-				<v-text-field
-					v-model="isbnCode"
-					:disabled="loadingIsbnCode.length != 0"
-					:rules="[isbnValidationRule]"
-					label="ISBN code"
-					autofocus
-					style="width: 250px; flex: none"
-					@keydown.enter="handleEnter()"
-				></v-text-field>
+				<div style="display: flex; align-items: center">
+					<v-text-field
+						v-model="isbnCode"
+						:disabled="loadingIsbnCode.length != 0"
+						:rules="[isbnValidationRule]"
+						label="ISBN code"
+						variant="outlined"
+						hide-details
+						density="compact"
+						autofocus
+						style="width: 250px; flex: none"
+						class="mt-3"
+						@keydown.enter="handleEnter()"
+					></v-text-field>
 
-				<v-checkbox
-					v-model="multiple"
-					:disabled="loadingIsbnCode.length != 0"
-					hide-details
-					dense
-					label="Multiple upload"
-					class="ml-0"
-				></v-checkbox>
+					<v-checkbox
+						v-model="multiple"
+						:disabled="loadingIsbnCode.length != 0"
+						hide-details
+						density="compact"
+						label="Multiple upload"
+						class="ml-0"
+					></v-checkbox>
+				</div>
 
 				<v-list
 					v-if="multiple"
