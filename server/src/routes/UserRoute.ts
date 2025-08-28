@@ -6,7 +6,6 @@ import multer from "multer";
 const router = Router();
 
 // Multer setup - store in memory
-// TODO: WE DONT NEED MULTER SINCE WE STORE IMAGE IN THE DATABASE, WE ONLY NEED THE FILTER
 const storage = multer.memoryStorage();
 const upload = multer({
     storage,
@@ -130,17 +129,15 @@ router.post("/password", requireAuth, async (req: Request, res: Response) => {
         const userResult = await pool.query(userQuery, [userId]);
 
         if (userResult.rows.length === 0) {
-            console.log("No user found for:" + currentPassword);
             return res.status(401).json({message: "Invalid username or password."});
         }
 
         const user = userResult.rows[0];
-        const hashedInputPassword = appService.hashPassword(currentPassword);
 
-        if (hashedInputPassword !== user.password) {
+        const comparePassword = await appService.comparePassword(currentPassword, user.password);
+        if (!comparePassword) {
             return res.status(401).json({ message: "Invalid current password." });
         }
-        console.log("newPassword", newPassword)
 
         // Password rules
         const hasMinLength = newPassword.length >= 8;
@@ -172,7 +169,6 @@ router.post("/password", requireAuth, async (req: Request, res: Response) => {
             message: "Password updated successfully"
         });
     } catch (err: any) {
-        console.error("Error executing query", err.stack);
         res.status(500).send("Internal Server Error");
     } finally {
         client.release();

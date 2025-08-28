@@ -1,16 +1,15 @@
 # Paper book
 
 ## TODO
-* improve password crypto
+* login popup 401
 * app labels + use table
+* handle axios errros
 * snackabars
 * allow to change book image
 * batch load of books in a location
 * batch load of books to a customer
-* handle axios errros
 
 ## backlog
-* multiple users app so ->  book, authors, etc must have the user or a workspace
 * use file logger
 * register: create register, recapchat + verification
 

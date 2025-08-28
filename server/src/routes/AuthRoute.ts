@@ -2,6 +2,7 @@ import express, {Request, Response} from "express";
 import {appService} from "../AppService";
 import jwt from "jsonwebtoken";
 import path from "path";
+import {requireAuth} from "../middlewares/AuthMiddleware";
 
 const router = express.Router();
 
@@ -37,7 +38,6 @@ router.get("/", (req: Request, res: Response) => {
 // Serve the login page
 //@ts-ignore
 router.get("/login", (req: Request, res: Response) => {
-    console.log("render login page")
     //@ts-ignore
     if (req.cookies.token) {
         return res.redirect("/app");
@@ -65,9 +65,9 @@ router.post("/login", async (req: Request, res: Response) => {
         }
 
         const user = userResult.rows[0];
-        const hashedInputPassword = appService.hashPassword(password);
 
-        if (hashedInputPassword !== user.password) {
+        const comparePassword = await appService.comparePassword(password, user.password);
+        if (!comparePassword) {
             console.log("invalid password for user:" + username);
             return res.status(401).json({ message: "Invalid username or password." });
         }
@@ -107,17 +107,6 @@ router.post("/login", async (req: Request, res: Response) => {
 router.get("/logout", (req: Request, res: Response) => {
     res.clearCookie("token");
     return res.redirect("/login"); // Redirect to login;
-});
-
-// Session check route
-//@ts-ignore
-router.get("/session", (req: Request, res: Response) => {
-    //@ts-ignore
-    if (req.session.user) {
-        //@ts-ignore
-        return res.json({user: req.session.user});
-    }
-    return res.status(401).json({message: "Not logged in"});
 });
 
 export default router;

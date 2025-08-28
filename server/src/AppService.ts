@@ -6,11 +6,13 @@ import pg from 'pg';
 import {routes} from "./routes/Routes";
 import {Logger} from "./utils/Logger";
 import AuthRoute from "./routes/AuthRoute";
-import crypto from "crypto";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import bcrypt from "bcrypt";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 export class AppService {
     /**
@@ -59,12 +61,6 @@ export class AppService {
      *
      * @private
      */
-    private readonly m_shaSecret: string;
-
-    /**
-     *
-     * @private
-     */
     private readonly m_jwtSecret: string;
 
     /**
@@ -72,6 +68,12 @@ export class AppService {
      * @private
      */
     private readonly m_sessionTime: number;
+
+    /**
+     *
+     * @private
+     */
+    private readonly m_allowDevAuth: boolean;
 
     public constructor() {
         dotenv.config();
@@ -83,10 +85,20 @@ export class AppService {
         this.m_app.use(bodyParser.urlencoded({extended: true}));
         this.m_app.use(cookieParser());
 
+        // secure HTTP headers
+        this.m_app.use(helmet());
+
+        // Rate limiting against brute force/DDoS
+        const limiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 min
+            max: 100, // limit per IP
+        });
+        this.m_app.use(limiter);
+
         // Set cors protection
         this.m_app.use(cors({
             origin: String(process.env.FRONT_END_URL), // your frontend URL
-            credentials: true
+            credentials: true,
         }));
 
         this.m_databaseConf = {
@@ -108,9 +120,9 @@ export class AppService {
             connectionTimeoutMillis: 2000,
         });
 
-        this.m_shaSecret    = String(process.env.SHA_SECRET);
         this.m_jwtSecret    = String(process.env.JWT_SECRET);
         this.m_sessionTime  = Number(process.env.SESSION_TIME);
+        this.m_allowDevAuth = Boolean(process.env.ALLOW_DEV_AUTH);
         this.m_server       = null;
         this.m_logger       = new Logger(String(process.env.LOGGER_PATH));
     }
@@ -215,6 +227,10 @@ export class AppService {
         return this.m_logger;
     }
 
+    public allowDevAuth(): boolean {
+        return this.m_allowDevAuth;
+    }
+
     /**
      *
      * @param request
@@ -229,15 +245,20 @@ export class AppService {
         try {
             decoded = jwt.verify(token, this.getJwtSecret()) as { user_id: number; exp: number };
         } catch (err) {
-            throw err;
+            throw new Error("Error while getting session user");
         }
 
         return decoded.user_id;
     }
 
     // TODO: MOVE TO bcrypt
-    public hashPassword(plainPassword: string): string {
-        return crypto.createHmac("sha256", this.m_shaSecret).update(plainPassword).digest("hex");
+    public hashPassword(plainPassword: string): Promise<string> {
+        const saltRounds = 12; // good balance between security and speed
+        return bcrypt.hash(plainPassword, saltRounds);
+    }
+
+    public async comparePassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+        return bcrypt.compare(plainPassword, hashedPassword);
     }
 }
 

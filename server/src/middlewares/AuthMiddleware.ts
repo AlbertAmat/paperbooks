@@ -1,15 +1,16 @@
-import { Request, Response, NextFunction } from "express";
+import {Request, Response, NextFunction} from "express";
 import jwt from "jsonwebtoken";
 import {appService} from "../AppService";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-    // development
-    if (process.env.NODE_ENV === "development") {
+    // only development
+    if (appService.allowDevAuth()) {
+        appService.getLogger().info("Serving DEVELOPMENT token")
         // Fake decoded token for dev
         req.cookies.token = jwt.sign(
-            { user_id: 1 }, // fake user ID
+            {user_id: 1}, // fake user ID
             appService.getJwtSecret(),
-            { expiresIn: Math.floor(appService.getSessionTime() / 1000) }
+            {expiresIn: Math.floor(appService.getSessionTime() / 1000)}
         );
     }
 
@@ -20,9 +21,13 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
     let decoded;
     try {
-        decoded = jwt.verify(token, appService.getJwtSecret()) as { user_id: number; exp: number };
+        decoded = jwt.verify(token, appService.getJwtSecret(), {
+            algorithms: ["HS256"],
+            audience: "paperbooks",
+            issuer: "paperbooks.xyz"
+        }) as { user_id: number; exp: number };
     } catch (err) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({message: "Unauthorized"});
     }
 
     const pool = appService.getDatabasePool();
@@ -33,7 +38,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     });
 
     if (!result.rowCount) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({message: "Unauthorized"});
     }
 
     // Check if token is near expiry (e.g., less than 5 minutes left)
@@ -43,9 +48,13 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     if (timeLeft < 5 * 60) {
         // Issue new token with extended expiration
         const newToken = jwt.sign(
-            { user_id: decoded.user_id },
+            {user_id: decoded.user_id},
             appService.getJwtSecret(),
-            { expiresIn: Math.floor(appService.getSessionTime() / 1000)}
+            {
+                expiresIn: Math.floor(appService.getSessionTime() / 1000),
+                audience: "paperbooks",
+                issuer: "paperbooks.xyz"
+            }
         );
 
         res.cookie("token", newToken, {
