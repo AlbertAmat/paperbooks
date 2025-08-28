@@ -27,7 +27,7 @@ export default abstract class ABook {
      *
      * @private
      */
-    protected readonly m_imageUrl: string | null;
+    protected m_imageUrl: Ref<string | null>;
 
     /**
      *
@@ -47,11 +47,11 @@ export default abstract class ABook {
      */
     protected m_languageCode: string | null;
 
-    public constructor(data: IBookItem) {
+    protected constructor(data: IBookItem) {
         this.m_id = data.id;
         this.m_name = data.name;
         this.m_authors.value = data.authors.map((author) => new BookAuthor(author));
-        this.m_imageUrl = data.image_url;
+        this.m_imageUrl = ref(data.image_url);
         this.m_isbn = data.isbn;
         this.m_categoryId = data.category_id;
         this.m_languageCode = data.language_code;
@@ -104,7 +104,7 @@ export default abstract class ABook {
      *
      */
     public getImageUrl(): string | null {
-        return this.m_imageUrl;
+        return this.m_imageUrl.value;
     }
 
     /**

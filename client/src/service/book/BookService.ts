@@ -84,6 +84,16 @@ export class BookService {
         return data;
     }
 
+    public async changeImage(
+        id: number,
+        image: File,
+    ): Promise<void> {
+        const formData = new FormData();
+        formData.set("image", image);
+
+        await axiosInstance.post(`${PATH_PREFIX}/book/${id}/image`, formData);
+    }
+
     /**
      *
      * @param isbn

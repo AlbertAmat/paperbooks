@@ -275,7 +275,7 @@ export default class Book extends BookItem {
             await bookService.updateBook(
                 this.m_id,
                 this.m_name,
-                this.m_imageUrl,
+                this.m_imageUrl.value,
                 this.m_isbn,
                 this.m_categoryId,
                 this.m_languageCode,
@@ -286,6 +286,37 @@ export default class Book extends BookItem {
                 this.m_pages,
                 this.m_format ? this.m_format.getFormatId() : null
             )
+            // TODO: snackbar message
+        } catch (e) {
+            console.error("Error while updating book.", e)
+        }
+    }
+
+    /**
+     *
+     */
+    public async changeImage(image: File) {
+        try {
+            await bookService.changeImage(this.m_id, image);
+
+            function fileToBase64(file: File): Promise<string> {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+
+                    reader.onload = () => {
+                        // The result includes the "data:mime/type;base64," prefix
+                        resolve(reader.result as string);
+                    };
+
+                    reader.onerror = (error) => {
+                        reject(error);
+                    };
+
+                    reader.readAsDataURL(file); // Reads the file and encodes to Base64
+                });
+            }
+
+            this.m_imageUrl.value = await fileToBase64(image);
             // TODO: snackbar message
         } catch (e) {
             console.error("Error while updating book.", e)

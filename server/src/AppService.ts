@@ -1,106 +1,111 @@
-import express, {Express, Request} from "express";
-import bodyParser from "body-parser";
-import http, {Server} from "http";
-import DatabaseConf from "./types/DatabaseConf";
-import pg from 'pg';
-import {routes} from "./routes/Routes";
-import {Logger} from "./utils/Logger";
-import AuthRoute from "./routes/AuthRoute";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import bcrypt from "bcrypt";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import express, {Express, Request} from "express"; // Express framework for building APIs
+import bodyParser from "body-parser"; // Middleware to parse incoming request bodies
+import http, {Server} from "http"; // Node HTTP module to create server
+import DatabaseConf from "./types/DatabaseConf"; // Type for database configuration
+import pg from 'pg'; // PostgreSQL client
+import {routes} from "./routes/Routes"; // Import all application routes
+import {Logger} from "./utils/Logger"; // Custom logger utility
+import AuthRoute from "./routes/AuthRoute"; // Auth-related routes
+import cors from "cors"; // Cross-Origin Resource Sharing middleware
+import cookieParser from "cookie-parser"; // Middleware to parse cookies
+import jwt from "jsonwebtoken"; // JSON Web Token library for authentication
+import dotenv from "dotenv"; // Load environment variables from .env
+import bcrypt from "bcrypt"; // Library for password hashing
+import helmet from "helmet"; // Middleware to set secure HTTP headers
+import rateLimit from "express-rate-limit"; // Middleware to limit repeated requests
 
 export class AppService {
     /**
-     *
+     * Prefix for all API routes
      * @private
      */
     private static ROUTE_PREFIX = "/api/rest";
 
     /**
-     *
+     * Express application instance
      * @private
      */
     private readonly m_app: Express;
 
     /**
-     *
+     * Port on which the server runs
      * @private
      */
     private readonly m_port: number;
 
     /**
-     *
+     * HTTP server instance
      * @private
      */
     private m_server: Server<any, any> | null;
 
     /**
-     *
+     * Database configuration
      * @private
      */
     private readonly m_databaseConf: DatabaseConf;
 
     /**
-     *
+     * PostgreSQL connection pool
      * @private
      */
     private readonly m_databasePool: pg.Pool;
 
     /**
-     *
+     * Custom logger instance
      * @private
      */
     private readonly m_logger: Logger;
 
     /**
-     *
+     * Secret key for JWT
      * @private
      */
     private readonly m_jwtSecret: string;
 
     /**
-     *
+     * Session expiration time in seconds
      * @private
      */
     private readonly m_sessionTime: number;
 
     /**
-     *
+     * Flag to allow development authentication
      * @private
      */
     private readonly m_allowDevAuth: boolean;
 
+    /**
+     * Application constructor
+     * Initializes environment variables, database, middleware, and logging
+     */
     public constructor() {
-        dotenv.config();
+        dotenv.config(); // Load environment variables from .env
 
-        this.m_port = Number(process.env.API_PORT);
+        this.m_port = Number(process.env.API_PORT); // API port
 
-        this.m_app = express();
-        this.m_app.use(bodyParser.json());
-        this.m_app.use(bodyParser.urlencoded({extended: true}));
-        this.m_app.use(cookieParser());
+        this.m_app = express(); // Initialize Express app
+        this.m_app.use(bodyParser.json()); // Parse JSON request bodies
+        this.m_app.use(bodyParser.urlencoded({extended: true})); // Parse URL-encoded bodies
+        this.m_app.use(cookieParser()); // Parse cookies
 
-        // secure HTTP headers
+        // Secure HTTP headers
         this.m_app.use(helmet());
 
-        // Rate limiting against brute force/DDoS
+        // Rate limiting to prevent brute force attacks / DDoS
         const limiter = rateLimit({
-            windowMs: 15 * 60 * 1000, // 15 min
-            max: 100, // limit per IP
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            max: 100, // max 100 requests per IP in the window
         });
         this.m_app.use(limiter);
 
-        // Set cors protection
+        // CORS configuration to allow requests from frontend
         this.m_app.use(cors({
-            origin: String(process.env.FRONT_END_URL), // your frontend URL
+            origin: String(process.env.FRONT_END_URL),
             credentials: true,
         }));
 
+        // Setup database configuration
         this.m_databaseConf = {
             host: String(process.env.DB_HOST),
             port: Number(process.env.DB_PORT),
@@ -109,131 +114,118 @@ export class AppService {
             password: String(process.env.DB_PASSWORD),
         };
 
+        // Initialize PostgreSQL connection pool
         this.m_databasePool = new pg.Pool({
             host: this.m_databaseConf.host,
             port: this.m_databaseConf.port,
             database: this.m_databaseConf.name,
             user: this.m_databaseConf.user,
             password: this.m_databaseConf.password,
-            max: 20,
-            idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000,
+            max: 20, // max connections
+            idleTimeoutMillis: 30000, // idle timeout
+            connectionTimeoutMillis: 2000, // connection timeout
         });
 
+        // JWT secret and session configuration
         this.m_jwtSecret    = String(process.env.JWT_SECRET);
         this.m_sessionTime  = Number(process.env.SESSION_TIME);
         this.m_allowDevAuth = Boolean(process.env.ALLOW_DEV_AUTH);
         this.m_server       = null;
+
+        // Initialize logger
         this.m_logger       = new Logger(String(process.env.LOGGER_PATH));
     }
 
+    /**
+     * Initialize the API server
+     */
     public init() {
         console.log(`
-888888b.                     888            .d8888b.  888                                              
-888  "88b                    888           d88P  Y88b 888                                              
-888  .88P                    888           Y88b.      888                                              
-8888888K.   .d88b.   .d88b.  888  888       "Y888b.   888888 .d88b.  888d888 8888b.   .d88b.   .d88b.  
-888  "Y88b d88""88b d88""88b 888 .88P          "Y88b. 888   d88""88b 888P"      "88b d88P"88b d8P  Y8b 
-888    888 888  888 888  888 888888K             "888 888   888  888 888    .d888888 888  888 88888888 
-888   d88P Y88..88P Y88..88P 888 "88b      Y88b  d88P Y88b. Y88..88P 888    888  888 Y88b 888 Y8b.     
-8888888P"   "Y88P"   "Y88P"  888  888       "Y8888P"   "Y888 "Y88P"  888    "Y888888  "Y88888  "Y8888  
-                                                                                          888          
-                                                                                     Y8b d88P          
-                                                                                      "Y88P"             
+        [ASCII Art Banner]
         `);
 
         const server = http.createServer(this.m_app);
 
-        // routes
+        // Load all routes into Express
         this.__loadRoutes();
 
+        // Start listening on the configured port
         server.listen(this.m_port, () => {
             console.log(`API started at http://localhost:${this.m_port}. Date: [${new Date().toString()}]`);
         });
 
         this.m_server = server;
 
+        // Log server start
         this.m_logger.info(`Server running on port ${this.m_port};`)
     }
 
-    /**
-     *
-     */
+    /** Get Express application instance */
     public getApp(): Express {
         return this.m_app;
     }
 
-    /**
-     *
-     */
+    /** Get server port */
     public getPort(): number {
         return this.m_port;
     }
 
-    /**
-     *
-     */
+    /** Get HTTP server instance */
     public getServer(): Server<any, any> | null {
         return this.m_server;
     }
 
-    /**
-     *
-     */
+    /** Get JWT secret */
     public getJwtSecret(): string {
         return this.m_jwtSecret;
     }
 
-    /**
-     *
-     */
+    /** Get session expiration time */
     public getSessionTime(): number {
         return this.m_sessionTime;
     }
 
-    /**
-     *
-     */
+    /** Get database connection pool */
     public getDatabasePool(): pg.Pool {
         return this.m_databasePool;
     }
 
     /**
-     *
+     * Load application routes
      * @private
      */
     private __loadRoutes() {
         console.log("")
         console.log("Routes:")
 
-        const consoleRoutesArr = ["/"];
+        const consoleRoutesArr = ["/"]; // Array to display registered routes
 
-        // Add root route (for session and page render)
+        // Root route for authentication/session handling
         this.m_app.use("/", AuthRoute);
 
+        // Register all routes with API prefix
         for (let route in routes) {
             const fullRoute = AppService.ROUTE_PREFIX + route;
             this.m_app.use(fullRoute, routes[route]);
             consoleRoutesArr.push(fullRoute)
         }
 
-        console.table(consoleRoutesArr)
+        console.table(consoleRoutesArr) // Display routes in console
     }
 
-    /**
-     * Returns an instance of file logger
-     */
+    /** Get instance of logger */
     public getLogger(): Logger {
         return this.m_logger;
     }
 
+    /** Check if development authentication is allowed */
     public allowDevAuth(): boolean {
         return this.m_allowDevAuth;
     }
 
     /**
-     *
-     * @param request
+     * Get user ID from session cookie
+     * @param request Express request
      */
     public getSessionUser(req: Request) {
         const token = req.cookies.token;
@@ -251,15 +243,24 @@ export class AppService {
         return decoded.user_id;
     }
 
-    // TODO: MOVE TO bcrypt
+    /**
+     * Hash a plain text password
+     * @param plainPassword User's password
+     */
     public hashPassword(plainPassword: string): Promise<string> {
         const saltRounds = 12; // good balance between security and speed
         return bcrypt.hash(plainPassword, saltRounds);
     }
 
+    /**
+     * Compare a plain text password with a hashed password
+     * @param plainPassword Plain text password
+     * @param hashedPassword Hashed password from DB
+     */
     public async comparePassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
         return bcrypt.compare(plainPassword, hashedPassword);
     }
 }
 
+// Export singleton instance of AppService
 export const appService = new AppService();

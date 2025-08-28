@@ -5,7 +5,6 @@
 * app labels + use table
 * handle axios errros
 * snackabars
-* allow to change book image
 * batch load of books in a location
 * batch load of books to a customer
 

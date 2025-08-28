@@ -12,7 +12,7 @@ const router: Router = Router();
 const storage = multer.memoryStorage();
 const upload = multer({
     storage,
-    limits: {fileSize: 2 * 1024 * 1024}, // 2MB
+    limits: {fileSize: 4 * 1024 * 1024}, // 4MB
     fileFilter: (req: Request, file: Express.Multer.File, cb: (error: any, acceptFile: boolean) => void) => {
         // @ts-ignore
         if (file.mimetype !== "image/png" && file.mimetype !== "image/jpeg") {
@@ -400,6 +400,35 @@ router.post('', requireAuth, upload.single("image"), async (req: Request, res: R
         );
 
         res.status(200).json(insertBook.rows[0].id);
+    } catch (error) {
+        // Rollback on error
+        console.error("Transaction error:", error);
+        res.status(500).send("Error adding book");
+    }
+});
+
+/**
+ * Change book image
+ */
+router.post('/:id/image', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    let imageUrl = "";
+
+    if (req.file) {
+        const base64 = req.file.buffer.toString("base64");
+        imageUrl = `data:${req.file.mimetype};base64,${base64}`;
+    }
+
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        const updatedBook = await pool.query(
+            "UPDATE books SET image_url = $1 WHERE id = $2 AND user_id = $3",
+            [imageUrl, id, userId]
+        );
+
+        res.status(200).json(updatedBook.rowCount);
     } catch (error) {
         // Rollback on error
         console.error("Transaction error:", error);

@@ -178,13 +178,7 @@
 					</v-col>
 
 					<v-col cols="12" md="3" lg="3" class="px-1">
-						<v-img
-							:src="showFallbackImage ? notFound : model.getBook().getImageUrl()"
-							@error="showFallbackImage = true"
-							contain
-							style="border-radius: 8px; object-fit: cover"
-							max-height="360px"
-						/>
+						<book-image :book="model.getBook()"/>
 					</v-col>
 				</v-row>
 
@@ -200,7 +194,6 @@
 <script setup lang="ts">
 import PageComponent from "@/views/PageComponent.vue";
 import BookController from "@/controller/book/BookController";
-import notFound from "@/assets/images/notFound.jpg";
 import CardComponent from "@/components/card/CardComponent.vue";
 import BookStocks from "@/views/book/compoents/BookStocks.vue";
 import {computed, ref, Ref, shallowRef, ShallowRef} from "vue";
@@ -208,10 +201,10 @@ import BookAuthor from "@/model/author/BookAuthor";
 import {applicationService} from "@/service/ApplicationService";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import {authorsService} from "@/service/author/AuthorsService";
+import BookImage from "@/views/book/compoents/BookImage.vue";
 
 const model = new BookController();
 
-const showFallbackImage: Ref<boolean> = ref(false);
 
 /**
  *

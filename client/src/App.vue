@@ -79,4 +79,8 @@ html, body {
 	background: linear-gradient(135deg, #9eef83, #FCFF7F) !important;
 }
 
+.gradient-transparent {
+	background: linear-gradient(135deg, rgba(158, 239, 131, 0.9), rgba(252, 255, 127, 0.9)) !important;
+}
+
 </style>
