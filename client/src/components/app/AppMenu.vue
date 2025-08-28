@@ -69,6 +69,7 @@ import {searchRoute} from "@/router/routes/SearchRoute";
 import {locationsRoute} from "@/router/routes/LocationsRoute";
 import {categoriesRoute} from "@/router/routes/CategoriesRoute";
 import {customersRoute} from "@/router/routes/CustomersRoute";
+import {authorsRoute} from "@/router/routes/AuthorsRoute";
 
 const route = useRoute()
 
@@ -110,6 +111,11 @@ const items = [
 		name: "Customers",
 		icon: "mdi-account-school-outline",
 		path: customersRoute.getPath()
+	},
+	{
+		name: "Authors",
+		icon: "mdi-account-tie",
+		path: authorsRoute.getPath()
 	}
 ]
 

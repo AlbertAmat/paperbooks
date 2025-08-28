@@ -7,6 +7,7 @@ import {locationsRoute} from "@/router/routes/LocationsRoute";
 import {categoriesRoute} from "@/router/routes/CategoriesRoute";
 import {settingsRoute} from "@/router/routes/SettingsRoute";
 import {customersRoute} from "@/router/routes/CustomersRoute";
+import {authorsRoute} from "@/router/routes/AuthorsRoute";
 
 // Define your routes
 const routes: Array<RouteRecordRaw> = [
@@ -20,6 +21,7 @@ const routes: Array<RouteRecordRaw> = [
     locationsRoute.getRoute(),
     categoriesRoute.getRoute(),
     customersRoute.getRoute(),
+    authorsRoute.getRoute(),
     settingsRoute.getRoute(),
 
     // Not found

@@ -204,10 +204,10 @@ import notFound from "@/assets/images/notFound.jpg";
 import CardComponent from "@/components/card/CardComponent.vue";
 import BookStocks from "@/views/book/compoents/BookStocks.vue";
 import {computed, ref, Ref, shallowRef, ShallowRef} from "vue";
-import BookAuthor from "@/model/book/BookAuthor";
+import BookAuthor from "@/model/author/BookAuthor";
 import {applicationService} from "@/service/ApplicationService";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
-import {authorService} from "@/service/author/AuthorService";
+import {authorsService} from "@/service/author/AuthorsService";
 
 const model = new BookController();
 
@@ -233,7 +233,7 @@ const loadingDelete: Ref<boolean> = ref(false);
  */
 const loadingAuthors: Ref<boolean> = ref(false);
 
-const loadedAuthors: ShallowRef<BookAuthor[]> = shallowRef(model.getBook().getAuthors())
+const loadedAuthors: ShallowRef<BookAuthor[]> = shallowRef(model.getBook().getAuthors());
 
 /**
  *
@@ -437,7 +437,7 @@ async function searchAuthors(prompt: string) {
 
 	try {
 		loadingAuthors.value = true;
-		const data = await authorService.searchAuthors(prompt)
+		const data = await authorsService.searchAuthors(prompt)
 		if (data) {
 			data.forEach((author) => {
 				const index = loadedAuthors.value.findIndex((item) => item.getAuthorId() === author.id)

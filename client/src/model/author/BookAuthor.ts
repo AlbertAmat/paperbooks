@@ -1,4 +1,6 @@
 import IBookAuthor from "@/types/book/IBookAuthor";
+import {authorsService} from "@/service/author/AuthorsService";
+import {Ref, ref} from "vue";
 
 export default class BookAuthor {
 
@@ -12,11 +14,11 @@ export default class BookAuthor {
      *
      * @private
      */
-    private readonly m_authorName: string;
+    private m_authorName: Ref<string>;
 
     public constructor(data: IBookAuthor) {
         this.m_authorId = data.id;
-        this.m_authorName = data.name;
+        this.m_authorName = ref(data.name);
     }
 
     /**
@@ -30,6 +32,11 @@ export default class BookAuthor {
      *
      */
     public getAuthorName(): string {
-        return this.m_authorName;
+        return this.m_authorName.value;
+    }
+
+    public async update(name: string) {
+        await authorsService.updateAuthor(this.m_authorId, name)
+        this.m_authorName.value = name;
     }
 }

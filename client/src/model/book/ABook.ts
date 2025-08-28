@@ -1,7 +1,7 @@
 import IBookItem from "@/types/book/IBookItem";
-import BookAuthor from "@/model/book/BookAuthor";
+import BookAuthor from "@/model/author/BookAuthor";
 import {bookRoute} from "@/router/routes/BookRoute";
-import {ref, Ref} from "vue";
+import {ref, Ref, shallowRef, ShallowRef} from "vue";
 
 export default abstract class ABook {
 
@@ -21,7 +21,7 @@ export default abstract class ABook {
      *
      * @private
      */
-    protected m_authors: Ref<BookAuthor[]> = ref([]);
+    protected m_authors: ShallowRef<BookAuthor[]> = shallowRef([]);
 
     /**
      *
