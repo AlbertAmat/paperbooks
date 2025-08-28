@@ -10,7 +10,11 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         req.cookies.token = jwt.sign(
             {user_id: 1}, // fake user ID
             appService.getJwtSecret(),
-            {expiresIn: Math.floor(appService.getSessionTime() / 1000)}
+            {
+                expiresIn: Math.floor(appService.getSessionTime() / 1000),
+                audience: "paperbooks",
+                issuer: "paperbooks.xyz"
+            }
         );
     }
 
