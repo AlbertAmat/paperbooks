@@ -4,12 +4,13 @@ import http, {Server} from "http";
 import DatabaseConf from "./types/DatabaseConf";
 import pg from 'pg';
 import {routes} from "./routes/Routes";
-import { Logger } from "./utils/Logger";
+import {Logger} from "./utils/Logger";
 import AuthRoute from "./routes/AuthRoute";
 import crypto from "crypto";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
 export class AppService {
     /**
@@ -22,13 +23,13 @@ export class AppService {
      *
      * @private
      */
-    private m_app: Express;
+    private readonly m_app: Express;
 
     /**
      *
      * @private
      */
-    private m_port: number;
+    private readonly m_port: number;
 
     /**
      *
@@ -40,74 +41,81 @@ export class AppService {
      *
      * @private
      */
-    private m_databaseConf: DatabaseConf | null;
+    private readonly m_databaseConf: DatabaseConf;
 
     /**
      *
      * @private
      */
-    private m_databasePool: pg.Pool | null;
+    private readonly m_databasePool: pg.Pool;
 
     /**
      *
      * @private
      */
-    private m_logger!: Logger;
+    private readonly m_logger: Logger;
 
     /**
      *
      * @private
      */
-    private m_shaSecret: string;
+    private readonly m_shaSecret: string;
 
     /**
      *
      * @private
      */
-    private m_jwtSecret: string;
+    private readonly m_jwtSecret: string;
 
     /**
      *
      * @private
      */
-    private m_frontEndUrl: string;
-
-    /**
-     *
-     * @private
-     */
-    private m_sessionTime: number;
+    private readonly m_sessionTime: number;
 
     public constructor() {
-        this.m_port = 8081;
+        dotenv.config();
+
+        this.m_port = Number(process.env.API_PORT);
 
         this.m_app = express();
         this.m_app.use(bodyParser.json());
-        this.m_app.use(bodyParser.urlencoded({ extended: true }));
+        this.m_app.use(bodyParser.urlencoded({extended: true}));
         this.m_app.use(cookieParser());
 
-        this.m_server = null;
-        this.m_databaseConf = null;
-        this.m_databasePool = null;
+        // Set cors protection
+        this.m_app.use(cors({
+            origin: String(process.env.FRONT_END_URL), // your frontend URL
+            credentials: true
+        }));
 
-        this.m_shaSecret = "";
-        this.m_jwtSecret = "";
-        this.m_frontEndUrl = "";
-        this.m_sessionTime = 0;
+        this.m_databaseConf = {
+            host: String(process.env.DB_HOST),
+            port: Number(process.env.DB_PORT),
+            name: String(process.env.DB_NAME),
+            user: String(process.env.DB_USER),
+            password: String(process.env.DB_PASSWORD),
+        };
+
+        this.m_databasePool = new pg.Pool({
+            host: this.m_databaseConf.host,
+            port: this.m_databaseConf.port,
+            database: this.m_databaseConf.name,
+            user: this.m_databaseConf.user,
+            password: this.m_databaseConf.password,
+            max: 20,
+            idleTimeoutMillis: 30000,
+            connectionTimeoutMillis: 2000,
+        });
+
+        this.m_shaSecret    = String(process.env.SHA_SECRET);
+        this.m_jwtSecret    = String(process.env.JWT_SECRET);
+        this.m_sessionTime  = Number(process.env.SESSION_TIME);
+        this.m_server       = null;
+        this.m_logger       = new Logger(String(process.env.LOGGER_PATH));
     }
 
-    /**
-     *
-     */
-    public init(
-        port: number,
-        database: DatabaseConf,
-        loggerPath: string,
-        shaSecret: string,
-        jwtSecret: string,
-        frontEndUrl: string,
-        sessionTime: number,
-    ) {
+    public init() {
         console.log(`
 888888b.                     888            .d8888b.  888                                              
 888  "88b                    888           d88P  Y88b 888                                              
@@ -122,43 +130,7 @@ export class AppService {
                                                                                       "Y88P"             
         `);
 
-        this.m_jwtSecret = jwtSecret;
-
-        // Start services and plugins than needs config
-        this.m_frontEndUrl = frontEndUrl;
-
-        this.m_sessionTime = sessionTime;
-
-        // Set cors protection
-        this.m_app.use(cors({
-            origin: this.m_frontEndUrl, // your frontend URL
-            credentials: true
-        }));
-
-        /**
-         * App
-         */
-        this.m_port = port;
-        console.log(`Starting server on port [${port}]...`)
-        //@ts-ignore
         const server = http.createServer(this.m_app);
-
-        /**
-         * Database
-         */
-        console.log(`Starting database connection...`)
-        console.table([database]);
-        this.m_databaseConf = database;
-        this.m_databasePool = new pg.Pool({
-            host: database.host,
-            port: database.port,
-            database: database.name,
-            user: database.user,
-            password: database.password,
-            max: 20,
-            idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000,
-        });
 
         // routes
         this.__loadRoutes();
@@ -168,11 +140,8 @@ export class AppService {
         });
 
         this.m_server = server;
-        this.m_logger = new Logger(loggerPath);
 
-        this.m_shaSecret = shaSecret;
-
-        this.m_logger.info(`Server running on port ${this.m_port}; Database: ${JSON.stringify(database)};`)
+        this.m_logger.info(`Server running on port ${this.m_port};`)
     }
 
     /**
@@ -214,10 +183,6 @@ export class AppService {
      *
      */
     public getDatabasePool(): pg.Pool {
-        if(!this.m_databasePool) {
-            throw "No database pool";
-        }
-
         return this.m_databasePool;
     }
 
@@ -234,7 +199,7 @@ export class AppService {
         // Add root route (for session and page render)
         this.m_app.use("/", AuthRoute);
 
-        for(let route in routes) {
+        for (let route in routes) {
             const fullRoute = AppService.ROUTE_PREFIX + route;
             this.m_app.use(fullRoute, routes[route]);
             consoleRoutesArr.push(fullRoute)
@@ -272,7 +237,7 @@ export class AppService {
 
     // TODO: MOVE TO bcrypt
     public hashPassword(plainPassword: string): string {
-       return crypto.createHmac("sha256", this.m_shaSecret).update(plainPassword).digest("hex");
+        return crypto.createHmac("sha256", this.m_shaSecret).update(plainPassword).digest("hex");
     }
 }
 

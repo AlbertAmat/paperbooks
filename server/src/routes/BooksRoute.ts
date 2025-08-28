@@ -3,8 +3,24 @@ import {appService} from "../AppService";
 import axios from "axios";
 import {v4 as uuidv4} from 'uuid';
 import {requireAuth} from "../middlewares/AuthMiddleware";
+import multer from "multer";
 
 const router: Router = Router();
+
+// Multer setup - store in memory
+// TODO: WE DONT NEED MULTER SINCE WE STORE IMAGE IN THE DATABASE, WE ONLY NEED THE FILTER
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage,
+    limits: {fileSize: 2 * 1024 * 1024}, // 2MB
+    fileFilter: (req: Request, file: Express.Multer.File, cb: (error: any, acceptFile: boolean) => void) => {
+        // @ts-ignore
+        if (file.mimetype !== "image/png" && file.mimetype !== "image/jpeg") {
+            return cb(new Error("Only PNG or JPG images are allowed"), false);
+        }
+        cb(null, true);
+    }
+});
 
 /**
  * Path: /book/search
@@ -345,6 +361,49 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
         res.status(500).send('Internal Server Error');
     } finally {
         client.release();
+    }
+});
+
+/**
+ * Create book manually
+ */
+//@ts-ignore
+router.post('', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
+    const name = req.body.name;
+    const description = req.body.description;
+    const isbn = req.body.isbn;
+    let imageUrl = "";
+
+    if (req.file) {
+        const base64 = req.file.buffer.toString("base64");
+        imageUrl = `data:${req.file.mimetype};base64,${base64}`;
+    }
+
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        // If the user give us a isbn code, check if exist
+        if(isbn) {
+            const existIsbn = await pool.query(
+                'SELECT id FROM books WHERE isbn = $1 AND user_id = $2',
+                [isbn, userId]
+            );
+            if (existIsbn.rowCount != 1) {
+                res.status(404).send("Book with provided ISBN code already exist");
+            }
+        }
+
+        const insertBook = await pool.query(
+            "INSERT INTO books (name, description, image_url, isbn, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+            [name, description, imageUrl, isbn, userId]
+        );
+
+        res.status(200).json(insertBook.rows[0].id);
+    } catch (error) {
+        // Rollback on error
+        console.error("Transaction error:", error);
+        res.status(500).send("Error adding book");
     }
 });
 

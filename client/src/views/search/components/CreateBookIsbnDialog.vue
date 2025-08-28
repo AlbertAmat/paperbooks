@@ -4,26 +4,17 @@
 		width="700"
 		scrollable
 	>
-		<template v-slot:activator="{ props: activatorProps }">
-			<v-btn
-				v-bind="activatorProps"
-				color="primary"
-				class="text-none gradient"
-				small
-			>
-				Add book
-			</v-btn>
-		</template>
-
 		<v-card>
-			<v-card-title class="d-flex">
+			<v-card-title class="d-flex" style="align-items: center">
 				Add book (ISBN)
 
 				<v-spacer></v-spacer>
 
 				<v-btn
 					@click="dialog = false"
+					variant="text"
 					icon
+					density="comfortable"
 				>
 					<v-icon>mdi-close</v-icon>
 				</v-btn>
@@ -31,16 +22,7 @@
 			<v-divider></v-divider>
 
 			<v-card-text>
-				<v-alert
-					v-if="!multiple && errorIsbnCode.length > 0"
-					type="warning"
-					dense
-					class="mt-1 mb-0"
-				>
-					Unable to automatically add book. Please, create book manually.
-				</v-alert>
-
-				<v-card-subtitle class="px-0">
+				<v-card-subtitle class="px-0" style="white-space: normal">
 					Easily add a book to your library by entering its ISBN code. The app will automatically fetch the
 					book's details,
 					including title, author, description, and more, and seamlessly add it to your collection.
@@ -60,31 +42,23 @@
 						class="mt-3"
 						@keydown.enter="handleEnter()"
 					></v-text-field>
-
-					<v-checkbox
-						v-model="multiple"
-						:disabled="loadingIsbnCode.length != 0"
-						hide-details
-						density="compact"
-						label="Multiple upload"
-						class="ml-0"
-					></v-checkbox>
 				</div>
 
 				<v-list
-					v-if="multiple"
-					dense
+					density="compact"
 					style="max-height: 400px; overflow-y: auto; overflow-x: hidden "
+					slim
 				>
 					<v-list-item
 						v-for="(item, index) in isbnCodeList"
 						:key="index"
-						dense
+						density="compact"
 						class="px-0"
+						prepend-icon="mdi-book"
+						:title="item"
+						slim
 					>
-						<v-icon class="mr-2">mdi-book</v-icon>
-						<v-list-item-title style="font-size: 14px">{{ item }}</v-list-item-title>
-						<v-list-item-action>
+						<template v-slot:append>
 							<v-progress-circular
 								v-if="loadingIsbnCode.includes(item)"
 								indeterminate
@@ -95,9 +69,10 @@
 							<v-icon
 								v-if="errorIsbnCode.includes(item)"
 								color="error"
-							>mdi-alert-circle
+							>
+								mdi-alert-circle
 							</v-icon>
-						</v-list-item-action>
+						</template>
 					</v-list-item>
 				</v-list>
 			</v-card-text>
@@ -117,8 +92,8 @@
 					color="primary"
 					:loading="loadingIsbnCode.length > 0"
 					:disabled="disableButton"
-					text
-					class="text-none"
+					variant="elevated"
+					class="text-none mr-4"
 					@click="addBooks()"
 				>
 					Add
@@ -135,11 +110,30 @@ import {bookService} from "@/service/book/BookService";
 import router from "@/router/Router";
 import {AxiosError} from "axios";
 import {bookRoute} from "@/router/routes/BookRoute";
+import Book from "@/model/book/Book";
+import BookStock from "@/model/book/BookStock";
+
+interface Props {
+	modelValue: boolean
+}
+
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+	(e: 'update:modelValue', value: boolean): void
+}>()
 
 /**
  *
  */
-const dialog: Ref<boolean> = ref(false);
+const dialog = computed({
+	get() {
+		return props.modelValue;
+	},
+	set(value: boolean) {
+		emit("update:modelValue", value)
+	}
+});
 
 /**
  *
@@ -150,11 +144,6 @@ const loadingIsbnCode: Ref<string[]> = ref([]);
  *
  */
 const errorIsbnCode: Ref<string[]> = ref([]);
-
-/**
- *
- */
-const multiple: Ref<boolean> = ref(false);
 
 /**
  *
@@ -170,9 +159,7 @@ const isbnCodeList: Ref<string[]> = ref([]);
  *
  */
 const disableButton = computed(() => {
-	return loadingIsbnCode.value.length > 0
-	|| multiple.value ? false : isbnCode.value.trim().length === 0
-	|| multiple.value ? false : !isValidIsbn(isbnCode.value);
+	return loadingIsbnCode.value.length > 0 || isbnCodeList.value.length == 0
 })
 
 // ISBN validation function
@@ -204,66 +191,36 @@ const isbnValidationRule = computed(() => {
 	};
 });
 
-/**
- *
- */
-async function createBook(code: string) {
-	if (!disableButton.value) {
+function handleEnter() {
+	isbnCodeList.value.push(isbnCode.value);
+	isbnCode.value = "";
+}
+
+function addBooks() {
+	isbnCodeList.value.forEach(async (code) => {
 		try {
-			if (!isbnCodeList.value.includes(code)) {
-				isbnCodeList.value.push(code);
-			}
 			loadingIsbnCode.value.push(code);
 			// TODO: CHECK IF BOOK EXIST
-			const id = await bookService.createBookFromIsbn(code);
-			if (id != null && !multiple.value) {
-				router.push(bookRoute.getPath(id));
-				dialog.value = false;
-			}
+			await bookService.createBookFromIsbn(code);
 		} catch (e) {
 			const error = e as AxiosError;
-			if (error.status === 404) {
+			if (error.status === 404 || error.status === 500) {
 				errorIsbnCode.value.push(code);
 			}
 		} finally {
 			const index = loadingIsbnCode.value.indexOf(code);
 			loadingIsbnCode.value.splice(index, 1);
 
-			if (multiple.value && loadingIsbnCode.value.length == 0) {
+			if (loadingIsbnCode.value.length == 0) {
 				if (errorIsbnCode.value.length === 0) {
-					isbnCodeList.value = isbnCodeList.value.filter((item) => !errorIsbnCode.value.includes(item))
+					isbnCodeList.value = [...isbnCodeList.value.filter((item) => !errorIsbnCode.value.includes(item))]
 				} else {
 					dialog.value = false;
 				}
 			}
 		}
-	}
-}
-
-function handleEnter() {
-	isbnCodeList.value.push(isbnCode.value);
-	if (multiple.value) {
-		isbnCode.value = "";
-	} else {
-		addBooks();
-	}
-}
-
-function addBooks() {
-	if (!isbnCodeList.value.includes(isbnCode.value)) {
-		isbnCodeList.value.push(isbnCode.value);
-	}
-
-	isbnCodeList.value.forEach((code) => {
-		createBook(code);
 	})
 }
-
-watch(() => multiple.value, () => {
-	if (!multiple.value) {
-		isbnCodeList.value = [];
-	}
-})
 
 watch(() => dialog.value, () => {
 	if (!dialog.value) {
@@ -271,7 +228,6 @@ watch(() => dialog.value, () => {
 		isbnCodeList.value = [];
 		errorIsbnCode.value = [];
 		loadingIsbnCode.value = [];
-		multiple.value = false;
 	}
 })
 </script>

@@ -17,11 +17,11 @@
     "jsbarcode": "^3.12.1",
     "sass": "^1.89.2",
     "sass-loader": "^16.0.5",
-    "vue": "^3.5.17",
+    "vue": "^3.5.20",
     "vue-chartjs": "^5.3.2",
     "vue-i18n": "^11.1.11",
     "vue-router": "^4.5.1",
-    "vuetify": "^3.9.2"
+    "vuetify": "^3.9.6"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",

@@ -48,11 +48,47 @@ export class BookService {
         return data;
     }
 
+    private fileToBase64(file: File) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.readAsDataURL(file);
+
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+        });
+    }
+
+    public async createBook(
+        name: string,
+        description: string | null,
+        isbn: string | null,
+        image: File | null,
+    ): Promise<number> {
+        const formData = new FormData();
+        formData.set("name", name);
+
+        if(description) {
+            formData.set("description", description);
+        }
+
+        if(isbn) {
+            formData.set("isbn", isbn);
+        }
+
+        if(image) {
+            formData.set("image", image);
+        }
+
+        const {data} = await axiosInstance.post(`${PATH_PREFIX}/book`, formData);
+        return data;
+    }
+
     /**
      *
      * @param isbn
      */
-    public async createBookFromIsbn(isbn: string): Promise<number> {
+    public async createBookFromIsbn(isbn: string): Promise<void> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/isbn/${isbn}`, {});
         return data;
     }

@@ -4,13 +4,10 @@
 * improve password crypto
 * app labels + use table
 * snackabars
-* fix styles in create book
-* create book manually (only required fill)
 * allow to change book image
 * batch load of books in a location
 * batch load of books to a customer
 * handle axios errros
-* 
 * authors view
 
 ## backlog

@@ -21,7 +21,46 @@
 			>
 				<v-icon size="18">{{ gridLayout ? 'mdi-view-grid-outline' : 'mdi-table' }}</v-icon>
 			</v-btn>
-			<create-book-isbn-dialog/>
+			<v-menu>
+				<template v-slot:activator="{ props }">
+					<v-btn
+						color="primary"
+						class="text-none gradient pr-1"
+						small
+						@click.stop.prevent="createBookIsbnDialog = true"
+					>
+						Add book
+
+						<v-divider vertical class="ml-2"/>
+
+						<v-btn
+							v-bind="props"
+							variant="text"
+							icon
+							density="compact"
+						>
+							<v-icon>mdi-chevron-down</v-icon>
+						</v-btn>
+					</v-btn>
+				</template>
+
+				<v-list density="compact">
+					<v-list-item @click="createBookManuallyDialog = true">
+						<v-list-item-title>Add book manually</v-list-item-title>
+					</v-list-item>
+				</v-list>
+			</v-menu>
+
+			<create-book-isbn-dialog
+				v-if="createBookIsbnDialog"
+				v-model="createBookIsbnDialog"
+			/>
+
+			<create-book-manually-dialog
+				v-if="createBookManuallyDialog"
+				v-model="createBookManuallyDialog"
+			/>
+
 		</template>
 
 		<template v-slot:default>
@@ -94,6 +133,7 @@ import BookItemSkeleton from "@/views/search/components/BookItemSkeleton.vue";
 import CreateBookIsbnDialog from "@/views/search/components/CreateBookIsbnDialog.vue";
 import {applicationService} from "@/service/ApplicationService";
 import router from "@/router/Router";
+import CreateBookManuallyDialog from "@/views/search/components/CreateBookManuallyDialog.vue";
 
 const model = new SearchController();
 
@@ -101,6 +141,9 @@ const model = new SearchController();
  *
  */
 const gridLayout: Ref<boolean> = ref(true);
+
+const createBookIsbnDialog: Ref<boolean> = ref(false);
+const createBookManuallyDialog: Ref<boolean> = ref(false);
 
 /**
  *
