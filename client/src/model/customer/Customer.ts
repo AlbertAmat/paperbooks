@@ -2,6 +2,7 @@ import ICategory from "@/types/category/ICategory";
 import {categoriesService} from "@/service/categories/CategoriesService";
 import {Ref, ref} from "vue";
 import ICustomer from "@/types/customer/ICustomer";
+import {customersService} from "@/service/customers/CustomersService";
 
 export default class Customer {
     /**
@@ -33,5 +34,10 @@ export default class Customer {
      */
     public getCustomerName(): string {
         return this.m_customerName.value;
+    }
+
+    public async update(name: string) {
+        await customersService.updateCustomer(this.m_customerId, name)
+        this.m_customerName.value = name;
     }
 }

@@ -66,9 +66,9 @@ import {Ref, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {dashboardRoute} from "@/router/routes/DashboardRoute";
 import {searchRoute} from "@/router/routes/SearchRoute";
-import {notFoundRoute} from "@/router/routes/NotFoundRoute";
 import {locationsRoute} from "@/router/routes/LocationsRoute";
 import {categoriesRoute} from "@/router/routes/CategoriesRoute";
+import {customersRoute} from "@/router/routes/CustomersRoute";
 
 const route = useRoute()
 
@@ -109,7 +109,7 @@ const items = [
 	{
 		name: "Customers",
 		icon: "mdi-account-school-outline",
-		path: notFoundRoute.getPath()
+		path: customersRoute.getPath()
 	}
 ]
 

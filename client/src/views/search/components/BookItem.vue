@@ -87,7 +87,7 @@ const props = defineProps<Props>()
 /**
  *
  */
-const showFallback: Ref<boolean> = ref(false);
+const showFallback: Ref<boolean> = ref(props.book.getImageUrl() === null);
 
 const category = applicationService.getCategory(props.book.getCategoryId());
 const language = applicationService.getLanguage(props.book.getLanguageCode());

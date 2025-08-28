@@ -31,6 +31,7 @@
 				<v-btn
 					color="primary"
 					density="comfortable"
+					variant="elevated"
 					@click="accept"
 					:loading="acceptLoading"
 					:disabled="acceptLoading || cancelLoading"

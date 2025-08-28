@@ -56,7 +56,17 @@
 							nav
 						>
 							<template v-slot:prepend>
-								<img :src="item.image_url" style="height: 40px; margin-right: 10px"/>
+								<img
+									v-if="item.image_url != null"
+									:src="item.image_url"
+									style="height: 40px; margin-right: 10px"
+								/>
+								<div
+									v-else
+									style="background-color: #f1f1f1; height: 40px; width: 30px; margin-right: 10px; display: flex; align-items: center; justify-content: center"
+								>
+									<v-icon>mdi-image-outline</v-icon>
+								</div>
 							</template>
 						</v-list-item>
 					</v-list>

@@ -5,7 +5,7 @@
 	>
 		<v-card>
 			<v-card-title>
-				{{ location ? 'Edit location' : 'Add location' }}
+				{{ customer ? 'Edit customer' : 'Add customer' }}
 			</v-card-title>
 
 			<v-divider></v-divider>
@@ -14,15 +14,6 @@
 				<v-text-field
 					v-model="name"
 					label="Name"
-					density="compact"
-					variant="outlined"
-					hide-details
-					class="mb-4"
-				></v-text-field>
-
-				<v-text-field
-					v-model="description"
-					label="Description"
 					density="compact"
 					variant="outlined"
 					hide-details
@@ -45,10 +36,10 @@
 					variant="elevated"
 					:disabled="name === null || (name != null && name.trim().length === 0) || loading"
 					:loading="loading"
-					@click="addLocation()"
+					@click="addCustomer()"
 					class="text-none"
 				>
-					{{ location ? 'Update' : 'Add' }}
+					{{ customer ? 'Update' : 'Add' }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -57,13 +48,12 @@
 
 <script setup lang="ts">
 import {computed, Ref, ref} from 'vue'
-import Location from "@/model/location/Location";
-import LocationsController from "@/controller/locations/LocationsController";
-import {applicationService} from "@/service/ApplicationService";
+import CustomersController from "@/controller/customers/CustomersController";
+import Customer from "@/model/customer/Customer";
 
 interface Props {
-	location?: Location,
-	controller: LocationsController,
+	customer?: Customer,
+	controller: CustomersController,
 	modelValue: boolean
 }
 
@@ -89,26 +79,20 @@ const loading: Ref<boolean> = ref(false);
 /**
  *
  */
-const name: Ref<string> = ref(props.location ? props.location.getName() : "");
-
-/**
- *
- */
-const description: Ref<string | null> = ref(props.location ? props.location.getDescription() : null);
+const name: Ref<string> = ref(props.customer ? props.customer.getCustomerName() : "");
 
 /**
  *
  *
  */
-async function addLocation() {
+async function addCustomer() {
 	try {
 		loading.value = true;
-		if (props.location) {
-			await props.location.update(name.value, description.value)
+		if (props.customer) {
+			await props.customer.update(name.value)
 		} else {
-			await props.controller.addLocation(name.value, description.value)
+			await props.controller.addCustomer(name.value)
 		}
-		applicationService.setLocations(props.controller.getLocations())
 		closeDialog();
 	} finally {
 		loading.value = false;
@@ -120,7 +104,6 @@ async function addLocation() {
  */
 function closeDialog() {
 	name.value = "";
-	description.value = null;
 	dialog.value = false;
 }
 </script>

@@ -9,6 +9,7 @@
 * batch load of books to a customer
 * handle axios errros
 * authors view
+* customers view
 
 ## backlog
 * multiple users app so ->  book, authors, etc must have the user or a workspace

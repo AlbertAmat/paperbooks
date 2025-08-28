@@ -26,8 +26,7 @@
 			<v-card-actions>
 				<v-spacer></v-spacer>
 				<v-btn
-					text
-					small
+					variant="text"
 					@click="closeDialog()"
 					class="text-none"
 				>
@@ -35,8 +34,7 @@
 				</v-btn>
 				<v-btn
 					color="primary"
-					outlined
-					small
+					variant="elevated"
 					:disabled="name === null || (name != null && name.trim().length === 0) || loading"
 					:loading="loading"
 					@click="addCategory()"
