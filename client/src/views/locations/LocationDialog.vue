@@ -60,9 +60,10 @@ import {computed, Ref, ref} from 'vue'
 import Location from "@/model/location/Location";
 import LocationsController from "@/controller/locations/LocationsController";
 import {applicationService} from "@/service/ApplicationService";
+import LocationExt from "@/model/location/LocationExt";
 
 interface Props {
-	location?: Location,
+	location?: LocationExt,
 	controller: LocationsController,
 	modelValue: boolean
 }

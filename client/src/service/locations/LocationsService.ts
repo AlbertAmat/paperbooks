@@ -3,11 +3,17 @@ import {ISearchResponse} from "@/types/search/ISearchResponse";
 import axiosInstance from "@/plugins/axiosInstance";
 import ILocation from "@/types/location/ILocation";
 import ILocationExt from "@/types/location/ILocationExt";
+import ILocationBook from "@/types/location/ILocationBook";
 
 class LocationsService {
 
     public async getLocations(): Promise<ILocationExt[]> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/location`)
+        return data;
+    }
+
+    public async getLocationBooks(id: number): Promise<ILocationBook[]> {
+        const {data} = await axiosInstance.get(`${PATH_PREFIX}/location/${id}/books`)
         return data;
     }
 

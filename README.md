@@ -7,7 +7,6 @@
 * handle axios erros
 * batch load of books in a location
 * batch load of books to a customer
-* use quagga to scan barcodes using laptop cam
 
 ## backlog
 * use file logger

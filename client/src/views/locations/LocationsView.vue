@@ -15,10 +15,12 @@
 			<v-data-table-virtual
 				:headers="headers"
 				density="compact"
+				item-value="id"
+				show-expand
 				:items="locations"
 			>
 				<template v-slot:item.totalBooks="{ item }">
-					<v-chip density="compact">{{item.totalBooks}}</v-chip>
+					<v-chip density="compact">{{ item.totalBooks }}</v-chip>
 				</template>
 				<template v-slot:item.actions="{ item }">
 					<v-icon
@@ -45,6 +47,15 @@
 						</v-icon>
 					</v-btn>
 				</template>
+				<template v-slot:expanded-row="{ columns, item }">
+					<tr>
+						<td :colspan="columns.length" class="py-2">
+							<v-sheet rounded="lg" border>
+								<location-books-table :location="controller.getLocation(item.id)"/>
+							</v-sheet>
+						</td>
+					</tr>
+				</template>
 			</v-data-table-virtual>
 
 			<location-dialog
@@ -65,6 +76,7 @@ import LocationDialog from "@/views/locations/LocationDialog.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import {applicationService} from "@/service/ApplicationService";
 import LocationExt from "@/model/location/LocationExt";
+import LocationBooksTable from "@/views/locations/LocationBooksTable.vue";
 
 const controller = new LocationsController();
 
@@ -112,8 +124,8 @@ const locations = computed(() => {
  * @param locationId
  */
 function editLocation(locationId: number) {
-	const location =  controller.getLocations().find(location => location.getId() === locationId);
-	if(location) {
+	const location = controller.getLocations().find(location => location.getId() === locationId);
+	if (location) {
 		selectedLocation.value = location;
 		dialog.value = true;
 	}

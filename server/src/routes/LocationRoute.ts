@@ -32,6 +32,37 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * Path: /location/id/books
+ */
+//@ts-ignore
+router.get('/:id/books', requireAuth, async (req: Request, res: Response) => {
+    const locationId = req.params.id;
+    if (!locationId) {
+        return res.status(400).send('No location ID provided');
+    }
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        const result = await pool.query(`
+            SELECT book_stocks.id,
+                   books.name, 
+                   books.id as book_id,
+                   book_stocks.code,
+                   book_stocks.status
+              FROM book_stocks, books
+               WHERE book_stocks.location_id = $1
+            AND book_stocks.book_id = books.id 
+            AND book_stocks.user_id = $2
+        `, [locationId, userId]);
+        res.status(200).json(result.rows);
+    } catch (err: any) {
+        console.error('Error executing query', err.stack);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+/**
  *
  */
 //@ts-ignore
@@ -129,7 +160,6 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 //@ts-ignore
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    console.log("Delete location, id:", id);
 
     // Database connection
     const pool = appService.getDatabasePool();

@@ -4,7 +4,7 @@ import {ref, Ref} from "vue";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 export default class Location {
-    private readonly m_id: number;
+    protected readonly m_id: number;
     private m_name: Ref<string>;
     private m_description: Ref<string | null>;
 
