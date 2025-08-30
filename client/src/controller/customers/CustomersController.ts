@@ -4,6 +4,7 @@ import {ShallowRef, shallowRef} from "vue";
 import ICustomer from "@/types/customer/ICustomer";
 import Customer from "@/model/customer/Customer";
 import {customersService} from "@/service/customers/CustomersService";
+import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 export default class CustomersController extends BaseController<ICustomer[]> {
 
@@ -47,6 +48,7 @@ export default class CustomersController extends BaseController<ICustomer[]> {
         try {
             const customer = await customersService.addCustomer(name);
             this.m_customers.value = [...this.m_customers.value, new Customer(customer)];
+            appSnackbarController.show({message: "Customer has been added successfully"})
         } catch (e) {
             console.error(e);
         }
@@ -63,6 +65,7 @@ export default class CustomersController extends BaseController<ICustomer[]> {
                 await customersService.deleteCustomer(customerId);
                 this.m_customers.value.splice(index, 1);
                 this.m_customers.value = [...this.m_customers.value];
+                appSnackbarController.show({message: "Customer has been deleted successfully"})
             } catch (e) {
                 console.error(e);
             }

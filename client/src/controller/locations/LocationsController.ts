@@ -3,6 +3,7 @@ import {locationsService} from "@/service/locations/LocationsService";
 import ILocation from "@/types/location/ILocation";
 import {ShallowRef, shallowRef} from "vue";
 import Location from "@/model/location/Location"
+import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 export default class LocationsController extends BaseController<ILocation[]> {
 
@@ -47,6 +48,7 @@ export default class LocationsController extends BaseController<ILocation[]> {
         try {
             const location = await locationsService.addLocation(name, description);
             this.m_locations.value = [...this.m_locations.value, new Location(location)];
+            appSnackbarController.show({message: "Location has been added successfully"})
         } catch (e) {
             console.error(e);
         }
@@ -63,6 +65,7 @@ export default class LocationsController extends BaseController<ILocation[]> {
                 await locationsService.deleteLocation(locationId);
                 this.m_locations.value.splice(index, 1);
                 this.m_locations.value = [...this.m_locations.value];
+                appSnackbarController.show({message: "Location has been deleted successfully"})
             } catch (e) {
                 console.error(e);
             }

@@ -3,6 +3,7 @@ import {ShallowRef, shallowRef} from "vue";
 import ICategory from "@/types/category/ICategory";
 import Category from "@/model/category/Category";
 import {categoriesService} from "@/service/categories/CategoriesService";
+import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 export default class CategoriesController extends BaseController<ICategory[]> {
 
@@ -47,6 +48,7 @@ export default class CategoriesController extends BaseController<ICategory[]> {
         try {
             const category = await categoriesService.addCategory(name);
             this.m_categories.value = [...this.m_categories.value, new Category(category)];
+            appSnackbarController.show({message: "Category was been added successfully"})
         } catch (e) {
             console.error(e);
         }
@@ -63,6 +65,7 @@ export default class CategoriesController extends BaseController<ICategory[]> {
                 await categoriesService.deleteCategory(id);
                 this.m_categories.value.splice(index, 1);
                 this.m_categories.value = [...this.m_categories.value];
+                appSnackbarController.show({message: "Category was been deleted successfully"})
             } catch (e) {
                 console.error(e);
             }

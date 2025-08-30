@@ -1,6 +1,7 @@
 import {IUser} from "@/types/user/IUser";
 import {ref, Ref} from "vue";
 import {userService} from "@/service/user/UserService";
+import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 export default class User {
     private readonly m_code: string;
@@ -64,7 +65,7 @@ export default class User {
                 language,
                 region
             );
-
+            appSnackbarController.show({message: "Profile information updated successfully"})
             this.m_email.value = email;
             this.m_name.value = name;
             this.m_language.value = language;
@@ -78,6 +79,7 @@ export default class User {
         try {
             await userService.removeImage();
             this.m_image.value = null;
+            appSnackbarController.show({message: "Profile image has been removed successfully"})
         } catch (e) {
             console.error("error while removing image. ", e)
         }
@@ -88,6 +90,7 @@ export default class User {
             await userService.uploadImage(image);
             const base64 = await this.__toBase64(image);
             this.m_image.value = base64;
+            appSnackbarController.show({message: "Profile image has been deleted successfully"})
         } catch (e) {
             console.error("error while uploading image. ", e)
         }

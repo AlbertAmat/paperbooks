@@ -2,6 +2,7 @@ import {BookStockStatusEnum, IBookStock} from "@/types/book/IBookStock";
 import JsBarcode from "jsbarcode";
 import {bookService} from "@/service/book/BookService";
 import {ref, Ref} from "vue";
+import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 export default class BookStock {
 
@@ -169,6 +170,8 @@ export default class BookStock {
             this.m_locationName = data.location_name;
             this.m_customerId.value = data.customer_id;
             this.m_customerName = data.customer_name;
+
+            appSnackbarController.show({message: `Book stock updated successfully`})
         } catch (e) {
             console.error("Error while updating book stock", e)
         }

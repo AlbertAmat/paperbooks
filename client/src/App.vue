@@ -29,6 +29,8 @@
 				<router-view/>
 
 				<confirmation-dialog/>
+
+				<app-snackbar/>
 			</v-main>
 		</template>
 	</v-app>
@@ -40,6 +42,8 @@ import AppBar from "@/components/app/AppBar.vue";
 import AppMenu from "@/components/app/AppMenu.vue";
 import {applicationService} from "@/service/ApplicationService";
 import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog.vue";
+import AppSnackbar from "@/components/appSnackbar/AppSnackbar.vue";
+import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 onMounted(() => {
 	applicationService.fetchPolicy();

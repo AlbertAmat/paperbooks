@@ -3,6 +3,7 @@ import {categoriesService} from "@/service/categories/CategoriesService";
 import {Ref, ref} from "vue";
 import ICustomer from "@/types/customer/ICustomer";
 import {customersService} from "@/service/customers/CustomersService";
+import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 export default class Customer {
     /**
@@ -39,5 +40,6 @@ export default class Customer {
     public async update(name: string) {
         await customersService.updateCustomer(this.m_customerId, name)
         this.m_customerName.value = name;
+        appSnackbarController.show({message: "Customer updated successfully"})
     }
 }

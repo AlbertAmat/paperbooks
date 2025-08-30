@@ -8,6 +8,7 @@ import {BookStockStatusEnum} from "@/types/book/IBookStock";
 import {shallowRef, ShallowRef} from "vue";
 import router from "@/router/Router";
 import {searchRoute} from "@/router/routes/SearchRoute";
+import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppSnackbarController";
 
 export default class Book extends BookItem {
 
@@ -233,7 +234,7 @@ export default class Book extends BookItem {
             const stock = new BookStock(this.m_id, data)
             this.m_stocks.value = [...this.m_stocks.value, stock];
 
-            // TODO: snackbar message
+            appSnackbarController.show({message: `Book stock has been added`})
 
             if(print) {
                 stock.printBarcode();
@@ -256,7 +257,7 @@ export default class Book extends BookItem {
                 this.m_stocks.value.splice(index, 1);
                 this.m_stocks.value = [...this.m_stocks.value];
 
-                // TODO: snackbar message
+                appSnackbarController.show({message: `Book stock deleted successfully`})
 
             } else {
                 console.warn("Unable to remove stock from array since index is -1")
@@ -286,7 +287,7 @@ export default class Book extends BookItem {
                 this.m_pages,
                 this.m_format ? this.m_format.getFormatId() : null
             )
-            // TODO: snackbar message
+            appSnackbarController.show({message: "Book updated successfully"})
         } catch (e) {
             console.error("Error while updating book.", e)
         }
@@ -298,6 +299,7 @@ export default class Book extends BookItem {
     public async changeImage(image: File) {
         try {
             await bookService.changeImage(this.m_id, image);
+            appSnackbarController.show({message: `Book image has been changed`})
 
             function fileToBase64(file: File): Promise<string> {
                 return new Promise((resolve, reject) => {
@@ -317,7 +319,6 @@ export default class Book extends BookItem {
             }
 
             this.m_imageUrl.value = await fileToBase64(image);
-            // TODO: snackbar message
         } catch (e) {
             console.error("Error while updating book.", e)
         }
@@ -326,7 +327,7 @@ export default class Book extends BookItem {
     public async deleteBook() {
         try {
             await bookService.deleteBook(this.m_id)
-            // TODO: snackbar message
+            appSnackbarController.show({message: `Book ${this.m_name} has been deleted`})
             router.push(searchRoute.getPath())
         } catch (e) {
             console.error("Error while deleting book.", e)

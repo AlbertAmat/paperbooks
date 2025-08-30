@@ -89,6 +89,7 @@ import { VFileUpload } from 'vuetify/labs/VFileUpload'
 import {bookService} from "@/service/book/BookService";
 import {bookRoute} from "@/router/routes/BookRoute";
 import router from "@/router/Router";
+import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppSnackbarController";
 
 
 interface Props {
@@ -189,8 +190,8 @@ async function addBook() {
 		loading.value = true;
 		const id = await bookService.createBook(name.value, description.value, isbn.value, image.value || null);
 		await router.push(bookRoute.getPath(id));
+		appSnackbarController.show({message: `Book '${name.value}' has been added`})
 		dialog.value = false;
-
 	} finally {
 		loading.value = false;
 	}
@@ -198,7 +199,7 @@ async function addBook() {
 
 watch(() => image.value, (img) => {
 	if(img && !img.type.startsWith("image/")) {
-		// TODO; SNACKBAR. Throw error that given file type is not supported
+		appSnackbarController.show({message: `Only images are allowed`, type: SnackbarType.ERROR})
 		image.value = undefined;
 	}
 })

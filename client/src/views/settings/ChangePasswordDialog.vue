@@ -116,6 +116,7 @@ import SettingsController from "@/controller/settings/SettingsController";
 import {ref, computed} from "vue";
 import {AxiosError} from "axios";
 import {userService} from "@/service/user/UserService";
+import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 interface Props {
 	controller: SettingsController,
@@ -170,6 +171,7 @@ async function changePassword() {
 			currentPassword.value,
 			newPassword1.value
 		);
+		appSnackbarController.show({message: "Password changed successfully"})
 		dialog.value = false;
 		currentPassword.value = "";
 		newPassword1.value = "";

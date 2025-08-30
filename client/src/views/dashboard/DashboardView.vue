@@ -83,6 +83,7 @@ import DashboardCard from "@/views/dashboard/DashboardCard.vue";
 import BooksInTimeChart from "@/views/dashboard/BooksInTimeChart.vue";
 import {bookRoute} from "@/router/routes/BookRoute";
 import {computed} from "vue";
+import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppSnackbarController";
 
 const controller = new DashboardController();
 

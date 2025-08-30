@@ -2,9 +2,8 @@
 
 ## TODO
 * login popup 401
-* app labels + use table
-* handle axios errros
-* snackabars
+* app labels + use db table
+* handle axios erros
 * batch load of books in a location
 * batch load of books to a customer
 

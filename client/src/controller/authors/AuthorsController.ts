@@ -4,6 +4,7 @@ import {ShallowRef, shallowRef} from "vue";
 import IBookAuthor from "@/types/book/IBookAuthor";
 import BookAuthor from "@/model/author/BookAuthor";
 import {authorsService} from "@/service/author/AuthorsService";
+import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 export default class AuthorsController extends BaseController<IBookAuthor[]> {
 
@@ -47,6 +48,7 @@ export default class AuthorsController extends BaseController<IBookAuthor[]> {
         try {
             const customer = await authorsService.addAuthor(name);
             this.m_authors.value = [...this.m_authors.value, new BookAuthor(customer)];
+            appSnackbarController.show({message: "New author added: " + name})
         } catch (e) {
             console.error(e);
         }
@@ -63,6 +65,7 @@ export default class AuthorsController extends BaseController<IBookAuthor[]> {
                 await authorsService.deleteAuthor(id);
                 this.m_authors.value.splice(index, 1);
                 this.m_authors.value = [...this.m_authors.value];
+                appSnackbarController.show({message: "Author has been deleted successfully"})
             } catch (e) {
                 console.error(e);
             }
