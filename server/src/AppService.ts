@@ -12,7 +12,8 @@ import jwt from "jsonwebtoken"; // JSON Web Token library for authentication
 import dotenv from "dotenv"; // Load environment variables from .env
 import bcrypt from "bcrypt"; // Library for password hashing
 import helmet from "helmet"; // Middleware to set secure HTTP headers
-import rateLimit from "express-rate-limit"; // Middleware to limit repeated requests
+import rateLimit from "express-rate-limit";
+import path from "path"; // Middleware to limit repeated requests
 
 export class AppService {
     /**
@@ -89,6 +90,9 @@ export class AppService {
         this.m_app.use(bodyParser.urlencoded({extended: true})); // Parse URL-encoded bodies
         this.m_app.use(cookieParser()); // Parse cookies
 
+        // use static from compiled app in /assets/app
+        this.m_app.use(express.static(path.join(__dirname,  "assets", "app")));
+
         // Secure HTTP headers
         this.m_app.use(helmet());
 
@@ -140,10 +144,6 @@ export class AppService {
      * Initialize the API server
      */
     public init() {
-        console.log(`
-        [ASCII Art Banner]
-        `);
-
         const server = http.createServer(this.m_app);
 
         // Load all routes into Express

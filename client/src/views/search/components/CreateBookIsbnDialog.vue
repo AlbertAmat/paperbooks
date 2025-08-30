@@ -41,7 +41,11 @@
 						style="width: 250px; flex: none"
 						class="mt-3"
 						@keydown.enter="handleEnter()"
-					></v-text-field>
+					>
+						<template v-slot:append-inner>
+							<barcode-scanner @value="addBarcodeValue"/>
+						</template>
+					</v-text-field>
 				</div>
 
 				<v-list
@@ -112,6 +116,7 @@ import {AxiosError} from "axios";
 import {bookRoute} from "@/router/routes/BookRoute";
 import Book from "@/model/book/Book";
 import BookStock from "@/model/book/BookStock";
+import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
 
 interface Props {
 	modelValue: boolean
@@ -161,6 +166,13 @@ const isbnCodeList: Ref<string[]> = ref([]);
 const disableButton = computed(() => {
 	return loadingIsbnCode.value.length > 0 || isbnCodeList.value.length == 0
 })
+
+function addBarcodeValue(value: string) {
+	if(isValidIsbn(value)) {
+		isbnCode.value = value;
+		handleEnter()
+	}
+}
 
 // ISBN validation function
 function isValidIsbn(isbn: string): boolean {
@@ -212,7 +224,7 @@ function addBooks() {
 			loadingIsbnCode.value.splice(index, 1);
 
 			if (loadingIsbnCode.value.length == 0) {
-				if (errorIsbnCode.value.length === 0) {
+				if (errorIsbnCode.value.length !== 0) {
 					isbnCodeList.value = [...isbnCodeList.value.filter((item) => !errorIsbnCode.value.includes(item))]
 				} else {
 					dialog.value = false;
@@ -220,6 +232,10 @@ function addBooks() {
 			}
 		}
 	})
+
+	if(errorIsbnCode.value.length == 0) {
+		dialog.value = false;
+	}
 }
 
 watch(() => dialog.value, () => {

@@ -219,6 +219,6 @@ onUnmounted(() => {
 });
 
 watch(() => router.currentRoute.value.query, () => {
-	model.fetchBooks();
-})
+	model.fetchBooks(true);
+}, {immediate: true})
 </script>

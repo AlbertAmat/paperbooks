@@ -14,6 +14,7 @@
     "@mdi/font": "^7.4.47",
     "axios": "^1.11.0",
     "chart.js": "^4.5.0",
+    "html5-qrcode": "^2.3.8",
     "jsbarcode": "^3.12.1",
     "sass": "^1.89.2",
     "sass-loader": "^16.0.5",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
     "@types/node": "^22.15.32",
+    "@types/vue-barcode-reader": "^0.0.3",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/tsconfig": "^0.7.0",
     "npm-run-all2": "^8.0.4",

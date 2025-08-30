@@ -23,7 +23,7 @@ CREATE TABLE app_labels (
     language CHAR(2),
     text VARCHAR(100) NOT NULL,
     PRIMARY KEY (code, language),
-    FOREIGN KEY (language) REFERENCES system_languages(code) ON DELETE CASCADE
+    FOREIGN KEY (language) REFERENCES app_languages(code) ON DELETE CASCADE
 );
 
 -- Users table

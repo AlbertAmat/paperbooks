@@ -2,10 +2,11 @@ import {PATH_PREFIX} from "@/Constants";
 import {ISearchResponse} from "@/types/search/ISearchResponse";
 import axiosInstance from "@/plugins/axiosInstance";
 import ILocation from "@/types/location/ILocation";
+import ILocationExt from "@/types/location/ILocationExt";
 
 class LocationsService {
 
-    public async getLocations(): Promise<ILocation[]> {
+    public async getLocations(): Promise<ILocationExt[]> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/location`)
         return data;
     }
@@ -17,7 +18,7 @@ class LocationsService {
         })
     }
 
-    public async addLocation(name: string, description: string | null): Promise<ILocation> {
+    public async addLocation(name: string, description: string | null): Promise<ILocationExt> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/location`, {
             name: name,
             description: description

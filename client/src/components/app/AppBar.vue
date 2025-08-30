@@ -15,7 +15,11 @@
 		prepend-inner-icon="mdi-magnify"
 		variant="solo-filled"
 		@keydown.enter="doSearch()"
-	></v-text-field>
+	>
+		<template v-slot:append-inner>
+			<barcode-scanner @value="searchBarcode"/>
+		</template>
+	</v-text-field>
 
 	<v-spacer></v-spacer>
 
@@ -31,6 +35,7 @@ import {useRoute} from "vue-router";
 import {SearchRoute, searchRoute} from "@/router/routes/SearchRoute";
 import router from "@/router/Router";
 import UserMenu from "@/components/app/UserMenu.vue";
+import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
 
 const route = useRoute()
 
@@ -46,6 +51,11 @@ const searchInput: Ref<string> = ref(query);
 function doSearch() {
 	const search = searchInput.value.trim();
 	router.push(searchRoute.getPath(search));
+}
+
+function searchBarcode(value: string) {
+	searchInput.value = value;
+	doSearch()
 }
 </script>
 

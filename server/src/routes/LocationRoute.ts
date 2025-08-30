@@ -17,7 +17,8 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
         const result = await client.query(`
             SELECT id, 
                    name, 
-                   description
+                   description,
+                   (SELECT COUNT(*) FROM book_stocks WHERE book_stocks.location_id = locations.id) total_books
               FROM locations
                WHERE user_id = $1
         `, [userId]);
@@ -53,7 +54,8 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
         const result = await pool.query(`
             SELECT locations.id,
                    locations.name,
-                   locations.description
+                   locations.description,
+                   (SELECT COUNT(*) FROM book_stocks WHERE book_stocks.location_id = locations.id) total_books
             FROM locations
             WHERE locations.id = ${insertLocation.rows[0].id}
             AND locations.user_id = $1
@@ -104,8 +106,9 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
         const locationQueryResult = await pool.query(
             `SELECT locations.id,
                     locations.name,
-                    locations.description
-              FROM locations
+                    locations.description,
+                    (SELECT COUNT(*) FROM book_stocks WHERE book_stocks.location_id = locations.id) total_books
+             FROM locations
              WHERE locations.id = $1
                AND locations.user_id = $2
                `,

@@ -2,7 +2,6 @@ import express, {Request, Response} from "express";
 import {appService} from "../AppService";
 import jwt from "jsonwebtoken";
 import path from "path";
-import {requireAuth} from "../middlewares/AuthMiddleware";
 
 const router = express.Router();
 

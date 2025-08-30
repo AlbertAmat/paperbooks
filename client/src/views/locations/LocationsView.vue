@@ -17,6 +17,9 @@
 				density="compact"
 				:items="locations"
 			>
+				<template v-slot:item.totalBooks="{ item }">
+					<v-chip density="compact">{{item.totalBooks}}</v-chip>
+				</template>
 				<template v-slot:item.actions="{ item }">
 					<v-icon
 						@click="editLocation(item.id)"
@@ -59,9 +62,9 @@ import PageComponent from "@/views/PageComponent.vue";
 import LocationsController from "@/controller/locations/LocationsController";
 import {computed, ref, Ref, ShallowRef, shallowRef} from "vue";
 import LocationDialog from "@/views/locations/LocationDialog.vue";
-import Location from "@/model/location/Location";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import {applicationService} from "@/service/ApplicationService";
+import LocationExt from "@/model/location/LocationExt";
 
 const controller = new LocationsController();
 
@@ -73,7 +76,7 @@ const dialog: Ref<boolean> = ref(false);
 /**
  *
  */
-const selectedLocation: ShallowRef<Location | undefined> = shallowRef(undefined);
+const selectedLocation: ShallowRef<LocationExt | undefined> = shallowRef(undefined);
 
 /**
  *
@@ -86,6 +89,7 @@ const headers = [
 		value: 'name',
 	},
 	{title: 'Description', value: 'description'},
+	{title: 'Total books', value: 'totalBooks'},
 	{title: 'Actions', value: 'actions', align: 'end',}
 ];
 
@@ -97,7 +101,8 @@ const locations = computed(() => {
 		return {
 			id: location.getId(),
 			name: location.getName(),
-			description: location.getDescription()
+			description: location.getDescription(),
+			totalBooks: location.getTotalBooks()
 		}
 	})
 })
