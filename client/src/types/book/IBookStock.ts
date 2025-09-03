@@ -1,4 +1,6 @@
-export interface IBookStock {
+import {IBookStockBase} from "@/types/book/IBookStockBase";
+
+export interface IBookStock extends IBookStockBase{
     id: number;
     code: string;
     status:BookStockStatusEnum;
@@ -7,6 +9,7 @@ export interface IBookStock {
     customer_id: number;
     customer_name: string;
 }
+
 
 export enum BookStockStatusEnum {
     AVAILABLE = 0,

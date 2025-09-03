@@ -1,10 +1,7 @@
 import IBookAuthor from "@/types/book/IBookAuthor";
+import {IBookBase} from "@/types/book/IBookBase";
 
-export default interface IBookItem {
-    id: number;
-    name: string;
-    image_url: string | null;
-    isbn: string | null;
+export default interface IBookItem extends IBookBase{
     category_id: number | null;
     language_code: string | null;
     authors: IBookAuthor[];

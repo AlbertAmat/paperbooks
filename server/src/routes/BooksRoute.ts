@@ -4,6 +4,9 @@ import axios from "axios";
 import {v4 as uuidv4} from 'uuid';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import multer from "multer";
+import {IBookStockBase} from "../types/book/IBookStockBase";
+import {IBookBase} from "../types/book/IBookBase";
+import {IBookAddMd} from "../types/book/IBookAddMd";
 
 const router: Router = Router();
 
@@ -278,7 +281,6 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
             id,
             userId
         ];
-        console.log("published_date", published_date)
         await client.query(updateQuery, updateValues);
 
         // Handle authors relationship in the book_authors table
@@ -773,6 +775,109 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
         res.status(500).send("Error deleting the book stock");
     }
 });
+
+/**
+ * Path: /book/{id}
+ * given a book isbn or book stock code get the book metadata necessary for adding a book
+ */
+//@ts-ignore
+//@ts-ignore
+router.get('/:bookCode/add/md', requireAuth, async (req: Request, res: Response) => {
+    const bookCode = String(req.params.bookCode).trim();
+    const userId = appService.getSessionUser(req);
+
+    const pool = appService.getDatabasePool();
+
+    try {
+        // 1. Try to match a stock code
+        const stockResult = await pool.query(
+            `
+            SELECT 
+                b.id AS book_id,
+                b.name,
+                b.image_url,
+                b.isbn,
+                bs.id AS stock_id,
+                bs.code AS stock_code,
+                bs.status
+            FROM book_stocks bs
+            INNER JOIN books b ON b.id = bs.book_id
+            WHERE bs.code = $1 AND bs.user_id = $2
+            LIMIT 1
+            `,
+            [bookCode, userId]
+        );
+
+        if (stockResult.rows.length > 0) {
+            const row = stockResult.rows[0];
+            const response: IBookAddMd = {
+                id: row.book_id,
+                name: row.name,
+                image_url: row.image_url,
+                isbn: row.isbn,
+                stocks: [
+                    {
+                        id: row.stock_id,
+                        code: row.stock_code,
+                        status: row.status
+                    }
+                ]
+            };
+            return res.status(200).json(response);
+        }
+
+        // 2. If not stock code, try as ISBN and fetch all stocks
+        const isbnResult = await pool.query(
+            `
+            SELECT 
+                b.id AS book_id,
+                b.name,
+                b.image_url,
+                b.isbn,
+                bs.id AS stock_id,
+                bs.code AS stock_code,
+                bs.status
+            FROM books b
+            LEFT JOIN book_stocks bs 
+                ON b.id = bs.book_id 
+               AND bs.user_id = $2
+            WHERE b.isbn = $1 AND b.user_id = $2
+            `,
+            [bookCode, userId]
+        );
+
+        if (isbnResult.rows.length === 0) {
+            return res.status(404).send("Book not found");
+        }
+
+        const base: IBookBase = {
+            id: isbnResult.rows[0].book_id,
+            name: isbnResult.rows[0].name,
+            image_url: isbnResult.rows[0].image_url,
+            isbn: isbnResult.rows[0].isbn
+        };
+
+        const stocks: IBookStockBase[] = isbnResult.rows
+            .filter(r => r.stock_id) // remove rows with no stock
+            .map(r => ({
+                id: r.stock_id,
+                code: r.stock_code,
+                status: r.status
+            }));
+
+        const response: IBookAddMd = {
+            ...base,
+            stocks
+        };
+
+        return res.status(200).json(response);
+
+    } catch (error) {
+        console.error("Transaction error:", error);
+        res.status(500).send("Error retrieving the book data");
+    }
+});
+
 
 // Helper function to format date to YYYY-MM-DD
 function formatPublishedDate(date: string | undefined): string | null {

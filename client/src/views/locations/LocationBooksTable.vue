@@ -4,22 +4,47 @@
 		density="compact"
 		:items="books"
 	>
+		<template v-slot:top>
+			<v-toolbar
+				flat
+				density="compact"
+				class="px-3"
+			>
+				<v-spacer/>
+				<v-btn
+					@click="addDialog = true;"
+					density="compact"
+					prepend-icon="mdi-plus"
+					text="Add a Book"
+					variant="elevated"
+					class="text-none gradient"
+				></v-btn>
+			</v-toolbar>
+		</template>
+
 		<template v-slot:item.status="{item}">
 			<v-chip
-				small
-				outlined
+				density="compact"
+				variant="outlined"
 				:color="item.status_color"
 			>
 				{{ item.status_text }}
 			</v-chip>
 		</template>
 	</v-data-table-virtual>
+
+	<add-location-books
+		v-if="addDialog"
+		v-model="addDialog"
+		:location="location"
+	/>
 </template>
 
 <script setup lang="ts">
 import {computed, onMounted, Ref, ref} from "vue";
 import LocationExt from "@/model/location/LocationExt";
 import BookStock from "@/model/book/BookStock";
+import AddLocationBooks from "@/components/addBookStocks/AddLocationBooks.vue";
 
 interface Props {
 	location: LocationExt
@@ -27,7 +52,8 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const loading:Ref<boolean> = ref(false);
+const loading: Ref<boolean> = ref(false);
+const addDialog: Ref<boolean> = ref(false);
 
 const headers = [
 	{
@@ -38,7 +64,7 @@ const headers = [
 	{title: 'Status', value: 'status'},
 ];
 
-const books = computed(()=> {
+const books = computed(() => {
 	return props.location.getBooks().map((book) => {
 		const status = BookStock.BookStockStatus.find((item) => item.value === book.getStockStatus());
 
@@ -54,7 +80,7 @@ const books = computed(()=> {
 })
 
 onMounted(async () => {
-	if(props.location.getBooks().length == 0) {
+	if (props.location.getBooks().length == 0) {
 		try {
 			loading.value = true;
 			await props.location.fetchBooks();

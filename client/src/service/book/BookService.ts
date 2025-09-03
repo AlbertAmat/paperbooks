@@ -3,6 +3,7 @@ import {PATH_PREFIX} from "@/Constants";
 import IBook from "@/types/book/IBook";
 import {BookStockStatusEnum, IBookStock} from "@/types/book/IBookStock";
 import axiosInstance from "@/plugins/axiosInstance";
+import {IBookAddMd} from "@/types/book/IBookAddMd";
 
 export class BookService {
 
@@ -142,6 +143,16 @@ export class BookService {
      */
     public async deleteBook(id: number): Promise<void> {
         await axiosInstance.delete(`${PATH_PREFIX}/book/${id}`);
+    }
+
+
+    /**
+     *
+     * @param bookCode
+     */
+    public async fetchBookAddMd(bookCode: string): Promise<IBookAddMd> {
+        const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/${bookCode}/add/md`);
+        return data;
     }
 
 }

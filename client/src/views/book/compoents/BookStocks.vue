@@ -16,16 +16,17 @@
 		</template>
 
 		<template v-slot:default>
-			<v-data-table-virtual
+			<v-data-table
 				:key="book.getStocks().length"
 				:headers="headers"
 				density="compact"
 				:items="stocks"
 			>
+
 				<template v-slot:item.status="{item}">
 					<v-chip
-						small
-						outlined
+						density="compact"
+						variant="outlined"
 						:color="item.status_color"
 					>
 						{{ item.status_text }}
@@ -64,7 +65,7 @@
 						</v-icon>
 					</v-btn>
 				</template>
-			</v-data-table-virtual>
+			</v-data-table>
 
 			<book-stock-dialog
 				v-if="stockDialog"

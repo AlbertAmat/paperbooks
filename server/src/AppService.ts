@@ -1,7 +1,6 @@
 import express, {Express, Request} from "express"; // Express framework for building APIs
 import bodyParser from "body-parser"; // Middleware to parse incoming request bodies
 import http, {Server} from "http"; // Node HTTP module to create server
-import DatabaseConf from "./types/DatabaseConf"; // Type for database configuration
 import pg from 'pg'; // PostgreSQL client
 import {routes} from "./routes/Routes"; // Import all application routes
 import {Logger} from "./utils/Logger"; // Custom logger utility
@@ -14,6 +13,14 @@ import bcrypt from "bcrypt"; // Library for password hashing
 import helmet from "helmet"; // Middleware to set secure HTTP headers
 import rateLimit from "express-rate-limit";
 import path from "path"; // Middleware to limit repeated requests
+
+interface DatabaseConf {
+    host: string;
+    port: number;
+    name: string;
+    user: string;
+    password: string;
+}
 
 export class AppService {
     /**
