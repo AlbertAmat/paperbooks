@@ -18,7 +18,9 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
             totalCategories,
             totalCustomers,
             booksInTime,
-            stockStatus
+            stockStatus,
+            totalBookedBooks,
+            totalLocations
         ] = await Promise.all([
             pool.query(`
                     SELECT b.id,
@@ -39,7 +41,9 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
             pool.query(`SELECT COUNT(*) AS count FROM categories WHERE user_id = $1`, [userId]),
             pool.query(`SELECT COUNT(*) AS count FROM customers WHERE user_id = $1`, [userId]),
             pool.query(`SELECT date_trunc('month', date_created) AS month, COUNT(*) AS total_books FROM books WHERE user_id = $1 GROUP BY month ORDER BY month`, [userId]),
-            pool.query(`SELECT status, COUNT(*) AS count FROM book_stocks WHERE user_id = $1 GROUP BY status`, [userId])
+            pool.query(`SELECT status, COUNT(*) AS count FROM book_stocks WHERE user_id = $1 GROUP BY status`, [userId]),
+            pool.query(`SELECT COUNT(*) AS count FROM book_stocks WHERE user_id = $1 AND customer_id IS NOT NULL`, [userId]),
+            pool.query(`SELECT COUNT(*) AS count FROM locations WHERE user_id = $1`, [userId])
         ]);
 
         res.json({
@@ -50,7 +54,9 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
             totalCategories: totalCategories.rows[0].count,
             totalCustomers: totalCustomers.rows[0].count,
             booksInTime: booksInTime.rows,
-            stockStatus: stockStatus.rows
+            stockStatus: stockStatus.rows,
+            totalBookedBooks: totalBookedBooks.rows[0].count,
+            totalLocations: totalLocations.rows[0].count,
         });
 
     } catch (err) {

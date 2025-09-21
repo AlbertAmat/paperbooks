@@ -208,12 +208,13 @@ function handleEnter() {
 	isbnCode.value = "";
 }
 
-function addBooks() {
-	isbnCodeList.value.forEach(async (code) => {
+async function addBooks() {
+	const createdBooksId: number[] = [];
+	for (const code of isbnCodeList.value) {
 		try {
 			loadingIsbnCode.value.push(code);
-			// TODO: CHECK IF BOOK EXIST
-			await bookService.createBookFromIsbn(code);
+			const id = await bookService.createBookFromIsbn(code);
+			createdBooksId.push(id);
 		} catch (e) {
 			const error = e as AxiosError;
 			if (error.status === 404 || error.status === 500) {
@@ -223,18 +224,24 @@ function addBooks() {
 			const index = loadingIsbnCode.value.indexOf(code);
 			loadingIsbnCode.value.splice(index, 1);
 
-			if (loadingIsbnCode.value.length == 0) {
+			if (loadingIsbnCode.value.length === 0) {
 				if (errorIsbnCode.value.length !== 0) {
-					isbnCodeList.value = [...isbnCodeList.value.filter((item) => !errorIsbnCode.value.includes(item))]
+					isbnCodeList.value = isbnCodeList.value.filter(
+						item => !errorIsbnCode.value.includes(item)
+					);
 				} else {
 					dialog.value = false;
 				}
 			}
 		}
-	})
+	}
 
-	if(errorIsbnCode.value.length == 0) {
+	if (errorIsbnCode.value.length === 0) {
 		dialog.value = false;
+
+		if(createdBooksId.length == 1) {
+			router.push(bookRoute.getPath(createdBooksId[0]));
+		}
 	}
 }
 

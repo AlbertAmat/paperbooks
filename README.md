@@ -5,7 +5,6 @@
 * publish + add to server
 * app labels + use db table
 * handle axios erros
-* batch load of books to a customer
 * add action un unreserve books
 
 ## backlog

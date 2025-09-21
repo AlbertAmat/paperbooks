@@ -7,15 +7,15 @@
 		>
 			<v-col cols="9" class="pl-0 pr-0">
 				<v-row no-gutters class="pa-0">
-					<v-col cols="4"  class="px-1 pb-1">
+					<v-col cols="4" class="px-1 pb-1">
 						<dashboard-card title="Overview" class="gradient">
 							<h2>
-								{{controller.getTotalBooks()}}
+								{{ controller.getTotalBooks() }}
 								<v-icon
 									size="18"
 									:color="upBooksTrend ? 'green' : 'red'"
 								>
-									{{upBooksTrend ? 'mdi-arrow-top-right' : 'mdi-arrow-bottom-left'}}
+									{{ upBooksTrend ? 'mdi-arrow-top-right' : 'mdi-arrow-bottom-left' }}
 								</v-icon>
 							</h2>
 							<span class="v-card-subtitle pl-0 mt-1">Total books</span>
@@ -23,16 +23,47 @@
 					</v-col>
 
 					<v-col cols="4" class="px-1 pb-1">
+						<dashboard-card title="Booked books">
+							<div style="display:flex; width: 100%; align-items: center">
+								<div style="flex: 1">
+									<h2>{{ controller.getTotalBookedBooks() }}</h2>
+									<span class="v-card-subtitle pl-0 mt-1">Total</span>
+								</div>
+
+								<v-btn
+									class="text-none mr-2 gradient"
+									small
+									color="priamry"
+								>
+									Release
+								</v-btn>
+							</div>
+						</dashboard-card>
+					</v-col>
+
+					<v-col cols="4" class="px-1 pb-1">
 						<dashboard-card title="Categories">
-							<h2>{{controller.getTotalCategories()}}</h2>
+							<h2>{{ controller.getTotalCategories() }}</h2>
 							<span class="v-card-subtitle pl-0 mt-1">Total</span>
 						</dashboard-card>
 					</v-col>
 
 					<v-col cols="4" class="px-1 pb-1">
 						<dashboard-card title="Customers">
-							<h2>{{controller.getTotalCustomers()}}</h2>
+							<h2>{{ controller.getTotalCustomers() }}</h2>
 							<span class="v-card-subtitle pl-0 mt-1">Total</span>
+						</dashboard-card>
+					</v-col>
+
+					<v-col cols="4" class="px-1 pb-1">
+						<dashboard-card title="Locations">
+							<h2>{{ controller.getTotalLocations() }}</h2>
+							<span class="v-card-subtitle pl-0 mt-1">Total</span>
+						</dashboard-card>
+					</v-col>
+
+					<v-col cols="4" class="px-1 pb-1">
+						<dashboard-card title=" ">
 						</dashboard-card>
 					</v-col>
 
@@ -83,7 +114,6 @@ import DashboardCard from "@/views/dashboard/DashboardCard.vue";
 import BooksInTimeChart from "@/views/dashboard/BooksInTimeChart.vue";
 import {bookRoute} from "@/router/routes/BookRoute";
 import {computed} from "vue";
-import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppSnackbarController";
 
 const controller = new DashboardController();
 

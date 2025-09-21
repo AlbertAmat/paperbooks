@@ -15,6 +15,8 @@ export default class DashboardController extends BaseController<IDashboard> {
     private m_totalLastMonth: number = 0;
     private m_totalCategories: number = 0;
     private m_totalCustomers: number = 0;
+    private m_totalBookedBooks: number = 0;
+    private m_totalLocations: number = 0;
     private m_booksInTime: IBooksInTime[] = [];
     private m_stockStatus: IDashboardStockSatuts[] = [];
 
@@ -33,6 +35,8 @@ export default class DashboardController extends BaseController<IDashboard> {
         this.m_totalLastMonth = data.totalLastMonth;
         this.m_totalCategories = data.totalCategories;
         this.m_totalCustomers = data.totalCustomers;
+        this.m_totalLocations = data.totalLocations;
+        this.m_totalBookedBooks = data.totalBookedBooks;
         this.m_booksInTime = data.booksInTime;
         this.m_stockStatus = data.stockStatus;
     }
@@ -57,8 +61,16 @@ export default class DashboardController extends BaseController<IDashboard> {
         return this.m_totalCategories;
     }
 
+    public getTotalLocations() {
+        return this.m_totalLocations;
+    }
+
     public getTotalCustomers() {
         return this.m_totalCustomers;
+    }
+
+    public getTotalBookedBooks() {
+        return this.m_totalBookedBooks;
     }
 
     public getBooksInTime() {

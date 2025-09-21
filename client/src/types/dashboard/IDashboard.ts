@@ -7,6 +7,8 @@ export default interface IDashboard {
     totalLastMonth: number;
     totalCategories: number;
     totalCustomers: number;
+    totalLocations: number;
+    totalBookedBooks: number;
     booksInTime: IBooksInTime[];
     stockStatus: IDashboardStockSatuts[];
 }
