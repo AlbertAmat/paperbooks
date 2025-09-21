@@ -1,0 +1,49 @@
+<template>
+	<book-stock-codes-dialog
+		v-model="dialog"
+		:loading="loading"
+		@add-books="addBooks"
+	/>
+</template>
+
+<script setup lang="ts">
+import {computed, ref, Ref} from "vue";
+import BookStockCodesDialog from "@/components/addBookStocks/BookStockCodesDialog.vue";
+import Customer from "@/model/customer/Customer";
+import {customersService} from "@/service/customers/CustomersService";
+
+interface Props {
+	customer: Customer,
+	modelValue: boolean
+}
+
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+	(e: 'update:modelValue', value: boolean): void
+}>()
+
+/**
+ *
+ */
+const dialog = computed({
+	get: () => props.modelValue,
+	set: (val: boolean) => emit('update:modelValue', val),
+})
+
+/**
+ *
+ */
+const loading: Ref<boolean> = ref(false);
+
+async function addBooks(books: string[]) {
+	try {
+		loading.value = true;
+		const data = await customersService.addBooks(props.customer.getCustomerId(), books);
+		props.customer.setBooks(data);
+	} finally {
+		loading.value = false;
+		dialog.value = false;
+	}
+}
+</script>

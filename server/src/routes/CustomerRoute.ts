@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import {appService} from "../AppService";
+import {Pool} from "pg";
 
 const router = Router();
 
@@ -16,7 +17,8 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
     try {
         const result = await client.query(`
             SELECT id, 
-                   name
+                   name,
+                   (SELECT count(*) FROM book_stocks WHERE book_stocks.customer_id = customers.id) total_books
               FROM customers
                WHERE user_id = $1
         `, [userId]);
@@ -144,5 +146,124 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
         client.release();
     }
 });
+
+
+/**
+ * Path: /customer/id/books
+ */
+//@ts-ignore
+router.get('/:id/books', requireAuth, async (req: Request, res: Response) => {
+    const customerId = Number(req.params.id);
+    if (!customerId) {
+        return res.status(400).send('No customer ID provided');
+    }
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        const books = await getCustomerBooks(pool, customerId, userId);
+        res.status(200).json(books);
+    } catch (err: any) {
+        console.error('Error executing query', err.stack);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+/**
+ * Path: /location/id/add/books
+ *
+ * Add books stock codes into a location. Used to movea stack of books between locations
+ */
+//@ts-ignore
+router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) => {
+    const customerId = Number(req.params.id);
+    const books: string[] = req.body.books;
+
+    if (!customerId) {
+        return res.status(400).send('No customer ID provided');
+    }
+
+    if (books.length === 0) {
+        return res.status(400).send('No books provided');
+    }
+
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        for (const bookStockCode of books) {
+            await pool.query(
+                'UPDATE book_stocks SET customer_id = $1, status = $2 WHERE code = $3 AND user_id = $4',
+                [customerId, 2, bookStockCode, userId]
+            );
+        }
+
+        const customerBooks = await getCustomerBooks(pool, customerId, userId);
+
+        res.status(200).json(customerBooks);
+    } catch (err: any) {
+        console.error('Error adding books to a customer', err.stack);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+/**
+ * Path: /location/id/books/bookStockCode
+ *
+ *
+ */
+//@ts-ignore
+router.delete('/:id/book/:bookStockCode', requireAuth, async (req: Request, res: Response) => {
+    const customerId = Number(req.params.id);
+    const bookStockCode = String(req.params.bookStockCode);
+
+    if (!customerId) {
+        return res.status(400).send('No customer ID provided');
+    }
+
+    if (!bookStockCode) {
+        return res.status(400).send('No book stock code provided');
+    }
+
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        await pool.query(
+            'UPDATE book_stocks SET status = $1, customer_id = $2 WHERE code = $3 AND customer_id = $4 AND user_id = $5',
+            [0, null, bookStockCode, customerId, userId]
+        );
+
+        res.status(200).send();
+    } catch (err: any) {
+        console.error('Error adding books to a customer', err.stack);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+/**
+ *
+ * @param pool
+ * @param customerId
+ * @param userId
+ */
+async function getCustomerBooks(pool: Pool, customerId: number, userId: number) {
+    const customerQueryResult = await pool.query(
+        `SELECT books.id,
+                books.name,
+                books.image_url,
+                books.isbn,
+                book_stocks.code
+              FROM book_stocks, books
+             WHERE book_stocks.book_id = books.id
+               AND book_stocks.user_id = $1
+               AND books.user_id = $2
+               AND book_stocks.customer_id = $3
+               `,
+        [userId, userId, customerId]
+    );
+
+   return customerQueryResult.rows;
+}
 
 export default router;

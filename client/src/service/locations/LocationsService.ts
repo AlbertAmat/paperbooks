@@ -37,7 +37,6 @@ class LocationsService {
         await axiosInstance.delete(`${PATH_PREFIX}/location/${locationId}`)
     }
 
-
     /**
      *
      * @param locationId

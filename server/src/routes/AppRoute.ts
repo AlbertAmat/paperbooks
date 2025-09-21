@@ -73,7 +73,8 @@ async function getCustomers(userId: number): Promise<Record<string, any>[]> {
 
     const query = `
         SELECT id,
-               name
+               name,
+               (SELECT count(*) FROM book_stocks WHERE book_stocks.customer_id = customers.id) total_books
         FROM customers
         WHERE user_id = $1
     `

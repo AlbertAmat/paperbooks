@@ -3,6 +3,8 @@ import {ISearchResponse} from "@/types/search/ISearchResponse";
 import axiosInstance from "@/plugins/axiosInstance";
 import ILocation from "@/types/location/ILocation";
 import ICustomer from "@/types/customer/ICustomer";
+import {ICustomerBook} from "@/types/customer/ICustomerBook";
+import ILocationBook from "@/types/location/ILocationBook";
 
 class CustomersService {
 
@@ -27,6 +29,29 @@ class CustomersService {
 
     public async deleteCustomer(customerId: number): Promise<void> {
         await axiosInstance.delete(`${PATH_PREFIX}/customer/${customerId}`)
+    }
+
+    public async getCustomerBooks(customerId:number): Promise<ICustomerBook[]> {
+        const {data} = await axiosInstance.get(`${PATH_PREFIX}/customer/${customerId}/books`);
+        return data;
+    }
+
+    /**
+     *
+     * @param customerId
+     * @param books: array of book stock code
+     */
+    public async addBooks(customerId: number, books: string[]): Promise<ICustomerBook[]> {
+        const {data} = await axiosInstance.post(`${PATH_PREFIX}/customer/${customerId}/add/books`, {books: books});
+        return data;
+    }
+
+    /**
+     * Remove a book from a customer
+     * @param customerId
+     */
+    public async removeCustomerBook(customerId: number, bookStockCode: string): Promise<void> {
+        await axiosInstance.delete(`${PATH_PREFIX}/customer/${customerId}/book/${bookStockCode}`);
     }
 }
 

@@ -7,6 +7,7 @@ import multer from "multer";
 import {IBookStockBase} from "../types/book/IBookStockBase";
 import {IBookBase} from "../types/book/IBookBase";
 import {IBookAddMd} from "../types/book/IBookAddMd";
+import {Pool, PoolClient} from "pg";
 
 const router: Router = Router();
 
@@ -366,6 +367,36 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     }
 });
 
+
+/**
+ * Change book image
+ */
+router.post('/:id/image', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    let imageUrl = "";
+
+    if (req.file) {
+        const base64 = req.file.buffer.toString("base64");
+        imageUrl = `data:${req.file.mimetype};base64,${base64}`;
+    }
+
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        const updatedBook = await pool.query(
+            "UPDATE books SET image_url = $1 WHERE id = $2 AND user_id = $3",
+            [imageUrl, id, userId]
+        );
+
+        res.status(200).json(updatedBook.rowCount);
+    } catch (error) {
+        // Rollback on error
+        console.error("Transaction error:", error);
+        res.status(500).send("Error adding book");
+    }
+});
+
 /**
  * Create book manually
  */
@@ -401,7 +432,15 @@ router.post('', requireAuth, upload.single("image"), async (req: Request, res: R
             [name, description, imageUrl, isbn, userId]
         );
 
-        res.status(200).json(insertBook.rows[0].id);
+        const bookId = insertBook.rows[0].id;
+
+        /************************************************************
+         * LOCATION
+         * Try to add the book to a location
+         * *********************************************************/
+        await automaticallyAddBookToLocation(pool, bookId, userId);
+
+        res.status(200).json(bookId);
     } catch (error) {
         // Rollback on error
         console.error("Transaction error:", error);
@@ -410,36 +449,7 @@ router.post('', requireAuth, upload.single("image"), async (req: Request, res: R
 });
 
 /**
- * Change book image
- */
-router.post('/:id/image', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    let imageUrl = "";
-
-    if (req.file) {
-        const base64 = req.file.buffer.toString("base64");
-        imageUrl = `data:${req.file.mimetype};base64,${base64}`;
-    }
-
-    const pool = appService.getDatabasePool();
-    const userId = appService.getSessionUser(req);
-
-    try {
-        const updatedBook = await pool.query(
-            "UPDATE books SET image_url = $1 WHERE id = $2 AND user_id = $3",
-            [imageUrl, id, userId]
-        );
-
-        res.status(200).json(updatedBook.rowCount);
-    } catch (error) {
-        // Rollback on error
-        console.error("Transaction error:", error);
-        res.status(500).send("Error adding book");
-    }
-});
-
-/**
- *
+ * Create book automatically base on isbn
  */
 //@ts-ignore
 router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
@@ -560,31 +570,42 @@ router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
                 bookId = bookResult.rows[0].id;
             }
 
-            // Insert authors into the authors and book_authors tables
-            if (authors && bookId) {
-                for (const author of authors) {
-                    // Check if the author exists
-                    let authorResult = await client.query(
-                        "SELECT id FROM authors WHERE name = $1 AND user_id = $2",
-                        [author, userId]
-                    );
-                    let authorId: number | null = null;
-                    if (authorResult.rowCount === 0) {
-                        const insertAuthorResult = await client.query(
-                            "INSERT INTO authors (name, user_id) VALUES ($1, $2) RETURNING id",
+            if (bookId != null) {
+                /************************************************************
+                 * AUTHORS
+                 * Insert authors into the authors and book_authors tables
+                 * *********************************************************/
+                if (authors) {
+                    for (const author of authors) {
+                        // Check if the author exists
+                        let authorResult = await client.query(
+                            "SELECT id FROM authors WHERE name = $1 AND user_id = $2",
                             [author, userId]
                         );
-                        authorId = insertAuthorResult.rows[0].id;
-                    } else {
-                        authorId = authorResult.rows[0].id;
-                    }
+                        let authorId: number | null = null;
+                        if (authorResult.rowCount === 0) {
+                            const insertAuthorResult = await client.query(
+                                "INSERT INTO authors (name, user_id) VALUES ($1, $2) RETURNING id",
+                                [author, userId]
+                            );
+                            authorId = insertAuthorResult.rows[0].id;
+                        } else {
+                            authorId = authorResult.rows[0].id;
+                        }
 
-                    // Insert into book_authors
-                    await client.query(
-                        "INSERT INTO book_authors (book_id, author_id, user_id) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING",
-                        [bookId, authorId, userId]
-                    );
+                        // Insert into book_authors
+                        await client.query(
+                            "INSERT INTO book_authors (book_id, author_id, user_id) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING",
+                            [bookId, authorId, userId]
+                        );
+                    }
                 }
+
+                /************************************************************
+                 * LOCATION
+                 * Try to add the book to a location
+                 * *********************************************************/
+                await automaticallyAddBookToLocation(client, bookId, userId);
             }
 
             // Commit transaction
@@ -873,6 +894,32 @@ async function generateBookStockCode(): Promise<string> {
     }
 
     return code;
+}
+
+/**
+ * Try to automatically create a book stock if user has only one location
+ * @param client
+ * @param bookId
+ * @param userId
+ */
+async function automaticallyAddBookToLocation(client: Pool | PoolClient, bookId: number, userId: number) {
+
+    const locations = await client.query(`
+        SELECT id
+        FROM locations
+        WHERE user_id = $1
+    `, [userId]);
+
+    if (locations.rowCount != null && locations.rowCount == 1) {
+        const locationId = locations.rows[0].id;
+
+        const code = await generateBookStockCode();
+
+        await client.query(
+            "INSERT INTO book_stocks (book_id, code, location_id, user_id) VALUES ($1, $2, $3, $4)",
+            [bookId, code, locationId, userId]
+        );
+    }
 }
 
 export default router;

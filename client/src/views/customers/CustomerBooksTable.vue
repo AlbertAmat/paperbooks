@@ -22,16 +22,6 @@
 			</v-toolbar>
 		</template>
 
-		<template v-slot:item.status="{item}">
-			<v-chip
-				density="compact"
-				variant="outlined"
-				:color="item.status_color"
-			>
-				{{ item.status_text }}
-			</v-chip>
-		</template>
-
 		<template v-slot:item.image="{item}">
 			<img
 				v-if="item.image != null"
@@ -45,29 +35,50 @@
 				<v-icon>mdi-image-outline</v-icon>
 			</div>
 		</template>
+
+		<template v-slot:item.action="{item}">
+			<v-btn
+				icon
+				variant="text"
+				density="compact"
+				@click="removeCustomerBook(item.code)"
+				:loading="removeLoading.includes(item.code)"
+				:disabled="removeLoading.includes(item.code)"
+				class="mx-1"
+			>
+				<v-icon
+					small
+					color="red"
+				>
+					mdi-delete
+				</v-icon>
+			</v-btn>
+		</template>
 	</v-data-table-virtual>
 
-	<location-add-books-dialog
+	<customer-add-books-dialog
 		v-if="addDialog"
 		v-model="addDialog"
-		:location="location"
+		:customer="customer"
 	/>
 </template>
 
 <script setup lang="ts">
 import {computed, onMounted, Ref, ref} from "vue";
-import LocationExt from "@/model/location/LocationExt";
-import BookStock from "@/model/book/BookStock";
-import LocationAddBooksDialog from "@/views/locations/LocationAddBooksDialog.vue";
+import Customer from "@/model/customer/Customer";
+import CustomerAddBooksDialog from "@/views/customers/CustomerAddBooksDialog.vue";
+import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 
 interface Props {
-	location: LocationExt
+	customer: Customer
 }
 
 const props = defineProps<Props>()
 
 const loading: Ref<boolean> = ref(false);
 const addDialog: Ref<boolean> = ref(false);
+
+const removeLoading: Ref<string[]> = ref([]);
 
 const headers = [
 	{
@@ -79,29 +90,35 @@ const headers = [
 		value: 'name',
 	},
 	{title: 'Code', value: 'code'},
-	{title: 'Status', value: 'status'},
+	{title: 'Actions', value: 'action'},
 ];
 
 const books = computed(() => {
-	return props.location.getBooks().map((book) => {
-		const status = BookStock.BookStockStatus.find((item) => item.value === book.getStockStatus());
-
+	return props.customer.getBooks().map((book) => {
 		return {
-			id: book.getBookId(),
-			name: book.getBookName(),
+			image: book.getImageUrl(),
+			id: book.getId(),
+			name: book.getName(),
 			code: book.getStockCode(),
-			image: book.getBookImageUrl(),
-			status: book.getStockStatus(),
-			status_color: status!.color,
-			status_text: status!.text,
 		}
 	})
 })
 
+async function removeCustomerBook(bookStockCode: string) {
+	confirmationDialogController.showDialog(`Remove book`, "Are you sure that you want to remove this book from this customer?", "Delete").then(async () => {
+		try {
+			removeLoading.value.push(bookStockCode);
+			await props.customer.removeBook(bookStockCode)
+		} finally {
+			removeLoading.value.splice(removeLoading.value.indexOf(bookStockCode), 1);
+		}
+	})
+}
+
 onMounted(async () => {
 	try {
 		loading.value = true;
-		await props.location.fetchBooks();
+		await props.customer.fetchBooks();
 	} finally {
 		loading.value = false;
 	}

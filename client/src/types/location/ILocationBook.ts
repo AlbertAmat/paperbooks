@@ -5,5 +5,6 @@ export default interface ILocationBook {
     book_id: number;
     code: string;
     name: string;
+    image_url: string | null;
     status: BookStockStatusEnum
 }

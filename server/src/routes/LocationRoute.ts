@@ -75,20 +75,16 @@ router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) =
     const userId = appService.getSessionUser(req);
 
     try {
-        console.log("Check if location id exist: ", locationId)
-
         const exist = await existLocation(pool, locationId, userId);
         if (!exist) {
             res.status(404).send('Location does not exist');
         }
 
         for (const bookStockCode of books) {
-            console.log("Adding book stock code: ", bookStockCode)
             await pool.query(
                 'UPDATE book_stocks SET location_id = $1 WHERE code = $2 AND user_id = $3',
                 [locationId, bookStockCode, userId]
             );
-            console.log("Book stock code added", bookStockCode)
         }
 
         const locationBooks = await getLocationBooks(pool, locationId, userId);
@@ -238,7 +234,8 @@ async function getLocationBooks(pool: Pool, locationId: number, userId: number) 
                    books.name,
                    books.id as book_id,
                    book_stocks.code,
-                   book_stocks.status
+                   book_stocks.status,
+                   books.image_url
             FROM book_stocks,
                  books
             WHERE book_stocks.location_id = $1

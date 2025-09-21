@@ -15,8 +15,14 @@
 			<v-data-table-virtual
 				:headers="headers"
 				density="compact"
+				show-expand
+				item-value="id"
 				:items="customers"
 			>
+				<template v-slot:item.totalBooks="{ item }">
+					<v-chip density="compact">{{ item.totalBooks }}</v-chip>
+				</template>
+
 				<template v-slot:item.actions="{ item }">
 					<v-icon
 						@click="editCustomer(item.id)"
@@ -42,6 +48,16 @@
 						</v-icon>
 					</v-btn>
 				</template>
+
+				<template v-slot:expanded-row="{ columns, item }">
+					<tr>
+						<td :colspan="columns.length" class="py-2">
+							<v-sheet rounded="lg" border>
+								<customer-books-table :customer="controller.getCustomer(item.id)"/>
+							</v-sheet>
+						</td>
+					</tr>
+				</template>
 			</v-data-table-virtual>
 
 			<customer-dialog
@@ -61,6 +77,7 @@ import CustomerDialog from "@/views/customers/CustomerDialog.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import CustomersController from "@/controller/customers/CustomersController";
 import Customer from "@/model/customer/Customer";
+import CustomerBooksTable from "@/views/customers/CustomerBooksTable.vue";
 
 const controller = new CustomersController();
 
@@ -84,6 +101,10 @@ const headers = [
 		title: 'Name',
 		value: 'name',
 	},
+	{
+		title: 'Total books',
+		value: 'totalBooks',
+	},
 	{title: 'Actions', value: 'actions', align: 'end',}
 ];
 
@@ -95,6 +116,7 @@ const customers = computed(() => {
 		return {
 			id: customer.getCustomerId(),
 			name: customer.getCustomerName(),
+			totalBooks: customer.getTotalBooks()
 		}
 	})
 })
