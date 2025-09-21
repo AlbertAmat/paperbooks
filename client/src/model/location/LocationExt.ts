@@ -3,6 +3,7 @@ import ILocationExt from "@/types/location/ILocationExt";
 import {locationsService} from "@/service/locations/LocationsService";
 import LocationBook from "@/model/location/LocationBook";
 import {shallowRef, ShallowRef} from "vue";
+import ILocationBook from "@/types/location/ILocationBook";
 
 export default class LocationExt extends Location{
 
@@ -36,6 +37,10 @@ export default class LocationExt extends Location{
      */
     public getBooks(): LocationBook[] {
         return this.m_books.value;
+    }
+
+    public setBooks(books: ILocationBook[]) {
+        this.m_books.value = books.map((book) => new LocationBook(book));
     }
 
     /**

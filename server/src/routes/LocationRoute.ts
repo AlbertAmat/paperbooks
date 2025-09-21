@@ -1,6 +1,7 @@
-import { Router, Request, Response } from 'express';
+import {Router, Request, Response} from 'express';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import {appService} from "../AppService";
+import {Pool} from "pg";
 
 const router = Router();
 
@@ -15,12 +16,12 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
 
     try {
         const result = await client.query(`
-            SELECT id, 
-                   name, 
+            SELECT id,
+                   name,
                    description,
                    (SELECT COUNT(*) FROM book_stocks WHERE book_stocks.location_id = locations.id) total_books
-              FROM locations
-               WHERE user_id = $1
+            FROM locations
+            WHERE user_id = $1
         `, [userId]);
         res.status(200).json(result.rows);
     } catch (err: any) {
@@ -36,7 +37,7 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
  */
 //@ts-ignore
 router.get('/:id/books', requireAuth, async (req: Request, res: Response) => {
-    const locationId = req.params.id;
+    const locationId = Number(req.params.id);
     if (!locationId) {
         return res.status(400).send('No location ID provided');
     }
@@ -44,20 +45,57 @@ router.get('/:id/books', requireAuth, async (req: Request, res: Response) => {
     const userId = appService.getSessionUser(req);
 
     try {
-        const result = await pool.query(`
-            SELECT book_stocks.id,
-                   books.name, 
-                   books.id as book_id,
-                   book_stocks.code,
-                   book_stocks.status
-              FROM book_stocks, books
-               WHERE book_stocks.location_id = $1
-            AND book_stocks.book_id = books.id 
-            AND book_stocks.user_id = $2
-        `, [locationId, userId]);
-        res.status(200).json(result.rows);
+        const locationBooks = await getLocationBooks(pool, locationId, userId);
+        res.status(200).json(locationBooks);
     } catch (err: any) {
         console.error('Error executing query', err.stack);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+/**
+ * Path: /location/id/add/books
+ *
+ * Add books stock codes into a location. Used to movea stack of books between locations
+ */
+//@ts-ignore
+router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) => {
+    const locationId = Number(req.params.id);
+    const books: string[] = req.body.books;
+
+    if (!locationId) {
+        return res.status(400).send('No location ID provided');
+    }
+
+    if (books.length === 0) {
+        return res.status(400).send('No books provided');
+    }
+
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        console.log("Check if location id exist: ", locationId)
+
+        const exist = await existLocation(pool, locationId, userId);
+        if (!exist) {
+            res.status(404).send('Location does not exist');
+        }
+
+        for (const bookStockCode of books) {
+            console.log("Adding book stock code: ", bookStockCode)
+            await pool.query(
+                'UPDATE book_stocks SET location_id = $1 WHERE code = $2 AND user_id = $3',
+                [locationId, bookStockCode, userId]
+            );
+            console.log("Book stock code added", bookStockCode)
+        }
+
+        const locationBooks = await getLocationBooks(pool, locationId, userId);
+
+        res.status(200).json(locationBooks);
+    } catch (err: any) {
+        console.error('Error adding books to a location', err.stack);
         res.status(500).send('Internal Server Error');
     }
 });
@@ -89,7 +127,7 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
                    (SELECT COUNT(*) FROM book_stocks WHERE book_stocks.location_id = locations.id) total_books
             FROM locations
             WHERE locations.id = ${insertLocation.rows[0].id}
-            AND locations.user_id = $1
+              AND locations.user_id = $1
         `, [userId])
 
         res.status(200).json(result.rows[0]);
@@ -130,7 +168,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
             [name, description, locationId, userId]
         );
 
-        if(queryResult.rowCount != 1) {
+        if (queryResult.rowCount != 1) {
             res.status(500).send();
         }
 
@@ -142,7 +180,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
              FROM locations
              WHERE locations.id = $1
                AND locations.user_id = $2
-               `,
+            `,
             [locationId, userId]
         );
 
@@ -174,7 +212,7 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
             return res.status(404).send({error: "Location not found"});
         }
 
-        await client.query( 'DELETE FROM locations WHERE id = $1 AND user_id = $2', [id, userId]);
+        await client.query('DELETE FROM locations WHERE id = $1 AND user_id = $2', [id, userId]);
 
         res.send({message: "Location deleted successfully"});
     } catch (e) {
@@ -184,5 +222,31 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
         client.release();
     }
 });
+
+async function existLocation(pool: Pool, locationId: number, userId: number): Promise<boolean> {
+    const queryResult = await pool.query(
+        'SELECT id FROM locations WHERE id = $1 AND user_id = $2',
+        [locationId, userId]
+    );
+
+    return queryResult.rowCount == 1;
+}
+
+async function getLocationBooks(pool: Pool, locationId: number, userId: number) {
+    const result = await pool.query(`
+            SELECT book_stocks.id,
+                   books.name,
+                   books.id as book_id,
+                   book_stocks.code,
+                   book_stocks.status
+            FROM book_stocks,
+                 books
+            WHERE book_stocks.location_id = $1
+              AND book_stocks.book_id = books.id
+              AND book_stocks.user_id = $2
+        `, [locationId, userId]);
+
+    return result.rows;
+}
 
 export default router;

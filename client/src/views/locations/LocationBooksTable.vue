@@ -33,7 +33,7 @@
 		</template>
 	</v-data-table-virtual>
 
-	<add-location-books
+	<location-add-books-dialog
 		v-if="addDialog"
 		v-model="addDialog"
 		:location="location"
@@ -44,7 +44,7 @@
 import {computed, onMounted, Ref, ref} from "vue";
 import LocationExt from "@/model/location/LocationExt";
 import BookStock from "@/model/book/BookStock";
-import AddLocationBooks from "@/components/addBookStocks/AddLocationBooks.vue";
+import LocationAddBooksDialog from "@/views/locations/LocationAddBooksDialog.vue";
 
 interface Props {
 	location: LocationExt
@@ -80,13 +80,11 @@ const books = computed(() => {
 })
 
 onMounted(async () => {
-	if (props.location.getBooks().length == 0) {
-		try {
-			loading.value = true;
-			await props.location.fetchBooks();
-		} finally {
-			loading.value = false;
-		}
+	try {
+		loading.value = true;
+		await props.location.fetchBooks();
+	} finally {
+		loading.value = false;
 	}
 })
 </script>

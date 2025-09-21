@@ -178,8 +178,8 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
            ) FILTER(WHERE authors.id IS NOT NULL), '[]') AS authors
             FROM books
                      LEFT JOIN book_stocks ON books.id = book_stocks.book_id
-                     LEFT JOIN locations ON book_stocks.location_id = locations.id 
-                     LEFT JOIN customers ON book_stocks.customer_id = customers.id 
+                     LEFT JOIN locations ON book_stocks.location_id = locations.id
+                     LEFT JOIN customers ON book_stocks.customer_id = customers.id
                      LEFT JOIN book_authors ON books.id = book_authors.book_id
                      LEFT JOIN authors ON book_authors.author_id = authors.id
             WHERE books.id = $1
@@ -265,7 +265,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
                 pages          = $10,
                 date_updated   = CURRENT_TIMESTAMP
             WHERE id = $11
-             AND user_id = $12
+              AND user_id = $12
         `;
         const updateValues = [
             name,
@@ -355,7 +355,7 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
             return res.status(404).send({error: "Book not found"});
         }
 
-        await client.query( 'DELETE FROM books WHERE id = $1 AND user_id = $2', [id, userId]);
+        await client.query('DELETE FROM books WHERE id = $1 AND user_id = $2', [id, userId]);
 
         res.send({message: "Book deleted successfully"});
     } catch (e) {
@@ -386,7 +386,7 @@ router.post('', requireAuth, upload.single("image"), async (req: Request, res: R
 
     try {
         // If the user give us a isbn code, check if exist
-        if(isbn) {
+        if (isbn) {
             const existIsbn = await pool.query(
                 'SELECT id FROM books WHERE isbn = $1 AND user_id = $2',
                 [isbn, userId]
@@ -632,7 +632,7 @@ router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
             'SELECT id FROM locations WHERE id = $1 AND user_id =$2',
             [locationId, userId]
         );
-        if(existLocation.rowCount != 1) {
+        if (existLocation.rowCount != 1) {
             res.status(404).send("Location not found");
         }
 
@@ -650,19 +650,19 @@ router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
 
         // fetch new data
         const result = await pool.query(
-            `SELECT book_stocks.id, 
-                    book_stocks.code, 
-                    book_stocks.status, 
+            `SELECT book_stocks.id,
+                    book_stocks.code,
+                    book_stocks.status,
                     book_stocks.location_id,
                     locations.name as location_name,
-                    customers.id as customer_id,
+                    customers.id   as customer_id,
                     customers.name as customer_name
-              FROM book_stocks
-                       LEFT JOIN customers ON book_stocks.customer_id = customers.id
-                       LEFT JOIN locations ON book_stocks.location_id = locations.id
+             FROM book_stocks
+                      LEFT JOIN customers ON book_stocks.customer_id = customers.id
+                      LEFT JOIN locations ON book_stocks.location_id = locations.id
              WHERE book_stocks.id = $1
                AND book_stocks.user_id = $2
-             `,
+            `,
             [insertStock.rows[0].id, userId]
         );
 
@@ -738,7 +738,7 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
             'SELECT id FROM locations WHERE id = $1 AND user_id = $2',
             [location_id, userId]
         );
-        if(existLocation.rowCount != 1) {
+        if (existLocation.rowCount != 1) {
             res.status(404).send("Location not found");
         }
 
@@ -747,24 +747,24 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
             [status, location_id, customer_id, bookId, stockId, userId]
         );
 
-        if(queryResult.rowCount != 1) {
+        if (queryResult.rowCount != 1) {
             res.status(500).send();
         }
 
         const stockQueryResult = await pool.query(
-            `SELECT book_stocks.id, 
-                    book_stocks.code, 
-                    book_stocks.status, 
+            `SELECT book_stocks.id,
+                    book_stocks.code,
+                    book_stocks.status,
                     book_stocks.location_id,
                     locations.name as location_name,
-                    customers.id as customer_id,
+                    customers.id   as customer_id,
                     customers.name as customer_name
-              FROM book_stocks
-                       LEFT JOIN customers ON book_stocks.customer_id = customers.id
-                       LEFT JOIN locations ON book_stocks.location_id = locations.id
+             FROM book_stocks
+                      LEFT JOIN customers ON book_stocks.customer_id = customers.id
+                      LEFT JOIN locations ON book_stocks.location_id = locations.id
              WHERE book_stocks.id = $1
                AND book_stocks.user_id = $2
-             `,
+            `,
             [stockId, userId]
         );
 
@@ -777,8 +777,8 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
 });
 
 /**
- * Path: /book/{id}
- * given a book isbn or book stock code get the book metadata necessary for adding a book
+ * Path: /:bookCode/add/md
+ * given a book stock code get the book metadata necessary for adding a book
  */
 //@ts-ignore
 //@ts-ignore
@@ -792,86 +792,40 @@ router.get('/:bookCode/add/md', requireAuth, async (req: Request, res: Response)
         // 1. Try to match a stock code
         const stockResult = await pool.query(
             `
-            SELECT 
-                b.id AS book_id,
-                b.name,
-                b.image_url,
-                b.isbn,
-                bs.id AS stock_id,
-                bs.code AS stock_code,
-                bs.status
-            FROM book_stocks bs
-            INNER JOIN books b ON b.id = bs.book_id
-            WHERE bs.code = $1 AND bs.user_id = $2
-            LIMIT 1
+                SELECT b.id    AS book_id,
+                       b.name,
+                       b.image_url,
+                       b.isbn,
+                       bs.id   AS stock_id,
+                       bs.code AS stock_code,
+                       bs.status
+                FROM book_stocks bs
+                         INNER JOIN books b ON b.id = bs.book_id
+                WHERE bs.code = $1
+                  AND bs.user_id = $2 LIMIT 1
             `,
             [bookCode, userId]
         );
 
-        if (stockResult.rows.length > 0) {
-            const row = stockResult.rows[0];
-            const response: IBookAddMd = {
-                id: row.book_id,
-                name: row.name,
-                image_url: row.image_url,
-                isbn: row.isbn,
-                stocks: [
-                    {
-                        id: row.stock_id,
-                        code: row.stock_code,
-                        status: row.status
-                    }
-                ]
-            };
-            return res.status(200).json(response);
+        if (stockResult.rows.length == 0) {
+            return res.status(404).send("Book stock not found");
         }
 
-        // 2. If not stock code, try as ISBN and fetch all stocks
-        const isbnResult = await pool.query(
-            `
-            SELECT 
-                b.id AS book_id,
-                b.name,
-                b.image_url,
-                b.isbn,
-                bs.id AS stock_id,
-                bs.code AS stock_code,
-                bs.status
-            FROM books b
-            LEFT JOIN book_stocks bs 
-                ON b.id = bs.book_id 
-               AND bs.user_id = $2
-            WHERE b.isbn = $1 AND b.user_id = $2
-            `,
-            [bookCode, userId]
-        );
-
-        if (isbnResult.rows.length === 0) {
-            return res.status(404).send("Book not found");
-        }
-
-        const base: IBookBase = {
-            id: isbnResult.rows[0].book_id,
-            name: isbnResult.rows[0].name,
-            image_url: isbnResult.rows[0].image_url,
-            isbn: isbnResult.rows[0].isbn
-        };
-
-        const stocks: IBookStockBase[] = isbnResult.rows
-            .filter(r => r.stock_id) // remove rows with no stock
-            .map(r => ({
-                id: r.stock_id,
-                code: r.stock_code,
-                status: r.status
-            }));
-
+        const row = stockResult.rows[0];
         const response: IBookAddMd = {
-            ...base,
-            stocks
+            id: row.book_id,
+            name: row.name,
+            image_url: row.image_url,
+            isbn: row.isbn,
+            stocks: [
+                {
+                    id: row.stock_id,
+                    code: row.stock_code,
+                    status: row.status
+                }
+            ]
         };
-
         return res.status(200).json(response);
-
     } catch (error) {
         console.error("Transaction error:", error);
         res.status(500).send("Error retrieving the book data");
@@ -920,4 +874,5 @@ async function generateBookStockCode(): Promise<string> {
 
     return code;
 }
+
 export default router;

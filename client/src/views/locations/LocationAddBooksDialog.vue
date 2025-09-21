@@ -1,0 +1,54 @@
+<template>
+	<book-stock-codes-dialog
+		v-model="dialog"
+		:loading="loading"
+		@add-books="addBooks"
+	/>
+</template>
+
+<script setup lang="ts">
+
+import LocationExt from "@/model/location/LocationExt";
+import {computed, ref, Ref} from "vue";
+import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
+import {bookService} from "@/service/book/BookService";
+import {IBookAddMd} from "@/types/book/IBookAddMd";
+import BookStockItem from "@/components/addBookStocks/BookStockItem.vue";
+import {locationsService} from "@/service/locations/LocationsService";
+import BookStockCodesDialog from "@/components/addBookStocks/BookStockCodesDialog.vue";
+
+interface Props {
+	location: LocationExt,
+	modelValue: boolean
+}
+
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+	(e: 'update:modelValue', value: boolean): void
+}>()
+
+/**
+ *
+ */
+const dialog = computed({
+	get: () => props.modelValue,
+	set: (val: boolean) => emit('update:modelValue', val),
+})
+
+/**
+ *
+ */
+const loading: Ref<boolean> = ref(false);
+
+async function addBooks(books: string[]) {
+	try {
+		loading.value = true;
+		const data = await locationsService.addBooks(props.location.getId(), books);
+		props.location.setBooks(data);
+	} finally {
+		loading.value = false;
+		dialog.value = false;
+	}
+}
+</script>

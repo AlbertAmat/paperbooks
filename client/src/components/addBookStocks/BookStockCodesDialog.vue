@@ -24,7 +24,7 @@
 			<v-card-text>
 				<v-text-field
 					v-model="bookCode"
-					label="ISBN code or stock code"
+					label="Stock code"
 					variant="outlined"
 					hide-details
 					density="compact"
@@ -53,15 +53,30 @@
 			<v-divider/>
 
 			<v-card-actions>
-
+				<v-spacer></v-spacer>
+				<v-btn
+					variant="text"
+					@click="dialog = false"
+					class="text-none"
+				>
+					Close
+				</v-btn>
+				<v-btn
+					color="primary"
+					variant="elevated"
+					:disabled="bookCodes.length == 0 || loading"
+					:loading="loading"
+					@click="emit('addBooks', bookCodes)"
+					class="text-none"
+				>
+					Add
+				</v-btn>
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
 </template>
 
 <script setup lang="ts">
-
-import LocationExt from "@/model/location/LocationExt";
 import {computed, ref, Ref} from "vue";
 import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
 import {bookService} from "@/service/book/BookService";
@@ -69,14 +84,15 @@ import {IBookAddMd} from "@/types/book/IBookAddMd";
 import BookStockItem from "@/components/addBookStocks/BookStockItem.vue";
 
 interface Props {
-	location: LocationExt,
-	modelValue: boolean
+	modelValue: boolean;
+	loading: boolean;
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
 	(e: 'update:modelValue', value: boolean): void
+	(e: 'addBooks', books: string[]): void
 }>()
 
 /**
@@ -84,11 +100,19 @@ const emit = defineEmits<{
  */
 const dialog = computed({
 	get: () => props.modelValue,
-	set: (val: boolean) => emit('update:modelValue', val),
+	set: (val: boolean) => {
+		emit('update:modelValue', val)
+
+		if(!val) {
+			books.value = new Map<string, IBookAddMd>();
+			bookCodes.value = [];
+			loadingBooks.value = [];
+		}
+	}
 })
 
 /**
- * An array of books ISBN and book stock
+ * An array of book stock codes
  */
 const bookCodes: Ref<string[]> = ref([]);
 
@@ -139,9 +163,4 @@ async function fetchBook(book: string) {
 		loadingBooks.value.splice(loadingIndex, 1);
 	}
 }
-
 </script>
-
-<style scoped>
-
-</style>

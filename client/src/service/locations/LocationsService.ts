@@ -36,6 +36,17 @@ class LocationsService {
     public async deleteLocation(locationId: number): Promise<void> {
         await axiosInstance.delete(`${PATH_PREFIX}/location/${locationId}`)
     }
+
+
+    /**
+     *
+     * @param locationId
+     * @param books: array of book stock code
+     */
+    public async addBooks(locationId: number, books: string[]): Promise<ILocationBook[]> {
+        const {data} = await axiosInstance.post(`${PATH_PREFIX}/location/${locationId}/add/books`, {books: books});
+        return data;
+    }
 }
 
 export const locationsService = new LocationsService();
