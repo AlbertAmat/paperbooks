@@ -1,0 +1,79 @@
+<template>
+	<v-dialog
+		v-model="model"
+		width="600"
+		persistent
+		:close-on-content-click="false"
+	>
+		<v-card>
+			<v-card-title
+				style="background-color: red; color: white; display: flex; align-items: center"
+				class="py-3 pr-2"
+			>
+				<v-icon
+					color="white"
+					class="mr-3"
+				>
+					mdi-alert
+				</v-icon>
+
+				An error has occurred
+
+				<v-spacer></v-spacer>
+
+				<v-btn
+					density="comfortable"
+					variant="text"
+					icon
+					@click="model = false"
+				>
+					<v-icon>mdi-close</v-icon>
+				</v-btn>
+			</v-card-title>
+
+			<v-divider/>
+
+			<v-card-text style="min-height: 60px; padding-top: 20px">
+				<template
+					v-if="controller.getError()!.response"
+				>
+					{{ controller.getError()!.response!.data }}
+				</template>
+				<template v-else>
+					{{ controller.getError()!.message }}
+				</template>
+			</v-card-text>
+
+			<v-divider></v-divider>
+
+			<v-card-actions>
+				<v-spacer></v-spacer>
+				<v-btn
+					density="comfortable"
+					variant="text"
+					@click="model = false"
+					class="text-none ml-1"
+				>
+					Close
+				</v-btn>
+			</v-card-actions>
+		</v-card>
+	</v-dialog>
+</template>
+
+<script setup lang="ts">
+
+import {errorDialogController} from "@/components/errorDialog/ErrorDialogController";
+import {computed} from "vue";
+
+const controller = errorDialogController;
+
+const model = computed({
+	get() {
+		return controller.isVisible();
+	},
+	set(val: boolean) {
+		controller.setVisible(val);
+	}
+})
+</script>

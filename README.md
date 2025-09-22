@@ -1,15 +1,15 @@
 # Paper book
 
 ## TODO
-* login popup 401
 * publish + add to server
 * app labels + use db table
-* handle axios erros
-* add action un unreserve books
+* add action un unreserve books (dashboard & customers)
 
 ## backlog
 * use file logger
 * register: create register, recapchat + verification
+* login popup 401
+
 
 ## Project setup
 ```

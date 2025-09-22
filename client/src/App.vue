@@ -31,6 +31,8 @@
 				<confirmation-dialog/>
 
 				<app-snackbar/>
+
+				<error-dialog/>
 			</v-main>
 		</template>
 	</v-app>
@@ -44,6 +46,7 @@ import {applicationService} from "@/service/ApplicationService";
 import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog.vue";
 import AppSnackbar from "@/components/appSnackbar/AppSnackbar.vue";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
+import ErrorDialog from "@/components/errorDialog/ErrorDialog.vue";
 
 onMounted(() => {
 	applicationService.fetchPolicy();
