@@ -18,7 +18,6 @@ export default class BookController extends BaseController<IBook>{
     }
 
     async fetchData(): Promise<IBook> {
-        console.log("router.currentRoute", router.currentRoute.value.params)
         const bookId = Number(router.currentRoute.value.params.book_id);
         return await bookService.getBook(bookId);
     }

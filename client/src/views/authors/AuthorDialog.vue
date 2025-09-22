@@ -39,7 +39,7 @@
 					@click="addAuthor()"
 					class="text-none"
 				>
-					{{ customer ? 'Update' : 'Add' }}
+					{{ author ? 'Update' : 'Add' }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>

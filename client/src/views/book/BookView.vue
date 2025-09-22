@@ -397,7 +397,11 @@ function categoriesJson() {
 }
 
 function deleteBook() {
-	confirmationDialogController.showDialog(`Delete book '${model.getBook().getName()}'`, "Are you sure that you want to delete this book?", "Delete").then(async () => {
+	confirmationDialogController.showDialog(
+		`Delete book '${model.getBook().getName()}'`,
+		"Are you sure that you want to delete this book?",
+		"Delete"
+	).then(async () => {
 		try {
 			loadingDelete.value = true;
 			await model.getBook().deleteBook();

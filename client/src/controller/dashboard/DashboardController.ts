@@ -1,33 +1,101 @@
-import {BaseController} from "@/controller/BaseController";
-import {ShallowRef, shallowRef} from "vue";
-import ICategory from "@/types/category/ICategory";
-import Category from "@/model/category/Category";
-import {categoriesService} from "@/service/categories/CategoriesService";
-import IDashboard, {IBooksInTime, IDashboardBook, IDashboardStockSatuts} from "@/types/dashboard/IDashboard";
-import {dashboardService} from "@/service/dashboard/DashboardService";
-import {BookStockStatusEnum} from "@/types/book/IBookStock";
+// Import the base controller to inherit common controller functionality
+import { BaseController } from "@/controller/BaseController";
 
+// Types for the dashboard data
+import IDashboard, {
+    IBooksInTime,
+    IDashboardBook,
+    IDashboardStockSatuts
+} from "@/types/dashboard/IDashboard";
+
+// Service to fetch dashboard-related data
+import { dashboardService } from "@/service/dashboard/DashboardService";
+
+/**
+ * Controller class responsible for fetching and holding
+ * the dashboard data used throughout the UI.
+ */
 export default class DashboardController extends BaseController<IDashboard> {
 
+    /**
+     * Recently added books displayed on the dashboard.
+     * @private
+     */
     private m_lastBooks: IDashboardBook[] = [];
+
+    /**
+     * Total number of books in the system.
+     * @private
+     */
     private m_totalBooks: number = 0;
+
+    /**
+     * Number of books added in the current month.
+     * @private
+     */
     private m_totalThisMonth: number = 0;
+
+    /**
+     * Number of books added in the previous month.
+     * @private
+     */
     private m_totalLastMonth: number = 0;
+
+    /**
+     * Total number of categories in the system.
+     * @private
+     */
     private m_totalCategories: number = 0;
+
+    /**
+     * Total number of customers registered.
+     * @private
+     */
     private m_totalCustomers: number = 0;
+
+    /**
+     * Total number of books currently booked/reserved.
+     * @private
+     */
     private m_totalBookedBooks: number = 0;
+
+    /**
+     * Total number of physical locations (e.g., branches or stores).
+     * @private
+     */
     private m_totalLocations: number = 0;
+
+    /**
+     * Time-series data of books added over time.
+     * @private
+     */
     private m_booksInTime: IBooksInTime[] = [];
+
+    /**
+     * Summary of stock statuses for all books.
+     * @private
+     */
     private m_stockStatus: IDashboardStockSatuts[] = [];
 
+    /**
+     * Constructor initializes the controller with the identifier "Dashboard".
+     */
     public constructor() {
         super("Dashboard");
     }
 
+    /**
+     * Fetches the dashboard data from the backend service.
+     * @returns A promise resolving to the dashboard data.
+     */
     async fetchData(): Promise<IDashboard> {
-        return await dashboardService.getData()
+        return await dashboardService.getData();
     }
 
+    /**
+     * Populates the controller state with the fetched dashboard data.
+     * @param data - The dashboard data object retrieved from the service.
+     */
     setData(data: IDashboard) {
         this.m_lastBooks = data.lastBooks;
         this.m_totalBooks = data.totalBooks;
@@ -41,42 +109,72 @@ export default class DashboardController extends BaseController<IDashboard> {
         this.m_stockStatus = data.stockStatus;
     }
 
+    /**
+     * Returns the list of most recently added books.
+     */
     public getLastBooks() {
         return this.m_lastBooks;
     }
 
+    /**
+     * Returns the total number of books.
+     */
     public getTotalBooks() {
         return this.m_totalBooks;
     }
 
+    /**
+     * Returns the number of books added this month.
+     */
     public getTotalThisMonth() {
         return this.m_totalThisMonth;
     }
 
+    /**
+     * Returns the number of books added last month.
+     */
     public getTotalLastMonth() {
         return this.m_totalLastMonth;
     }
 
+    /**
+     * Returns the total number of categories.
+     */
     public getTotalCategories() {
         return this.m_totalCategories;
     }
 
+    /**
+     * Returns the total number of physical locations.
+     */
     public getTotalLocations() {
         return this.m_totalLocations;
     }
 
+    /**
+     * Returns the total number of registered customers.
+     */
     public getTotalCustomers() {
         return this.m_totalCustomers;
     }
 
+    /**
+     * Returns the total number of booked/reserved books.
+     */
     public getTotalBookedBooks() {
         return this.m_totalBookedBooks;
     }
 
+    /**
+     * Returns time-series data for books added over time.
+     */
     public getBooksInTime() {
         return this.m_booksInTime;
     }
 
+    /**
+     * Returns the stock status data for all books.
+     */
     public getStockStatus() {
         return this.m_stockStatus;
     }

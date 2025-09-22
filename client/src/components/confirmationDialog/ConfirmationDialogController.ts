@@ -30,7 +30,7 @@ export class ConfirmationDialogController {
     }
 
     /**
-     * Muestra el diálogo y devuelve una promesa que se resuelve al aceptar o rechazar.
+     *
      * @param title
      * @param desc
      * @param action

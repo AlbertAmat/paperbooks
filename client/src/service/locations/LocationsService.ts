@@ -1,7 +1,5 @@
 import {PATH_PREFIX} from "@/Constants";
-import {ISearchResponse} from "@/types/search/ISearchResponse";
 import axiosInstance from "@/plugins/axiosInstance";
-import ILocation from "@/types/location/ILocation";
 import ILocationExt from "@/types/location/ILocationExt";
 import ILocationBook from "@/types/location/ILocationBook";
 

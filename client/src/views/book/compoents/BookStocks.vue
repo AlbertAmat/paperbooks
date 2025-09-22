@@ -152,7 +152,11 @@ function printBarcode(id: number) {
  * @param stockId
  */
 async function removeBookStock(stock: Record<string, any>) {
-	confirmationDialogController.showDialog(`Delete stock ${stock.code}`, "Are you sure that you want to remove this book stock?", "Delete").then(async () => {
+	confirmationDialogController.showDialog(
+		`Delete stock ${stock.code}`,
+		"Are you sure that you want to remove this book stock?",
+		"Delete"
+	).then(async () => {
 		try {
 			deleteLoading.value.push(stock.id);
 			await props.book.removeBookStock(stock.id);

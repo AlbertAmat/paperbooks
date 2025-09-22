@@ -1,4 +1,3 @@
-import axios from "axios";
 import {PATH_PREFIX} from "@/Constants";
 import IBook from "@/types/book/IBook";
 import {BookStockStatusEnum, IBookStock} from "@/types/book/IBookStock";

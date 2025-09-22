@@ -1,10 +1,8 @@
 import {PATH_PREFIX} from "@/Constants";
-import {ISearchResponse} from "@/types/search/ISearchResponse";
 import axiosInstance from "@/plugins/axiosInstance";
 import ILocation from "@/types/location/ILocation";
 import ICustomer from "@/types/customer/ICustomer";
 import {ICustomerBook} from "@/types/customer/ICustomerBook";
-import ILocationBook from "@/types/location/ILocationBook";
 
 class CustomersService {
 

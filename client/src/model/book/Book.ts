@@ -327,7 +327,7 @@ export default class Book extends BookItem {
     public async deleteBook() {
         try {
             await bookService.deleteBook(this.m_id)
-            appSnackbarController.show({message: `Book ${this.m_name} has been deleted`})
+            appSnackbarController.show({message: `Book has been deleted`})
             router.push(searchRoute.getPath())
         } catch (e) {
             console.error("Error while deleting book.", e)

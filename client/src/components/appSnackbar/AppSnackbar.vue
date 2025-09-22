@@ -50,7 +50,6 @@ onMounted(() => {
 	const unsubscribe = appSnackbarController.subscribe((options) => {
 		snackbar.value = options;
 		isVisible.value = !!options;
-		console.log("inside")
 	});
 
 	onUnmounted(() => {

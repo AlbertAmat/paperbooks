@@ -18,10 +18,17 @@ export default class AuthorsController extends BaseController<IBookAuthor[]> {
         super("Authors");
     }
 
+    /**
+     *
+     */
     async fetchData(): Promise<IBookAuthor[]> {
         return await authorsService.getAuthors()
     }
 
+    /**
+     *
+     * @param data
+     */
     setData(data: IBookAuthor[]) {
         this.m_authors.value = data.map(author => new BookAuthor(author));
     }
