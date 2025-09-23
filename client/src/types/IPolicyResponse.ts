@@ -4,6 +4,7 @@ import {IFormat} from "@/types/format/IFormat";
 import ILocation from "@/types/location/ILocation";
 import {IUser} from "@/types/user/IUser";
 import ICustomer from "@/types/customer/ICustomer";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default interface IPolicyResponse {
     user: IUser;
@@ -12,5 +13,5 @@ export default interface IPolicyResponse {
     languages: ILanguage[];
     formats: IFormat[];
     locations: ILocation[];
-    labels: Record<string, string>;
+    labels: Record<AppLabels, string>;
 }

@@ -17,6 +17,7 @@ import Customer from "@/model/customer/Customer";
 
 // Axios instance configured with interceptors and base URL
 import axiosInstance from "@/plugins/axiosInstance";
+import {i18n} from "@/plugins/i18n/i18n";
 
 /**
  * ApplicationService is a central store-like service
@@ -110,6 +111,11 @@ export class ApplicationService {
             this.m_languages = data.languages.map((lang) => new Language(lang));
             this.m_formats = data.formats.map((format) => new Format(format));
             this.m_locations = data.locations.map((location) => new Location(location));
+
+            // Set i18n locale
+            //@ts-ignore
+            i18n.global.locale.value = this.m_user.getLanguage();
+            i18n.global.setLocaleMessage(this.m_user.getLanguage(), data.labels);
         } catch (e: any) {
             const error = e as Error;
             console.error("Error while fetching application policy.", e);

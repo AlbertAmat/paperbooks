@@ -10,6 +10,8 @@ import IDashboard, {
 
 // Service to fetch dashboard-related data
 import { dashboardService } from "@/service/dashboard/DashboardService";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 /**
  * Controller class responsible for fetching and holding
@@ -81,7 +83,7 @@ export default class DashboardController extends BaseController<IDashboard> {
      * Constructor initializes the controller with the identifier "Dashboard".
      */
     public constructor() {
-        super("Dashboard");
+        super(i18n.global.t(AppLabels.DASHBOARD));
     }
 
     /**
