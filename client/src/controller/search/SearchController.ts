@@ -35,7 +35,7 @@ export default class SearchController extends BaseController<ISearchResponse> {
     private m_books: ShallowRef<BookItem[]>;
 
     public constructor() {
-        super(i18n.global.t(AppLabels.SEARCH_BOOKS));
+        super(i18n.global.t(AppLabels.LIBRARY));
 
         this.m_books = shallowRef([]);
     }

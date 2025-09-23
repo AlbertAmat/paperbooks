@@ -194,7 +194,7 @@ async function addBook() {
 		loading.value = true;
 		const id = await bookService.createBook(name.value, description.value, isbn.value, image.value || null);
 		await router.push(bookRoute.getPath(id));
-		appSnackbarController.show({message: `Book '${name.value}' has been added`})
+		appSnackbarController.show({message: t(AppLabels.BOOK_HAS_BEEN_ADDED, {name: name.value}) })
 		dialog.value = false;
 	} finally {
 		loading.value = false;
@@ -203,7 +203,7 @@ async function addBook() {
 
 watch(() => image.value, (img) => {
 	if(img && !img.type.startsWith("image/")) {
-		appSnackbarController.show({message: `Only images are allowed`, type: SnackbarType.ERROR})
+		appSnackbarController.show({message: t(AppLabels.ONLY_IMAGES_ALLOWED), type: SnackbarType.ERROR})
 		image.value = undefined;
 	}
 })

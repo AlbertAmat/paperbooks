@@ -7,12 +7,12 @@
 				:disabled="disableSave"
 				class="gradient text-none"
 			>
-				Save
+				{{t(AppLabels.SAVE)}}
 			</v-btn>
 		</template>
 		<template v-slot:default>
 			<div style="height: 100%; width: 100%; padding-top: 10px;">
-				<settings-card title="My Profile">
+				<settings-card :title="t(AppLabels.USERCONF_MY_PROFILE)">
 					<div style="display: flex; margin-bottom: 30px">
 						<v-avatar
 							class="mr-6"
@@ -35,7 +35,7 @@
 									variant="tonal"
 									class="gradient text-none"
 								>
-									Change image
+									{{t(AppLabels.USERCONF_CHANGE_IMAGE)}}
 								</v-btn>
 								<v-btn
 									@click="removeImage"
@@ -44,99 +44,96 @@
 									variant="tonal"
 									class="ml-4 text-none"
 								>
-									Remove image
+									{{ t(AppLabels.USERCONF_REMOVE_IMAGE) }}
 								</v-btn>
 
 								<!-- hidden input-->
 								<input type="file" id="fileInput" accept="image/png, image/jpeg" style="display: none">
 							</div>
-							<p class="v-card-subtitle pl-0 mt-2">We only support PNGs, JPGs under 2MB</p>
+							<p class="v-card-subtitle pl-0 mt-2">{{t(AppLabels.USERCONF_IMAGE_SUPPORT)}}</p>
 						</div>
 					</div>
 					<div style="width: 100%; display: flex">
 						<v-text-field
 							:model-value="controller.getUser().getCode()"
-							label="Code"
+							:label="t(AppLabels.CODE)"
 							density="compact"
 							variant="outlined"
 							readonly
 							disabled
 							hide-details
 							class="mr-2 settings-filed"
-						></v-text-field>
+						/>
 
 						<v-text-field
 							v-model="name"
-							label="Name"
+							:label="t(AppLabels.USERCONF_NAME)"
 							density="compact"
 							variant="outlined"
 							hide-details
 							class="ml-2 settings-filed"
-						></v-text-field>
+						/>
 					</div>
 				</settings-card>
 
-				<settings-card title="Language & Region">
+				<settings-card :title="t(AppLabels.USERCONF_LANGUAGE_REGION)">
 					<div style="width: 100%; display: flex">
 						<v-select
 							v-model="language"
 							:items="supportedLanguages"
 							item-value="value"
 							item-title="text"
-							label="Language"
+							:label="t(AppLabels.USERCONF_LANGUAGE)"
 							density="compact"
 							variant="outlined"
 							hide-details
 							class="mr-2 settings-filed"
-						></v-select>
+						/>
 
 						<v-select
 							v-model="region"
 							:items="regions"
 							item-value="code"
 							item-title="region"
-							label="Regions"
+							:label="t(AppLabels.USERCONF_REGION)"
 							density="compact"
 							variant="outlined"
 							hide-details
 							class="ml-2 settings-filed"
-						></v-select>
+						/>
 					</div>
 				</settings-card>
-				<settings-card title="Account Security">
+				<settings-card :title="t(AppLabels.USERCONF_ACCOUNT_SECURITY)">
 					<v-text-field
 						v-model="email"
-						label="Email"
+						:label="t(AppLabels.USERCONF_EMAIL)"
 						density="compact"
 						variant="outlined"
 						hide-details
 						class="mb-4  settings-filed"
-					></v-text-field>
+					/>
 
 					<div style="display: flex; align-items: center; width: 100%; min-width: 0">
 						<div style="flex: 1; padding-right: 80px">
-							<p style="font-size: 14px; font-weight: 530">Change password</p>
+							<p style="font-size: 14px; font-weight: 530">{{t(AppLabels.USERCONF_CHANGE_PASSWORD)}}</p>
 							<p
 								class="v-card-subtitle pl-0"
 								style="white-space: normal"
 							>
-								Update your account password to keep your account secure. You’ll need to enter your
-								current password and choose a new one that meets security requirements.
+								{{t(AppLabels.USERCONF_CHANGE_PASSWORD_DESC)}}
 							</p>
 						</div>
 						<change-password-dialog :controller="controller"/>
 					</div>
-				</settings-card>
 
-				<settings-card title="Settings">
-					<div style="display: flex; align-items: center">
+					<div style="display: flex; align-items: center; margin-top: 16px">
 						<div style="flex: 1; min-width: 0">
-							<p style="color: #c62f2f; font-weight: 530">Delete my account</p>
+							<p style="color: #c62f2f; font-weight: 530">{{t(AppLabels.USERCONF_DELETE)}}</p>
 							<p
 								class="v-card-subtitle pl-0"
 								style="white-space: normal"
 							>
-								Permanently delete the account and remove workspace and books.
+								{{t(AppLabels.USERCONF_DELETE_DESC)}}
 							</p>
 						</div>
 						<v-btn
@@ -147,7 +144,7 @@
 							color="error"
 							class="text-none"
 						>
-							Delete account
+							{{t(AppLabels.USERCONF_DELETE)}}
 						</v-btn>
 					</div>
 				</settings-card>
@@ -163,8 +160,12 @@ import {Ref, ref, computed} from "vue";
 import SettingsCard from "@/views/settings/SettingsCard.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import ChangePasswordDialog from "@/views/settings/ChangePasswordDialog.vue";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
+import {useI18n} from "vue-i18n";
 
 const controller = new SettingsController();
+
+const {t} = useI18n();
 
 /**
  *
@@ -251,8 +252,11 @@ async function removeImage() {
 }
 
 async function deleteUser() {
-	confirmationDialogController.showDialog(`Delete user`, "Are you sure you want to delete your Paper Books account?\n" +
-		"This will permanently remove your account and all associated content.", "Delete").then(async () => {
+	confirmationDialogController.showDialog(
+		t(AppLabels.USERCONF_DELETE_USER_TITLE),
+		t(AppLabels.USERCONF_DELETE_USER_DESC),
+		t(AppLabels.DELETE)
+	).then(async () => {
 		try {
 			loadingDelete.value = true;
 			await controller.getUser().delete();
@@ -276,13 +280,13 @@ function changeImage() {
 			if (!file) return; // No file selected
 
 			if (file.type !== "image/png" && file.type !== "image/jpeg") {
-				alert("Please upload a PNG or JPEG image.");
+				alert(t(AppLabels.USERCONF_IMAGE_FORMAT_ALERT));
 				event.target.value = ""; // Clear the input
 				return;
 			}
 
 			if (file.size > 2 * 1024 * 1024) {
-				alert("File size must be less than 2MB.");
+				alert(t(AppLabels.USERCONF_IMAGE_SIZE_ALERT));
 				event.target.value = ""; // Clear the input
 				return;
 			}

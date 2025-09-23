@@ -132,9 +132,9 @@ function createAuthor() {
 async function deleteItem(authorId: number) {
 	const author = controller.getAuthor(authorId);
 	confirmationDialogController.showDialog(
-		`Delete author ${author ? author.getAuthorName() : ''}`,
-		"Are you sure that you want to remove this author?",
-		"Delete"
+		`${t(AppLabels.DELETE_AUTHOR_TITLE)} ${author ? author.getAuthorName() : ''}`,
+		t(AppLabels.DELETE_AUTHOR_DESC),
+		t(AppLabels.DELETE)
 	).then(async () => {
 		try {
 			deleteLoading.value.push(authorId);

@@ -29,7 +29,7 @@
 						small
 						@click.stop.prevent="createBookIsbnDialog = true"
 					>
-						Add book
+						{{t(AppLabels.ADD_BOOK)}}
 
 						<v-divider vertical class="ml-2"/>
 
@@ -46,7 +46,7 @@
 
 				<v-list density="compact">
 					<v-list-item @click="createBookManuallyDialog = true">
-						<v-list-item-title>Add book manually</v-list-item-title>
+						<v-list-item-title>{{t(AppLabels.ADD_BOOK_MANUALLY)}}</v-list-item-title>
 					</v-list-item>
 				</v-list>
 			</v-menu>
@@ -134,8 +134,12 @@ import CreateBookIsbnDialog from "@/views/search/components/CreateBookIsbnDialog
 import {applicationService} from "@/service/ApplicationService";
 import router from "@/router/Router";
 import CreateBookManuallyDialog from "@/views/search/components/CreateBookManuallyDialog.vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 const model = new SearchController();
+
+const {t} = useI18n();
 
 /**
  *
@@ -156,11 +160,11 @@ const loadingBooks: Ref<boolean> = ref(false);
 const infiniteScrollTrigger: Ref<HTMLElement | null> = ref(null);
 
 const headers = [
-	{title: 'Image', 	key: 'image', 	sortable: false,},
-	{title: 'Name',	 	key: 'name', 	sortable: false,},
-	{title: 'ISBN', 	key: 'isbn',	 sortable: false,},
-	{title: 'Category', key: 'category', sortable: false,},
-	{title: 'Language', key: 'language', sortable: false,},
+	{title: t(AppLabels.IMAGE), 	key: 'image', 	sortable: false,},
+	{title: t(AppLabels.NAME),	 	key: 'name', 	sortable: false,},
+	{title: 'ISBN', 				key: 'isbn',	 sortable: false,},
+	{title: t(AppLabels.CATEGORY),	key: 'category', sortable: false,},
+	{title: t(AppLabels.LANGUAGE), 	key: 'language', sortable: false,},
 ]
 
 const itemsJson = computed(() => {

@@ -74,7 +74,7 @@ export default class AuthorsController extends BaseController<IBookAuthor[]> {
                 await authorsService.deleteAuthor(id);
                 this.m_authors.value.splice(index, 1);
                 this.m_authors.value = [...this.m_authors.value];
-                appSnackbarController.show({message: "Author has been deleted successfully"})
+                appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_AUTHOR_DELETED)})
             } catch (e) {
                 console.error(e);
             }

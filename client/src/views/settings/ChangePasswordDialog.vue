@@ -10,7 +10,7 @@
 				variant="tonal"
 				class="text-none"
 			>
-				Change password
+				{{t(AppLabels.USERCONF_CHANGE_PASSWORD)}}
 			</v-btn>
 		</template>
 
@@ -30,7 +30,7 @@
 						v-model="currentPassword"
 						:append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
 						:type="show1 ? 'text' : 'password'"
-						label="Current password"
+						:label="t(AppLabels.USERCONF_CURRENT_PASSWORD)"
 						density="compact"
 						variant="outlined"
 						hide-details
@@ -43,7 +43,7 @@
 						:append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
 						:type="show2 ? 'text' : 'password'"
 						hint="At least 8 characters"
-						label="New password"
+						:label="t(AppLabels.USERCONF_NEW_PASSWORD)"
 						density="compact"
 						variant="outlined"
 						hide-details
@@ -56,20 +56,20 @@
 						class="text-caption"
 						:style="{ color: !allRulesMet ? 'red' : '' }"
 					>
-						Please add all necessary characters to create safe password.
+						{{t(AppLabels.USERCONF_PASSWORD_SECURITY)}}
 					</span>
 					<ul class="text-caption mb-4" style="list-style: none; padding: 0;">
 						<li :style="{ color: hasMinLength ? 'green' : 'red' }">
-							At least 8 characters
+							{{t(AppLabels.USERCONF_PASSWORD_MINIMUM_CHAR)}}
 						</li>
 						<li :style="{ color: hasUppercase ? 'green' : 'red' }">
-							At least one uppercase letter
+							{{t(AppLabels.USERCONF_PASSWORD_UPPERCASE)}}
 						</li>
 						<li :style="{ color: hasNumber ? 'green' : 'red' }">
-							At least one number
+							{{t(AppLabels.USERCONF_PASSWORD_ONE_NUMBER)}}
 						</li>
 						<li :style="{ color: hasSpecialChar ? 'green' : 'red' }">
-							At least one special character
+							{{t(AppLabels.USERCONF_PASSWORD_SPECIAL_CHAR)}}
 						</li>
 					</ul>
 
@@ -77,7 +77,7 @@
 						v-model="newPassword2"
 						:append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
 						:type="show3 ? 'text' : 'password'"
-						label="Repeat new password"
+						:label="t(AppLabels.USEERCONF_PASSWORD_REPEAT)"
 						density="compact"
 						variant="outlined"
 						:error-messages="passwordMismatchMessage"
@@ -90,10 +90,10 @@
 					<v-spacer></v-spacer>
 
 					<v-btn
-						text="Cancel"
+						:text="t(AppLabels.CANCEL)"
 						class="text-none"
 						@click="dialog = false"
-					></v-btn>
+					/>
 
 					<v-btn
 						:disabled="loading || !allRulesMet || newPassword1 != newPassword2 || currentPassword.trim().length == 0"
@@ -103,7 +103,7 @@
 						class="text-none"
 						@click="changePassword"
 					>
-						Save
+						{{t(AppLabels.SAVE)}}
 					</v-btn>
 				</v-card-actions>
 			</v-card>
@@ -117,12 +117,16 @@ import {ref, computed} from "vue";
 import {AxiosError} from "axios";
 import {userService} from "@/service/user/UserService";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 interface Props {
 	controller: SettingsController,
 }
 
 const props = defineProps<Props>();
+
+const {t} = useI18n();
 
 const dialog = ref(false);
 
@@ -155,13 +159,13 @@ const allRulesMet = computed(() =>
 
 const passwordMismatchMessage = computed(() => {
 	if (!newPassword2.value) return ""; // No message if empty
-	if (newPassword1.value !== newPassword2.value) return "Passwords does not match";
+	if (newPassword1.value !== newPassword2.value) return t(AppLabels.USERCONF_PASSWORD_NOT_MATCH);
 	return "";
 });
 
 async function changePassword() {
 	if (newPassword1.value !== newPassword2.value) {
-		alert("Passwords do not match!");
+		alert(t(AppLabels.USERCONF_PASSWORD_NOT_MATCH));
 		return;
 	}
 
@@ -171,13 +175,12 @@ async function changePassword() {
 			currentPassword.value,
 			newPassword1.value
 		);
-		appSnackbarController.show({message: "Password changed successfully"})
+		appSnackbarController.show({message: t(AppLabels.USERCONF_PASSWORD_CHANGED)})
 		dialog.value = false;
 		currentPassword.value = "";
 		newPassword1.value = "";
 		newPassword2.value = "";
 	} catch (e: AxiosError) {
-		console.log(e)
 		error.value = e.response.data.message
 	} finally {
 		loading.value = false;
