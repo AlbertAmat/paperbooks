@@ -1,6 +1,6 @@
 <template>
 	<card-component
-		title="Stocks"
+		:title="t(AppLabels.STOCKS)"
 		icon="mdi-book-multiple"
 		:counter="stocks.length"
 	>
@@ -11,7 +11,7 @@
 				color="primary"
 				class="text-none"
 			>
-				Add
+				{{t(AppLabels.ADD)}}
 			</v-btn>
 		</template>
 
@@ -84,6 +84,8 @@ import BookStock from "@/model/book/BookStock";
 import BookStockDialog from "@/views/book/compoents/BookStockDialog.vue";
 import CardComponent from "@/components/card/CardComponent.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 interface Props {
 	book: Book
@@ -91,17 +93,19 @@ interface Props {
 
 const props = defineProps<Props>()
 
+const {t} = useI18n();
+
 const headers = [
 	{
-		title: 'Code',
+		title: t(AppLabels.CODE),
 		align: 'start',
 		sortable: false,
 		value: 'code',
 	},
-	{title: 'Location', value: 'location_name'},
-	{title: 'Status', value: 'status'},
-	{title: 'Booked by', value: 'booked_user'},
-	{title: 'Actions', value: 'actions', align: 'end',}
+	{title: t(AppLabels.LOCATION), value: 'location_name'},
+	{title: t(AppLabels.BOOK_STOCK_STATUS), value: 'status'},
+	{title: t(AppLabels.BOOKED_BY), value: 'booked_user'},
+	{title: t(AppLabels.ACTIONS), value: 'actions', align: 'end',}
 ];
 
 const stockDialog: Ref<boolean> = ref(false);
@@ -131,7 +135,7 @@ const stocks = computed(() => {
 			id: stock.getId(),
 			code: stock.getCode(),
 			location_id: stock.getLocationId(),
-			location_name: stock.getLocationName() || '[No location]',
+			location_name: stock.getLocationName() || t(AppLabels.NO_LOCATION),
 			status: stock.getStatus(),
 			status_color: status!.color,
 			status_text: status!.text,
@@ -153,9 +157,9 @@ function printBarcode(id: number) {
  */
 async function removeBookStock(stock: Record<string, any>) {
 	confirmationDialogController.showDialog(
-		`Delete stock ${stock.code}`,
-		"Are you sure that you want to remove this book stock?",
-		"Delete"
+		`${t(AppLabels.DELETE_STOCK)} ${stock.code}`,
+		t(AppLabels.DELETE_STOCK_DESC),
+		t(AppLabels.DELETE)
 	).then(async () => {
 		try {
 			deleteLoading.value.push(stock.id);

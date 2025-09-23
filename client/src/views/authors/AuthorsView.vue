@@ -7,7 +7,7 @@
 				color="primary"
 				small
 			>
-				Add
+				{{t(AppLabels.ADD)}}
 			</v-btn>
 		</template>
 
@@ -63,8 +63,12 @@ import AuthorDialog from "@/views/authors/AuthorDialog.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import AuthorsController from "@/controller/authors/AuthorsController";
 import BookAuthor from "@/model/author/BookAuthor";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 const controller = new AuthorsController();
+
+const {t} = useI18n();
 
 /**
  *
@@ -83,10 +87,10 @@ const deleteLoading: Ref<number[]> = ref([]);
 
 const headers = [
 	{
-		title: 'Name',
+		title: t(AppLabels.NAME),
 		value: 'name',
 	},
-	{title: 'Actions', value: 'actions', align: 'end',}
+	{title: t(AppLabels.ACTIONS), value: 'actions', align: 'end',}
 ];
 
 /**

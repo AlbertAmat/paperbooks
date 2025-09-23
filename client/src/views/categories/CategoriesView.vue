@@ -7,7 +7,7 @@
 				color="primary"
 				small
 			>
-				Add
+				{{t(AppLabels.ADD)}}
 			</v-btn>
 		</template>
 
@@ -62,8 +62,12 @@ import {applicationService} from "@/service/ApplicationService";
 import CategoriesController from "@/controller/categories/CategoriesController";
 import Category from "@/model/category/Category";
 import CategoryDialog from "./CategoryDialog.vue"
-	""
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
+
 const controller = new CategoriesController();
+
+const {t} = useI18n();
 
 /**
  *
@@ -82,10 +86,10 @@ const deleteLoading: Ref<number[]> = ref([]);
 
 const headers = [
 	{
-		title: 'Name',
+		title: t(AppLabels.NAME),
 		value: 'name',
 	},
-	{title: 'Actions', value: 'actions', align: 'end',}
+	{title: t(AppLabels.ACTIONS), value: 'actions', align: 'end',}
 ];
 
 /**
@@ -127,9 +131,9 @@ function createCategory() {
 async function deleteItem(id: number) {
 	const category = controller.getCategory(id);
 	confirmationDialogController.showDialog(
-		`Delete category ${category ? category.getCategoryName() : ''}`,
-		"Are you sure that you want to remove this category?",
-		"Delete"
+		`${t(AppLabels.DELETE_CATEGORY)} ${category ? category.getCategoryName() : ''}`,
+		t(AppLabels.DELETE_CATEGORY_DESC),
+		t(AppLabels.DELETE)
 	).then(async () => {
 		try {
 			deleteLoading.value.push(id);

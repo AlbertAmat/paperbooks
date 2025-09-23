@@ -7,7 +7,7 @@
 				color="primary"
 				small
 			>
-				Add
+				{{t(AppLabels.ADD)}}
 			</v-btn>
 		</template>
 
@@ -78,8 +78,12 @@ import {confirmationDialogController} from "@/components/confirmationDialog/Conf
 import CustomersController from "@/controller/customers/CustomersController";
 import Customer from "@/model/customer/Customer";
 import CustomerBooksTable from "@/views/customers/CustomerBooksTable.vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 const controller = new CustomersController();
+
+const {t} = useI18n();
 
 /**
  *
@@ -98,14 +102,14 @@ const deleteLoading: Ref<number[]> = ref([]);
 
 const headers = [
 	{
-		title: 'Name',
+		title: t(AppLabels.NAME),
 		value: 'name',
 	},
 	{
-		title: 'Total books',
+		title: t(AppLabels.TOTAL_BOOKS),
 		value: 'totalBooks',
 	},
-	{title: 'Actions', value: 'actions', align: 'end',}
+	{title: t(AppLabels.ACTIONS), value: 'actions', align: 'end',}
 ];
 
 /**
@@ -148,9 +152,9 @@ function createCustomer() {
 async function deleteItem(customerId: number) {
 	const customer = controller.getCustomer(customerId);
 	confirmationDialogController.showDialog(
-		`Delete customer ${customer ? customer.getCustomerName() : ''}`,
-		"Are you sure that you want to remove this customer?",
-		"Delete"
+		`${t(AppLabels.DELETE_CUSTOMER)} ${customer ? customer.getCustomerName() : ''}`,
+		t(AppLabels.DELETE_CUSTOMER_DESC),
+		t(AppLabels.DELETE)
 	).then(async () => {
 		try {
 			deleteLoading.value.push(customerId);

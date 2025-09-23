@@ -31,7 +31,7 @@
 
 						<template v-else>
 							<v-icon size="60">mdi-plus</v-icon>
-							<span style="font-size: 20px; font-weight: bold">Drag and drop an image</span>
+							<span style="font-size: 20px; font-weight: bold">{{t(AppLabels.IMAGE_DRAG_AND_DROP)}}</span>
 						</template>
 					</div>
 				</v-expand-transition>
@@ -46,13 +46,17 @@
 			/>
 		</v-card>
 	</v-hover>
-	<div style="text-align: center; width: 100%; color: #afafaf">(Hover to change book image)</div>
+	<div style="text-align: center; width: 100%; color: #afafaf">{{t(AppLabels.BOOK_HOVER_INFO)}}</div>
 </template>
 
 <script setup lang="ts">
 import Book from "@/model/book/Book";
 import notFound from "@/assets/images/notFound.jpg";
 import { ref, Ref } from "vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
+
+const {t} = useI18n();
 
 interface Props {
 	book: Book;

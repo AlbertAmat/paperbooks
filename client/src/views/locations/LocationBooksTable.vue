@@ -15,7 +15,7 @@
 					@click="addDialog = true;"
 					density="compact"
 					prepend-icon="mdi-plus"
-					text="Add a Book"
+					:text="t(AppLabels.ADD_A_BOOK)"
 					variant="elevated"
 					class="text-none gradient"
 				></v-btn>
@@ -59,27 +59,31 @@ import {computed, onMounted, Ref, ref} from "vue";
 import LocationExt from "@/model/location/LocationExt";
 import BookStock from "@/model/book/BookStock";
 import LocationAddBooksDialog from "@/views/locations/LocationAddBooksDialog.vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 interface Props {
 	location: LocationExt
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
+
+const {t} = useI18n();
 
 const loading: Ref<boolean> = ref(false);
 const addDialog: Ref<boolean> = ref(false);
 
 const headers = [
 	{
-		title: 'Image',
+		title: t(AppLabels.IMAGE),
 		value: 'image',
 	},
 	{
-		title: 'Name',
+		title: t(AppLabels.NAME),
 		value: 'name',
 	},
-	{title: 'Code', value: 'code'},
-	{title: 'Status', value: 'status'},
+	{title: t(AppLabels.CODE), value: 'code'},
+	{title: t(AppLabels.BOOK_STOCK_STATUS), value: 'status'},
 ];
 
 const books = computed(() => {

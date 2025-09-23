@@ -5,7 +5,7 @@
 	>
 		<v-card>
 			<v-card-title>
-				{{ author ? 'Edit author' : 'Add author' }}
+				{{ author ? t(AppLabels.EDIT_AUTHOR)  : t(AppLabels.ADD_AUTHOR) }}
 			</v-card-title>
 
 			<v-divider></v-divider>
@@ -13,7 +13,7 @@
 			<v-card-text>
 				<v-text-field
 					v-model="name"
-					label="Name"
+					:label="t(AppLabels.NAME)"
 					density="compact"
 					variant="outlined"
 					hide-details
@@ -29,7 +29,7 @@
 					@click="closeDialog()"
 					class="text-none"
 				>
-					Close
+					{{ t(AppLabels.CLOSE) }}
 				</v-btn>
 				<v-btn
 					color="primary"
@@ -39,7 +39,7 @@
 					@click="addAuthor()"
 					class="text-none"
 				>
-					{{ author ? 'Update' : 'Add' }}
+					{{ author ? t(AppLabels.UPDATE) : t(AppLabels.ADD) }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -52,12 +52,16 @@ import CustomersController from "@/controller/customers/CustomersController";
 import Customer from "@/model/customer/Customer";
 import BookAuthor from "@/model/author/BookAuthor";
 import AuthorsController from "@/controller/authors/AuthorsController";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 interface Props {
 	author?: BookAuthor,
 	controller: AuthorsController,
 	modelValue: boolean
 }
+
+const {t} = useI18n();
 
 const props = defineProps<Props>()
 

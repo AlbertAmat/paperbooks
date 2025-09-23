@@ -7,7 +7,7 @@
 				color="primary"
 				small
 			>
-				Add
+				{{t(AppLabels.ADD)}}
 			</v-btn>
 		</template>
 
@@ -77,8 +77,12 @@ import {confirmationDialogController} from "@/components/confirmationDialog/Conf
 import {applicationService} from "@/service/ApplicationService";
 import LocationExt from "@/model/location/LocationExt";
 import LocationBooksTable from "@/views/locations/LocationBooksTable.vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 const controller = new LocationsController();
+
+const {t} = useI18n();
 
 /**
  *
@@ -97,12 +101,12 @@ const deleteLoading: Ref<number[]> = ref([]);
 
 const headers = [
 	{
-		title: 'Name',
+		title: t(AppLabels.NAME),
 		value: 'name',
 	},
-	{title: 'Description', value: 'description'},
-	{title: 'Total books', value: 'totalBooks'},
-	{title: 'Actions', value: 'actions', align: 'end',}
+	{title: t(AppLabels.DESCRIPTION), value: 'description'},
+	{title: t(AppLabels.TOTAL_BOOKS), value: 'totalBooks'},
+	{title: t(AppLabels.ACTIONS), value: 'actions', align: 'end',}
 ];
 
 /**
@@ -146,9 +150,9 @@ function createLocation() {
 async function deleteItem(locationId: number) {
 	const location = controller.getLocation(locationId);
 	confirmationDialogController.showDialog(
-		`Delete location ${location ? location.getName() : ''}`,
-		"Are you sure that you want to remove this location?",
-		"Delete"
+		`${t(AppLabels.DELETE_LOCATION)} ${location ? location.getName() : ''}`,
+		t(AppLabels.DELETE_LOCATION_DESC),
+		t(AppLabels.DELETE)
 	).then(async () => {
 		try {
 			deleteLoading.value.push(locationId);

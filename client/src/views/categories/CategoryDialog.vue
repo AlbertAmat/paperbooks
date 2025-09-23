@@ -5,7 +5,7 @@
 	>
 		<v-card>
 			<v-card-title>
-				{{ category ? 'Edit category' : 'Add category' }}
+				{{ category ? t(AppLabels.EDIT_CATEGORY) : t(AppLabels.ADD_CATEGORY) }}
 			</v-card-title>
 
 			<v-divider></v-divider>
@@ -13,7 +13,7 @@
 			<v-card-text>
 				<v-text-field
 					v-model="name"
-					label="Name"
+					:label="t(AppLabels.NAME)"
 					density="compact"
 					variant="outlined"
 					hide-details
@@ -30,7 +30,7 @@
 					@click="closeDialog()"
 					class="text-none"
 				>
-					Close
+					{{t(AppLabels.CLOSE)}}
 				</v-btn>
 				<v-btn
 					color="primary"
@@ -40,7 +40,7 @@
 					@click="addCategory()"
 					class="text-none"
 				>
-					{{ category ? 'Update' : 'Add' }}
+					{{ category ? t(AppLabels.UPDATE) : t(AppLabels.ADD) }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -52,6 +52,8 @@ import {computed, Ref, ref} from 'vue'
 import {applicationService} from "@/service/ApplicationService";
 import Category from "@/model/category/Category";
 import CategoriesController from "@/controller/categories/CategoriesController";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 interface Props {
 	category?: Category,
@@ -60,6 +62,8 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+const {t} = useI18n();
 
 const emit = defineEmits<{
 	(e: 'update:modelValue', value: boolean): void

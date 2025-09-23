@@ -5,7 +5,7 @@
 	>
 		<v-card>
 			<v-card-title>
-				{{ customer ? 'Edit customer' : 'Add customer' }}
+				{{ customer ? t(AppLabels.EDIT_CUSTOMER) : t(AppLabels.ADD_CUSTOMER) }}
 			</v-card-title>
 
 			<v-divider></v-divider>
@@ -13,7 +13,7 @@
 			<v-card-text>
 				<v-text-field
 					v-model="name"
-					label="Name"
+					:label="t(AppLabels.NAME)"
 					density="compact"
 					variant="outlined"
 					hide-details
@@ -29,7 +29,7 @@
 					@click="closeDialog()"
 					class="text-none"
 				>
-					Close
+					{{t(AppLabels.CLOSE)}}
 				</v-btn>
 				<v-btn
 					color="primary"
@@ -39,7 +39,7 @@
 					@click="addCustomer()"
 					class="text-none"
 				>
-					{{ customer ? 'Update' : 'Add' }}
+					{{ customer ? t(AppLabels.UPDATE) : t(AppLabels.ADD) }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -50,6 +50,8 @@
 import {computed, Ref, ref} from 'vue'
 import CustomersController from "@/controller/customers/CustomersController";
 import Customer from "@/model/customer/Customer";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 interface Props {
 	customer?: Customer,
@@ -57,7 +59,9 @@ interface Props {
 	modelValue: boolean
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
+
+const {t} = useI18n();
 
 const emit = defineEmits<{
 	(e: 'update:modelValue', value: boolean): void

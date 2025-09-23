@@ -8,7 +8,7 @@
 			<v-col cols="9" class="pl-0 pr-0">
 				<v-row no-gutters class="pa-0">
 					<v-col cols="4" class="px-1 pb-1">
-						<dashboard-card title="Overview" class="gradient">
+						<dashboard-card :title="t(AppLabels.OVERVIEW)" class="gradient">
 							<h2>
 								{{ controller.getTotalBooks() }}
 								<v-icon
@@ -18,16 +18,16 @@
 									{{ upBooksTrend ? 'mdi-arrow-top-right' : 'mdi-arrow-bottom-left' }}
 								</v-icon>
 							</h2>
-							<span class="v-card-subtitle pl-0 mt-1">Total books</span>
+							<span class="v-card-subtitle pl-0 mt-1">{{t(AppLabels.TOTAL_BOOKS)}}</span>
 						</dashboard-card>
 					</v-col>
 
 					<v-col cols="4" class="px-1 pb-1">
-						<dashboard-card title="Booked books">
+						<dashboard-card :title="t(AppLabels.BOOKED_BOOKS)">
 							<div style="display:flex; width: 100%; align-items: center">
 								<div style="flex: 1">
 									<h2>{{ controller.getTotalBookedBooks() }}</h2>
-									<span class="v-card-subtitle pl-0 mt-1">Total</span>
+									<span class="v-card-subtitle pl-0 mt-1">{{t(AppLabels.DASHBOARD_TOTAL)}}</span>
 								</div>
 
 								<v-btn
@@ -35,30 +35,30 @@
 									small
 									color="priamry"
 								>
-									Release
+									{{t(AppLabels.RELEASE)}}
 								</v-btn>
 							</div>
 						</dashboard-card>
 					</v-col>
 
 					<v-col cols="4" class="px-1 pb-1">
-						<dashboard-card title="Categories">
+						<dashboard-card :title="t(AppLabels.CATEGORIES)">
 							<h2>{{ controller.getTotalCategories() }}</h2>
-							<span class="v-card-subtitle pl-0 mt-1">Total</span>
+							<span class="v-card-subtitle pl-0 mt-1">{{t(AppLabels.DASHBOARD_TOTAL)}}</span>
 						</dashboard-card>
 					</v-col>
 
 					<v-col cols="4" class="px-1 pb-1">
-						<dashboard-card title="Customers">
+						<dashboard-card :title="t(AppLabels.CUSTOMERS)">
 							<h2>{{ controller.getTotalCustomers() }}</h2>
-							<span class="v-card-subtitle pl-0 mt-1">Total</span>
+							<span class="v-card-subtitle pl-0 mt-1">{{t(AppLabels.DASHBOARD_TOTAL)}}</span>
 						</dashboard-card>
 					</v-col>
 
 					<v-col cols="4" class="px-1 pb-1">
-						<dashboard-card title="Locations">
+						<dashboard-card :title="t(AppLabels.LOCATIONS)">
 							<h2>{{ controller.getTotalLocations() }}</h2>
-							<span class="v-card-subtitle pl-0 mt-1">Total</span>
+							<span class="v-card-subtitle pl-0 mt-1">{{t(AppLabels.DASHBOARD_TOTAL)}}</span>
 						</dashboard-card>
 					</v-col>
 
@@ -68,7 +68,7 @@
 					</v-col>
 
 					<v-col cols="12" class="px-1 pt-1">
-						<dashboard-card title="Chart">
+						<dashboard-card :title="t(AppLabels.DASHBOARD_CHART)">
 							<books-in-time-chart :data="controller.getBooksInTime()"/>
 						</dashboard-card>
 					</v-col>
@@ -76,7 +76,7 @@
 			</v-col>
 
 			<v-col class="pl-1 pr-0">
-				<dashboard-card title="Last books" style="height: 100%; max-height: 100%">
+				<dashboard-card :title="t(AppLabels.DASHBOARD_LAST_BOOKS)" style="height: 100%; max-height: 100%">
 					<v-list slim style="padding: 0;">
 						<v-list-item
 							v-for="item in controller.getLastBooks()"
@@ -114,8 +114,12 @@ import DashboardCard from "@/views/dashboard/DashboardCard.vue";
 import BooksInTimeChart from "@/views/dashboard/BooksInTimeChart.vue";
 import {bookRoute} from "@/router/routes/BookRoute";
 import {computed} from "vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 const controller = new DashboardController();
+
+const {t} = useI18n();
 
 function getBookUrl(id: number) {
 	return bookRoute.getPath(id)

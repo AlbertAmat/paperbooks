@@ -7,13 +7,8 @@
 </template>
 
 <script setup lang="ts">
-
 import LocationExt from "@/model/location/LocationExt";
 import {computed, ref, Ref} from "vue";
-import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
-import {bookService} from "@/service/book/BookService";
-import {IBookAddMd} from "@/types/book/IBookAddMd";
-import BookStockItem from "@/components/addBookStocks/BookStockItem.vue";
 import {locationsService} from "@/service/locations/LocationsService";
 import BookStockCodesDialog from "@/components/addBookStocks/BookStockCodesDialog.vue";
 
@@ -41,6 +36,10 @@ const dialog = computed({
  */
 const loading: Ref<boolean> = ref(false);
 
+/**
+ *
+ * @param books
+ */
 async function addBooks(books: string[]) {
 	try {
 		loading.value = true;

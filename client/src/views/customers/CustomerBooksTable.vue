@@ -15,7 +15,7 @@
 					@click="addDialog = true;"
 					density="compact"
 					prepend-icon="mdi-plus"
-					text="Add a Book"
+					:text="t(AppLabels.ADD_BOOK)"
 					variant="elevated"
 					class="text-none gradient"
 				></v-btn>
@@ -68,12 +68,16 @@ import {computed, onMounted, Ref, ref} from "vue";
 import Customer from "@/model/customer/Customer";
 import CustomerAddBooksDialog from "@/views/customers/CustomerAddBooksDialog.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 interface Props {
 	customer: Customer
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
+
+const {t} = useI18n();
 
 const loading: Ref<boolean> = ref(false);
 const addDialog: Ref<boolean> = ref(false);
@@ -82,15 +86,15 @@ const removeLoading: Ref<string[]> = ref([]);
 
 const headers = [
 	{
-		title: 'Image',
+		title: t(AppLabels.IMAGE),
 		value: 'image',
 	},
 	{
-		title: 'Name',
+		title: t(AppLabels.NAME),
 		value: 'name',
 	},
-	{title: 'Code', value: 'code'},
-	{title: 'Actions', value: 'action'},
+	{title: t(AppLabels.CODE), value: 'code'},
+	{title: t(AppLabels.ACTIONS), value: 'action'},
 ];
 
 const books = computed(() => {
@@ -105,7 +109,11 @@ const books = computed(() => {
 })
 
 async function removeCustomerBook(bookStockCode: string) {
-	confirmationDialogController.showDialog(`Remove book`, "Are you sure that you want to remove this book from this customer?", "Delete").then(async () => {
+	confirmationDialogController.showDialog(
+		t(AppLabels.REMOVE_BOOK),
+		t(AppLabels.REMOVE_BOOK_DESC),
+		t(AppLabels.DELETE)
+	).then(async () => {
 		try {
 			removeLoading.value.push(bookStockCode);
 			await props.customer.removeBook(bookStockCode)

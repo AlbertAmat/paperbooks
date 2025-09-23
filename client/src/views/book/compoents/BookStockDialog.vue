@@ -5,22 +5,20 @@
 	>
 		<v-card>
 			<v-card-title>
-				{{ stock ? 'Edit book stock' : 'Add book stock' }}
+				{{ stock ? t(AppLabels.EDIT_BOOK_STOCK) : t(AppLabels.ADD_BOOK_STOCK) }}
 			</v-card-title>
 
 			<v-divider></v-divider>
 
 			<v-card-text>
 				<p class="mb-8 mt-1" style="font-size: 14px">
-					Book stock represents individual copies of a book, allowing you to track quantity and status.
-					Each book stock has a unique barcode for identification.
-					Please ensure the stock barcode is added to the book.
+					{{t(AppLabels.BOOK_STOCK_INFO)}}
 				</p>
 
 				<v-select
 					v-model="selectedStatus"
 					:items="status"
-					label="Status"
+					:label="t(AppLabels.BOOK_STOCK_STATUS)"
 					density="compact"
 					variant="outlined"
 					item-value="value"
@@ -31,7 +29,7 @@
 				<v-select
 					v-model="selectedLocation"
 					:items="locations"
-					label="Locations"
+					:label="t(AppLabels.LOCATIONS)"
 					density="compact"
 					variant="outlined"
 					item-value="value"
@@ -44,7 +42,7 @@
 					v-if="selectedStatus == BookStockStatusEnum.BOOKED"
 					v-model="selectedCustomer"
 					:items="customers"
-					label="Booked by"
+					:label="t(AppLabels.BOOKED_BY)"
 					density="compact"
 					variant="outlined"
 					item-value="value"
@@ -64,7 +62,7 @@
 					@click="closeDialog()"
 					class="text-none"
 				>
-					Close
+					{{ t(AppLabels.CLOSE) }}
 				</v-btn>
 				<v-btn
 					color="primary"
@@ -75,7 +73,7 @@
 					@click="addStock()"
 					class="text-none"
 				>
-					{{ stock ? 'Update' : 'Add' }}
+					{{ stock ? t(AppLabels.UPDATE) : t(AppLabels.ADD) }}
 				</v-btn>
 				<v-btn
 					v-if="!stock"
@@ -86,7 +84,7 @@
 					@click="addStock(true)"
 					class="text-none"
 				>
-					Add & print
+					{{t(AppLabels.ADD_AND_PRINT)}}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -99,6 +97,8 @@ import Book from "@/model/book/Book";
 import {BookStockStatusEnum} from "@/types/book/IBookStock";
 import BookStock from "@/model/book/BookStock";
 import {applicationService} from "@/service/ApplicationService";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 interface Props {
 	book: Book,
@@ -107,6 +107,8 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+const {t} = useI18n();
 
 const emit = defineEmits<{
 	(e: 'update:modelValue', value: boolean): void

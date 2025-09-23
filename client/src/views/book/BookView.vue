@@ -22,7 +22,7 @@
 				:loading="loadingUpdate"
 				small
 			>
-				Save
+				{{t(AppLabels.SAVE)}}
 			</v-btn>
 		</template>
 
@@ -34,7 +34,7 @@
 						<!-- BOOK														-->
 						<!-- ================================================================== -->
 						<card-component
-							title="Book"
+							:title="t(AppLabels.BOOK)"
 							icon="mdi-book"
 							dense
 						>
@@ -44,7 +44,7 @@
 									<v-text-field
 										v-model="name"
 										:disabled="disableFields"
-										label="Name"
+										:label="t(AppLabels.NAME)"
 										density="compact"
 										variant="outlined"
 										class="mr-1"
@@ -67,7 +67,7 @@
 										v-model="category"
 										:disabled="disableFields"
 										:items="categoriesJson()"
-										label="Category"
+										:label="t(AppLabels.CATEGORY)"
 										density="compact"
 										variant="outlined"
 										item-value="value"
@@ -82,7 +82,7 @@
 										v-model="language"
 										:disabled="disableFields"
 										:items="languagesJson()"
-										label="Language"
+										:label="t(AppLabels.LANGUAGE)"
 										density="compact"
 										variant="outlined"
 										item-value="value"
@@ -99,7 +99,7 @@
 										v-model="format"
 										:disabled="disableFields"
 										:items="formatsJson()"
-										label="Format"
+										:label="t(AppLabels.FORMAT)"
 										density="compact"
 										variant="outlined"
 										item-value="value"
@@ -113,7 +113,7 @@
 									<v-text-field
 										v-model="pages"
 										:disabled="disableFields"
-										label="Pages"
+										:label="t(AppLabels.PAGES)"
 										type="number"
 										density="compact"
 										variant="outlined"
@@ -133,9 +133,9 @@
 									variant="outlined"
 									item-value="value"
 									item-title="text"
-									label="Authors"
+									:label="t(AppLabels.AUTHORS)"
 									color="primary"
-									placeholder="Add authors.."
+									:placeholder="t(AppLabels.ADD_AUTHOR)"
 									dense
 									multiple
 								></v-autocomplete>
@@ -144,7 +144,7 @@
 									<!-- Publisher -->
 									<v-text-field
 										v-model="publisher"
-										label="Publisher"
+										:label="t(AppLabels.PUBLISHER)"
 										:disabled="disableFields"
 										density="compact"
 										variant="outlined"
@@ -155,7 +155,7 @@
 									<!-- Published date -->
 									<v-text-field
 										v-model="publishedDate"
-										label="Published date"
+										:label="t(AppLabels.PUBLISHED_DATE)"
 										:disabled="disableFields"
 										type="date"
 										density="compact"
@@ -171,7 +171,7 @@
 									:disabled="disableFields"
 									density="compact"
 									variant="outlined"
-									label="Description"
+									:label="t(AppLabels.DESCRIPTION)"
 								></v-textarea>
 							</template>
 						</card-component>
@@ -202,9 +202,12 @@ import {applicationService} from "@/service/ApplicationService";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import {authorsService} from "@/service/author/AuthorsService";
 import BookImage from "@/views/book/compoents/BookImage.vue";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
+import {useI18n} from "vue-i18n";
 
 const model = new BookController();
 
+const {t} = useI18n();
 
 /**
  *
@@ -330,7 +333,6 @@ const publishedDate = computed({
 		}
 	},
 	set(val: string | null) {
-		console.log(val)
 		model.getBook().setPublishDate(val ? new Date(val) : null);
 		hasChanges.value = true;
 	}
@@ -398,9 +400,9 @@ function categoriesJson() {
 
 function deleteBook() {
 	confirmationDialogController.showDialog(
-		`Delete book '${model.getBook().getName()}'`,
-		"Are you sure that you want to delete this book?",
-		"Delete"
+		`${t(AppLabels.DELETE_BOOK)} '${model.getBook().getName()}'`,
+		t(AppLabels.DELETE_BOOK_DESC),
+		t(AppLabels.DELETE)
 	).then(async () => {
 		try {
 			loadingDelete.value = true;

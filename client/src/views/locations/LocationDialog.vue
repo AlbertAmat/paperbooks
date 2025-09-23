@@ -5,7 +5,7 @@
 	>
 		<v-card>
 			<v-card-title>
-				{{ location ? 'Edit location' : 'Add location' }}
+				{{ location ? t(AppLabels.EDIT_LOCATION) : t(AppLabels.ADD_LOCATION) }}
 			</v-card-title>
 
 			<v-divider></v-divider>
@@ -13,7 +13,7 @@
 			<v-card-text>
 				<v-text-field
 					v-model="name"
-					label="Name"
+					:label="t(AppLabels.NAME)"
 					density="compact"
 					variant="outlined"
 					hide-details
@@ -22,7 +22,7 @@
 
 				<v-text-field
 					v-model="description"
-					label="Description"
+					:label="t(AppLabels.DESCRIPTION)"
 					density="compact"
 					variant="outlined"
 					hide-details
@@ -38,7 +38,7 @@
 					@click="closeDialog()"
 					class="text-none"
 				>
-					Close
+					{{t(AppLabels.CLOSE)}}
 				</v-btn>
 				<v-btn
 					color="primary"
@@ -48,7 +48,7 @@
 					@click="addLocation()"
 					class="text-none"
 				>
-					{{ location ? 'Update' : 'Add' }}
+					{{ location ? t(AppLabels.UPDATE) : t(AppLabels.ADD) }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -60,6 +60,8 @@ import {computed, Ref, ref} from 'vue'
 import LocationsController from "@/controller/locations/LocationsController";
 import {applicationService} from "@/service/ApplicationService";
 import LocationExt from "@/model/location/LocationExt";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 interface Props {
 	location?: LocationExt,
@@ -67,7 +69,9 @@ interface Props {
 	modelValue: boolean
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
+
+const {t} = useI18n();
 
 const emit = defineEmits<{
 	(e: 'update:modelValue', value: boolean): void

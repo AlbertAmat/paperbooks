@@ -19,6 +19,8 @@ import {
 } from 'chart.js';
 import {Line as LineChartComponent} from 'vue-chartjs';
 import {IBooksInTime} from "@/types/dashboard/IDashboard";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 // Register Chart.js modules
 ChartJS.register(
@@ -30,6 +32,8 @@ ChartJS.register(
 	CategoryScale,
 	LinearScale
 );
+
+const {t} = useI18n();
 
 interface Props {
 	data: IBooksInTime[];
@@ -46,7 +50,7 @@ const chartData = computed(() => ({
 	),
 	datasets: [
 		{
-			label: 'Books Added Over Time',
+			label: t(AppLabels.DASHBOARD_BOOKS_ADDED_TIME_OVER_TIME),
 			data: props.data.map(item => item.total_books),
 			borderColor: '#9eef83',
 			backgroundColor: '#9eef83',

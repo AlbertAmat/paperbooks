@@ -6,7 +6,7 @@
 	>
 		<v-card>
 			<v-card-title class="d-flex" style="align-items: center">
-				Add book (ISBN)
+				{{t(AppLabels.ADD_BOOK_ISBN)}}
 
 				<v-spacer></v-spacer>
 
@@ -23,7 +23,7 @@
 
 			<v-card-text>
 				<v-card-subtitle class="px-0" style="white-space: normal">
-					Easily add a book to your library by entering its ISBN code. The app will automatically fetch the book's details, including title, author, description, and more, and seamlessly add it to your collection.
+					{{t(AppLabels.ADD_BOOK_ISBN_DESC)}}
 				</v-card-subtitle>
 
 				<div style="display: flex; align-items: center">
@@ -31,7 +31,7 @@
 						v-model="isbnCode"
 						:disabled="loadingIsbnCode.length != 0"
 						:rules="[isbnValidationRule]"
-						label="ISBN code"
+						:label="t(AppLabels.ISBN_CODE)"
 						variant="outlined"
 						hide-details
 						density="compact"
@@ -88,7 +88,7 @@
 					class="text-none"
 					@click="dialog = false"
 				>
-					Cancel
+					{{t(AppLabels.CANCEL)}}
 				</v-btn>
 				<v-btn
 					color="primary"
@@ -98,7 +98,7 @@
 					class="text-none mr-4"
 					@click="addBooks()"
 				>
-					Add
+					{{t(AppLabels.ADD)}}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -115,12 +115,16 @@ import {bookRoute} from "@/router/routes/BookRoute";
 import Book from "@/model/book/Book";
 import BookStock from "@/model/book/BookStock";
 import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 interface Props {
 	modelValue: boolean
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
+
+const {t} = useI18n();
 
 const emit = defineEmits<{
 	(e: 'update:modelValue', value: boolean): void
@@ -196,7 +200,7 @@ const isbnValidationRule = computed(() => {
 		if (isValidIsbn(value)) {
 			return true;
 		} else {
-			return "Invalid ISBN format. Please enter a valid ISBN-10 or ISBN-13.";
+			return t(AppLabels.INVALID_ISBN_CODE);
 		}
 	};
 });

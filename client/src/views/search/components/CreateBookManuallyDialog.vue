@@ -6,7 +6,7 @@
 	>
 		<v-card>
 			<v-card-title class="d-flex" style="align-items: center">
-				Add book
+				{{t(AppLabels.ADD_BOOK)}}
 
 				<v-spacer></v-spacer>
 
@@ -25,7 +25,7 @@
 				<v-file-upload
 					v-model="image"
 					density="compact"
-					title="Drag and drop book cover"
+					:title="t(AppLabels.DRAG_AND_DROP_BOOK_COVER)"
 					clearable
 					class="mb-6"
 				></v-file-upload>
@@ -65,7 +65,7 @@
 					class="text-none"
 					@click="dialog = false"
 				>
-					Cancel
+					{{t(AppLabels.CANCEL)}}
 				</v-btn>
 				<v-btn
 					color="primary"
@@ -75,7 +75,7 @@
 					class="text-none mr-4"
 					@click="addBook()"
 				>
-					Add
+					{{t(AppLabels.ADD)}}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -90,13 +90,17 @@ import {bookService} from "@/service/book/BookService";
 import {bookRoute} from "@/router/routes/BookRoute";
 import router from "@/router/Router";
 import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppSnackbarController";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 
 interface Props {
 	modelValue: boolean
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
+
+const {t} = useI18n();
 
 const emit = defineEmits<{
 	(e: 'update:modelValue', value: boolean): void
@@ -149,7 +153,7 @@ const isbnValidationRule = computed(() => {
 		if (isValidIsbn(value)) {
 			return true;
 		} else {
-			return "Invalid ISBN format. Please enter a valid ISBN-10 or ISBN-13.";
+			return t(AppLabels.INVALID_ISBN_CODE);
 		}
 	};
 });
@@ -161,12 +165,12 @@ enum FIELD_TYPE {
 
 const fields: Array<{ label: string, model: Ref<any>, type: FIELD_TYPE, rules?: any }> = [
 	{
-		label: "Name",
+		label: t(AppLabels.NAME),
 		model: name,
 		type: FIELD_TYPE.TEXT_FIELD
 	},
 	{
-		label: "Description",
+		label: t(AppLabels.DESCRIPTION),
 		model: description,
 		type: FIELD_TYPE.TEXT_AREA
 	},
