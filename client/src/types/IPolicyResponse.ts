@@ -12,4 +12,5 @@ export default interface IPolicyResponse {
     languages: ILanguage[];
     formats: IFormat[];
     locations: ILocation[];
+    labels: Record<string, string>;
 }

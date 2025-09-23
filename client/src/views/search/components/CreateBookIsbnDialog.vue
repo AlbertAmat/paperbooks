@@ -23,9 +23,7 @@
 
 			<v-card-text>
 				<v-card-subtitle class="px-0" style="white-space: normal">
-					Easily add a book to your library by entering its ISBN code. The app will automatically fetch the
-					book's details,
-					including title, author, description, and more, and seamlessly add it to your collection.
+					Easily add a book to your library by entering its ISBN code. The app will automatically fetch the book's details, including title, author, description, and more, and seamlessly add it to your collection.
 				</v-card-subtitle>
 
 				<div style="display: flex; align-items: center">

@@ -64,6 +64,10 @@ export default class Customer {
         return this.m_books.value;
     }
 
+    /**
+     *
+     * @param books
+     */
     public setBooks(books: ICustomerBook[]) {
         this.m_books.value = books.map((book) => new CustomerBook(book));
     }
@@ -77,6 +81,19 @@ export default class Customer {
         this.m_totalBooks.value =  this.m_books.value.length;
     }
 
+    /**
+     *
+     * @param name
+     */
+    public async update(name:string) {
+        await customersService.updateCustomer(this.m_customerId, name);
+        this.m_customerName.value = name;
+    }
+
+    /**
+     *
+     * @param bookStockCode
+     */
     public async removeBook(bookStockCode: string) {
         await customersService.removeCustomerBook(this.m_customerId, bookStockCode);
 

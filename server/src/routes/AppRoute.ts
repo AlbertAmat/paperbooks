@@ -21,6 +21,7 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
     let formats: Record<string, any>[] = [];
     let locations: Record<string, any>[] = [];
     let customers: Record<string, any>[] = [];
+    let appLabels: Record<string, string> = {};
 
     try {
         categories = await getCategories(userId);
@@ -52,6 +53,11 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
         console.error("Error when getting customers. ", e)
     }
 
+    try {
+        appLabels = await getAppLabels(userId);
+    } catch (e) {
+        console.error("Error when getting app labels. ", e)
+    }
 
     const user = await  getUser(userId);
 
@@ -62,6 +68,7 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
         formats: formats,
         locations: locations,
         customers: customers,
+        labels: appLabels,
     });
 });
 
@@ -163,6 +170,30 @@ async function getLocations(userId: number): Promise<Record<string, any>[]> {
 
     // Return the result (found rows)
     return result.rows;
+}
+
+/**
+ *
+ */
+async function getAppLabels(userId: number): Promise<Record<string, string>> {
+    const pool = appService.getDatabasePool();
+    const query = `
+        SELECT app_labels.code, app_labels.text
+          FROM app_labels, users
+         WHERE users.id = $1
+           AND app_labels.language = users.language
+    `
+    // Use a prepared statement to fetch items by name
+    console.log("executing query: ", query);
+    const result = await pool.query(query, [userId]);
+
+    // Return the result (found rows)
+    const appLabels: Record<string, string> = {};
+    result.rows.forEach((row) => {
+        appLabels[row.code] = row.text;
+    });
+
+    return appLabels;
 }
 
 /**

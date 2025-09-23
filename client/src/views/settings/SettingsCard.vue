@@ -13,12 +13,5 @@ interface Props {
 	title:  string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-	outline: false,  // ✅ no function needed for primitive
-	dense: false
-})
+const props = defineProps<Props>();
 </script>
-
-<style scoped>
-
-</style>

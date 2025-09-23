@@ -9,7 +9,9 @@
 ## backlog
 * use file logger
 * register: create register, recapchat + verification
-* login popup 401
+* handle enters in input dialog
+* sometims barcode webcam fails at second time
+* add links in all books tables (locations, customer)
 
 
 ## Project setup

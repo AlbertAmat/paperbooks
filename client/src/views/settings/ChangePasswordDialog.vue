@@ -60,16 +60,16 @@
 					</span>
 					<ul class="text-caption mb-4" style="list-style: none; padding: 0;">
 						<li :style="{ color: hasMinLength ? 'green' : 'red' }">
-							• At least 8 characters
+							At least 8 characters
 						</li>
 						<li :style="{ color: hasUppercase ? 'green' : 'red' }">
-							• At least one uppercase letter
+							At least one uppercase letter
 						</li>
 						<li :style="{ color: hasNumber ? 'green' : 'red' }">
-							• At least one number
+							At least one number
 						</li>
 						<li :style="{ color: hasSpecialChar ? 'green' : 'red' }">
-							• At least one special character
+							At least one special character
 						</li>
 					</ul>
 
