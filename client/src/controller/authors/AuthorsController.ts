@@ -5,6 +5,8 @@ import IBookAuthor from "@/types/book/IBookAuthor";
 import BookAuthor from "@/model/author/BookAuthor";
 import {authorsService} from "@/service/author/AuthorsService";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class AuthorsController extends BaseController<IBookAuthor[]> {
 
@@ -15,7 +17,7 @@ export default class AuthorsController extends BaseController<IBookAuthor[]> {
     private m_authors: ShallowRef<BookAuthor[]> = shallowRef([]);
 
     public constructor() {
-        super("Authors");
+        super(i18n.global.t(AppLabels.AUTHORS));
     }
 
     /**
@@ -55,7 +57,7 @@ export default class AuthorsController extends BaseController<IBookAuthor[]> {
         try {
             const customer = await authorsService.addAuthor(name);
             this.m_authors.value = [...this.m_authors.value, new BookAuthor(customer)];
-            appSnackbarController.show({message: "New author added: " + name})
+            appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_NEW_AUTHOR_ADDED) + " " + name})
         } catch (e) {
             console.error(e);
         }

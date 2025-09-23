@@ -4,7 +4,7 @@
 		<!-- APP BAR											-->
 		<!-- ================================================== -->
 		<v-card-title style="display: flex; align-items: center; font-size: 14px">
-			<app-bar>
+			<app-bar :title="model.getPageName()">
 				<template v-slot:prepend>
 					<slot name="prepend"/>
 				</template>

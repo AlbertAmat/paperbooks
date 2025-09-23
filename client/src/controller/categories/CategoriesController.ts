@@ -4,6 +4,8 @@ import ICategory from "@/types/category/ICategory";
 import Category from "@/model/category/Category";
 import {categoriesService} from "@/service/categories/CategoriesService";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class CategoriesController extends BaseController<ICategory[]> {
 
@@ -14,7 +16,7 @@ export default class CategoriesController extends BaseController<ICategory[]> {
     private m_categories: ShallowRef<Category[]> = shallowRef([]);
 
     public constructor() {
-        super("Categories");
+        super(i18n.global.t(AppLabels.CATEGORIES));
     }
 
     async fetchData(): Promise<ICategory[]> {
@@ -48,7 +50,7 @@ export default class CategoriesController extends BaseController<ICategory[]> {
         try {
             const category = await categoriesService.addCategory(name);
             this.m_categories.value = [...this.m_categories.value, new Category(category)];
-            appSnackbarController.show({message: "Category was been added successfully"})
+            appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_NEW_CATEGORY_ADDED)})
         } catch (e) {
             console.error(e);
         }
@@ -65,7 +67,7 @@ export default class CategoriesController extends BaseController<ICategory[]> {
                 await categoriesService.deleteCategory(id);
                 this.m_categories.value.splice(index, 1);
                 this.m_categories.value = [...this.m_categories.value];
-                appSnackbarController.show({message: "Category was been deleted successfully"})
+                appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_DELETED_CATEGORY)})
             } catch (e) {
                 console.error(e);
             }

@@ -2,6 +2,8 @@ import IBookAuthor from "@/types/book/IBookAuthor";
 import {authorsService} from "@/service/author/AuthorsService";
 import {Ref, ref} from "vue";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class BookAuthor {
 
@@ -38,7 +40,7 @@ export default class BookAuthor {
 
     public async update(name: string) {
         await authorsService.updateAuthor(this.m_authorId, name);
-        appSnackbarController.show({message: "Author updated successfully"})
+        appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_AUTHOR_UPDATED)})
         this.m_authorName.value = name;
     }
 }

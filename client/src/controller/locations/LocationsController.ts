@@ -4,6 +4,8 @@ import {ShallowRef, shallowRef} from "vue";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 import ILocationExt from "@/types/location/ILocationExt";
 import LocationExt from "@/model/location/LocationExt";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class LocationsController extends BaseController<ILocationExt[]> {
 
@@ -14,7 +16,7 @@ export default class LocationsController extends BaseController<ILocationExt[]> 
     private m_locations: ShallowRef<LocationExt[]> = shallowRef([]);
 
     public constructor() {
-        super("Locations");
+        super(i18n.global.t(AppLabels.LOCATIONS));
     }
 
     async fetchData(): Promise<ILocationExt[]> {
@@ -48,7 +50,7 @@ export default class LocationsController extends BaseController<ILocationExt[]> 
         try {
             const location = await locationsService.addLocation(name, description);
             this.m_locations.value = [...this.m_locations.value, new LocationExt(location)];
-            appSnackbarController.show({message: "Location has been added successfully"})
+            appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_NEW_LOCATION_ADDED)})
         } catch (e) {
             console.error(e);
         }
@@ -65,7 +67,7 @@ export default class LocationsController extends BaseController<ILocationExt[]> 
                 await locationsService.deleteLocation(locationId);
                 this.m_locations.value.splice(index, 1);
                 this.m_locations.value = [...this.m_locations.value];
-                appSnackbarController.show({message: "Location has been deleted successfully"})
+                appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_DELETED_LOCATION)})
             } catch (e) {
                 console.error(e);
             }

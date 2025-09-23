@@ -5,6 +5,8 @@ import BookItem from "@/model/book/BookItem";
 import {ISearchResponse} from "@/types/search/ISearchResponse";
 import router from "@/router/Router";
 import {SearchRoute} from "@/router/routes/SearchRoute";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class SearchController extends BaseController<ISearchResponse> {
 
@@ -33,7 +35,7 @@ export default class SearchController extends BaseController<ISearchResponse> {
     private m_books: ShallowRef<BookItem[]>;
 
     public constructor() {
-        super("Search books");
+        super(i18n.global.t(AppLabels.SEARCH_BOOKS));
 
         this.m_books = shallowRef([]);
     }

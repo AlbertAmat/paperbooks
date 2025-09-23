@@ -7,7 +7,7 @@
 		</template>
 
 		<v-card max-height="400px" min-height="300px">
-			<v-card-title>Scan barcode</v-card-title>
+			<v-card-title>{{t(AppLabels.SCAN_BARCODE)}}</v-card-title>
 			<v-divider></v-divider>
 
 			<v-card-text>
@@ -18,12 +18,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch} from "vue";
 import { Html5Qrcode } from "html5-qrcode";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 const emit = defineEmits<{
 	(e: 'value', value: string): void
 }>()
+
+const {t} = useI18n();
 
 const dialog = ref(false);
 let html5QrCode: Html5Qrcode | null = null;

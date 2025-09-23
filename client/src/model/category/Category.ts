@@ -2,6 +2,8 @@ import ICategory from "@/types/category/ICategory";
 import {categoriesService} from "@/service/categories/CategoriesService";
 import {Ref, ref} from "vue";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class Category {
     /**
@@ -38,6 +40,6 @@ export default class Category {
     public async update(name: string) {
         await categoriesService.updateCategory(this.m_categoryId, name)
         this.m_categoryName.value = name;
-        appSnackbarController.show({message: "Category was updated successfully"})
+        appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_CATEGORY_UPDATED)})
     }
 }

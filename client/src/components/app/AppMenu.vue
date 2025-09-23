@@ -70,8 +70,12 @@ import {locationsRoute} from "@/router/routes/LocationsRoute";
 import {categoriesRoute} from "@/router/routes/CategoriesRoute";
 import {customersRoute} from "@/router/routes/CustomersRoute";
 import {authorsRoute} from "@/router/routes/AuthorsRoute";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 const route = useRoute()
+
+const {t} = useI18n();
 
 /**
  *
@@ -88,32 +92,32 @@ const rail: Ref<boolean> = ref(false);
  */
 const items = [
 	{
-		name: "Dashboard",
+		name: t(AppLabels.DASHBOARD),
 		icon: "mdi-chart-box-outline",
 		path: dashboardRoute.getPath()
 	},
 	{
-		name: "Library",
+		name: t(AppLabels.LIBRARY),
 		icon: "mdi-bookshelf",
 		path: searchRoute.getPath()
 	},
 	{
-		name: "Locations",
+		name: t(AppLabels.LOCATIONS),
 		icon: "mdi-map-marker-radius",
 		path: locationsRoute.getPath()
 	},
 	{
-		name: "Categories",
+		name: t(AppLabels.CATEGORIES),
 		icon: "mdi-shape-outline",
 		path: categoriesRoute.getPath()
 	},
 	{
-		name: "Customers",
+		name: t(AppLabels.CUSTOMERS),
 		icon: "mdi-account-school-outline",
 		path: customersRoute.getPath()
 	},
 	{
-		name: "Authors",
+		name: t(AppLabels.AUTHORS),
 		icon: "mdi-account-tie",
 		path: authorsRoute.getPath()
 	}

@@ -26,7 +26,7 @@
 					:loading="cancelLoading"
 					:disabled="cancelLoading || acceptLoading"
 				>
-					Cancel
+					{{t(AppLabels.CANCEL)}}
 				</v-btn>
 				<v-btn
 					color="primary"
@@ -47,7 +47,10 @@
 <script setup lang="ts">
 import {computed, ref, Ref} from 'vue'
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController"
+import {AppLabels} from "@/plugins/i18n/AppLabels";
+import {useI18n} from "vue-i18n";
 
+const {t} = useI18n();
 const controller = confirmationDialogController;
 
 const acceptLoading: Ref<boolean> = ref(false);

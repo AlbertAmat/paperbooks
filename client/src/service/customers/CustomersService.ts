@@ -17,7 +17,7 @@ class CustomersService {
         })
     }
 
-    public async addCustomer(name: string): Promise<ILocation> {
+    public async addCustomer(name: string): Promise<ICustomer> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/customer`, {
             name: name,
         })

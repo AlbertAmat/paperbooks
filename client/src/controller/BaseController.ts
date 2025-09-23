@@ -20,8 +20,11 @@ export abstract class BaseController<I> {
      */
     private m_data: ShallowRef<I | null>;
 
+    private m_pageName: string;
+
     protected constructor(name: string) {
         document.title = name;
+        this.m_pageName = name;
 
         this.m_loading = ref(false);
         this.m_error = shallowRef(null);
@@ -47,6 +50,10 @@ export abstract class BaseController<I> {
      */
     public isLoading(): boolean {
         return this.m_loading.value;
+    }
+
+    public getPageName(): string {
+        return this.m_pageName;
     }
 
     /**

@@ -8,7 +8,7 @@
 
 	<v-text-field
 		v-model="searchInput"
-		placeholder="Search books"
+		:placeholder="t(AppLabels.SEARCH_BOOKS)"
 		density="compact"
 		:details="false"
 		hide-details
@@ -30,17 +30,26 @@
 
 <script setup lang="ts">
 import {computed, ref, Ref} from "vue";
-import {applicationService} from "@/service/ApplicationService";
 import {useRoute} from "vue-router";
 import {SearchRoute, searchRoute} from "@/router/routes/SearchRoute";
 import router from "@/router/Router";
 import UserMenu from "@/components/app/UserMenu.vue";
 import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
+
+interface Props {
+	title:  string;
+}
+
+const props = defineProps<Props>()
 
 const route = useRoute()
 
+const {t} = useI18n();
+
 const pageName = computed(() => {
-	return route.name || "";
+	return props.title || route.name;
 })
 
 const params = router.currentRoute.value.query;

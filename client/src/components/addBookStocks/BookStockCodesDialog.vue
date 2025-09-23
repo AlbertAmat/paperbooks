@@ -5,7 +5,7 @@
 	>
 		<v-card height="600px">
 			<v-card-title class="d-flex">
-				Add book
+				{{t(AppLabels.ADD_BOOK)}}
 
 				<v-spacer></v-spacer>
 
@@ -24,7 +24,7 @@
 			<v-card-text>
 				<v-text-field
 					v-model="bookCode"
-					label="Stock code"
+					:label="t(AppLabels.STOCK_CODE)"
 					variant="outlined"
 					hide-details
 					density="compact"
@@ -59,7 +59,7 @@
 					@click="dialog = false"
 					class="text-none"
 				>
-					Close
+					{{ t(AppLabels.CLOSE) }}
 				</v-btn>
 				<v-btn
 					color="primary"
@@ -69,7 +69,7 @@
 					@click="emit('addBooks', bookCodes)"
 					class="text-none"
 				>
-					Add
+					{{t(AppLabels.ADD)}}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -82,6 +82,8 @@ import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
 import {bookService} from "@/service/book/BookService";
 import {IBookAddMd} from "@/types/book/IBookAddMd";
 import BookStockItem from "@/components/addBookStocks/BookStockItem.vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "../../plugins/i18n/AppLabels";
 
 interface Props {
 	modelValue: boolean;
@@ -94,6 +96,8 @@ const emit = defineEmits<{
 	(e: 'update:modelValue', value: boolean): void
 	(e: 'addBooks', books: string[]): void
 }>()
+
+const { t } = useI18n();
 
 /**
  *

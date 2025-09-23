@@ -17,8 +17,7 @@
 					mdi-alert
 				</v-icon>
 
-				An error has occurred
-
+				{{t(AppLabels.ERROR_OCCURRED)}}
 				<v-spacer></v-spacer>
 
 				<v-btn
@@ -54,7 +53,7 @@
 					@click="model = false"
 					class="text-none ml-1"
 				>
-					Close
+					{{ t(AppLabels.CLOSE) }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -65,6 +64,10 @@
 
 import {errorDialogController} from "@/components/errorDialog/ErrorDialogController";
 import {computed} from "vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
+
+const {t} = useI18n();
 
 const controller = errorDialogController;
 

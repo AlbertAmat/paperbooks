@@ -63,21 +63,21 @@
 
 import {settingsRoute} from "@/router/routes/SettingsRoute";
 import {applicationService} from "@/service/ApplicationService";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
+
+const {t} = useI18n();
 
 const items = [
 	{
-		title: "Settings",
+		title: t(AppLabels.SETTINGS),
 		to: settingsRoute.getPath()
 	},
 	{
-		title: "Log out",
+		title: t(AppLabels.LOG_OUT),
 		href: window.location.origin + "/logout"
 	},
 ]
 
 const user = applicationService.getUser();
 </script>
-
-<style scoped>
-
-</style>

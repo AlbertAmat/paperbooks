@@ -3,28 +3,30 @@ import JsBarcode from "jsbarcode";
 import {bookService} from "@/service/book/BookService";
 import {ref, Ref} from "vue";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class BookStock {
 
     public static BookStockStatus = [
         {
             value: BookStockStatusEnum.BOOKED,
-            text: "Booked",
+            text: i18n.global.t(AppLabels.BOOKED),
             color: "#3F51B5"
         },
         {
             value: BookStockStatusEnum.AVAILABLE,
-            text: "Available",
+            text: i18n.global.t(AppLabels.AVAILABLE),
             color: "#4CAF50"
         },
         {
             value: BookStockStatusEnum.NOT_AVAILABLE,
-            text: "Not available",
+            text:i18n.global.t(AppLabels.NOT_AVAILABLE),
             color: "#607D8B"
         },
         {
             value: BookStockStatusEnum.DAMAGE,
-            text: "Damage",
+            text: i18n.global.t(AppLabels.DAMAGE),
             color: "#FF5722"
         },
     ]
@@ -144,7 +146,7 @@ export default class BookStock {
 
         // Open a new print window
         const printWindow = window.open("", "_blank", "toolbar=no,menubar=no,scrollbars=no,resizable=no,status=no");
-
+        // TODO: OPEN DIRECTLY CHROME PRINT DIALOG WITHOUT PRINT BUTTON
         if (printWindow) {
             printWindow.document.write(`
             <html>
@@ -171,7 +173,7 @@ export default class BookStock {
             this.m_customerId.value = data.customer_id;
             this.m_customerName = data.customer_name;
 
-            appSnackbarController.show({message: `Book stock updated successfully`})
+            appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_STOCK_UPDATED)})
         } catch (e) {
             console.error("Error while updating book stock", e)
         }

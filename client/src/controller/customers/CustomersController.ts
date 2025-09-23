@@ -5,6 +5,8 @@ import ICustomer from "@/types/customer/ICustomer";
 import Customer from "@/model/customer/Customer";
 import {customersService} from "@/service/customers/CustomersService";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class CustomersController extends BaseController<ICustomer[]> {
 
@@ -15,7 +17,7 @@ export default class CustomersController extends BaseController<ICustomer[]> {
     private m_customers: ShallowRef<Customer[]> = shallowRef([]);
 
     public constructor() {
-        super("Customers");
+        super(i18n.global.t(AppLabels.CUSTOMERS));
     }
 
     async fetchData(): Promise<ICustomer[]> {
@@ -48,7 +50,7 @@ export default class CustomersController extends BaseController<ICustomer[]> {
         try {
             const customer = await customersService.addCustomer(name);
             this.m_customers.value = [...this.m_customers.value, new Customer(customer)];
-            appSnackbarController.show({message: "Customer has been added successfully"})
+            appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_NEW_CUSTOMER_ADDED)})
         } catch (e) {
             console.error(e);
         }
@@ -65,7 +67,7 @@ export default class CustomersController extends BaseController<ICustomer[]> {
                 await customersService.deleteCustomer(customerId);
                 this.m_customers.value.splice(index, 1);
                 this.m_customers.value = [...this.m_customers.value];
-                appSnackbarController.show({message: "Customer has been deleted successfully"})
+                appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_DELETED_CUSTOMER)})
             } catch (e) {
                 console.error(e);
             }

@@ -2,6 +2,8 @@ import ILocation from "@/types/location/ILocation";
 import {locationsService} from "@/service/locations/LocationsService";
 import {ref, Ref} from "vue";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class Location {
     protected readonly m_id: number;
@@ -30,6 +32,6 @@ export default class Location {
         await locationsService.updateLocation(this.m_id, name, description)
         this.m_name.value = name;
         this.m_description.value = description;
-        appSnackbarController.show({message: "Location has been updated successfully"})
+        appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_LOCATION_UPDATED)})
     }
 }

@@ -9,6 +9,8 @@ import { userService } from "@/service/user/UserService";
 
 // Controller for showing feedback messages (snackbars) to the user
 import { appSnackbarController } from "@/components/appSnackbar/AppSnackbarController";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 /**
  * Represents a user of the application and provides methods to
@@ -138,7 +140,7 @@ export default class User {
     public async update(name: string, email: string, language: string, region: string) {
         try {
             await userService.update(name, email, language, region);
-            appSnackbarController.show({ message: "Profile information updated successfully" });
+            appSnackbarController.show({ message: i18n.global.t(AppLabels.SNACKBAR_PROFILE_UPDATED) });
             this.m_email.value = email;
             this.m_name.value = name;
             this.m_language.value = language;
@@ -156,7 +158,7 @@ export default class User {
         try {
             await userService.removeImage();
             this.m_image.value = null;
-            appSnackbarController.show({ message: "Profile image has been removed successfully" });
+            appSnackbarController.show({ message: i18n.global.t(AppLabels.SNACKBAR_PROFILE_IMAGE_DELETED)});
         } catch (e) {
             console.error("Error while removing image: ", e);
         }
@@ -172,7 +174,7 @@ export default class User {
             await userService.uploadImage(image);
             const base64 = await this.__toBase64(image);
             this.m_image.value = base64;
-            appSnackbarController.show({ message: "Profile image has been uploaded successfully" });
+            appSnackbarController.show({ message: i18n.global.t(AppLabels.SNACKBAR_PROFILE_IMAGE_UPDATED) });
         } catch (e) {
             console.error("Error while uploading image: ", e);
         }

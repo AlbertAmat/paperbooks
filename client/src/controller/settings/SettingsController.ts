@@ -1,11 +1,13 @@
 import {BaseController} from "@/controller/BaseController";
 import User from "@/model/user/User";
 import {applicationService} from "@/service/ApplicationService";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class SettingsController extends BaseController<User> {
 
     public constructor() {
-        super("Settings");
+        super(i18n.global.t(AppLabels.SETTINGS));
     }
 
     async fetchData(): Promise<User> {
