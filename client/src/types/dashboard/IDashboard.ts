@@ -9,6 +9,7 @@ export default interface IDashboard {
     totalCustomers: number;
     totalLocations: number;
     totalBookedBooks: number;
+    totalAuthors: number;
     booksInTime: IBooksInTime[];
     stockStatus: IDashboardStockSatuts[];
 }

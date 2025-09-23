@@ -266,7 +266,6 @@ export default class Book extends BookItem {
             }
         } catch (e) {
             console.error("Error while removing book stock", e)
-            // TODO: snackbar message
         }
     }
 

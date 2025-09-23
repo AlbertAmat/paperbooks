@@ -2,7 +2,6 @@
 
 ## TODO
 * publish + add to server
-* app labels + use db table
 * add action un unreserve books (dashboard & customers)
 * review create book isb, is not checking the isbn length
 

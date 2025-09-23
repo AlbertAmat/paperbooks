@@ -5,6 +5,7 @@ import {ref, Ref} from "vue";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 import {i18n} from "@/plugins/i18n/i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import jsPDF from "jspdf";
 
 export default class BookStock {
 
@@ -21,7 +22,7 @@ export default class BookStock {
         },
         {
             value: BookStockStatusEnum.NOT_AVAILABLE,
-            text:i18n.global.t(AppLabels.NOT_AVAILABLE),
+            text: i18n.global.t(AppLabels.NOT_AVAILABLE),
             color: "#607D8B"
         },
         {
@@ -80,10 +81,10 @@ export default class BookStock {
     private m_customerName: string | null;
 
     public constructor(bookId: number, stock: IBookStock) {
-        this.m_bookId       = bookId;
-        this.m_id       = stock.id;
-        this.m_code     = stock.code;
-        this.m_status   = ref(stock.status);
+        this.m_bookId = bookId;
+        this.m_id = stock.id;
+        this.m_code = stock.code;
+        this.m_status = ref(stock.status);
 
         this.m_locationId = ref(stock.location_id);
         this.m_locationName = stock.location_name;
@@ -135,33 +136,27 @@ export default class BookStock {
      * @private
      */
     public printBarcode() {
-        // Create a temporary canvas
+        // 1. Create a temporary canvas
         const canvas = document.createElement("canvas");
 
-        // Generate the barcode on the canvas
+        // 2. Generate the barcode on the canvas
         JsBarcode(canvas, this.m_code, { format: "CODE128" });
 
-        // Convert canvas to Base64 image
+        // 3. Convert canvas to image data
         const barcodeImage = canvas.toDataURL("image/png");
 
-        // Open a new print window
-        const printWindow = window.open("", "_blank", "toolbar=no,menubar=no,scrollbars=no,resizable=no,status=no");
-        // TODO: OPEN DIRECTLY CHROME PRINT DIALOG WITHOUT PRINT BUTTON
-        if (printWindow) {
-            printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Print Barcode</title>
-                </head>
-                <body>
-                    <img src="${barcodeImage}" alt="Barcode">
-                    <br>
-                    <button onclick="window.print();">Print</button>
-                </body>
-            </html>
-        `);
-            printWindow.document.close();
-        }
+        // 4. Create a PDF
+        const pdf = new jsPDF({
+            orientation: "portrait",
+            unit: "px",
+            format: [canvas.width, canvas.height], // size to fit barcode
+        });
+
+        // 5. Add the barcode image to PDF
+        pdf.addImage(barcodeImage, "PNG", 0, 0, canvas.width/2, canvas.height/2);
+
+        // 6. Open PDF in new window for printing
+        pdf.output("dataurlnewwindow");
     }
 
     public async update(status: BookStockStatusEnum, locationId: number, customerId: number | null) {

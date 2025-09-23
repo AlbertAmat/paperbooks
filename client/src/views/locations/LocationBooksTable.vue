@@ -22,6 +22,12 @@
 			</v-toolbar>
 		</template>
 
+		<template v-slot:item.name="{item}">
+			<router-link :to="item.url">
+				{{item.name}}
+			</router-link>
+		</template>
+
 		<template v-slot:item.status="{item}">
 			<v-chip
 				density="compact"
@@ -61,6 +67,7 @@ import BookStock from "@/model/book/BookStock";
 import LocationAddBooksDialog from "@/views/locations/LocationAddBooksDialog.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import {bookRoute} from "@/router/routes/BookRoute";
 
 interface Props {
 	location: LocationExt
@@ -98,6 +105,7 @@ const books = computed(() => {
 			status: book.getStockStatus(),
 			status_color: status!.color,
 			status_text: status!.text,
+			url: bookRoute.getPath(book.getBookId())
 		}
 	})
 })

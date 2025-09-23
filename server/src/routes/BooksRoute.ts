@@ -12,7 +12,6 @@ import {Pool, PoolClient} from "pg";
 const router: Router = Router();
 
 // Multer setup - store in memory
-// TODO: WE DONT NEED MULTER SINCE WE STORE IMAGE IN THE DATABASE, WE ONLY NEED THE FILTER
 const storage = multer.memoryStorage();
 const upload = multer({
     storage,

@@ -33,7 +33,7 @@
 								<v-btn
 									class="text-none mr-2 gradient"
 									small
-									color="priamry"
+									color="primary"
 								>
 									{{t(AppLabels.RELEASE)}}
 								</v-btn>
@@ -63,7 +63,9 @@
 					</v-col>
 
 					<v-col cols="4" class="px-1 pb-1">
-						<dashboard-card title=" ">
+						<dashboard-card :title="t(AppLabels.AUTHORS)">
+							<h2>{{ controller.getTotalAuthors() }}</h2>
+							<span class="v-card-subtitle pl-0 mt-1">{{t(AppLabels.DASHBOARD_TOTAL)}}</span>
 						</dashboard-card>
 					</v-col>
 

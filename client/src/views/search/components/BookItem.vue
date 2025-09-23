@@ -29,42 +29,36 @@
 				<v-list-item-subtitle
 					v-if="book.hasAuthors()"
 					:title="book.getAuthors()[0].getAuthorName()"
-					class="book-subtitle ellipsis"
+					class="book-subtitle ellipsis mt-1"
 				>
 					{{ book.getAuthors()[0].getAuthorName() }}
 				</v-list-item-subtitle>
 
-				<!-- Book isbn -->
-				<v-list-item-subtitle
-					v-if="book.hasIsbn()"
-					:title="book.getIsbn()"
-					class="book-subtitle ellipsis mb-2"
-				>
-					<b>ISBN: </b> {{ book.getIsbn() }}
-				</v-list-item-subtitle>
+				<div class="mt-3" style="flex: 1">
 
-				<v-chip
-					v-if="category"
-					density="compact"
-					variant="outlined"
-					class="px-2 mb-1 mr-1 ellipsis"
-					style="display: block; width: fit-content"
-				>
-					<v-icon small class="mr-2">mdi-shape-outline</v-icon>
-					{{ category.getCategoryName() }}
-				</v-chip>
+					<!-- Book isbn -->
+					<v-list-item-subtitle
+						v-if="book.hasIsbn()"
+						:title="book.getIsbn()"
+						class="book-subtitle ellipsis"
+					>
+						<b>ISBN: </b> {{ book.getIsbn() }}
+					</v-list-item-subtitle>
 
-				<v-chip
-					v-if="language"
-					density="compact"
-					variant="outlined"
-					color="green"
-					class="px-2 mb-1 ellipsis"
-					style="display: block; width: fit-content"
-				>
-					<v-icon small class="mr-2">mdi-flag-outline</v-icon>
-					{{ language.getLanguageName() }}
-				</v-chip>
+					<v-list-item-subtitle
+						v-if="category"
+						class="book-subtitle ellipsis"
+					>
+						<b>{{ t(AppLabels.CATEGORY) }}: </b> {{ category.getCategoryName() }}
+					</v-list-item-subtitle>
+
+					<v-list-item-subtitle
+						v-if="language"
+						class="book-subtitle ellipsis"
+					>
+						<b>{{ t(AppLabels.LANGUAGE) }}: </b> {{ language.getLanguageName() }}
+					</v-list-item-subtitle>
+				</div>
 			</div>
 		</v-card>
 	</v-hover>
@@ -77,12 +71,16 @@ import BookItem from "@/model/book/BookItem";
 //@ts-ignore
 import notFound from "@/assets/images/notFound.jpg";
 import {applicationService} from "@/service/ApplicationService";
+import {AppLabels} from "../../../plugins/i18n/AppLabels";
+import {useI18n} from "vue-i18n";
 
 interface Props {
 	book: BookItem
 }
 
 const props = defineProps<Props>()
+
+const {t} = useI18n();
 
 /**
  *
@@ -107,6 +105,7 @@ const language = applicationService.getLanguage(props.book.getLanguageCode());
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
+	display: block;
 }
 
 .book-subtitle {

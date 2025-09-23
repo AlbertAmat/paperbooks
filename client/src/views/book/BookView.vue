@@ -28,7 +28,7 @@
 
 		<template v-slot:default>
 			<div style="height: 100%;">
-				<v-row no-gutters>
+				<v-row no-gutters class="mb-4">
 					<v-col class="px-1">
 						<!-- ================================================================== -->
 						<!-- BOOK														-->

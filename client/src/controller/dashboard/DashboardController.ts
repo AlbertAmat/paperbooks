@@ -67,6 +67,8 @@ export default class DashboardController extends BaseController<IDashboard> {
      */
     private m_totalLocations: number = 0;
 
+    private m_totalAuthors: number = 0;
+
     /**
      * Time-series data of books added over time.
      * @private
@@ -109,6 +111,7 @@ export default class DashboardController extends BaseController<IDashboard> {
         this.m_totalBookedBooks = data.totalBookedBooks;
         this.m_booksInTime = data.booksInTime;
         this.m_stockStatus = data.stockStatus;
+        this.m_totalAuthors = data.totalAuthors;
     }
 
     /**
@@ -137,6 +140,10 @@ export default class DashboardController extends BaseController<IDashboard> {
      */
     public getTotalLastMonth() {
         return this.m_totalLastMonth;
+    }
+
+    public getTotalAuthors(): number {
+        return this.m_totalAuthors;
     }
 
     /**

@@ -31,7 +31,7 @@
 
 						<template v-else>
 							<v-icon size="60">mdi-plus</v-icon>
-							<span style="font-size: 20px; font-weight: bold">{{t(AppLabels.IMAGE_DRAG_AND_DROP)}}</span>
+							<span style="font-size: 20px; font-weight: bold; padding: 0 20px; text-align: center">{{t(AppLabels.IMAGE_DRAG_AND_DROP)}}</span>
 						</template>
 					</div>
 				</v-expand-transition>
