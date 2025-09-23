@@ -206,11 +206,16 @@ const isbnValidationRule = computed(() => {
 });
 
 function handleEnter() {
-	isbnCodeList.value.push(isbnCode.value);
+	if (isValidIsbn(isbnCode.value)) {
+		isbnCodeList.value.push(isbnCode.value);
+	}
 	isbnCode.value = "";
 }
 
 async function addBooks() {
+	errorIsbnCode.value = [];
+	loadingIsbnCode.value = [];
+
 	const createdBooksId: number[] = [];
 	for (const code of isbnCodeList.value) {
 		try {
