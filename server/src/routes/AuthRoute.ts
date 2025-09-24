@@ -2,12 +2,20 @@ import express, {Request, Response} from "express";
 import {appService} from "../AppService";
 import jwt from "jsonwebtoken";
 import path from "path";
+import rateLimit from "express-rate-limit";
 
 const router = express.Router();
 
+// rate limit specific for login and register, thsi limiter is more strict than the generic of the entire app
+const authLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 5, // only allow 5 requests per IP per window
+    message: "Too many attempts, please try again after 15 minutes.",
+});
+
 // Helper: Create token
 function createToken(userId: number) {
-    return jwt.sign({ user_id: userId }, appService.getJwtSecret(), { expiresIn: Math.floor(appService.getSessionTime() / 1000) });
+    return jwt.sign({user_id: userId}, appService.getJwtSecret(), {expiresIn: Math.floor(appService.getSessionTime() / 1000)});
 }
 
 // TODO: REVIEW IF THIS ENDPOINT SHOULD BE IN HERE
@@ -46,7 +54,7 @@ router.get("/login", (req: Request, res: Response) => {
 
 // Login route
 //@ts-ignore
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", authLimiter,  async (req: Request, res: Response) => {
     console.log("Handle login authentication")
     const {username, password} = req.body;
     if (!username || !password) {
@@ -68,7 +76,7 @@ router.post("/login", async (req: Request, res: Response) => {
         const comparePassword = await appService.comparePassword(password, user.password);
         if (!comparePassword) {
             console.log("invalid password for user:" + username);
-            return res.status(401).json({ message: "Invalid username or password." });
+            return res.status(401).json({message: "Invalid username or password."});
         }
 
         console.log("Updating last login date for user:" + username);
@@ -95,12 +103,75 @@ router.post("/login", async (req: Request, res: Response) => {
 
         console.log("Redirecting to /app for user:" + username);
 
-        res.json({ success: true, message: "Login successful", redirectUrl: "/app" });
+        res.json({success: true, message: "Login successful", redirectUrl: "/app"});
     } catch (error) {
         console.error("Login error:", error);
         return res.status(500).json({message: "Internal server error"});
     }
 });
+
+router.get("/register", (req: Request, res: Response) => {
+    //@ts-ignore
+    if (req.cookies.token) {
+        return res.redirect("/app");
+    }
+    res.sendFile(path.join(__dirname, "..", "assets", "register.html"));
+});
+
+/**
+ * Register users
+ */
+router.post("/register", authLimiter, async (req: Request, res: Response) => {
+    const { userName, email, name, password } = req.body;
+
+    // Basic input validation
+    if (!email || !userName || !name || !password) {
+        return res.status(400).json({ message: "Missing required fields." });
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format." });
+    }
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{};':"\\|,.<>/?]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+        return res.status(400).json({
+            message: "Password must be at least 8 characters long and include a number, an uppercase letter, and a special symbol."
+        });
+    }
+
+    try {
+        const pool = appService.getDatabasePool();
+
+        // Hash the password securely
+        const hashedPassword = appService.hashPassword(password);
+
+        // Use INSERT with unique constraints to avoid race conditions
+        const insertQuery = `
+            INSERT INTO users (name, code, email, password) 
+            VALUES ($1, $2, $3, $4) 
+            RETURNING id
+        `;
+
+        await pool.query(insertQuery, [name, userName, email, hashedPassword]);
+
+        return res.status(201).json({
+            success: true,
+            message: "Register successful",
+            redirectUrl: "/login",
+        });
+
+    } catch (error: any) {
+        // Handle unique constraint violation
+        if (error.code === "23505") { // PostgreSQL unique violation
+            return res.status(409).json({ message: "Email or username already exists." });
+        }
+
+        console.error("Register error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+});
+
 
 // Logout route
 router.get("/logout", (req: Request, res: Response) => {

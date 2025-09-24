@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Book - Login</title>
+    <title>Paper Book - Register</title>
     <style>
         body {
             background-color: rgb(250, 250, 250);
@@ -13,8 +13,7 @@
             height: 100vh;
             font-family: Arial, sans-serif;
         }
-
-        .login-container {
+        .register-container {
             background: white;
             padding: 20px;
             border-radius: 8px;
@@ -22,17 +21,12 @@
             text-align: center;
             width: 300px;
         }
-
-        .login-container h2 {
-            margin-bottom: 20px;
-        }
-
+        .register-container h2 { margin-bottom: 20px; }
         .input-group {
             position: relative;
             display: flex;
             margin-bottom: 15px;
         }
-
         input {
             width: 100%;
             padding: 10px;
@@ -40,7 +34,6 @@
             border-radius: 4px;
             font-size: 16px;
         }
-
         .toggle-password {
             position: absolute;
             right: 10px;
@@ -50,8 +43,7 @@
             background: none;
             border: none;
         }
-
-        .login-btn {
+        .register-btn {
             width: 100%;
             padding: 10px;
             background-color: #007bff;
@@ -60,8 +52,8 @@
             border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
+            margin-top: 30px;
         }
-
         .error-message {
             color: red;
             margin-bottom: 10px;
@@ -71,69 +63,78 @@
     </style>
 </head>
 <body>
-<div class="login-container">
-    <h2>Paper Book</h2>
-    <form id="loginForm" action="/login" method="POST">
+<div class="register-container">
+    <h2>Paper Book - Register</h2>
+    <form id="registerForm" action="/register" method="POST">
         <div class="input-group">
-            <input type="text" name="username" placeholder="Username" required>
+            <input type="text" name="name" placeholder="Name" required>
+        </div>
+        <div class="input-group">
+            <input type="email" name="email" placeholder="Email" required>
+        </div>
+        <div class="input-group">
+            <input type="text" name="userName" placeholder="User code" required>
         </div>
         <div class="input-group">
             <input type="password" name="password" id="password" placeholder="Password" required>
-            <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+            <button type="button" class="toggle-password" onclick="togglePassword('password')">👁️</button>
+        </div>
+        <div class="input-group">
+            <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" required>
+            <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">👁️</button>
         </div>
 
-        <div
-                class="error-message"
-                id="error-message"
-                style="display: none;"
-        >
-            Invalid username or password
-        </div>
+        <div class="error-message" id="error-message" style="display: none;"></div>
 
-        <button type="submit" class="login-btn">Login</button>
-
-        <a href="/register" style="margin-top: 10px; display: block; font-size: 12px">No account? Register and start using the app</a>
+        <button type="submit" class="register-btn">Register</button>
     </form>
 </div>
+
 <script>
-    function togglePassword() {
-        const passwordField = document.getElementById('password');
-        passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+    function togglePassword(id) {
+        const field = document.getElementById(id);
+        field.type = field.type === 'password' ? 'text' : 'password';
     }
 
-    document.getElementById('loginForm').addEventListener('submit', async function (event) {
-        event.preventDefault(); // Prevent default form submission
+    document.getElementById('registerForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
 
         const form = this;
-        const username = form.username.value;
+        const name = form.name.value;
+        const email = form.email.value;
+        const userName = form.userName.value;
         const password = form.password.value;
+        const confirmPassword = form.confirmPassword.value;
         const errorMessage = document.getElementById('error-message');
 
+        if (password !== confirmPassword) {
+            errorMessage.innerText = "Passwords do not match.";
+            errorMessage.style.display = "block";
+            return;
+        }
+
         try {
-            const response = await fetch("/login", {
+            const response = await fetch("/register", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({username, password})
+                body: JSON.stringify({ name, email, userName, password })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                errorMessage.innerText = data.message;
+                errorMessage.innerText = data.message || "Registration failed";
                 errorMessage.style.display = "block";
                 return;
             }
 
-            // Hide error if login is successful
             errorMessage.style.display = "none";
-
-            // Redirect on successful login
-            window.location.href = data.redirectUrl;
+            window.location.href = data.redirectUrl || "/login";
 
         } catch (error) {
             errorMessage.innerText = "An error occurred. Please try again.";
             errorMessage.style.display = "block";
-            console.error("Login error:", error);
+            console.error("Registration error:", error);
         }
     });
 </script>

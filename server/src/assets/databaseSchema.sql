@@ -593,6 +593,7 @@ CREATE TABLE users
     image           BYTEA,
     language        CHAR(2)   DEFAULT 'en',
     region          CHAR(2)   DEFAULT 'US',
+    disabled        BOOLEAN  DEFAULT TRUE,
     FOREIGN KEY (language) REFERENCES app_languages (code) ON DELETE SET NULL
 );
 

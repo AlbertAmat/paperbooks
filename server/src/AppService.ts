@@ -101,7 +101,16 @@ export class AppService {
         this.m_app.use(express.static(path.join(__dirname,  "assets", "app")));
 
         // Secure HTTP headers
-        this.m_app.use(helmet());
+        this.m_app.use(helmet({
+            contentSecurityPolicy: {
+                useDefaults: true,
+                directives: {
+                    // Allow inline event handlers (not recommended)
+                    'script-src-attr': ["'unsafe-inline'"],
+                    'script-src-elem': ["'unsafe-inline'"],
+                },
+            },
+        }));
 
         // Rate limiting to prevent brute force attacks / DDoS
         const limiter = rateLimit({
