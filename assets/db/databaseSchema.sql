@@ -1,12 +1,3 @@
--- customers table
-CREATE TABLE customers
-(
-    id      SERIAL PRIMARY KEY,
-    name    VARCHAR(100) NOT NULL,
-    user_id INT          NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-);
-
 CREATE TABLE app_languages
 (
     code CHAR(2) PRIMARY KEY,
@@ -595,6 +586,15 @@ CREATE TABLE users
     region          CHAR(2)   DEFAULT 'US',
     disabled        BOOLEAN  DEFAULT TRUE,
     FOREIGN KEY (language) REFERENCES app_languages (code) ON DELETE SET NULL
+);
+
+-- customers table
+CREATE TABLE customers
+(
+    id      SERIAL PRIMARY KEY,
+    name    VARCHAR(100) NOT NULL,
+    user_id INT          NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 -- Locations table

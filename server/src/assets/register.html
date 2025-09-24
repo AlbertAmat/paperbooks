@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Book - Register</title>
+    <title>Paper Books - Register</title>
     <style>
         body {
             background-color: rgb(250, 250, 250);
@@ -132,7 +132,8 @@
             window.location.href = data.redirectUrl || "/login";
 
         } catch (error) {
-            errorMessage.innerText = "An error occurred. Please try again.";
+            errorMessage.innerText = error;
+            //errorMessage.innerText = "An error occurred. Please try again.";
             errorMessage.style.display = "block";
             console.error("Registration error:", error);
         }

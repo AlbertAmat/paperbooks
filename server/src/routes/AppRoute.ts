@@ -5,11 +5,6 @@ import path from "path";
 
 const router = Router();
 
-// serve application
-router.get('', requireAuth, async (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, "..", "public", "index.html"));
-})
-
 // GET - policy conf
 // /app/policy
 //@ts-ignore

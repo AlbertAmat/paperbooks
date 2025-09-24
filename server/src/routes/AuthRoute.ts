@@ -3,6 +3,7 @@ import {appService} from "../AppService";
 import jwt from "jsonwebtoken";
 import path from "path";
 import rateLimit from "express-rate-limit";
+import {requireAuth} from "../middlewares/AuthMiddleware";
 
 const router = express.Router();
 
@@ -15,18 +16,41 @@ const authLimiter = rateLimit({
 
 // Helper: Create token
 function createToken(userId: number) {
-    return jwt.sign({user_id: userId}, appService.getJwtSecret(), {expiresIn: Math.floor(appService.getSessionTime() / 1000)});
+    return jwt.sign(
+        {user_id: userId},
+        appService.getJwtSecret(),
+        {
+            expiresIn: Math.floor(appService.getSessionTime() / 1000),
+            audience: "paperbooks",
+            issuer: "paperbooks.xyz"
+        }
+    );
 }
 
-// TODO: REVIEW IF THIS ENDPOINT SHOULD BE IN HERE
-const distPath = path.join(__dirname, '../../../client/dist')
-router.use("/assets", express.static(path.join(distPath, "assets"), {
+const clientDistPath = process.env.NODE_ENV === "production" ?  path.join(__dirname, "../../../client") : path.join(__dirname, '../../../client/dist')
+router.use("/app/assets", requireAuth, express.static(path.join(clientDistPath, "assets"), {
     setHeaders: (res, path) => {
         if (path.endsWith(".css")) {
             res.set('Content-Type', 'text/css');
         }
     }
 }));
+
+// serve application
+// only used in production
+router.get('/app', requireAuth, async (req: Request, res: Response) => {
+    const appPath = path.join(clientDistPath, "index.html");
+
+    console.log("serving /app index:", appPath)
+    res.sendFile(appPath);
+})
+
+router.get('/app/*', requireAuth, async (req: Request, res: Response) => {
+    const appPath = path.join(clientDistPath, "index.html");
+
+    console.log("serving /app/* index:", appPath)
+    res.sendFile(appPath);
+})
 
 // Handle root path ('/')
 router.get("/", (req: Request, res: Response) => {
@@ -45,10 +69,10 @@ router.get("/", (req: Request, res: Response) => {
 // Serve the login page
 //@ts-ignore
 router.get("/login", (req: Request, res: Response) => {
-    //@ts-ignore
-    if (req.cookies.token) {
-        return res.redirect("/app");
-    }
+    // If user goes to login page, clear the current token.
+    // we can improve it, by checking if the token is valid, etc ad redirect to app
+    // at the moment, we will clear the token
+    res.clearCookie("token");
     res.sendFile(path.join(__dirname, "..", "assets", "login.html"));
 });
 
@@ -91,7 +115,6 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
         console.log("Setting session and cookie for user:" + username);
 
         const userToken = createToken(user.id);
-        console.log("userToken", userToken)
 
         // Send JWT in cookie
         res.cookie("token", userToken, {
@@ -175,6 +198,7 @@ router.post("/register", authLimiter, async (req: Request, res: Response) => {
 
 // Logout route
 router.get("/logout", (req: Request, res: Response) => {
+    console.log("Logout user")
     res.clearCookie("token");
     return res.redirect("/login"); // Redirect to login;
 });

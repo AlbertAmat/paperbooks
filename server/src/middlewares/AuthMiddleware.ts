@@ -5,6 +5,7 @@ import {appService} from "../AppService";
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     // only development
     if (appService.allowDevAuth()) {
+        console.log("Serving DEVELOPMENT token")
         appService.getLogger().info("Serving DEVELOPMENT token")
         // Fake decoded token for dev
         req.cookies.token = jwt.sign(
@@ -30,7 +31,9 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
             audience: "paperbooks",
             issuer: "paperbooks.xyz"
         }) as { user_id: number; exp: number };
-    } catch (err) {
+    } catch (err: any) {
+        console.log("Error decoding JWT", err)
+        appService.getLogger().error(err.toString());
         return res.status(401).json({message: "Unauthorized"});
     }
 
@@ -41,7 +44,8 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         values: [decoded.user_id]
     });
 
-    if (!result.rowCount) {
+    console.log("result.rowCount", result.rowCount)
+    if (result.rowCount == 0) {
         return res.status(401).json({message: "Unauthorized"});
     }
 

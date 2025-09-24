@@ -52,7 +52,7 @@ import {IBookAddMd} from "@/types/book/IBookAddMd";
 interface Props {
 	metadata?: IBookAddMd,
 	code: string;
-	loading?: string
+	loading?: boolean
 }
 
 const props = defineProps<Props>()

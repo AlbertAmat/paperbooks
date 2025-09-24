@@ -90,6 +90,8 @@ export class AppService {
     public constructor() {
         dotenv.config(); // Load environment variables from .env
 
+        const frontEndUrl = String(process.env.FRONT_END_URL);
+
         this.m_port = Number(process.env.API_PORT); // API port
 
         this.m_app = express(); // Initialize Express app
@@ -105,9 +107,12 @@ export class AppService {
             contentSecurityPolicy: {
                 useDefaults: true,
                 directives: {
-                    // Allow inline event handlers (not recommended)
-                    'script-src-attr': ["'unsafe-inline'"],
-                    'script-src-elem': ["'unsafe-inline'"],
+                    defaultSrc: ["'self'"],
+                    scriptSrc: ["'self'", frontEndUrl, "'unsafe-inline'"],
+                    styleSrc: ["'self'", "'unsafe-inline'"],
+                    imgSrc: ["'self'", "data:", "*"],
+                    "script-src-attr": ["'unsafe-inline'"],
+                    "script-src-elem": ["'unsafe-inline'", "'self'", frontEndUrl, "'unsafe-inline'"]
                 },
             },
         }));
@@ -121,7 +126,7 @@ export class AppService {
 
         // CORS configuration to allow requests from frontend
         this.m_app.use(cors({
-            origin: String(process.env.FRONT_END_URL),
+            origin: frontEndUrl,
             credentials: true,
         }));
 
@@ -149,7 +154,7 @@ export class AppService {
         // JWT secret and session configuration
         this.m_jwtSecret    = String(process.env.JWT_SECRET);
         this.m_sessionTime  = Number(process.env.SESSION_TIME);
-        this.m_allowDevAuth = Boolean(process.env.ALLOW_DEV_AUTH);
+        this.m_allowDevAuth = process.env.ALLOW_DEV_AUTH == "true";
         this.m_server       = null;
 
         // Initialize logger

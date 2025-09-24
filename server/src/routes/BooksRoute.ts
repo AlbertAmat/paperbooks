@@ -4,8 +4,6 @@ import axios from "axios";
 import {v4 as uuidv4} from 'uuid';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import multer from "multer";
-import {IBookStockBase} from "../types/book/IBookStockBase";
-import {IBookBase} from "../types/book/IBookBase";
 import {IBookAddMd} from "../types/book/IBookAddMd";
 import {Pool, PoolClient} from "pg";
 

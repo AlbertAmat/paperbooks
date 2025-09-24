@@ -2,7 +2,6 @@
 
 ## TODO
 * publish + add to server
-* register: create register, recapchat + verification
 * add action un unreserve books (dashboard & customers)
 
 ## backlog
