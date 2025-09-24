@@ -37,7 +37,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     const pool = appService.getDatabasePool();
     const result = await pool.query({
         name: "user-prep-stmt",
-        text: "SELECT id FROM users WHERE id = $1",
+        text: "SELECT id FROM users WHERE id = $1 AND disabled = FALSE",
         values: [decoded.user_id]
     });
 

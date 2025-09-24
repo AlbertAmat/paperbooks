@@ -63,7 +63,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
 
     try {
         const pool = appService.getDatabasePool();
-        const userQuery = "SELECT id, code, password FROM users WHERE code = $1 OR email = $2";
+        const userQuery = "SELECT id, code, password FROM users WHERE code = $1 OR email = $2 AND disabled = FALSE";
         const userResult = await pool.query(userQuery, [username, username]);
 
         if (userResult.rows.length === 0) {
@@ -144,7 +144,7 @@ router.post("/register", authLimiter, async (req: Request, res: Response) => {
         const pool = appService.getDatabasePool();
 
         // Hash the password securely
-        const hashedPassword = appService.hashPassword(password);
+        const hashedPassword = await appService.hashPassword(password);
 
         // Use INSERT with unique constraints to avoid race conditions
         const insertQuery = `
