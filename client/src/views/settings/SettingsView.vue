@@ -5,7 +5,9 @@
 				@click="save()"
 				:loading="saving"
 				:disabled="disableSave"
-				class="gradient text-none"
+				color="primary"
+				variant="elevated"
+				class="text-none"
 			>
 				{{t(AppLabels.SAVE)}}
 			</v-btn>
@@ -33,7 +35,7 @@
 									:loading="uploadingImage"
 									:disabled="uploadingImage"
 									variant="tonal"
-									class="gradient text-none"
+									class="text-none"
 								>
 									{{t(AppLabels.USERCONF_CHANGE_IMAGE)}}
 								</v-btn>

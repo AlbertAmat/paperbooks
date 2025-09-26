@@ -3,9 +3,10 @@
 		<template v-slot:append>
 			<v-btn
 				@click="createCustomer()"
-				class="text-none gradient"
+				class="text-none"
 				color="primary"
 				small
+				variant="elevated"
 			>
 				{{t(AppLabels.ADD)}}
 			</v-btn>

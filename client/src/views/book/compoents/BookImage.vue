@@ -20,7 +20,7 @@
 				<v-expand-transition>
 					<div
 						v-if="isHovering || loading"
-						class="book-image-hover gradient-transparent"
+						class="book-image-hover"
 					>
 						<v-progress-circular
 							v-if="loading"
@@ -111,5 +111,6 @@ async function loadImage(file: File) {
 	flex-direction: column;
 	color: white;
 	cursor: pointer;
+	background-color: #1c7ff1;
 }
 </style>

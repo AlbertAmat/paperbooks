@@ -1,11 +1,10 @@
 <template>
 	<v-card
-		class="pa-0"
 		:variant="outline ? 'outlined' : 'flat'"
 	>
 		<v-card-title
 			v-if="!dense"
-			class="d-flex align-center px-0 pt-0"
+			class="d-flex align-center"
 			style="font-size: 16px"
 		>
 			<v-icon v-if="icon" class="mr-2">{{icon}}</v-icon>
@@ -15,7 +14,7 @@
 			<v-chip
 				v-if="counter != undefined"
 				density="compact"
-				class="px-2 ml-2 gradient">
+				class="px-2 ml-2">
 				{{ counter }}
 			</v-chip>
 
@@ -23,7 +22,7 @@
 
 			<slot name="actions"></slot>
 		</v-card-title>
-		<v-card-text class="px-0 pb-0" :class="dense ? 'pt-0' : ''">
+		<v-card-text :class="dense ? 'pt-0' : ''">
 			<slot></slot>
 		</v-card-text>
 	</v-card>

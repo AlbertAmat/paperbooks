@@ -14,10 +14,11 @@
 				<v-btn
 					@click="addDialog = true;"
 					density="compact"
+					color="primary"
+					variant="tonal"
 					prepend-icon="mdi-plus"
 					:text="t(AppLabels.ADD_A_BOOK)"
-					variant="elevated"
-					class="text-none gradient"
+					class="text-none"
 				></v-btn>
 			</v-toolbar>
 		</template>

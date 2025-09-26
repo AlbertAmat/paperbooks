@@ -3,7 +3,7 @@
 		<template v-slot:append>
 			<v-btn
 				@click="createAuthor()"
-				class="text-none gradient"
+				class="text-none"
 				color="primary"
 				small
 			>

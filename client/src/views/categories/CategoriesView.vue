@@ -3,8 +3,9 @@
 		<template v-slot:append>
 			<v-btn
 				@click="createCategory()"
-				class="text-none gradient"
+				class="text-none"
 				color="primary"
+				variant="elevated"
 				small
 			>
 				{{t(AppLabels.ADD)}}

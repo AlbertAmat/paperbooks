@@ -52,8 +52,8 @@ const chartData = computed(() => ({
 		{
 			label: t(AppLabels.DASHBOARD_BOOKS_ADDED_TIME_OVER_TIME),
 			data: props.data.map(item => item.total_books),
-			borderColor: '#9eef83',
-			backgroundColor: '#9eef83',
+			borderColor: '#1c7ff1',
+			backgroundColor: '#1c7ff1',
 			fill: false,
 			tension: 0.3
 		}

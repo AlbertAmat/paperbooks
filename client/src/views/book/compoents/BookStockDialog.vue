@@ -66,18 +66,19 @@
 				</v-btn>
 				<v-btn
 					color="primary"
-					outlined
 					small
 					:disabled="selectedStatus === null || selectedLocation == null || loading"
 					:loading="loading"
 					@click="addStock()"
 					class="text-none"
+					variant="tonal"
 				>
 					{{ stock ? t(AppLabels.UPDATE) : t(AppLabels.ADD) }}
 				</v-btn>
 				<v-btn
 					v-if="!stock"
 					color="primary"
+					variant="elevated"
 					small
 					:disabled="selectedStatus === null || selectedLocation == null || loading"
 					:loading="loading"

@@ -1,21 +1,28 @@
 <template>
-	<v-card class="app-content my-2 mr-1">
+	<div class="app-content">
 		<!-- ================================================== -->
-		<!-- APP BAR											-->
+		<!-- PAGE BAR											-->
 		<!-- ================================================== -->
-		<v-card-title style="display: flex; align-items: center; font-size: 14px">
-			<app-bar :title="model.getPageName()">
-				<template v-slot:prepend>
-					<slot name="prepend"/>
-				</template>
+		<v-toolbar
+			color="white"
+			density="comfortable"
+			elevation="1"
+			style="position: sticky; top: 0; left: 0; z-index: 2"
+			class="px-5"
+		>
+			<!-- Page name -->
+			<h4 style="font-size: 18px">{{ model.getPageName() }}</h4>
 
-				<template v-slot:append>
-					<slot name="append"/>
-				</template>
-			</app-bar>
-		</v-card-title>
+			<slot name="prepend"></slot>
 
-		<v-card-text id="scroller" style="overflow-y: auto; display: flex; flex-direction: column; flex: 1">
+			<v-spacer></v-spacer>
+
+			<slot name="append"></slot>
+		</v-toolbar>
+
+		<v-container
+			style=" display: flex; flex-direction: column; flex: 1"
+		>
 			<v-overlay
 				v-if="model.isLoading()"
 				:opacity="0"
@@ -37,13 +44,12 @@
 			<template v-else-if="model.hasData()">
 				<slot></slot>
 			</template>
-		</v-card-text>
-	</v-card>
+		</v-container>
+	</div>
 </template>
 
 <script setup lang="ts">
 import {BaseController} from "@/controller/BaseController";
-import AppBar from "@/components/app/AppBar.vue";
 
 interface Props {
 	model: BaseController<any>
@@ -59,7 +65,5 @@ const props = defineProps<Props>()
 	display: flex !important;
 	flex-direction: column !important;
 	flex: 1;
-	overflow-y: auto !important;
-	border: 1px solid #ECECEC
 }
 </style>

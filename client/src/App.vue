@@ -1,6 +1,5 @@
 <template>
 	<v-app>
-
 		<v-overlay
 			v-if="applicationService.isLoading()"
 			:opacity="0"
@@ -23,17 +22,23 @@
 			<!-- ================================================== -->
 			<!-- APP MENU											-->
 			<!-- ================================================== -->
-			<app-menu></app-menu>
+			<app-menu/>
 
-			<v-main class="app-main">
+			<!-- ================================================== -->
+			<!-- APP BAR											-->
+			<!-- ================================================== -->
+			<app-bar/>
+
+			<v-main class="app-main" id="scroller">
+				<!-- Content -->
 				<router-view/>
 
+				<!-- ================================================== -->
+				<!-- APP DIALOGS										-->
+				<!-- ================================================== -->
 				<confirmation-dialog/>
-
 				<app-snackbar/>
-
 				<error-dialog/>
-
 				<print-dialog/>
 			</v-main>
 		</template>
@@ -59,18 +64,19 @@ onMounted(() => {
 <style>
 html, body {
 	height: 100vh;
-	overflow: hidden;
+	overflow: hidden !important;
 }
 
 #app {
 	height: 100%;
+	overflow: hidden;
 }
 
 .app-main {
-	overflow: auto;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
+	overflow: auto;
 }
 
 .app-main .v-main__wrap {
@@ -84,13 +90,4 @@ html, body {
 	color: white;
 	height: 100%;
 }
-
-.gradient {
-	background: linear-gradient(135deg, #9eef83, #FCFF7F) !important;
-}
-
-.gradient-transparent {
-	background: linear-gradient(135deg, rgba(158, 239, 131, 0.9), rgba(252, 255, 127, 0.9)) !important;
-}
-
 </style>

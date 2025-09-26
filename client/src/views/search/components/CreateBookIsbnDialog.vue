@@ -98,7 +98,7 @@
 					class="text-none mr-4"
 					@click="addBooks()"
 				>
-					{{t(AppLabels.ADD)}}
+					{{t(AppLabels.ADD)}} ({{isbnCodeList.length}})
 				</v-btn>
 			</v-card-actions>
 		</v-card>

@@ -20,6 +20,8 @@
 				</v-avatar>
 
 				{{user.getName()}}
+
+				<v-icon>mdi-chevron-down</v-icon>
 			</v-btn>
 		</template>
 		<v-card width="250px">

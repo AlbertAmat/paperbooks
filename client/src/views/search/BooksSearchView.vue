@@ -14,18 +14,19 @@
 		<template v-slot:append>
 			<v-btn
 				density="compact"
-				color="secondary"
+				color="primary"
 				icon
 				@click="gridLayout = !gridLayout"
 				class="mr-3"
 			>
-				<v-icon size="18">{{ gridLayout ? 'mdi-view-grid-outline' : 'mdi-table' }}</v-icon>
+				<v-icon>{{ gridLayout ? 'mdi-view-grid-outline' : 'mdi-table' }}</v-icon>
 			</v-btn>
 			<v-menu>
 				<template v-slot:activator="{ props }">
 					<v-btn
 						color="primary"
-						class="text-none gradient pr-1"
+						variant="tonal"
+						class="text-none pr-1"
 						small
 						@click.stop.prevent="createBookIsbnDialog = true"
 					>
@@ -35,8 +36,8 @@
 
 						<v-btn
 							v-bind="props"
-							variant="text"
 							icon
+							variant="text"
 							density="compact"
 						>
 							<v-icon>mdi-chevron-down</v-icon>

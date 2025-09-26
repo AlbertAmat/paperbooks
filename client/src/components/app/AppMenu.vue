@@ -1,23 +1,27 @@
 <template>
 	<v-navigation-drawer
-		:rail="rail"
+		v-model="menu"
+		:rail="expanded"
 		app
 		border="0"
 		width="230"
 		class="app-menu"
+		expand-on-hover
+		permanent
+		color="#011a38"
+		:dark="true"
 	>
-		<div class="d-flex align-center py-3 ml-1" :class="rail ? 'px-1' : 'px-3'">
-			<v-avatar class="gradient" rounded>
-				<v-icon color="#4b4b4b">
+		<div class="d-flex align-center py-3 ml-1" :class="expanded ? 'px-1' : 'px-3'">
+			<v-avatar color="primary" rounded>
+				<v-icon color="white">
 					mdi-book-open
 				</v-icon>
 			</v-avatar>
 
 			<!-- APP TITLE -->
 			<span
-				v-if="!rail"
 				class="mx-2"
-				style="font-weight: bold; flex: 1"
+				style="font-weight: bold; flex: 1; color: white"
 			>
 				Paper Book
 			</span>
@@ -25,12 +29,11 @@
 
 		<v-list
 			v-model="selectedItem"
-			color="#5b5b5b"
 			:lines="false"
 			density="compact"
 			slim
 			nav
-			style="flex: 1; overflow-y: auto; display: flex; flex-direction: column"
+			style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;"
 		>
 			<v-list-item
 				v-for="(item, index) in items"
@@ -41,38 +44,42 @@
 				:title="item.name"
 				:prepend-icon="item.icon"
 				density="compact"
-				:style="{color: selectedItem === item.path ? 'black' : ''}"
+				:style="{'font-weight': selectedItem == item.path ? 'bold !important' : ''}"
 			/>
 		</v-list>
 
-		<div style="width: 100%;">
-			<div>
-				<v-badge
-					location="top right"
-					color="primary"
-					:content="printDialogController.getTotalLabels()"
-					@click="printDialogController.setVisible(true)"
-					class="ml-3 mr-2"
-				>
-					<v-icon icon="mdi-printer-outline"></v-icon>
-				</v-badge>
+		<div style="width: 100%;" class="pb-3">
+			<v-list-item
+				@click="printDialogController.setVisible(true)"
+				nav
+				title="Printer queue"
+				prepend-icon="mdi-printer-outline"
+				density="compact"
+				class="mx-2"
+			>
+				<template v-slot:prepend>
+					<v-badge
+						location="top right"
+						color="primary"
+						:content="printDialogController.getTotalLabels()"
+						@click="printDialogController.setVisible(true)"
+					>
+						<v-icon
+							icon="mdi-printer-outline"
+							:color="printDialogController.getTotalLabels() == 0 ? 'white' : 'primary'"
+						/>
+					</v-badge>
+				</template>
+			</v-list-item>
 
-				Printer queue
-			</div>
-
-			<div style="display: flex; width: 100%; justify-content: center">
-				<v-spacer v-if="!rail"></v-spacer>
-				<v-btn
-					icon
-					variant="text"
-					density="comfortable"
-					@click="rail = !rail"
-					:class="!rail ? 'mr-3' : ''"
-					nav
-				>
-					<v-icon size="25">{{ rail ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
-				</v-btn>
-			</div>
+			<v-list-item
+				nav
+				:disabled="true"
+				title="Help"
+				prepend-icon="mdi-help-circle-outline"
+				density="compact"
+				class="mx-2"
+			/>
 		</div>
 	</v-navigation-drawer>
 </template>
@@ -102,7 +109,8 @@ const selectedItem: Ref<string | null> = ref(null);
 /**
  *
  */
-const rail: Ref<boolean> = ref(false);
+const menu: Ref<boolean> = ref(true);
+const expanded: Ref<boolean> = ref(true);
 
 /**
  *
@@ -148,7 +156,7 @@ watch(() => route.path, (path) => {
 
 <style scoped>
 .app-menu {
-	background-color: transparent !important;
+	color: white;
 }
 
 .app-menu >>> .v-navigation-drawer__border {

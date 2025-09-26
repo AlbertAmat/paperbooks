@@ -3,9 +3,8 @@
 ## TODO
 * add action un unreserve books (dashboard & customers)
 * empty state graph and library
-* add counter in add
 * add threshhold when adding books with isbn
-* check multiple isb creation
+* info button
 
 ## backlog
 * use file logger

@@ -8,7 +8,7 @@
 			<v-col cols="9" class="pl-0 pr-0">
 				<v-row no-gutters class="pa-0">
 					<v-col cols="4" class="px-1 pb-1">
-						<dashboard-card :title="t(AppLabels.OVERVIEW)" class="gradient">
+						<dashboard-card :title="t(AppLabels.OVERVIEW)">
 							<h2>
 								{{ controller.getTotalBooks() }}
 								<v-icon
@@ -31,7 +31,7 @@
 								</div>
 
 								<v-btn
-									class="text-none mr-2 gradient"
+									class="text-none mr-2"
 									small
 									color="primary"
 								>
@@ -70,7 +70,10 @@
 					</v-col>
 
 					<v-col cols="12" class="px-1 pt-1">
-						<dashboard-card :title="t(AppLabels.DASHBOARD_CHART)">
+						<dashboard-card
+							:title="t(AppLabels.DASHBOARD_CHART)"
+							large
+						>
 							<books-in-time-chart :data="controller.getBooksInTime()"/>
 						</dashboard-card>
 					</v-col>

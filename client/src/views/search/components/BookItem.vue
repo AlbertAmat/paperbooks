@@ -2,12 +2,11 @@
 	<v-hover v-slot="{ isHovering }">
 		<v-card
 			:to="book.getUrl()"
-			elevation="0"
+			:elevation="isHovering ? 2 : 0"
 			class="d-flex px-1"
 			height="125px"
-			:class="isHovering ? 'active' : ''"
-			color="background"
-			style=" align-items: center; border: 1px solid #ECECEC"
+			color="white"
+			style="align-items: center; border: 1px solid #ECECEC"
 		>
 			<img
 				:src="showFallback ? notFound : book.getImageUrl()"
@@ -111,9 +110,5 @@ const language = applicationService.getLanguage(props.book.getLanguageCode());
 .book-subtitle {
 	padding: 0;
 	font-size: 12px;
-}
-
-.active {
-	border: 2px solid var(--v-primary-base)
 }
 </style>

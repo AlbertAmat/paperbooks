@@ -7,7 +7,7 @@
 				@click="goToHome()"
 				color="primary"
 				block
-				class="text-none mt-4 gradient"
+				class="text-none mt-4"
 			>
 				{{t(AppLabels.NOT_FOUND_GO_HOME)}}
 			</v-btn>

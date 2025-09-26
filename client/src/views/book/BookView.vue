@@ -15,12 +15,13 @@
 				<v-icon>mdi-delete-outline</v-icon>
 			</v-btn>
 			<v-btn
-				class="text-none gradient"
+				class="text-none"
 				color="primary"
 				:disabled="!hasChanges"
 				@click="updateBook()"
 				:loading="loadingUpdate"
 				small
+				variant="elevated"
 			>
 				{{t(AppLabels.SAVE)}}
 			</v-btn>
