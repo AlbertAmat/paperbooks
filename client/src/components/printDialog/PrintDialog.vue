@@ -62,7 +62,7 @@
 					color="red"
 					class="mr-3 text-none"
 				>
-					${{t(AppLabels.CLEAR_QUEUE)}}
+					{{t(AppLabels.CLEAR_QUEUE)}}
 				</v-btn>
 
 				<v-btn
@@ -72,7 +72,7 @@
 					density="compact"
 					class="text-none"
 				>
-					${{t(AppLabels.PRINT)}}
+					{{t(AppLabels.PRINT)}}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
