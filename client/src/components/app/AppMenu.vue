@@ -49,28 +49,7 @@
 		</v-list>
 
 		<div style="width: 100%;" class="pb-3">
-			<v-list-item
-				@click="printDialogController.setVisible(true)"
-				nav
-				title="Printer queue"
-				prepend-icon="mdi-printer-outline"
-				density="compact"
-				class="mx-2"
-			>
-				<template v-slot:prepend>
-					<v-badge
-						location="top right"
-						color="primary"
-						:content="printDialogController.getTotalLabels()"
-						@click="printDialogController.setVisible(true)"
-					>
-						<v-icon
-							icon="mdi-printer-outline"
-							:color="printDialogController.getTotalLabels() == 0 ? 'white' : 'primary'"
-						/>
-					</v-badge>
-				</template>
-			</v-list-item>
+			<print-dialog/>
 
 			<v-list-item
 				nav
@@ -95,7 +74,7 @@ import {customersRoute} from "@/router/routes/CustomersRoute";
 import {authorsRoute} from "@/router/routes/AuthorsRoute";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
-import {printDialogController} from "@/components/printDialog/PrintDialogController";
+import PrintDialog from "@/components/printDialog/PrintDialog.vue"
 
 const route = useRoute()
 

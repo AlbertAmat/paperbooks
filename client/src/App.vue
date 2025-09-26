@@ -39,22 +39,19 @@
 				<confirmation-dialog/>
 				<app-snackbar/>
 				<error-dialog/>
-				<print-dialog/>
 			</v-main>
 		</template>
 	</v-app>
 </template>
 
 <script setup lang="ts">
-import {defineComponent, onMounted} from 'vue';
+import {onMounted} from 'vue';
 import AppBar from "@/components/app/AppBar.vue";
 import AppMenu from "@/components/app/AppMenu.vue";
 import {applicationService} from "@/service/ApplicationService";
 import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog.vue";
 import AppSnackbar from "@/components/appSnackbar/AppSnackbar.vue";
-import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 import ErrorDialog from "@/components/errorDialog/ErrorDialog.vue";
-import PrintDialog from "@/components/printDialog/PrintDialog.vue";
 
 onMounted(() => {
 	applicationService.fetchPolicy();
