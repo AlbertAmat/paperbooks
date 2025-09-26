@@ -9,7 +9,7 @@
 			<v-list-item
 				nav
 				v-bind="props"
-				title="Printer queue"
+				:title="t(AppLabels.PRINT_QUEUE)"
 				prepend-icon="mdi-printer-outline"
 				density="compact"
 				class="mx-2"
@@ -33,7 +33,7 @@
 			<v-card-title
 				class="print-dialog-header py-2"
 			>
-				<span>Print</span>
+				<span>{{t(AppLabels.PRINT_QUEUE)}}</span>
 
 				<v-spacer/>
 
@@ -48,7 +48,7 @@
 			</v-card-title>
 
 			<v-card-text class="pt-3" style="font-size: 14px">
-				Total labels to print: <b>{{controller.getTotalLabels()}}</b>
+				${{t(AppLabels.TOTAL_LABELS_TO_PRINT)}} <b>{{controller.getTotalLabels()}}</b>
 			</v-card-text>
 
 			<v-divider/>
@@ -62,7 +62,7 @@
 					color="red"
 					class="mr-3 text-none"
 				>
-					Clear queue
+					${{t(AppLabels.CLEAR_QUEUE)}}
 				</v-btn>
 
 				<v-btn
@@ -72,7 +72,7 @@
 					density="compact"
 					class="text-none"
 				>
-					Print
+					${{t(AppLabels.PRINT)}}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -83,8 +83,12 @@
 
 import {printDialogController} from "@/components/printDialog/PrintDialogController";
 import {computed} from "vue";
+import {useI18n} from "vue-i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 const controller = printDialogController;
+
+const {t} = useI18n();
 
 const model = computed({
 	get() {

@@ -1,6 +1,8 @@
 import { ref, Ref, ShallowRef, shallowRef } from "vue";
 import jsPDF from "jspdf";
 import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppSnackbarController";
+import {i18n} from "@/plugins/i18n/i18n";
+import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export interface PrintLabelItem {
     name: string;
@@ -66,7 +68,10 @@ export class PrintDialogController {
     public addLabel(name: string, code: string, label: HTMLCanvasElement) {
         if(Object.keys(this.m_labels.value).includes(code)) {
             console.warn("label already exist");
-            appSnackbarController.show({message: "Label is already added into the queue", type: SnackbarType.ERROR})
+            appSnackbarController.show({
+                message: i18n.global.t(AppLabels.SNACKBAR_PRINT_LABEL_ALREADY_ADDED),
+                type: SnackbarType.ERROR
+            })
             return;
         }
 
@@ -75,7 +80,7 @@ export class PrintDialogController {
         this.m_labels.value = { ...this.m_labels.value };
 
         appSnackbarController.show({
-            message: "Label added into the queue"
+            message:  i18n.global.t(AppLabels.SNACKBAR_PRINT_LABEL_ADDED)
         })
     }
 

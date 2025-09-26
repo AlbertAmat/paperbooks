@@ -11,6 +11,7 @@ import {searchRoute} from "@/router/routes/SearchRoute";
 import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppSnackbarController";
 import {i18n} from "@/plugins/i18n/i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import {printDialogController} from "@/components/printDialog/PrintDialogController";
 
 export default class Book extends BookItem {
 
@@ -239,7 +240,7 @@ export default class Book extends BookItem {
             appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_STOCK_ADDED)})
 
             if(print) {
-                stock.printBarcode();
+                printDialogController.addLabel(this.m_name, stock.getCode(), stock.generateBarcodeImage());
             }
         } catch (e) {
             console.error("Error while adding book stock", e)

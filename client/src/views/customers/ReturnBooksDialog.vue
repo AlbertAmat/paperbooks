@@ -1,7 +1,7 @@
 <template>
 	<v-btn
 		@click="dialog = true"
-		class="text-none mr-2"
+		class="text-none"
 		small
 		variant="tonal"
 		color="primary"
