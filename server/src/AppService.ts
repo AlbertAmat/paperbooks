@@ -120,7 +120,7 @@ export class AppService {
 
         // Rate limiting to prevent brute force attacks / DDoS
         const limiter = rateLimit({
-            windowMs: 15 * 60 * 1000, // 15 minutes
+            windowMs: 10 * 60 * 1000, // 10 minutes
             max: 100, // max 100 requests per IP in the window
         });
         this.m_app.use(limiter);
