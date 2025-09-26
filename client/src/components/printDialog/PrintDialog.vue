@@ -7,7 +7,6 @@
 	>
 		<template v-slot:activator="{ props }">
 			<v-list-item
-				@click="model = true"
 				nav
 				v-bind="props"
 				title="Printer queue"
@@ -20,7 +19,6 @@
 						location="top right"
 						color="primary"
 						:content="printDialogController.getTotalLabels()"
-						@click="printDialogController.setVisible(true)"
 					>
 						<v-icon
 							icon="mdi-printer-outline"

@@ -850,6 +850,30 @@ router.get('/:bookCode/add/md', requireAuth, async (req: Request, res: Response)
     }
 });
 
+/**
+ * Create book manually
+ */
+//@ts-ignore
+router.post('/return', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
+    const books: string[] = req.body.books;
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        books.forEach(async (bookStockCode: string) => {
+            await pool.query(
+                'UPDATE book_stocks SET customer_id = $1, status = $2 WHERE code = $3 AND user_id = $4',
+                [null, 0, bookStockCode, userId]
+            );
+        })
+
+        res.status(200).send();
+    } catch (error) {
+        // Rollback on error
+        console.error("Transaction error:", error);
+        res.status(500).send("Error returning books");
+    }
+});
 
 // Helper function to format date to YYYY-MM-DD
 function formatPublishedDate(date: string | undefined): string | null {

@@ -5,7 +5,7 @@
 	>
 		<v-card height="600px">
 			<v-card-title class="d-flex">
-				{{t(AppLabels.ADD_BOOK)}}
+				{{title || t(AppLabels.ADD_BOOK)}}
 
 				<v-spacer></v-spacer>
 
@@ -66,10 +66,10 @@
 					variant="elevated"
 					:disabled="bookCodes.length == 0 || loading"
 					:loading="loading"
-					@click="emit('addBooks', bookCodes)"
+					@click="emit('executeAction', bookCodes)"
 					class="text-none"
 				>
-					{{t(AppLabels.ADD)}}
+					{{ actionText || t(AppLabels.ADD)}}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -88,13 +88,15 @@ import {AppLabels} from "../../plugins/i18n/AppLabels";
 interface Props {
 	modelValue: boolean;
 	loading: boolean;
+	title?: string;
+	actionText?: string;
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
 	(e: 'update:modelValue', value: boolean): void
-	(e: 'addBooks', books: string[]): void
+	(e: 'executeAction', books: string[]): void
 }>()
 
 const { t } = useI18n();

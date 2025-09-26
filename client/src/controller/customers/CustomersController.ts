@@ -24,6 +24,10 @@ export default class CustomersController extends BaseController<ICustomer[]> {
         return await customersService.getCustomers()
     }
 
+    async reload() {
+        await this.__fetchData();
+    }
+
     setData(data: ICustomer[]) {
         this.m_customers.value = data.map(customer => new Customer(customer));
     }

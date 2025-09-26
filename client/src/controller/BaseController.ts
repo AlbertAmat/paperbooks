@@ -81,7 +81,7 @@ export abstract class BaseController<I> {
         return this.m_data.value != null
     }
 
-    private async __fetchData() {
+    protected async __fetchData() {
         try {
             this.m_loading.value = false;
             this.m_error.value = null;

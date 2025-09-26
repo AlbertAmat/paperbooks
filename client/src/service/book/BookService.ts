@@ -155,6 +155,15 @@ export class BookService {
         return data;
     }
 
+    /**
+     *
+     * @param bookCode
+     */
+    public async returnBooks(books: string[]): Promise<void> {
+        const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/return`, {books: books});
+        return data;
+    }
+
 }
 
 export const bookService = new BookService();

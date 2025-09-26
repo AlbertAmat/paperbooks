@@ -2,7 +2,7 @@
 	<book-stock-codes-dialog
 		v-model="dialog"
 		:loading="loading"
-		@add-books="addBooks"
+		@execute-action="addBooks"
 	/>
 </template>
 

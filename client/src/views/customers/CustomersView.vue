@@ -1,6 +1,8 @@
 <template>
 	<page-component :model="controller">
 		<template v-slot:append>
+			<return-books-dialog @refresh="reloadCustomers()"/>
+
 			<v-btn
 				@click="createCustomer()"
 				class="text-none"
@@ -81,6 +83,7 @@ import Customer from "@/model/customer/Customer";
 import CustomerBooksTable from "@/views/customers/CustomerBooksTable.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import ReturnBooksDialog from "@/views/customers/ReturnBooksDialog.vue";
 
 const controller = new CustomersController();
 
@@ -165,4 +168,9 @@ async function deleteItem(customerId: number) {
 		}
 	});
 }
+
+function reloadCustomers() {
+	controller.reload();
+}
+
 </script>
