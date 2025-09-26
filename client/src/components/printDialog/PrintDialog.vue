@@ -48,7 +48,7 @@
 			</v-card-title>
 
 			<v-card-text class="pt-3" style="font-size: 14px">
-				${{t(AppLabels.TOTAL_LABELS_TO_PRINT)}} <b>{{controller.getTotalLabels()}}</b>
+				{{t(AppLabels.TOTAL_LABELS_TO_PRINT)}} <b>{{controller.getTotalLabels()}}</b>
 			</v-card-text>
 
 			<v-divider/>
