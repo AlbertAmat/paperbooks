@@ -45,18 +45,34 @@
 			/>
 		</v-list>
 
-		<div style="display: flex; width: 100%; justify-content: center">
-			<v-spacer v-if="!rail"></v-spacer>
-			<v-btn
-				icon
-				variant="text"
-				density="comfortable"
-				@click="rail = !rail"
-				:class="!rail ? 'mr-3' : ''"
-				nav
-			>
-				<v-icon size="25">{{ rail ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
-			</v-btn>
+		<div style="width: 100%;">
+			<div>
+				<v-badge
+					location="top right"
+					color="primary"
+					:content="printDialogController.getTotalLabels()"
+					@click="printDialogController.setVisible(true)"
+					class="ml-3 mr-2"
+				>
+					<v-icon icon="mdi-printer-outline"></v-icon>
+				</v-badge>
+
+				Printer queue
+			</div>
+
+			<div style="display: flex; width: 100%; justify-content: center">
+				<v-spacer v-if="!rail"></v-spacer>
+				<v-btn
+					icon
+					variant="text"
+					density="comfortable"
+					@click="rail = !rail"
+					:class="!rail ? 'mr-3' : ''"
+					nav
+				>
+					<v-icon size="25">{{ rail ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
+				</v-btn>
+			</div>
 		</div>
 	</v-navigation-drawer>
 </template>
@@ -72,6 +88,7 @@ import {customersRoute} from "@/router/routes/CustomersRoute";
 import {authorsRoute} from "@/router/routes/AuthorsRoute";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import {printDialogController} from "@/components/printDialog/PrintDialogController";
 
 const route = useRoute()
 

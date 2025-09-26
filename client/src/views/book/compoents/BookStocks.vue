@@ -35,11 +35,11 @@
 
 				<template v-slot:item.actions="{ item }">
 					<v-icon
-						@click="printBarcode(item.id)"
+						@click="addToPrintQueue(item.id)"
 						small
 						class="mx-1"
 					>
-						mdi-barcode
+						mdi-printer-pos-plus-outline
 					</v-icon>
 					<v-icon
 						@click="showEditStockDialog(item.id)"
@@ -86,6 +86,8 @@ import CardComponent from "@/components/card/CardComponent.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import {printDialogController} from "@/components/printDialog/PrintDialogController";
+import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 
 interface Props {
 	book: Book
@@ -144,10 +146,10 @@ const stocks = computed(() => {
 	})
 })
 
-function printBarcode(id: number) {
+function addToPrintQueue(id: number) {
 	const stock = props.book.getStocks().find((stock) => stock.getId() === id);
 	if (stock) {
-		stock.printBarcode()
+		printDialogController.addLabel(props.book.getName(), stock.getCode(), stock.generateBarcodeImage());
 	}
 }
 

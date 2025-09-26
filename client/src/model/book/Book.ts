@@ -75,7 +75,7 @@ export default class Book extends BookItem {
             this.m_format = applicationService.getFormat(data.format_id) || null;
         }
 
-        this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(this.m_id,stock)));
+        this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(this,stock)));
     }
 
     public static empty(): Book {
@@ -233,7 +233,7 @@ export default class Book extends BookItem {
     public async addBookStock(status: BookStockStatusEnum, locationId: number, customerId: number | null, print: boolean) {
         try {
             const data = await bookService.addBookStock(this.m_id, locationId, status, customerId);
-            const stock = new BookStock(this.m_id, data)
+            const stock = new BookStock(this, data)
             this.m_stocks.value = [...this.m_stocks.value, stock];
 
             appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_STOCK_ADDED)})

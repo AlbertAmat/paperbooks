@@ -33,6 +33,8 @@
 				<app-snackbar/>
 
 				<error-dialog/>
+
+				<print-dialog/>
 			</v-main>
 		</template>
 	</v-app>
@@ -47,6 +49,7 @@ import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDial
 import AppSnackbar from "@/components/appSnackbar/AppSnackbar.vue";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
 import ErrorDialog from "@/components/errorDialog/ErrorDialog.vue";
+import PrintDialog from "@/components/printDialog/PrintDialog.vue";
 
 onMounted(() => {
 	applicationService.fetchPolicy();

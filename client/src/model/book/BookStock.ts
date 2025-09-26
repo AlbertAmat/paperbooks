@@ -6,6 +6,7 @@ import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarControl
 import {i18n} from "@/plugins/i18n/i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import jsPDF from "jspdf";
+import ABook from "@/model/book/ABook";
 
 export default class BookStock {
 
@@ -36,7 +37,7 @@ export default class BookStock {
      * The book id as reference
      * @private
      */
-    private readonly m_bookId: number;
+    private readonly m_book: ABook;
 
     /**
      * The book stock id
@@ -80,8 +81,8 @@ export default class BookStock {
      */
     private m_customerName: string | null;
 
-    public constructor(bookId: number, stock: IBookStock) {
-        this.m_bookId = bookId;
+    public constructor(book: ABook, stock: IBookStock) {
+        this.m_book = book;
         this.m_id = stock.id;
         this.m_code = stock.code;
         this.m_status = ref(stock.status);
@@ -132,36 +133,57 @@ export default class BookStock {
 
     /**
      *
-     * @param productCode
-     * @private
      */
-    public printBarcode() {
-        // 1. Create a temporary canvas
-        const canvas = document.createElement("canvas");
-
-        // 2. Generate the barcode on the canvas
-        JsBarcode(canvas, this.m_code, { format: "CODE128" });
-
-        // 3. Convert canvas to image data
-        const barcodeImage = canvas.toDataURL("image/png");
-
-        // 4. Create a PDF
-        const pdf = new jsPDF({
-            orientation: "portrait",
-            unit: "px",
-            format: [canvas.width, canvas.height], // size to fit barcode
+    /**
+     * Generate a barcode image with a custom description below.
+     */
+    public generateBarcodeImage(): HTMLCanvasElement {
+        // Create a barcode-only canvas
+        const barcodeCanvas = document.createElement('canvas');
+        JsBarcode(barcodeCanvas, this.m_code, {
+            format: "CODE128",
+            displayValue: false,
+            width: 4,
+            height: 150,
+            margin: 20
         });
 
-        // 5. Add the barcode image to PDF
-        pdf.addImage(barcodeImage, "PNG", 0, 0, canvas.width/2, canvas.height/2);
+        // Prepare final canvas with extra space for text
+        const paddingBottom = 30; // space for description
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = barcodeCanvas.width;
+        finalCanvas.height = barcodeCanvas.height + paddingBottom;
 
-        // 6. Open PDF in new window for printing
-        pdf.output("dataurlnewwindow");
+        const ctx = finalCanvas.getContext('2d');
+        if (!ctx) return finalCanvas;
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+        // Draw barcode on top of white background
+        ctx.drawImage(barcodeCanvas, 0, 0);
+
+        // Add black text below barcode
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "#000000";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const yPos = barcodeCanvas.height + paddingBottom / 2;
+        ctx.fillText(`${this.m_book.getName()} : ${this.m_code}`, finalCanvas.width / 2, yPos);
+
+        // return finalCanvas.toDataURL("image/png");
+        return finalCanvas;
     }
 
+    /**
+     *
+     * @param status
+     * @param locationId
+     * @param customerId
+     */
     public async update(status: BookStockStatusEnum, locationId: number, customerId: number | null) {
         try {
-            const data = await bookService.updateBookStock(this.m_bookId, this.m_id, status, locationId, customerId);
+            const data = await bookService.updateBookStock(this.m_book.getId(), this.m_id, status, locationId, customerId);
             this.m_status.value = data.status;
             this.m_locationId.value = data.location_id;
             this.m_locationName = data.location_name;

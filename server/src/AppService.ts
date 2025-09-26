@@ -110,6 +110,7 @@ export class AppService {
                     defaultSrc: ["'self'"],
                     scriptSrc: ["'self'", frontEndUrl, "'unsafe-inline'"],
                     styleSrc: ["'self'", "'unsafe-inline'"],
+                    frameSrc: ["'self'", "data:"],
                     imgSrc: ["'self'", "data:", "*"],
                     "script-src-attr": ["'unsafe-inline'"],
                     "script-src-elem": ["'unsafe-inline'", "'self'", frontEndUrl, "'unsafe-inline'"]

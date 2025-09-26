@@ -1,8 +1,11 @@
 # Paper book
 
 ## TODO
-* publish + add to server
 * add action un unreserve books (dashboard & customers)
+* empty state graph and library
+* add counter in add
+* add threshhold when adding books with isbn
+* check multiple isb creation
 
 ## backlog
 * use file logger

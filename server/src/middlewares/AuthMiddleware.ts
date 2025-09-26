@@ -44,7 +44,6 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         values: [decoded.user_id]
     });
 
-    console.log("result.rowCount", result.rowCount)
     if (result.rowCount == 0) {
         return res.status(401).json({message: "Unauthorized"});
     }
