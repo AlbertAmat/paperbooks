@@ -85,7 +85,7 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
             params.push(ids);
         }
 
-        if(filters.length > 0) {
+        if (filters.length > 0) {
             filters.forEach((filter) => {
                 switch (filter) {
                     case SearchFilter.NO_STOCK: {
@@ -536,33 +536,43 @@ router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
             await client.query("BEGIN");
 
             // Check and insert language if not exists
-            let languageResult = await client.query(
-                "SELECT code FROM languages WHERE code = $1",
-                [languageCode]
-            );
-            if (languageResult.rowCount === 0) {
-                await client.query(
-                    "INSERT INTO languages (code, name) VALUES ($1, $2)",
-                    [languageCode, languageCode] // Replace with proper language name if available
+            try {
+                let languageResult = await client.query(
+                    "SELECT code FROM languages WHERE code = $1",
+                    [languageCode]
                 );
+                if (languageResult.rowCount === 0) {
+                    await client.query(
+                        "INSERT INTO languages (code, name) VALUES ($1, $2)",
+                        [languageCode, languageCode] // Replace with proper language name if available
+                    );
+                }
+            } catch (e) {
+                console.log("Error while adding language in automatice book", e)
+                console.log("Skiping language")
             }
 
             // Check and insert category if not exists
             let categoryId: number | null = null;
             if (categoryName) {
-                let categoryResult = await client.query(
-                    "SELECT id FROM categories WHERE name = $1 AND user_id = $2",
-                    [categoryName, userId]
-                );
-
-                if (categoryResult.rowCount === 0) {
-                    const insertCategoryResult = await client.query(
-                        "INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING id",
+                try {
+                    let categoryResult = await client.query(
+                        "SELECT id FROM categories WHERE name = $1 AND user_id = $2",
                         [categoryName, userId]
                     );
-                    categoryId = insertCategoryResult.rows[0].id;
-                } else {
-                    categoryId = categoryResult.rows[0].id;
+
+                    if (categoryResult.rowCount === 0) {
+                        const insertCategoryResult = await client.query(
+                            "INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING id",
+                            [categoryName, userId]
+                        );
+                        categoryId = insertCategoryResult.rows[0].id;
+                    } else {
+                        categoryId = categoryResult.rows[0].id;
+                    }
+                } catch (e) {
+                    console.log("Error while adding category in automatice book", e)
+                    console.log("Skiping category")
                 }
             }
 
