@@ -7,6 +7,7 @@ import multer from "multer";
 import {IBookAddMd} from "../types/book/IBookAddMd";
 import {Pool, PoolClient} from "pg";
 import {AppErrors} from "../types/AppErrors";
+import {SearchFilter} from "../types/search/SearchFilter";
 
 const router: Router = Router();
 
@@ -34,6 +35,7 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
     // Array of categories
     const category_id = req.query.category_id;
     const page = Math.max(0, Number(req.query.page)) || 0;
+    const filters: SearchFilter[] = req.query.filters ? String(req.query.filters).split(",") as SearchFilter[] : [];
 
     const userId = appService.getSessionUser(req);
 
@@ -81,6 +83,21 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
 
             conditions.push(`category_id = ANY($${conditions.length + 1})`);
             params.push(ids);
+        }
+
+        if(filters.length > 0) {
+            filters.forEach((filter) => {
+                switch (filter) {
+                    case SearchFilter.NO_STOCK: {
+                        conditions.push(`books.id NOT IN (SELECT book_id FROM book_stocks WHERE user_id = $${conditions.length + 1})`);
+                        params.push(userId);
+                    }
+                    case SearchFilter.HAS_STOCK: {
+                        conditions.push(`books.id IN (SELECT book_id FROM book_stocks WHERE user_id = $${conditions.length + 1})`);
+                        params.push(userId);
+                    }
+                }
+            })
         }
 
         if (conditions.length > 0) {

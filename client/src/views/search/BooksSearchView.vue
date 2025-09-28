@@ -65,6 +65,8 @@
 		</template>
 
 		<template v-slot:default>
+			<search-filters :model="model"/>
+
 			<template v-if="gridLayout">
 				<v-row no-gutters style="flex: initial">
 					<v-col
@@ -139,6 +141,7 @@ import router from "@/router/Router";
 import CreateBookManuallyDialog from "@/views/search/components/CreateBookManuallyDialog.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import SearchFilters from "@/views/search/components/SearchFilters.vue";
 
 const model = new SearchController();
 

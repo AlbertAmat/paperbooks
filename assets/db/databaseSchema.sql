@@ -163,7 +163,10 @@ VALUES ('en', 'ADD_BOOK', 'Add book'),
        ('en', 'USERCONF_IMAGE_FORMAT_ALERT', 'Please upload a PNG or JPEG image.'),
        ('en', 'EDIT_CATEGORY', 'Edit category'),
        ('en', 'ADD_CATEGORY', 'Add category'),
-       ('en', 'USERCONF_IMAGE_SIZE_ALERT', 'File size must be less than 2MB');
+       ('en', 'USERCONF_IMAGE_SIZE_ALERT', 'File size must be less than 2MB'),
+       ('en', 'ADD_FILTER', 'Add filter'),
+       ('en', 'NO_STOCK_FILTER', 'No stock'),
+       ('en', 'HAS_STOCK_FILTER', 'Has stock');
 
 -- catalan labels
 INSERT INTO app_labels (language, code, text)
@@ -309,7 +312,10 @@ VALUES ('ca', 'ADD_BOOK', 'Afegir llibre'),
        ('ca', 'USERCONF_IMAGE_FORMAT_ALERT', 'Si us plau, pengeu una imatge PNG o JPEG.'),
        ('ca', 'EDIT_CATEGORY', 'Editar categoria'),
        ('ca', 'ADD_CATEGORY', 'Afegir categoria'),
-       ('ca', 'USERCONF_IMAGE_SIZE_ALERT', 'La mida del fitxer ha de ser inferior a 2 MB');
+       ('ca', 'USERCONF_IMAGE_SIZE_ALERT', 'La mida del fitxer ha de ser inferior a 2 MB'),
+       ('ca', 'ADD_FILTER', 'Afegir filtre'),
+       ('ca', 'NO_STOCK_FILTER', 'Sense estoc'),
+       ('ca', 'HAS_STOCK_FILTER', 'Amb estoc');
 
 -- spanish labels
 INSERT INTO app_labels (language, code, text)
@@ -455,9 +461,12 @@ VALUES ('es', 'ADD_BOOK', 'Agregar libro'),
        ('es', 'USERCONF_IMAGE_FORMAT_ALERT', 'Por favor, cargue una imagen PNG o JPEG.'),
        ('es', 'EDIT_CATEGORY', 'Editar categoría'),
        ('es', 'ADD_CATEGORY', 'Agregar categoría'),
-       ('es', 'USERCONF_IMAGE_SIZE_ALERT', 'El tamaño del archivo debe ser inferior a 2 MB');
+       ('es', 'USERCONF_IMAGE_SIZE_ALERT', 'El tamaño del archivo debe ser inferior a 2 MB'),
+       ('es', 'ADD_FILTER', 'Agregar filtro'),
+       ('es', 'NO_STOCK_FILTER', 'Sin stock'),
+       ('es', 'HAS_STOCK_FILTER', 'Con stock');
 
-INSERT INTO app_labels (language, code, text)
+    INSERT INTO app_labels (language, code, text)
 VALUES ('it', 'ADD_BOOK', 'Aggiungi libro'),
        ('it', 'ADD_BOOK_MANUALLY', 'Aggiungi libro manualmente'),
        ('it', 'STOCK_CODE', 'Codice stock'),
@@ -599,7 +608,10 @@ VALUES ('it', 'ADD_BOOK', 'Aggiungi libro'),
        ('it', 'USERCONF_IMAGE_FORMAT_ALERT', 'Carica un’immagine PNG o JPEG.'),
        ('it', 'EDIT_CATEGORY', 'Modifica categoria'),
        ('it', 'ADD_CATEGORY', 'Aggiungi categoria'),
-       ('it', 'USERCONF_IMAGE_SIZE_ALERT', 'La dimensione del file deve essere inferiore a 2 MB');
+       ('it', 'USERCONF_IMAGE_SIZE_ALERT', 'La dimensione del file deve essere inferiore a 2 MB'),
+       ('it', 'ADD_FILTER', 'Aggiungi filtro'),
+       ('it', 'NO_STOCK_FILTER', 'Senza stock'),
+       ('it', 'HAS_STOCK_FILTER', 'Con stock');
 
 
 -- Users table

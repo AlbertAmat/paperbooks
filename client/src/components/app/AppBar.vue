@@ -12,6 +12,7 @@
 			density="compact"
 			:details="false"
 			hide-details
+			clearable
 			prepend-inner-icon="mdi-magnify"
 			variant="underlined"
 			@keydown.enter="doSearch()"

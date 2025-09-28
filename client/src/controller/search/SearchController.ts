@@ -7,6 +7,7 @@ import router from "@/router/Router";
 import {SearchRoute} from "@/router/routes/SearchRoute";
 import {i18n} from "@/plugins/i18n/i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import {SearchFilter} from "@/types/search/SearchFilter";
 
 export default class SearchController extends BaseController<ISearchResponse> {
 
@@ -26,6 +27,12 @@ export default class SearchController extends BaseController<ISearchResponse> {
      *
      * @private
      */
+    private m_filters: Ref<SearchFilter[]> = ref([]);
+
+    /**
+     *
+     * @private
+     */
     private m_limit: number = 0;
 
     /**
@@ -36,7 +43,6 @@ export default class SearchController extends BaseController<ISearchResponse> {
 
     public constructor() {
         super(i18n.global.t(AppLabels.LIBRARY));
-
         this.m_books = shallowRef([]);
     }
 
@@ -47,7 +53,8 @@ export default class SearchController extends BaseController<ISearchResponse> {
         return await searchService.searchBooks(
             query,
             null,
-            0
+            0,
+            []
         )
     }
 
@@ -70,7 +77,8 @@ export default class SearchController extends BaseController<ISearchResponse> {
             const data = await searchService.searchBooks(
                 query,
                 null,
-                this.m_page.value
+                this.m_page.value,
+                this.m_filters.value
             );
 
             if(clear) {
@@ -155,4 +163,24 @@ export default class SearchController extends BaseController<ISearchResponse> {
         return this.m_books.value;
     }
 
+    public getFilters(): SearchFilter[] {
+        return this.m_filters.value;
+    }
+
+    public addFilter(filter: SearchFilter) {
+        if(!this.m_filters.value.includes(filter)) {
+            this.m_filters.value.push(filter)
+            this.m_page.value = 0;
+            this.fetchBooks(true);
+        }
+    }
+
+    public removeFilter(filter: SearchFilter) {
+        if(this.m_filters.value.includes(filter)) {
+            this.m_filters.value.splice(this.m_filters.value.indexOf(filter), 1);
+            this.m_filters.value = [...this.m_filters.value];
+            this.m_page.value = 0;
+            this.fetchBooks(true);
+        }
+    }
 }
