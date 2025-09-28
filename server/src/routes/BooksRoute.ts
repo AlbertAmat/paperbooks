@@ -91,10 +91,12 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
                     case SearchFilter.NO_STOCK: {
                         conditions.push(`books.id NOT IN (SELECT book_id FROM book_stocks WHERE user_id = $${conditions.length + 1})`);
                         params.push(userId);
+                        break;
                     }
                     case SearchFilter.HAS_STOCK: {
                         conditions.push(`books.id IN (SELECT book_id FROM book_stocks WHERE user_id = $${conditions.length + 1})`);
                         params.push(userId);
+                        break;
                     }
                 }
             })
