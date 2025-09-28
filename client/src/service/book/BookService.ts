@@ -88,8 +88,8 @@ export class BookService {
      * @param isbn
      * returns the book id
      */
-    public async createBookFromIsbn(isbn: string): Promise<number> {
-        const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/isbn/${isbn}`, {});
+    public async createBookFromIsbn(isbn: string, location: number |null): Promise<number> {
+        const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/isbn/${isbn}`, {location: location});
         return data;
     }
 

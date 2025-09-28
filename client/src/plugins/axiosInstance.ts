@@ -1,5 +1,6 @@
 import axios from "axios";
 import {errorDialogController} from "@/components/errorDialog/ErrorDialogController";
+import {AppError, AppErrorsList} from "@/types/AppError";
 
 // Create Axios instance
 const axiosInstance = axios.create({
@@ -13,6 +14,24 @@ axiosInstance.interceptors.response.use(
 
     // If there's an error, handle it here
     error => {
+        // CUSTOM ERRORS
+        // You can also add custom logic like:
+        // - Show a toast notification
+        // - Retry logic
+        // TODO: HANDLE CUSTOM ERRORS
+        const errorCode = error.response.status;
+        if(AppErrorsList.includes(errorCode)) {
+            switch (errorCode as AppError) {
+                case AppError.BOOK_NOT_FOUND: {
+                    // Component will handle the error
+                    return Promise.reject(error);
+                }
+                default: {
+                    return Promise.reject(error);
+                }
+            }
+        }
+
         // This will catch:
         // - Network errors (no response)
         // - Timeout errors
@@ -33,11 +52,6 @@ axiosInstance.interceptors.response.use(
             // Something else happened while setting up the request
             console.error("Request Setup Error:", error.message);
         }
-
-        // You can also add custom logic like:
-        // - Show a toast notification
-        // - Retry logic
-        // TODO: HANDLE CUSTOM ERRORS
 
         // Always reject so calling code can handle it if needed
         return Promise.reject(error);

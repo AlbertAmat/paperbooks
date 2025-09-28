@@ -66,7 +66,7 @@
 
 		<template v-slot:default>
 			<template v-if="gridLayout">
-				<v-row no-gutters>
+				<v-row no-gutters style="flex: initial">
 					<v-col
 						v-for="book in model.getBooks()"
 						:key="book.getId()"
@@ -75,6 +75,7 @@
 						md="4"
 						lg="3"
 						class="pa-1"
+						style="height: fit-content"
 					>
 						<book-item :book="book"/>
 					</v-col>
@@ -87,6 +88,7 @@
 							sm="4"
 							md="3"
 							class="pa-2"
+							style="height: fit-content"
 						>
 							<book-item-skeleton/>
 						</v-col>

@@ -1,8 +1,9 @@
 <template>
 	<v-dialog
 		v-model="dialog"
-		width="700"
+		width="570"
 		scrollable
+		:close-on-content-click="false"
 	>
 		<v-card>
 			<v-card-title class="d-flex" style="align-items: center">
@@ -44,6 +45,19 @@
 							<barcode-scanner @value="addBarcodeValue"/>
 						</template>
 					</v-text-field>
+
+					<v-select
+						v-model="selectedLocation"
+						:items="locations"
+						:label="t(AppLabels.LOCATIONS)"
+						density="compact"
+						variant="outlined"
+						item-value="value"
+						item-title="text"
+						hide-details
+						style="width: 250px; flex: none"
+						class="ml-3 mt-3"
+					></v-select>
 				</div>
 
 				<v-list
@@ -69,10 +83,17 @@
 							></v-progress-circular>
 
 							<v-icon
-								v-if="errorIsbnCode.includes(item)"
+								v-else-if="errorIsbnCode.includes(item)"
 								color="error"
 							>
 								mdi-alert-circle
+							</v-icon>
+
+							<v-icon
+								v-else-if="createdBooks.includes(item)"
+								color="green"
+							>
+								mdi-check
 							</v-icon>
 						</template>
 					</v-list-item>
@@ -91,8 +112,18 @@
 					{{t(AppLabels.CANCEL)}}
 				</v-btn>
 				<v-btn
+					v-if="errorIsbnCode.length != 0 && createdBooks.length != 0"
 					color="primary"
-					:loading="loadingIsbnCode.length > 0"
+					variant="elevated"
+					class="text-none mr-4"
+					@click="dialog = false"
+				>
+					{{t(AppLabels.CLOSE)}}
+				</v-btn>
+				<v-btn
+					v-else
+					color="primary"
+					:loading="loadingIsbnCode.length > 0 || loading"
 					:disabled="disableButton"
 					variant="elevated"
 					class="text-none mr-4"
@@ -110,13 +141,16 @@ import {computed, ref, Ref, watch} from "vue";
 import {validateIsbn10, validateIsbn13} from "@/utils/IsbnVerification";
 import {bookService} from "@/service/book/BookService";
 import router from "@/router/Router";
-import {AxiosError} from "axios";
+import {AxiosError, AxiosResponse} from "axios";
 import {bookRoute} from "@/router/routes/BookRoute";
 import Book from "@/model/book/Book";
 import BookStock from "@/model/book/BookStock";
 import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import {AppError} from "@/types/AppError";
+import {applicationService} from "@/service/ApplicationService";
+import {BookStockStatusEnum} from "@/types/book/IBookStock";
 
 interface Props {
 	modelValue: boolean
@@ -155,18 +189,35 @@ const errorIsbnCode: Ref<string[]> = ref([]);
 /**
  *
  */
+const loading: Ref<boolean> = ref(false);
+
 const isbnCode: Ref<string> = ref("");
 
 /**
  *
  */
 const isbnCodeList: Ref<string[]> = ref([]);
+const createdBooks: Ref<string[]> = ref([]);
 
 /**
  *
  */
 const disableButton = computed(() => {
 	return loadingIsbnCode.value.length > 0 || isbnCodeList.value.length == 0
+})
+
+/**
+ *
+ */
+const selectedLocation: Ref<number | null> = ref(null);
+
+const locations = computed(() => {
+	return applicationService.getLocations().map((location) => {
+		return {
+			value: location.getId(),
+			text: location.getName()
+		}
+	})
 })
 
 function addBarcodeValue(value: string) {
@@ -212,50 +263,65 @@ function handleEnter() {
 	isbnCode.value = "";
 }
 
+function delay(ms: number) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function addBooks() {
 	errorIsbnCode.value = [];
 	loadingIsbnCode.value = [];
+	loading.value = true;
 
-	const createdBooksId: number[] = [];
+	const totalBooks = isbnCodeList.value.length;
+
 	for (const code of isbnCodeList.value) {
 		try {
 			loadingIsbnCode.value.push(code);
-			const id = await bookService.createBookFromIsbn(code);
-			createdBooksId.push(id);
-		} catch (e) {
-			const error = e as AxiosError;
-			if (error.status === 404 || error.status === 500) {
-				errorIsbnCode.value.push(code);
+
+			const id = await bookService.createBookFromIsbn(code, selectedLocation.value);
+			createdBooks.value.push(code);
+
+			if (totalBooks === 1) {
+				router.push(bookRoute.getPath(id));
+			}
+		} catch (error:any) {
+
+			const response = error.response;
+			console.log("error", error)
+			console.log("response", response)
+			if(response) {
+				const errorCode = response.status;
+				console.log("errorCode", errorCode)
+				if (errorCode && errorCode === AppError.BOOK_NOT_FOUND) {
+					console.log("inside")
+					errorIsbnCode.value.push(code);
+				}
+			} else {
+				console.error(error)
 			}
 		} finally {
 			const index = loadingIsbnCode.value.indexOf(code);
 			loadingIsbnCode.value.splice(index, 1);
-
-			if (loadingIsbnCode.value.length === 0) {
-				if (errorIsbnCode.value.length !== 0) {
-					isbnCodeList.value = isbnCodeList.value.filter(
-						item => !errorIsbnCode.value.includes(item)
-					);
-				} else {
-					dialog.value = false;
-				}
-			}
 		}
+
+		// Wait 1.5 seconds before processing the next ISBN
+		await delay(1500);
 	}
 
-	if (errorIsbnCode.value.length === 0) {
-		dialog.value = false;
+	loading.value = false;
 
-		if(createdBooksId.length == 1) {
-			router.push(bookRoute.getPath(createdBooksId[0]));
-		}
+	if (errorIsbnCode.value.length === 0 && createdBooks.value.length == totalBooks) {
+		dialog.value = false;
 	}
 }
 
 watch(() => dialog.value, () => {
 	if (!dialog.value) {
 		isbnCode.value = "";
+		loading.value = false;
+		selectedLocation.value = null;
 		isbnCodeList.value = [];
+		createdBooks.value = [];
 		errorIsbnCode.value = [];
 		loadingIsbnCode.value = [];
 	}

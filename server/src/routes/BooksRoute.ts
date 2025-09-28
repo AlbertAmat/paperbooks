@@ -1,11 +1,12 @@
 import {Router, Request, Response} from 'express';
 import {appService} from "../AppService";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import {v4 as uuidv4} from 'uuid';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import multer from "multer";
 import {IBookAddMd} from "../types/book/IBookAddMd";
 import {Pool, PoolClient} from "pg";
+import {AppErrors} from "../types/AppErrors";
 
 const router: Router = Router();
 
@@ -419,7 +420,7 @@ router.post('', requireAuth, upload.single("image"), async (req: Request, res: R
                 'SELECT id FROM books WHERE isbn = $1 AND user_id = $2',
                 [isbn, userId]
             );
-            if (existIsbn.rowCount != 1) {
+            if (existIsbn.rowCount == 1) {
                 res.status(404).send("Book with provided ISBN code already exist");
             }
         }
@@ -455,13 +456,15 @@ router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
         return res.status(400).send('No ISBN code provided');
     }
 
+    const locationId: string | null = req.body.location;
+
     const userId = appService.getSessionUser(req);
 
     try {
         // Fetch book details from Google Books API
         const {data} = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbnCode}`);
         if (!data.items || data.items.length === 0) {
-            return res.status(404).send('Book not found');
+            return res.status(AppErrors.BOOK_NOT_FOUND).send('Book not found');
         }
 
         const bookData = data.items[0].volumeInfo;
@@ -532,8 +535,7 @@ router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
                     "SELECT id FROM categories WHERE name = $1 AND user_id = $2",
                     [categoryName, userId]
                 );
-                console.log("")
-                console.log("category", categoryResult.rows)
+
                 if (categoryResult.rowCount === 0) {
                     const insertCategoryResult = await client.query(
                         "INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING id",
@@ -602,16 +604,38 @@ router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
                  * LOCATION
                  * Try to add the book to a location
                  * *********************************************************/
-                await automaticallyAddBookToLocation(client, bookId, userId);
+                if (locationId != null) {
+                    const existLocation = await pool.query(
+                        'SELECT id FROM locations WHERE id = $1 AND user_id = $2',
+                        [locationId, userId]
+                    );
+                    if (existLocation.rowCount == 1) {
+                        const status = 0;
+                        console.log(`Adding book stock with status ${status} in book id: ${bookId}`);
+
+                        const code = await generateBookStockCode();
+
+                        await client.query(
+                            "INSERT INTO book_stocks (book_id, code, status, location_id, customer_id, user_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+                            [bookId, code, status, locationId, null, userId]
+                        );
+                    } else {
+                        console.log("Unable to add book to a location, location does not exist")
+                    }
+                } else {
+                    await automaticallyAddBookToLocation(client, bookId, userId);
+                }
             }
 
             // Commit transaction
             await client.query("COMMIT");
             res.status(200).json(bookId);
-        } catch (error) {
+        } catch (error: AxiosError | Error | any) {
             // Rollback on error
             await client.query("ROLLBACK");
-            console.error("Transaction error:", error);
+            console.error("Transaction error when adding automatic book:", error);
+            appService.getLogger().error("Error adding automatic book:")
+            appService.getLogger().error(error.toString());
             res.status(500).send("Error processing the book");
         } finally {
             client.release();

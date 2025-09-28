@@ -5,7 +5,7 @@
 
 			<v-btn
 				@click="createCustomer()"
-				class="text-none"
+				class="text-none ml-3"
 				color="primary"
 				small
 				variant="elevated"

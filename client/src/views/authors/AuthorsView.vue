@@ -5,6 +5,7 @@
 				@click="createAuthor()"
 				class="text-none"
 				color="primary"
+				variant="elevated"
 				small
 			>
 				{{t(AppLabels.ADD)}}

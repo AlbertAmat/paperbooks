@@ -16,6 +16,7 @@
 					:label="t(AppLabels.NAME)"
 					density="compact"
 					variant="outlined"
+					autofocus
 					hide-details
 				></v-text-field>
 			</v-card-text>

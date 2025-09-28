@@ -240,7 +240,7 @@ export default class Book extends BookItem {
             appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_STOCK_ADDED)})
 
             if(print) {
-                printDialogController.addLabel(this.m_name, stock.getCode(), stock.generateBarcodeImage());
+                printDialogController.addLabel(this.m_name.value, stock.getCode(), stock.generateBarcodeImage());
             }
         } catch (e) {
             console.error("Error while adding book stock", e)
@@ -277,11 +277,11 @@ export default class Book extends BookItem {
         try {
             await bookService.updateBook(
                 this.m_id,
-                this.m_name,
+                this.m_name.value,
                 this.m_imageUrl.value,
-                this.m_isbn,
-                this.m_categoryId,
-                this.m_languageCode,
+                this.m_isbn.value,
+                this.m_categoryId.value,
+                this.m_languageCode.value,
                 this.m_authors.value.map((author) => author.getAuthorId()),
                 this.m_description,
                 this.m_publisher,

@@ -15,7 +15,7 @@ export default abstract class ABook {
      *
      * @private
      */
-    protected m_name: string;
+    protected m_name: Ref<string>;
 
     /**
      *
@@ -33,28 +33,28 @@ export default abstract class ABook {
      *
      * @private
      */
-    protected m_isbn: string | null;
+    protected m_isbn: Ref<string | null>;
 
     /**
      *
      * @private
      */
-    protected m_categoryId: number | null;
+    protected m_categoryId: Ref<number | null>;
 
     /**
      *
      * @private
      */
-    protected m_languageCode: string | null;
+    protected m_languageCode: Ref<string | null>;
 
     protected constructor(data: IBookItem) {
         this.m_id = data.id;
-        this.m_name = data.name;
+        this.m_name = ref(data.name);
         this.m_authors.value = data.authors.map((author) => new BookAuthor(author));
         this.m_imageUrl = ref(data.image_url);
-        this.m_isbn = data.isbn;
-        this.m_categoryId = data.category_id;
-        this.m_languageCode = data.language_code;
+        this.m_isbn = ref(data.isbn);
+        this.m_categoryId = ref(data.category_id);
+        this.m_languageCode = ref(data.language_code);
     }
 
     /**
@@ -68,7 +68,7 @@ export default abstract class ABook {
      *
      */
     public getName(): string {
-        return this.m_name;
+        return this.m_name.value;
     }
 
     /**
@@ -76,7 +76,7 @@ export default abstract class ABook {
      * @param value
      */
     public setName(value: string) {
-        this.m_name = value;
+        this.m_name.value = value;
     }
 
     /**
@@ -111,49 +111,49 @@ export default abstract class ABook {
      *
      */
     public hasIsbn(): boolean {
-        return this.m_isbn != null;
+        return this.m_isbn.value != null;
     }
 
     /**
      *
      */
     public getIsbn(): string | null {
-        return this.m_isbn;
+        return this.m_isbn.value;
     }
 
     /**
      *
      */
     public setIsbn(value: string | null) {
-        this.m_isbn = value;
+        this.m_isbn.value = value;
     }
 
     /**
      *
      */
     public getCategoryId(): number | null {
-        return this.m_categoryId;
+        return this.m_categoryId.value;
     }
 
     /**
      *
      */
     public setCategoryId(value: number | null) {
-        this.m_categoryId = value;
+        this.m_categoryId.value = value;
     }
 
     /**
      *
      */
     public getLanguageCode(): string | null {
-        return this.m_languageCode;
+        return this.m_languageCode.value;
     }
 
     /**
      *
      */
     public setLanguageCode(value: string | null) {
-        this.m_languageCode = value;
+        this.m_languageCode.value = value;
     }
 
     /**

@@ -14,6 +14,7 @@
 				<v-text-field
 					v-model="name"
 					:label="t(AppLabels.NAME)"
+					autofocus
 					density="compact"
 					variant="outlined"
 					hide-details

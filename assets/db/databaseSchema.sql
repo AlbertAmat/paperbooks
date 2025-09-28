@@ -746,9 +746,10 @@ CREATE TABLE book_stocks
 CREATE TABLE authors
 (
     id      SERIAL PRIMARY KEY,
-    name    VARCHAR(100) NOT NULL UNIQUE,
+    name    VARCHAR(100) NOT NULL,
     user_id INT          NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT unique_user_author UNIQUE (user_id, name)
 );
 
 CREATE TABLE book_authors
