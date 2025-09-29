@@ -76,6 +76,10 @@ router.get("/login", (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, "..", "assets", "login.html"));
 });
 
+router.use("/background.png", (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, "..", "assets", "background.png"));
+});
+
 // Login route
 //@ts-ignore
 router.post("/login", authLimiter,  async (req: Request, res: Response) => {
