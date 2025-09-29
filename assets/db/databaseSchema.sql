@@ -654,9 +654,10 @@ CREATE TABLE locations
 CREATE TABLE categories
 (
     id      SERIAL PRIMARY KEY,
-    name    VARCHAR(100) NOT NULL UNIQUE,
-    user_id INT          NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    name    VARCHAR(100) NOT NULL,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT unique_user_category UNIQUE (user_id, name)
 );
 
 -- Languages table
