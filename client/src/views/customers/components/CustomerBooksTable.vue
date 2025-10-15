@@ -72,15 +72,15 @@
 
 <script setup lang="ts">
 import {computed, onMounted, Ref, ref} from "vue";
-import Customer from "@/model/customer/Customer";
-import CustomerAddBooksDialog from "@/views/customers/CustomerAddBooksDialog.vue";
+import CustomerAddBooksDialog from "@/views/customers/components/CustomerAddBooksDialog.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {bookRoute} from "@/router/routes/BookRoute";
+import CustomerDetail from "@/model/customer/CustomerDetail";
 
 interface Props {
-	customer: Customer
+	customer: CustomerDetail
 }
 
 const props = defineProps<Props>();

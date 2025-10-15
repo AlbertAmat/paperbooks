@@ -6,6 +6,7 @@ import {Pool} from "pg";
 const router = Router();
 
 /**
+ * Get all the list of customers
  * Path: /customer
  */
 //@ts-ignore
@@ -22,7 +23,20 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
               FROM customers
                WHERE user_id = $1
         `, [userId]);
-        res.status(200).json(result.rows);
+
+        // get user tags list
+        const tags = await client.query(`
+            SELECT id, 
+                   name,
+                   color
+              FROM tags
+               WHERE user_id = $1
+        `, [userId]);
+
+        res.status(200).json({
+            customers: result.rows,
+            tags: tags.rows
+        });
     } catch (err: any) {
         console.error('Error executing query', err.stack);
         res.status(500).send('Internal Server Error');

@@ -50,12 +50,12 @@
 <script setup lang="ts">
 import {computed, Ref, ref} from 'vue'
 import CustomersController from "@/controller/customers/CustomersController";
-import Customer from "@/model/customer/Customer";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import CustomerDetail from "@/model/customer/CustomerDetail";
 
 interface Props {
-	customer?: Customer,
+	customer?: CustomerDetail,
 	controller: CustomersController,
 	modelValue: boolean
 }

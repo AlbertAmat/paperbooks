@@ -1,12 +1,12 @@
 import {PATH_PREFIX} from "@/Constants";
 import axiosInstance from "@/plugins/axiosInstance";
-import ILocation from "@/types/location/ILocation";
 import ICustomer from "@/types/customer/ICustomer";
 import {ICustomerBook} from "@/types/customer/ICustomerBook";
+import {ICustomersResponse} from "@/types/customer/ICustomersResponse";
 
 class CustomersService {
 
-    public async getCustomers(): Promise<ICustomer[]> {
+    public async getPageData(): Promise<ICustomersResponse> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/customer`)
         return data;
     }
@@ -17,7 +17,7 @@ class CustomersService {
         })
     }
 
-    public async addCustomer(name: string): Promise<ICustomer> {
+    public async addCustomer(name: string): Promise<ICustomerDetail> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/customer`, {
             name: name,
         })

@@ -76,14 +76,15 @@
 <script setup lang="ts">
 import PageComponent from "@/views/PageComponent.vue";
 import {computed, ref, Ref, ShallowRef, shallowRef} from "vue";
-import CustomerDialog from "@/views/customers/CustomerDialog.vue";
+import CustomerDialog from "@/views/customers/components/CustomerDialog.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import CustomersController from "@/controller/customers/CustomersController";
 import Customer from "@/model/customer/Customer";
-import CustomerBooksTable from "@/views/customers/CustomerBooksTable.vue";
+import CustomerBooksTable from "@/views/customers/components/CustomerBooksTable.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
-import ReturnBooksDialog from "@/views/customers/ReturnBooksDialog.vue";
+import ReturnBooksDialog from "@/views/customers/components/ReturnBooksDialog.vue";
+import CustomerDetail from "@/model/customer/CustomerDetail";
 
 const controller = new CustomersController();
 
@@ -97,7 +98,7 @@ const dialog: Ref<boolean> = ref(false);
 /**
  *
  */
-const selectedCustomer: ShallowRef<Customer | undefined> = shallowRef(undefined);
+const selectedCustomer: ShallowRef<CustomerDetail | undefined> = shallowRef(undefined);
 
 /**
  *
@@ -111,9 +112,16 @@ const headers = [
 	},
 	{
 		title: t(AppLabels.TOTAL_BOOKS),
+		value: 'tags',
+	},
+	{
+		title: t(AppLabels.TAGS),
 		value: 'totalBooks',
 	},
-	{title: t(AppLabels.ACTIONS), value: 'actions', align: 'end',}
+	{
+		title: t(AppLabels.ACTIONS),
+		value: 'actions',
+		align: 'end',}
 ];
 
 /**
@@ -124,6 +132,7 @@ const customers = computed(() => {
 		return {
 			id: customer.getCustomerId(),
 			name: customer.getCustomerName(),
+			tags: customer.getTags(),
 			totalBooks: customer.getTotalBooks()
 		}
 	})
