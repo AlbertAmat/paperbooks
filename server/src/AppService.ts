@@ -84,6 +84,12 @@ export class AppService {
     private readonly m_allowDevAuth: boolean;
 
     /**
+     * The google books PI key, if not present, it will use open library
+     * @private
+     */
+    private readonly m_googleApiKey: string | undefined;
+
+    /**
      * Application constructor
      * Initializes environment variables, database, middleware, and logging
      */
@@ -156,6 +162,9 @@ export class AppService {
         this.m_jwtSecret    = String(process.env.JWT_SECRET);
         this.m_sessionTime  = Number(process.env.SESSION_TIME);
         this.m_allowDevAuth = process.env.ALLOW_DEV_AUTH == "true";
+
+        this.m_googleApiKey = String(process.env.GOOGLE_BOOKS_API_KEY)
+
         this.m_server       = null;
 
         // Initialize logger
@@ -200,6 +209,13 @@ export class AppService {
     /** Get JWT secret */
     public getJwtSecret(): string {
         return this.m_jwtSecret;
+    }
+
+    /**
+     *
+     */
+    public getGoogleApiKey(): string | undefined {
+        return this.m_googleApiKey;
     }
 
     /** Get session expiration time */

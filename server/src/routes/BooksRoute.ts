@@ -8,7 +8,7 @@ import {IBookAddMd} from "../types/book/IBookAddMd";
 import {Pool, PoolClient} from "pg";
 import {AppErrors} from "../types/AppErrors";
 import {SearchFilter} from "../types/search/SearchFilter";
-
+//@ts-ignore
 const router: Router = Router();
 
 // Multer setup - store in memory
@@ -455,7 +455,7 @@ router.post('', requireAuth, upload.single("image"), async (req: Request, res: R
          * LOCATION
          * Try to add the book to a location
          * *********************************************************/
-        await automaticallyAddBookToLocation(pool, bookId, userId);
+        await __automaticallyAddBookToLocation(pool, bookId, userId);
 
         res.status(200).json(bookId);
     } catch (error) {
@@ -469,211 +469,394 @@ router.post('', requireAuth, upload.single("image"), async (req: Request, res: R
  * Create book automatically base on isbn
  */
 //@ts-ignore
-router.post('/isbn/:isbn', requireAuth, async (req: Request, res: Response) => {
-    const isbnCode = req.params.isbn;
-    if (!isbnCode) {
-        return res.status(400).send('No ISBN code provided');
-    }
-
-    const locationId: string | null = req.body.location;
-
-    const userId = appService.getSessionUser(req);
-
-    try {
-        // Fetch book details from Google Books API
-        const {data} = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbnCode}`);
-        if (!data.items || data.items.length === 0) {
-            return res.status(AppErrors.BOOK_NOT_FOUND).send('Book not found');
+router.post(
+    '/isbn/:isbn',
+    requireAuth,
+    async (req: Request, res: Response) => {
+        const isbnCode = req.params.isbn;
+        if (!isbnCode) {
+            return res.status(400).send('No ISBN code provided');
         }
 
-        const bookData = data.items[0].volumeInfo;
-        const {
-            title: name,
-            authors,
-            description,
-            categories,
-            publisher,
-            publishedDate,
-            pageCount: pages,
-            language,
-            imageLinks,
-        } = bookData;
+        const locationId: string | null = req.body.location;
+        const userId = appService.getSessionUser(req);
 
-        // Format the publishedDate
-        const formattedPublishedDate = formatPublishedDate(publishedDate);
-
-        /**
-         * Book image
-         */
-        let imageUrl: null | string = null;
-        if (imageLinks && imageLinks.thumbnail) {
-            imageUrl = imageLinks.thumbnail as string | null;
-        } else {
-            // Step 1: Try Open Library Covers API
-            const openLibraryCoverUrl = `https://covers.openlibrary.org/b/isbn/${isbnCode}-M.jpg`;
-            const openLibraryResponse = await axios.get(
-                openLibraryCoverUrl,
-                {responseType: 'arraybuffer'}
-            );
-
-            // Check if the response is an image
-            const contentType = openLibraryResponse.headers['content-type'];
-            const isImage = contentType && contentType.startsWith('image/');
-
-            // Check if Open Library returned an image
-            if (openLibraryResponse.status === 200 && isImage) {
-                imageUrl = openLibraryCoverUrl;
-            }
-        }
-
-        const categoryName = categories ? categories[0] : null;
-        const languageCode = language;
-
-        // Begin a transaction
-        const pool = appService.getDatabasePool();
-        const client = await pool.connect();
         try {
-            await client.query("BEGIN");
+            /**
+             * =========================
+             * FETCH BOOK (Google → fallback OpenLibrary)
+             * =========================
+             */
+            const bookData = await fetchBookData(isbnCode);
 
-            // Check and insert language if not exists
-            try {
-                let languageResult = await client.query(
-                    "SELECT code FROM languages WHERE code = $1",
-                    [languageCode]
-                );
-                if (languageResult.rowCount === 0) {
-                    await client.query(
-                        "INSERT INTO languages (code, name) VALUES ($1, $2)",
-                        [languageCode, languageCode] // Replace with proper language name if available
-                    );
-                }
-            } catch (e) {
-                console.log("Error while adding language in automatice book", e)
-                console.log("Skiping language")
+            if (!bookData) {
+                return res.status(404).send('Book not found');
             }
 
-            // Check and insert category if not exists
-            let categoryId: number | null = null;
-            if (categoryName) {
-                try {
-                    let categoryResult = await client.query(
-                        "SELECT id FROM categories WHERE name = $1 AND user_id = $2",
-                        [categoryName, userId]
-                    );
+            const {
+                title: name,
+                authors,
+                description,
+                categories,
+                publisher,
+                publishedDate,
+                pageCount: pages,
+                language,
+                imageLinks,
+            } = bookData;
 
-                    if (categoryResult.rowCount === 0) {
-                        const insertCategoryResult = await client.query(
-                            "INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING id",
-                            [categoryName, userId]
-                        );
-                        categoryId = insertCategoryResult.rows[0].id;
-                    } else {
-                        categoryId = categoryResult.rows[0].id;
-                    }
-                } catch (e) {
-                    console.log("Error while adding category in automatice book", e)
-                    console.log("Skiping category")
-                }
-            }
+            const formattedPublishedDate = formatPublishedDate(publishedDate);
 
-            // Check if the book already exists
-            let bookId: number | null = null;
-            let bookResult = await client.query(
-                "SELECT id FROM books WHERE isbn = $1 AND user_id = $2",
-                [isbnCode, userId]
-            );
-            if (bookResult.rowCount === 0) {
-                // Insert the book into the books table
-                const insertBookResult = await client.query(
-                    `INSERT INTO books (name, description, image_url, isbn, category_id,
-                                        publisher, published_date, language_code, pages, user_id)
-                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
-                    [
-                        name, description, imageUrl, isbnCode, categoryId,
-                        publisher, formattedPublishedDate, languageCode, pages, userId
-                    ]
-                );
-                bookId = insertBookResult.rows[0].id;
+            /**
+             * IMAGE (Google → OpenLibrary Covers fallback)
+             */
+            let imageUrl: string | null = null;
+
+            if (imageLinks?.thumbnail) {
+                imageUrl = imageLinks.thumbnail;
             } else {
-                bookId = bookResult.rows[0].id;
+                imageUrl = await fetchOpenLibraryCover(isbnCode);
             }
 
-            if (bookId != null) {
-                /************************************************************
+            const categoryName = categories?.[0] ?? null;
+            const languageCode = language ?? 'unknown';
+
+            /**
+             * =========================
+             * DATABASE TRANSACTION ONLY
+             * =========================
+             */
+            const pool = appService.getDatabasePool();
+            const client = await pool.connect();
+
+            try {
+                await client.query('BEGIN');
+
+                /**
+                 * LANGUAGE
+                 */
+                await ensureLanguage(client, languageCode);
+
+                /**
+                 * CATEGORY
+                 */
+                const categoryId = await __ensureCategory(
+                    client,
+                    categoryName,
+                    userId
+                );
+
+                /**
+                 * BOOK
+                 */
+                let bookId = await __getOrCreateBook(
+                    client,
+                    {
+                        name,
+                        description,
+                        imageUrl,
+                        isbnCode,
+                        categoryId,
+                        publisher,
+                        formattedPublishedDate,
+                        languageCode,
+                        pages,
+                    },
+                    userId
+                );
+
+                /**
                  * AUTHORS
-                 * Insert authors into the authors and book_authors tables
-                 * *********************************************************/
-                if (authors) {
-                    for (const author of authors) {
-                        // Check if the author exists
-                        let authorResult = await client.query(
-                            "SELECT id FROM authors WHERE name = $1 AND user_id = $2",
-                            [author, userId]
-                        );
-                        let authorId: number | null = null;
-                        if (authorResult.rowCount === 0) {
-                            const insertAuthorResult = await client.query(
-                                "INSERT INTO authors (name, user_id) VALUES ($1, $2) RETURNING id",
-                                [author, userId]
-                            );
-                            authorId = insertAuthorResult.rows[0].id;
-                        } else {
-                            authorId = authorResult.rows[0].id;
-                        }
-
-                        // Insert into book_authors
-                        await client.query(
-                            "INSERT INTO book_authors (book_id, author_id, user_id) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING",
-                            [bookId, authorId, userId]
-                        );
-                    }
+                 */
+                if (authors?.length) {
+                    await __ensureAuthors(client, bookId, authors, userId);
                 }
 
-                /************************************************************
+                /**
                  * LOCATION
-                 * Try to add the book to a location
-                 * *********************************************************/
-                if (locationId != null) {
-                    const existLocation = await pool.query(
-                        'SELECT id FROM locations WHERE id = $1 AND user_id = $2',
-                        [locationId, userId]
+                 */
+                if (locationId) {
+                    await __addBookToLocation(
+                        client,
+                        bookId,
+                        locationId,
+                        userId
                     );
-                    if (existLocation.rowCount == 1) {
-                        const status = 0;
-                        console.log(`Adding book stock with status ${status} in book id: ${bookId}`);
-
-                        const code = await generateBookStockCode();
-
-                        await client.query(
-                            "INSERT INTO book_stocks (book_id, code, status, location_id, customer_id, user_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
-                            [bookId, code, status, locationId, null, userId]
-                        );
-                    } else {
-                        console.log("Unable to add book to a location, location does not exist")
-                    }
                 } else {
-                    await automaticallyAddBookToLocation(client, bookId, userId);
+                    await __automaticallyAddBookToLocation(
+                        client,
+                        bookId,
+                        userId
+                    );
                 }
+
+                await client.query('COMMIT');
+                res.status(200).json(bookId);
+            } catch (dbError) {
+                await client.query('ROLLBACK');
+                console.error('DB transaction error:', dbError);
+                return res
+                    .status(500)
+                    .send('Error processing book in database');
+            } finally {
+                client.release();
+            }
+        } catch (error: unknown) {
+            console.error('Error fetching book details:', error);
+
+            if (axios.isAxiosError(error)) {
+                return res.status(502).send('External book service failed');
             }
 
-            // Commit transaction
-            await client.query("COMMIT");
-            res.status(200).json(bookId);
-        } catch (error: AxiosError | Error | any) {
-            // Rollback on error
-            await client.query("ROLLBACK");
-            console.error("Transaction error when adding automatic book:", error);
-            appService.getLogger().error("Error adding automatic book:")
-            appService.getLogger().error(error.toString());
-            res.status(500).send("Error processing the book");
-        } finally {
-            client.release();
+            return res
+                .status(500)
+                .send('Unexpected server error');
         }
-    } catch (error) {
-        console.error("Error fetching book details:", error);
-        res.status(500).send("Error fetching book details");
     }
-});
+);
+
+/**
+ * =========================================================
+ * EXTERNAL API: GOOGLE BOOKS (with retry + backoff)
+ * =========================================================
+ */
+async function fetchBookData(isbn: string, retries = 3): Promise<any> {
+    try {
+        const apiKey = appService.getGoogleApiKey();
+        if (!apiKey) {
+            throw new Error("Missing GOOGLE_BOOKS_API_KEY");
+        }
+
+        const { data } = await axios.get(
+            'https://www.googleapis.com/books/v1/volumes',
+            {
+                params: {
+                    q: `isbn:${isbn}`,
+                    key: apiKey
+                },
+                timeout: 9000,
+                headers: {
+                    'User-Agent': 'paperbooks-server/1.0',
+                },
+            },
+        );
+
+        return data?.items?.[0]?.volumeInfo ?? null;
+    } catch (error: unknown) {
+        if (
+            axios.isAxiosError(error) &&
+            error.response?.status === 429 &&
+            retries > 0
+        ) {
+            const delay = (4 - retries) * 1000;
+
+            await new Promise(r => setTimeout(r, delay));
+
+            return fetchBookData(isbn, retries - 1);
+        }
+
+        console.warn('Google Books failed, trying fallback...', error);
+        return __fetchOpenLibraryMetadata(isbn);
+    }
+}
+
+/**
+ * =========================================================
+ * FALLBACK: OPEN LIBRARY METADATA
+ * =========================================================
+ */
+async function __fetchOpenLibraryMetadata(isbn: string): Promise<any> {
+    try {
+        const { data } = await axios.get(
+            `https://openlibrary.org/search.json?isbn=${isbn}`,
+            { timeout: 9000 }
+        );
+
+        console.log("OL data: ", {
+            title: data.title,
+            authors: data.authors?.map((a: any) => a.name) ?? [],
+            description: data.description?.value ?? data.description,
+            categories: data.subjects ?? [],
+            publisher: data.publishers?.[0],
+            publishedDate: data.publish_date,
+            pageCount: data.number_of_pages,
+            language: data.languages?.[0]?.key?.replace('/languages/', ''),
+            imageLinks: null,
+        })
+        return {
+            title: data.title,
+            authors: data.authors?.map((a: any) => a.name) ?? [],
+            description: data.description?.value ?? data.description,
+            categories: data.subjects ?? [],
+            publisher: data.publishers?.[0],
+            publishedDate: data.publish_date,
+            pageCount: data.number_of_pages,
+            language: data.languages?.[0]?.key?.replace('/languages/', '').substring(0, 2),
+            imageLinks: null,
+        };
+    } catch (error) {
+        console.error('OpenLibrary fallback failed:', error);
+        return null;
+    }
+}
+
+/**
+ * =========================================================
+ * OPEN LIBRARY COVER
+ * =========================================================
+ */
+async function fetchOpenLibraryCover(isbn: string): Promise<string | null> {
+    try {
+        const url = `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`;
+
+        const res = await axios.get(url, {
+            responseType: 'arraybuffer',
+            timeout: 3000,
+        });
+
+        const contentType = res.headers['content-type'];
+
+        if (res.status === 200 && contentType?.startsWith('image/')) {
+            return url;
+        }
+
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * =========================================================
+ * DB HELPERS
+ * =========================================================
+ */
+async function ensureLanguage(client: any, code: string) {
+    const result = await client.query(
+        'SELECT code FROM languages WHERE code = $1',
+        [code]
+    );
+
+    if (result.rowCount === 0) {
+        await client.query(
+            'INSERT INTO languages (code, name) VALUES ($1, $2)',
+            [code, code]
+        );
+    }
+}
+
+async function __ensureCategory(
+    client: any,
+    name: string | null,
+    userId: number
+): Promise<number | null> {
+    if (!name) return null;
+
+    const result = await client.query(
+        'SELECT id FROM categories WHERE name = $1 AND user_id = $2',
+        [name, userId]
+    );
+
+    if (result.rowCount > 0) {
+        return result.rows[0].id;
+    }
+
+    const insert = await client.query(
+        'INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING id',
+        [name, userId]
+    );
+
+    return insert.rows[0].id;
+}
+
+async function __getOrCreateBook(client: any, book: any, userId: number) {
+    const existing = await client.query(
+        'SELECT id FROM books WHERE isbn = $1 AND user_id = $2',
+        [book.isbnCode, userId]
+    );
+
+    if (existing.rowCount > 0) {
+        return existing.rows[0].id;
+    }
+
+    const insert = await client.query(
+        `INSERT INTO books (
+            name, description, image_url, isbn, category_id,
+            publisher, published_date, language_code, pages, user_id
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+        RETURNING id`,
+        [
+            book.name,
+            book.description,
+            book.imageUrl,
+            book.isbnCode,
+            book.categoryId,
+            book.publisher,
+            book.formattedPublishedDate,
+            book.languageCode,
+            book.pages,
+            userId,
+        ]
+    );
+
+    return insert.rows[0].id;
+}
+
+async function __ensureAuthors(
+    client: any,
+    bookId: number,
+    authors: string[],
+    userId: number
+) {
+    for (const author of authors) {
+        let result = await client.query(
+            'SELECT id FROM authors WHERE name = $1 AND user_id = $2',
+            [author, userId]
+        );
+
+        let authorId: number;
+
+        if (result.rowCount === 0) {
+            const insert = await client.query(
+                'INSERT INTO authors (name, user_id) VALUES ($1,$2) RETURNING id',
+                [author, userId]
+            );
+            authorId = insert.rows[0].id;
+        } else {
+            authorId = result.rows[0].id;
+        }
+
+        await client.query(
+            `INSERT INTO book_authors (book_id, author_id, user_id)
+             VALUES ($1,$2,$3)
+             ON CONFLICT DO NOTHING`,
+            [bookId, authorId, userId]
+        );
+    }
+}
+
+async function __addBookToLocation(
+    client: any,
+    bookId: number,
+    locationId: string,
+    userId: number
+) {
+    const exist = await client.query(
+        'SELECT id FROM locations WHERE id = $1 AND user_id = $2',
+        [locationId, userId]
+    );
+
+    if (exist.rowCount !== 1) return;
+
+    const code = await generateBookStockCode();
+
+    await client.query(
+        `INSERT INTO book_stocks
+         (book_id, code, status, location_id, customer_id, user_id)
+         VALUES ($1,$2,$3,$4,$5,$6)`,
+        [bookId, code, 0, locationId, null, userId]
+    );
+}
 
 /**
  *
@@ -976,7 +1159,7 @@ async function generateBookStockCode(): Promise<string> {
  * @param bookId
  * @param userId
  */
-async function automaticallyAddBookToLocation(client: Pool | PoolClient, bookId: number, userId: number) {
+async function __automaticallyAddBookToLocation(client: Pool | PoolClient, bookId: number, userId: number) {
 
     const locations = await client.query(`
         SELECT id
