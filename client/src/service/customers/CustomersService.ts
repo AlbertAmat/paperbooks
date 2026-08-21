@@ -1,6 +1,6 @@
 import {PATH_PREFIX} from "@/Constants";
 import axiosInstance from "@/plugins/axiosInstance";
-import ICustomer from "@/types/customer/ICustomer";
+import {ICustomerDetail} from "@/types/customer/ICustomer";
 import {ICustomerBook} from "@/types/customer/ICustomerBook";
 import {ICustomersResponse} from "@/types/customer/ICustomersResponse";
 

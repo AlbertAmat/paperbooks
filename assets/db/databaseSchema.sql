@@ -641,13 +641,29 @@ CREATE TABLE tags
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
+
+-- groups
+CREATE TABLE customer_groups
+(
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL,
+    description TEXT,
+    user_id     INT NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+
+    CONSTRAINT unique_user_customer_group UNIQUE (user_id, name)
+);
+
 -- customers table
 CREATE TABLE customers
 (
     id      SERIAL PRIMARY KEY,
     name    VARCHAR(100) NOT NULL,
+    group_id INT,
     user_id INT          NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES customer_groups (id) ON DELETE SET NULL
 );
 
 -- customers tags table
