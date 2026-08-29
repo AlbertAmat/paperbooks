@@ -18,7 +18,19 @@
 					variant="outlined"
 					autofocus
 					hide-details
+					class="mb-4"
 				></v-text-field>
+				<v-select
+					v-model="selectedGroupId"
+					:items="groupItems"
+					item-title="title"
+					item-value="value"
+					:label="t(AppLabels.GROUP)"
+					density="compact"
+					variant="outlined"
+					clearable
+					hide-details
+				></v-select>
 			</v-card-text>
 
 			<v-divider></v-divider>
@@ -53,10 +65,12 @@ import CustomersController from "@/controller/customers/CustomersController";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import CustomerDetail from "@/model/customer/CustomerDetail";
+import CustomerGroupsController from "@/controller/customers/CustomerGroupsController";
 
 interface Props {
 	customer?: CustomerDetail,
 	controller: CustomersController,
+	groupsController: CustomerGroupsController,
 	modelValue: boolean
 }
 
@@ -88,6 +102,20 @@ const name: Ref<string> = ref(props.customer ? props.customer.getCustomerName() 
 
 /**
  *
+ */
+const selectedGroupId: Ref<number | null> = ref(props.customer ? props.customer.getGroupId() : null);
+
+/**
+ *
+ */
+const groupItems = computed(() => {
+	return props.groupsController.getGroups().map(group => {
+		return {title: group.getName(), value: group.getId()}
+	})
+})
+
+/**
+ *
  *
  */
 async function addCustomer() {
@@ -95,8 +123,10 @@ async function addCustomer() {
 		loading.value = true;
 		if (props.customer) {
 			await props.customer.update(name.value)
+			await applyGroupChange(props.customer)
 		} else {
-			await props.controller.addCustomer(name.value)
+			const group = selectedGroupId.value != null ? props.groupsController.getGroup(selectedGroupId.value) : undefined;
+			await props.controller.addCustomer(name.value, group)
 		}
 		closeDialog();
 	} finally {
@@ -105,10 +135,40 @@ async function addCustomer() {
 }
 
 /**
+ * Applies a group selection change to an existing customer, keeping
+ * each group's customer count in sync.
+ *
+ * @param customer
+ */
+async function applyGroupChange(customer: CustomerDetail) {
+	const previousGroupId = customer.getGroupId();
+	const newGroupId = selectedGroupId.value;
+
+	if (previousGroupId === newGroupId) {
+		return;
+	}
+
+	if (newGroupId != null) {
+		const newGroup = props.groupsController.getGroup(newGroupId);
+		if (newGroup) {
+			await customer.assignToGroup(newGroup.getId(), newGroup.getName())
+			newGroup.incrementTotalCustomers();
+		}
+	} else {
+		await customer.removeFromGroup()
+	}
+
+	if (previousGroupId != null) {
+		props.groupsController.getGroup(previousGroupId)?.decrementTotalCustomers();
+	}
+}
+
+/**
  *
  */
 function closeDialog() {
 	name.value = "";
+	selectedGroupId.value = null;
 	dialog.value = false;
 }
 </script>

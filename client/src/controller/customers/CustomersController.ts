@@ -10,6 +10,7 @@ import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {ICustomersResponse} from "@/types/customer/ICustomersResponse";
 import {Tag} from "@/model/customer/Tag";
 import CustomerDetail from "@/model/customer/CustomerDetail";
+import CustomerGroup from "@/model/customer/CustomerGroup";
 
 export default class CustomersController extends BaseController<ICustomersResponse> {
 
@@ -74,11 +75,17 @@ export default class CustomersController extends BaseController<ICustomersRespon
     /**
      *
      * @param name
+     * @param group
      */
-    public async addCustomer(name: string) {
+    public async addCustomer(name: string, group?: CustomerGroup) {
         try {
             const customer = await customersService.addCustomer(name);
-            this.m_customers.value = [...this.m_customers.value, new CustomerDetail(customer)];
+            const customerDetail = new CustomerDetail(customer);
+            if (group) {
+                await customerDetail.assignToGroup(group.getId(), group.getName());
+                group.incrementTotalCustomers();
+            }
+            this.m_customers.value = [...this.m_customers.value, customerDetail];
             appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_NEW_CUSTOMER_ADDED)})
         } catch (e) {
             console.error(e);
