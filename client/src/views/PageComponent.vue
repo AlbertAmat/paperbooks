@@ -5,13 +5,13 @@
 		<!-- ================================================== -->
 		<v-toolbar
 			color="white"
-			density="comfortable"
+			density="compact"
 			elevation="1"
 			style="position: sticky; top: 0; left: 0; z-index: 2"
-			class="px-5"
+			class="px-5 page-toolbar"
 		>
 			<!-- Page name -->
-			<h4 style="font-size: 18px">{{ model.getPageName() }}</h4>
+			<h4 class="page-toolbar-title">{{ model.getPageName() }}</h4>
 
 			<slot name="prepend"></slot>
 
@@ -59,12 +59,56 @@ const props = defineProps<Props>()
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .app-content {
 	position: relative;
 	display: flex !important;
 	flex-direction: column !important;
 	flex: 1;
 	min-height: 0;
+}
+
+.page-toolbar {
+	height: 35px !important;
+
+	:deep(.v-toolbar__content) {
+		height: 35px !important;
+		min-height: 35px !important;
+	}
+
+	.page-toolbar-title {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1;
+		white-space: nowrap;
+	}
+
+	:deep(.v-btn) {
+		height: 26px !important;
+		min-height: 26px !important;
+		font-size: 12px;
+
+		&.v-btn--icon {
+			width: 26px !important;
+		}
+	}
+
+	:deep(.v-btn__content) {
+		font-size: 12px;
+	}
+
+	:deep(.v-btn .v-icon) {
+		font-size: 16px;
+	}
+
+	:deep(.v-chip) {
+		height: 20px !important;
+		font-size: 11px;
+	}
+
+	:deep(.v-divider--vertical) {
+		margin-top: 4px;
+		margin-bottom: 4px;
+	}
 }
 </style>

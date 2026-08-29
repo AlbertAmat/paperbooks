@@ -2,7 +2,7 @@
 	<v-app-bar
 		app
 		density="compact"
-		class="px-5"
+		class="px-5 app-bar"
 		border
 		:elevation="0"
 	>
@@ -16,7 +16,7 @@
 			prepend-inner-icon="mdi-magnify"
 			variant="underlined"
 			@keydown.enter="doSearch()"
-			style="max-width: 30%"
+			class="app-bar-search"
 		>
 			<template v-slot:append-inner>
 				<barcode-scanner @value="searchBarcode"/>
@@ -57,12 +57,15 @@ function searchBarcode(value: string) {
 </script>
 
 <style scoped lang="scss">
-.app-bar {
-	display: flex;
-	align-items: center;
-	z-index: 2;
-	position: sticky;
-	left: 0;
-	top: 0;
+.app-bar :deep(.v-toolbar__content) {
+	position: relative;
+}
+
+.app-bar-search {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 100%;
+	max-width: 420px;
 }
 </style>
