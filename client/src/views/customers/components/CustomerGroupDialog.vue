@@ -69,6 +69,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Create/edit dialog for a customer group. Passing an existing `group`
+ * prop switches it to edit mode; omitting it creates a new one.
+ */
 import {computed, Ref, ref} from 'vue'
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";

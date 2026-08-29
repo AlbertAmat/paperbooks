@@ -51,6 +51,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Application root component. Renders a loading spinner while
+ * `ApplicationService.fetchPolicy()` (kicked off on mount) is in flight, an
+ * error state if it failed, or the app shell (menu, top bar, footer,
+ * router-view content, and the app-wide dialog/snackbar singletons) once ready.
+ */
 import {onMounted} from 'vue';
 import AppBar from "@/components/app/AppBar.vue";
 import AppMenu from "@/components/app/AppMenu.vue";

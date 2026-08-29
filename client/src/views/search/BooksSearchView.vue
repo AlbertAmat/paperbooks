@@ -150,6 +150,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Book search/library view: a grid (infinite scroll, via an IntersectionObserver-
+ * style scroll-position check on `#scroller`) or table layout of search
+ * results, filters, and the two "add book" entry points (ISBN or manual).
+ * Re-runs the search whenever the route's query string changes.
+ */
 import {Ref, ref, onMounted, onUnmounted, computed, watch} from "vue";
 import PageComponent from "@/views/PageComponent.vue";
 import SearchController from "@/controller/search/SearchController";

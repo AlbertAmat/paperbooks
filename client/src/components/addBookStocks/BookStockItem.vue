@@ -47,6 +47,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * One row in `BookStockCodesDialog`'s list: shows a loading placeholder
+ * (just the raw code) until `metadata` resolves, then the book's cover +
+ * name; emits `remove` to drop this code from the pending list.
+ */
 import {IBookAddMd} from "@/types/book/IBookAddMd";
 
 interface Props {

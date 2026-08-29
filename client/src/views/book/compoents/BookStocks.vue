@@ -78,6 +78,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Physical stocks table on the book detail view: lists every copy with its
+ * code/location/status/customer, and lets the user add/edit/delete a stock
+ * or queue its barcode for printing.
+ */
 import {computed, Ref, ref, ShallowRef, shallowRef} from 'vue'
 import Book from "@/model/book/Book";
 import BookStock from "@/model/book/BookStock";

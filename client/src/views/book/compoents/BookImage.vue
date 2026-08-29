@@ -50,6 +50,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Book cover on the book detail view: click or drag-and-drop an image
+ * to replace it (via `Book.changeImage`); falls back to a placeholder
+ * image if there's no cover or it fails to load.
+ */
 import Book from "@/model/book/Book";
 import notFound from "@/assets/images/notFound.jpg";
 import { ref, Ref } from "vue";

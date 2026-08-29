@@ -67,6 +67,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Left-hand navigation drawer (collapses to icon-only "rail" mode, expands
+ * on hover): links to every top-level view, plus the print queue and help/docs.
+ */
 import {Ref, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {dashboardRoute} from "@/router/routes/DashboardRoute";

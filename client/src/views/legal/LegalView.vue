@@ -10,6 +10,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Legal documents view (privacy policy, terms of service, cookie policy):
+ * renders the document selected by the `:document?` route param (see
+ * `LegalRoute`) via `LegalContent`, content/locale from `legalData.ts`.
+ */
 import {computed, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useI18n} from "vue-i18n";

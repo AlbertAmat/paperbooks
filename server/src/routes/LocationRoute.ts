@@ -1,3 +1,11 @@
+/**
+ * =============================================================================
+ * LocationRoute
+ * =============================================================================
+ * Mounted at `/api/rest/location`. CRUD for physical storage "locations"
+ * (shelves, rooms, warehouses, ...) and moving book stocks between them.
+ * All routes require auth and are scoped to the caller's `user_id`.
+ */
 import {Router, Request, Response} from 'express';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import {appService} from "../AppService";
@@ -6,7 +14,15 @@ import {Pool} from "pg";
 const router = Router();
 
 /**
- * Path: /location
+ * GET /location
+ * -------------
+ * List every location the user owns, with a `total_books` count of stocks
+ * currently placed there.
+ *
+ * Auth: required.
+ *
+ * Example response (200):
+ *  [{ "id": 2, "name": "Main shelf", "description": "Front room", "total_books": 14 }]
  */
 //@ts-ignore
 router.get('', requireAuth, async (req: Request, res: Response) => {
@@ -33,7 +49,15 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
- * Path: /location/id/books
+ * GET /location/:id/books
+ * ------------------------
+ * List the books currently stocked at a location.
+ *
+ * Auth: required. Path param `id` {number} - location id.
+ *
+ * Example response (200):
+ *  [{ "id": 5, "name": "The Hobbit", "book_id": 12, "code": "a1b2c3d4e5",
+ *     "status": 0, "image_url": "https://..." }]
  */
 //@ts-ignore
 router.get('/:id/books', requireAuth, async (req: Request, res: Response) => {
@@ -54,9 +78,18 @@ router.get('/:id/books', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
- * Path: /location/id/add/books
+ * POST /location/:id/add/books
+ * ------------------------------
+ * Move a batch of book stocks into this location (by scanning/typing their
+ * stock codes) - e.g. after physically moving books between shelves.
  *
- * Add books stock codes into a location. Used to movea stack of books between locations
+ * Auth: required. Path param `id` {number} - destination location id.
+ * Body: { "books": ["a1b2c3d4e5", "f6g7h8i9j0"] }  // array of book_stocks.code
+ *
+ * Example response (200): the updated list of books now at this location
+ * (same shape as GET /location/:id/books).
+ *
+ * Response (404): "Location does not exist".
  */
 //@ts-ignore
 router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) => {
@@ -97,7 +130,14 @@ router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) =
 });
 
 /**
+ * POST /location
+ * ---------------
+ * Create a new location.
  *
+ * Auth: required.
+ * Body: { "name": "Main shelf", "description": "Front room" }
+ *
+ * Example response (200): { "id": 2, "name": "Main shelf", "description": "Front room", "total_books": 0 }
  */
 //@ts-ignore
 router.post('', requireAuth, async (req: Request, res: Response) => {
@@ -137,7 +177,13 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
 
 
 /**
+ * PUT /location/:id
+ * -------------------
+ * Rename/update a location's description.
  *
+ * Auth: required. Path param `id` {number}. Body: { "name": "...", "description": "..." }
+ *
+ * Example response (200): the updated location row (same shape as GET /location).
  */
 //@ts-ignore
 router.put('/:id', requireAuth, async (req: Request, res: Response) => {
@@ -189,7 +235,13 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * DELETE /location/:id
+ * ----------------------
+ * Delete a location.
  *
+ * Auth: required. Path param `id` {number}.
+ *
+ * Responses: 200 {"message": "Location deleted successfully"} | 404 {"error": "Location not found"}.
  */
 //@ts-ignore
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
@@ -219,6 +271,7 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     }
 });
 
+/** Whether location `locationId` exists and belongs to `userId`. */
 async function existLocation(pool: Pool, locationId: number, userId: number): Promise<boolean> {
     const queryResult = await pool.query(
         'SELECT id FROM locations WHERE id = $1 AND user_id = $2',
@@ -228,6 +281,7 @@ async function existLocation(pool: Pool, locationId: number, userId: number): Pr
     return queryResult.rowCount == 1;
 }
 
+/** Fetch the books (with stock code/status) currently stored at `locationId`. */
 async function getLocationBooks(pool: Pool, locationId: number, userId: number) {
     const result = await pool.query(`
             SELECT book_stocks.id,

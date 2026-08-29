@@ -1,5 +1,6 @@
 import {ARoute} from "@/router/ARoute";
 
+/** Route to the dashboard/overview view (`/app/dashboard`) - also the app's default landing route. */
 export class DashboardRoute extends ARoute {
 
     public static PATH = "/dashboard";

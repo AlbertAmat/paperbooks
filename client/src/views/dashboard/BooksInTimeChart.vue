@@ -6,6 +6,7 @@
 </template>
 
 <script setup lang="ts">
+/** Line chart of books added per month (Chart.js via vue-chartjs), fed by `IDashboard.booksInTime`. */
 import {computed} from 'vue';
 import {
 	Chart as ChartJS,

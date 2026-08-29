@@ -1,12 +1,24 @@
+/**
+ * =============================================================================
+ * AuthorRoute
+ * =============================================================================
+ * Mounted at `/api/rest/author`. CRUD + search for the user's `authors`.
+ * All routes require auth and are scoped to the caller's `user_id`.
+ */
 import { Router, Request, Response } from 'express';
 import {appService} from "../AppService";
 import {requireAuth} from "../middlewares/AuthMiddleware";
 
 const router = Router();
 
-
 /**
- * Path: /customer
+ * GET /author
+ * ------------
+ * List every author belonging to the user.
+ *
+ * Auth: required.
+ *
+ * Example response (200): [{ "id": 4, "name": "J.R.R. Tolkien" }]
  */
 //@ts-ignore
 router.get('', requireAuth, async (req: Request, res: Response) => {
@@ -31,7 +43,14 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /author/search
+ * ---------------------
+ * Case-insensitive substring search over the user's authors by name -
+ * used for the author autocomplete/picker when adding a book.
  *
+ * Auth: required. Body: { "query": "tolk" }
+ *
+ * Example response (200): [{ "id": 4, "name": "J.R.R. Tolkien" }]
  */
 //@ts-ignore
 router.post('/search', requireAuth, async (req: Request, res: Response) => {
@@ -62,7 +81,13 @@ router.post('/search', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /author
+ * -------------
+ * Create a new author.
  *
+ * Auth: required. Body: { "name": "J.R.R. Tolkien" }
+ *
+ * Example response (200): { "id": 4, "name": "J.R.R. Tolkien" }
  */
 //@ts-ignore
 router.post('', requireAuth, async (req: Request, res: Response) => {
@@ -99,7 +124,13 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
 
 
 /**
+ * PUT /author/:id
+ * -----------------
+ * Rename an author.
  *
+ * Auth: required. Path param `id` {number}. Body: { "name": "..." }
+ *
+ * Example response (200): { "id": 4, "name": "..." }
  */
 //@ts-ignore
 router.put('/:id', requireAuth, async (req: Request, res: Response) => {
@@ -146,7 +177,13 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * DELETE /author/:id
+ * --------------------
+ * Delete an author.
  *
+ * Auth: required. Path param `id` {number}.
+ *
+ * Responses: 200 {"message": "Author deleted successfully"} | 404 {"error": "Author not found"}.
  */
 //@ts-ignore
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {

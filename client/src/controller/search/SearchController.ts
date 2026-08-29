@@ -1,3 +1,9 @@
+/**
+ * Backs the book search/library view: paginated, filterable search with an
+ * "infinite scroll"-style `fetchBooks(clear)` that either replaces the
+ * current results (new query/filter) or appends the next page. The initial
+ * search text comes from the `query` route param (see `SearchRoute`).
+ */
 import {BaseController} from "@/controller/BaseController";
 import {searchService} from "@/service/search/SearchService";
 import {ref, Ref, shallowRef, ShallowRef} from "vue";
@@ -67,8 +73,9 @@ export default class SearchController extends BaseController<ISearchResponse> {
     }
 
     /**
-     *
-     * @param page
+     * Re-run the search for the current query/page/filters.
+     * @param clear If true, replace the current results (new search/filter
+     * change); if false/omitted, append to them (loading the next page).
      */
     public async fetchBooks(clear?: boolean) {
         try {
@@ -167,6 +174,7 @@ export default class SearchController extends BaseController<ISearchResponse> {
         return this.m_filters.value;
     }
 
+    /** Enable a search filter, reset to page 0, and re-run the search from scratch. */
     public addFilter(filter: SearchFilter) {
         if(!this.m_filters.value.includes(filter)) {
             this.m_filters.value.push(filter)
@@ -175,6 +183,7 @@ export default class SearchController extends BaseController<ISearchResponse> {
         }
     }
 
+    /** Disable a search filter, reset to page 0, and re-run the search from scratch. */
     public removeFilter(filter: SearchFilter) {
         if(this.m_filters.value.includes(filter)) {
             this.m_filters.value.splice(this.m_filters.value.indexOf(filter), 1);

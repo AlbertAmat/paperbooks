@@ -223,9 +223,7 @@ export class AppService {
         return this.m_jwtSecret;
     }
 
-    /**
-     *
-     */
+    /** Get the configured Google Books API key (undefined falls back to Open Library, see BooksRoute.ts). */
     public getGoogleApiKey(): string | undefined {
         return this.m_googleApiKey;
     }

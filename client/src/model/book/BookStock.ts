@@ -1,3 +1,14 @@
+/**
+ * View model for a single physical copy of a book (a `book_stocks` row):
+ * its status/location/customer, plus generating a printable barcode label
+ * for it. Always tied to the owning `ABook` instance (needed to print the
+ * book's name alongside the barcode).
+ *
+ * @example
+ * const stock = book.getStocks()[0];
+ * const canvas = stock.generateBarcodeImage();
+ * await stock.update(BookStockStatusEnum.BOOKED, locationId, customerId);
+ */
 import {BookStockStatusEnum, IBookStock} from "@/types/book/IBookStock";
 import JsBarcode from "jsbarcode";
 import {bookService} from "@/service/book/BookService";
@@ -10,6 +21,7 @@ import ABook from "@/model/book/ABook";
 
 export default class BookStock {
 
+    /** Display label + color for each `BookStockStatusEnum` value, for status chips/selects. */
     public static BookStockStatus = [
         {
             value: BookStockStatusEnum.BOOKED,
@@ -132,10 +144,9 @@ export default class BookStock {
     }
 
     /**
-     *
-     */
-    /**
-     * Generate a barcode image with a custom description below.
+     * Render a CODE128 barcode of this stock's code onto a canvas, with the
+     * book name and code printed below it - used for the printable labels
+     * in `PrintDialog.vue`.
      */
     public generateBarcodeImage(): HTMLCanvasElement {
         // Create a barcode-only canvas
@@ -175,12 +186,7 @@ export default class BookStock {
         return finalCanvas;
     }
 
-    /**
-     *
-     * @param status
-     * @param locationId
-     * @param customerId
-     */
+    /** Persist a new status/location/customer for this stock and sync local reactive state. */
     public async update(status: BookStockStatusEnum, locationId: number, customerId: number | null) {
         try {
             const data = await bookService.updateBookStock(this.m_book.getId(), this.m_id, status, locationId, customerId);

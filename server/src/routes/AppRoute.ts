@@ -1,3 +1,11 @@
+/**
+ * =============================================================================
+ * AppRoute
+ * =============================================================================
+ * Mounted at `/api/rest/app`. General application-level endpoints: a public
+ * health check, and the "policy" bootstrap payload the client fetches once
+ * on login to hydrate its dropdowns/labels/locale.
+ */
 import { Router, Request, Response } from 'express';
 import {appService} from "../AppService";
 import {requireAuth} from "../middlewares/AuthMiddleware";
@@ -5,9 +13,14 @@ import path from "path";
 
 const router = Router();
 
-// GET - version/health check, unauthenticated so it can be used by
-// container orchestrators and uptime monitors
-// /app/version
+/**
+ * GET /app/version
+ * ------------------
+ * Health check / version probe. Unauthenticated so it can be used by
+ * container orchestrators and uptime monitors.
+ *
+ * Example response (200): { "version": "0.1.2", "uptime": 12345.6 }
+ */
 router.get('/version', (req: Request, res: Response) => {
     res.json({
         version: process.env.APP_VERSION || "dev",
@@ -15,8 +28,29 @@ router.get('/version', (req: Request, res: Response) => {
     });
 });
 
-// GET - policy conf
-// /app/policy
+/**
+ * GET /app/policy
+ * ------------------
+ * Bootstrap payload fetched once after login: the current user's profile
+ * plus every reference list (categories, languages, formats, locations,
+ * customers) and UI label translations needed to render the app. Each
+ * section is fetched independently and defaults to `[]`/`{}` on failure so
+ * one failing query doesn't take down the whole app shell.
+ *
+ * Auth: required.
+ *
+ * Example response (200):
+ *  {
+ *    "user": { "code": "jdoe", "name": "Jane Doe", "email": "jane@example.com",
+ *               "language": "en", "region": "US", "image": null, "isPublicInstitution": false },
+ *    "categories": [{ "id": 3, "name": "Fantasy" }],
+ *    "languages": [{ "code": "en", "name": "English" }],
+ *    "formats": [{ "id": 1, "name": "Paperback" }],
+ *    "locations": [{ "id": 2, "name": "Main shelf", "description": "" }],
+ *    "customers": [{ "id": 7, "name": "Jane Doe" }],
+ *    "labels": { "app.title": "PaperBooks" }
+ *  }
+ */
 //@ts-ignore
 router.get('/policy', requireAuth, async (req: Request, res: Response) => {
     const userId = appService.getSessionUser(req)
@@ -77,9 +111,7 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
     });
 });
 
-/**
- *
- */
+/** List `{id, name}` for every customer of `userId` - used to populate the policy payload. */
 async function getCustomers(userId: number): Promise<Record<string, any>[]> {
     const pool = appService.getDatabasePool();
 
@@ -98,9 +130,7 @@ async function getCustomers(userId: number): Promise<Record<string, any>[]> {
 }
 
 
-/**
- *
- */
+/** List `{id, name}` for every category of `userId` - used to populate the policy payload. */
 async function getCategories(userId: number): Promise<Record<string, any>[]> {
     const pool = appService.getDatabasePool();
 
@@ -118,9 +148,7 @@ async function getCategories(userId: number): Promise<Record<string, any>[]> {
      return result.rows;
 }
 
-/**
- *
- */
+/** List every `{code, name}` row in the global `languages` table (not user-scoped). */
 async function getLanguages(): Promise<Record<string, any>[]> {
     const pool = appService.getDatabasePool();
 
@@ -137,9 +165,7 @@ async function getLanguages(): Promise<Record<string, any>[]> {
     return result.rows;
 }
 
-/**
- *
- */
+/** List every `{id, name}` row in the global `formats` table (not user-scoped), e.g. "Paperback". */
 async function getFormats(): Promise<Record<string, any>[]> {
     const pool = appService.getDatabasePool();
 
@@ -156,9 +182,7 @@ async function getFormats(): Promise<Record<string, any>[]> {
     return result.rows;
 }
 
-/**
- *
- */
+/** List `{id, name, description}` for every location of `userId` - used to populate the policy payload. */
 async function getLocations(userId: number): Promise<Record<string, any>[]> {
     const pool = appService.getDatabasePool();
     const query = `
@@ -177,7 +201,8 @@ async function getLocations(userId: number): Promise<Record<string, any>[]> {
 }
 
 /**
- *
+ * Build a `{ labelCode: translatedText }` map for `userId`'s configured
+ * `users.language`, from the `app_labels` translation table.
  */
 async function getAppLabels(userId: number): Promise<Record<string, string>> {
     const pool = appService.getDatabasePool();
@@ -201,7 +226,9 @@ async function getAppLabels(userId: number): Promise<Record<string, string>> {
 }
 
 /**
- *
+ * Fetch `userId`'s profile fields, converting the stored `image` bytea (if
+ * any) into a `data:image/png;base64,...` URL the client can use directly
+ * as an `<img src>`. Throws if the user doesn't exist.
  */
 async function getUser(userId: number): Promise<Record<string, any>> {
     const pool = appService.getDatabasePool();

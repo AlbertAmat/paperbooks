@@ -1,3 +1,7 @@
+/**
+ * Backs the book detail view: reads the `book_id` route param, loads that
+ * book, and exposes it as a `Book` model instance.
+ */
 import {BaseController} from "@/controller/BaseController";
 import IBook from "@/types/book/IBook";
 import Book from "@/model/book/Book";

@@ -18,6 +18,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * "Return books" button + dialog (shown on the dashboard and customers
+ * views): wraps `BookStockCodesDialog` to bulk-return a scanned/typed batch
+ * of book stock codes via `bookService.returnBooks`, then emits `refresh`
+ * so the parent can reload its data.
+ */
 import {ref, Ref} from "vue";
 import BookStockCodesDialog from "@/components/addBookStocks/BookStockCodesDialog.vue";
 import {AppLabels} from "@/plugins/i18n/AppLabels";

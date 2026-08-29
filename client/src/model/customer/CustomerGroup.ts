@@ -1,30 +1,17 @@
+/**
+ * View model for a customer group, with reactive rename/description update
+ * and a locally-tracked member count (kept in sync via
+ * `incrementTotalCustomers`/`decrementTotalCustomers` when customers are
+ * assigned/removed elsewhere, avoiding a full re-fetch).
+ */
 import {Ref, ref} from "vue";
 import {ICustomerGroup} from "@/types/customer/ICustomerGroup";
 import {customerGroupService} from "@/service/customers/CustomerGroupService";
 
 export default class CustomerGroup {
-    /**
-     *
-     * @private
-     */
     private readonly m_id: number;
-
-    /**
-     *
-     * @private
-     */
     private readonly m_name: Ref<string>;
-
-    /**
-     *
-     * @private
-     */
     private readonly m_description: Ref<string | undefined>;
-
-    /**
-     *
-     * @private
-     */
     private readonly m_totalCustomers: Ref<number>;
 
     public constructor(data: ICustomerGroup) {
@@ -62,27 +49,19 @@ export default class CustomerGroup {
         return this.m_totalCustomers.value;
     }
 
-    /**
-     *
-     * @param name
-     * @param description
-     */
+    /** Persist a new name/description on the server and update local state. */
     public async update(name: string, description?: string) {
         await customerGroupService.updateGroup(this.m_id, name, description);
         this.m_name.value = name;
         this.m_description.value = description;
     }
 
-    /**
-     *
-     */
+    /** Bump the locally-tracked member count (e.g. after assigning a customer to this group). */
     public incrementTotalCustomers() {
         this.m_totalCustomers.value += 1;
     }
 
-    /**
-     *
-     */
+    /** Decrement the locally-tracked member count, floored at 0 (e.g. after removing a customer). */
     public decrementTotalCustomers() {
         this.m_totalCustomers.value = Math.max(0, this.m_totalCustomers.value - 1);
     }

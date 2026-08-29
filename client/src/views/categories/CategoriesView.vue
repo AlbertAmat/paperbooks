@@ -75,6 +75,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Categories management view: a data table of all categories with inline
+ * edit/delete, an empty state when there are none, and the add/edit dialog.
+ * Deletes also sync `ApplicationService`'s cached category list, since it's
+ * used app-wide (e.g. the book edit form's category picker).
+ */
 import PageComponent from "@/views/PageComponent.vue";
 import {computed, ref, Ref, ShallowRef, shallowRef} from "vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";

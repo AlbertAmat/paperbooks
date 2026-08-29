@@ -1,3 +1,4 @@
+/** View model for a book category, wrapping `ICategory` with reactive rename support. */
 import ICategory from "@/types/category/ICategory";
 import {categoriesService} from "@/service/categories/CategoriesService";
 import {Ref, ref} from "vue";
@@ -6,16 +7,7 @@ import {i18n} from "@/plugins/i18n/i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class Category {
-    /**
-     *
-     * @private
-     */
     private readonly m_categoryId: number;
-
-    /**
-     *
-     * @private
-     */
     private readonly m_categoryName: Ref<string>;
 
     public constructor(data: ICategory) {
@@ -23,20 +15,15 @@ export default class Category {
         this.m_categoryName = ref(data.name);
     }
 
-    /**
-     *
-     */
     public getCategoryId(): number {
         return this.m_categoryId;
     }
 
-    /**
-     *
-     */
     public getCategoryName(): string {
         return this.m_categoryName.value;
     }
 
+    /** Rename this category on the server and update local state. */
     public async update(name: string) {
         await categoriesService.updateCategory(this.m_categoryId, name)
         this.m_categoryName.value = name;

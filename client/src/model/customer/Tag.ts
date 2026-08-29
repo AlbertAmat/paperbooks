@@ -1,3 +1,4 @@
+/** View model for a customer tag (label + color), used to color-code customers. */
 import {ref, Ref} from "vue";
 import {ITag} from "@/types/customer/ITag";
 

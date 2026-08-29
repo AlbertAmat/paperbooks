@@ -1,5 +1,6 @@
 import {ARoute} from "@/router/ARoute";
 
+/** Catch-all route (`/:pathMatch(.*)*`) rendering the 404 view for any unmatched URL. */
 export class NotFoundRoute extends ARoute {
 
     public static PATH = "/:pathMatch(.*)*";

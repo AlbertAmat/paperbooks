@@ -7,6 +7,7 @@
 </template>
 
 <script setup lang="ts">
+/** Wraps `BookStockCodesDialog` to lend a scanned/typed batch of book stock codes to this customer. */
 import {computed, ref, Ref} from "vue";
 import BookStockCodesDialog from "@/components/addBookStocks/BookStockCodesDialog.vue";
 import Customer from "@/model/customer/Customer";

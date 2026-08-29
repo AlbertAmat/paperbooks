@@ -1,3 +1,8 @@
+/**
+ * Backs the account settings view. The "fetch" just reads the already-loaded
+ * user from `ApplicationService` (populated once at app bootstrap via
+ * `GET /app/policy`) rather than making a new network call.
+ */
 import {BaseController} from "@/controller/BaseController";
 import User from "@/model/user/User";
 import {applicationService} from "@/service/ApplicationService";

@@ -32,6 +32,13 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * In-app documentation view: a section sidebar and Markdown content pane
+ * (`MarkdownViewer`), with the active section driven by the `:section?`
+ * route param (see `DocsRoute`) and content/locale from `docsData.ts`.
+ * A broken in-page anchor link that happens to match another section's id
+ * navigates there instead of failing (`onAnchorNotFound`).
+ */
 import {computed, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useI18n} from "vue-i18n";

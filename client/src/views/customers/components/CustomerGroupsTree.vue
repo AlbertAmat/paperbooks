@@ -161,6 +161,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Groups tab of the customers view: an expandable table of every group
+ * (plus a synthetic "No group" row for unassigned customers) where
+ * expanding a group lists its members with checkboxes for batch-move and
+ * drag-and-drop support to move customers between groups. All moves go
+ * through `moveCustomers`, which keeps each affected group's member count
+ * in sync locally instead of re-fetching. Exposes `createGroup()` so the
+ * parent view's toolbar "Add" button can open the create dialog for
+ * whichever tab is active.
+ */
 import {computed, reactive, Ref, ref, ShallowRef, shallowRef} from 'vue'
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";

@@ -1,3 +1,17 @@
+/**
+ * Global controller backing the single `ConfirmationDialog.vue` instance
+ * mounted in App.vue. Turns a "confirm this destructive action" prompt into
+ * a Promise, so calling code can simply `await` the user's answer instead
+ * of wiring up its own dialog state.
+ *
+ * @example
+ * const confirmed = await confirmationDialogController.showDialog(
+ *   i18n.global.t(AppLabels.DELETE_BOOK),
+ *   i18n.global.t(AppLabels.DELETE_BOOK_DESC),
+ *   i18n.global.t(AppLabels.DELETE)
+ * );
+ * if (confirmed) await book.deleteBook();
+ */
 import { ref, Ref } from "vue";
 
 export class ConfirmationDialogController {
@@ -30,10 +44,12 @@ export class ConfirmationDialogController {
     }
 
     /**
-     *
-     * @param title
-     * @param desc
-     * @param action
+     * Show the confirmation dialog and return a Promise resolved `true` if
+     * the user confirms (`executeAction()`) or rejected `false` if they
+     * cancel (`cancelAction()`).
+     * @param title Dialog title.
+     * @param desc Dialog description/body text.
+     * @param action Label for the confirm button.
      */
     public showDialog(title: string, desc: string, action: string): Promise<boolean> {
         this.m_title = title;
@@ -48,6 +64,7 @@ export class ConfirmationDialogController {
         });
     }
 
+    /** Resolve the pending `showDialog()` promise with `true` and hide the dialog. */
     public executeAction() {
         if (this.m_resolver) {
             this.m_resolver(true); // Aceptado
@@ -57,6 +74,7 @@ export class ConfirmationDialogController {
         this.m_visible.value = false;
     }
 
+    /** Reject the pending `showDialog()` promise with `false` and hide the dialog. */
     public cancelAction() {
         if (this.m_reject) {
             this.m_reject(false); // Cancelado

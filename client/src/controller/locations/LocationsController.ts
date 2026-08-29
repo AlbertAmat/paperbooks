@@ -1,3 +1,4 @@
+/** Backs the locations management view: loads all locations and exposes add/delete operations. */
 import {BaseController} from "@/controller/BaseController";
 import {locationsService} from "@/service/locations/LocationsService";
 import {ShallowRef, shallowRef} from "vue";

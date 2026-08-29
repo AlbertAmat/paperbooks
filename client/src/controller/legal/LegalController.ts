@@ -1,3 +1,9 @@
+/**
+ * Backs the legal documents view (privacy policy, terms, cookie policy).
+ * Has no server data to fetch (content lives statically in `legalData.ts`)
+ * - only exists to set the page title via `BaseController`, localized
+ * through `normalizeLegalLocale`.
+ */
 import {BaseController} from "@/controller/BaseController";
 import {i18n} from "@/plugins/i18n/i18n";
 import {legalUiLabels, normalizeLegalLocale} from "@/views/legal/legalData";

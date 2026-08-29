@@ -1,3 +1,8 @@
+/**
+ * Loads and manages customer groups for the customers view. Standalone
+ * (doesn't extend `BaseController`) since it's used alongside
+ * `CustomersController` on the same page rather than as its own route.
+ */
 import {Ref, ref, ShallowRef, shallowRef} from "vue";
 import {ICustomerGroup} from "@/types/customer/ICustomerGroup";
 import CustomerGroup from "@/model/customer/CustomerGroup";
@@ -24,9 +29,7 @@ export default class CustomerGroupsController {
         this.reload();
     }
 
-    /**
-     *
-     */
+    /** (Re)fetch every customer group from the server. */
     public async reload() {
         try {
             this.m_loading.value = true;

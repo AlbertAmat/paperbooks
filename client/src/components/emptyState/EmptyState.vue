@@ -33,6 +33,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Decorative "nothing here yet" placeholder used across list views (books,
+ * locations, customers, categories, authors, ...) when a list is empty:
+ * an icon with orbiting decorative chips (or a compact icon-only variant),
+ * a title/description, and an actions slot (typically an "add" button).
+ */
 import {computed} from "vue";
 
 interface Props {

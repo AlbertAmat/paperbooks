@@ -26,6 +26,7 @@
 </template>
 
 <script setup lang="ts">
+/** Renders an array of structured `LegalBlock`s (headings/paragraphs/lists/tables) as plain HTML - see legalTypes.ts and legalData.ts. */
 import {LegalBlock} from "@/views/legal/legalTypes";
 
 interface Props {

@@ -4,19 +4,37 @@ import {BookStockStatusEnum, IBookStock} from "@/types/book/IBookStock";
 import axiosInstance from "@/plugins/axiosInstance";
 import {IBookAddMd} from "@/types/book/IBookAddMd";
 
+/**
+ * Thin HTTP client for the `/api/rest/book` endpoints (see server/src/routes/BooksRoute.ts):
+ * book CRUD, ISBN-based auto-creation, cover image upload, and managing
+ * physical stocks (add/update/remove/return) for a book.
+ *
+ * @example
+ * const book = await bookService.getBook(12);
+ * const stock = await bookService.addBookStock(12, 2, BookStockStatusEnum.AVAILABLE, null);
+ */
 export class BookService {
 
-    /**
-     *
-     * @param isbn
-     */
+    /** Fetch full detail for a single book, including its stocks and authors. */
     public async getBook(id: number): Promise<IBook> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/${id}`, {});
         return data;
     }
 
     /**
-     *
+     * Update a book's metadata and its full list of author ids.
+     * @param id Book id.
+     * @param name Book title.
+     * @param image_url Cover image URL, or a `data:` URI, or null to leave unchanged.
+     * @param isbn ISBN code, or null.
+     * @param category_id Category id, or null.
+     * @param language_code 2-letter language code, or null.
+     * @param authors Full desired list of author ids (diffed against the current set).
+     * @param description Free-text description, or null.
+     * @param publisher Publisher name, or null.
+     * @param published_date Publication date, or null.
+     * @param pages Page count.
+     * @param format_id Format id, or null.
      */
     public async updateBook(
         id: number,
@@ -48,6 +66,10 @@ export class BookService {
         return data;
     }
 
+    /**
+     * Create a book manually (as opposed to `createBookFromIsbn`).
+     * @returns The new book's id.
+     */
     public async createBook(
         name: string,
         description: string | null,
@@ -73,6 +95,7 @@ export class BookService {
         return data;
     }
 
+    /** Replace a book's cover image with an uploaded file. */
     public async changeImage(
         id: number,
         image: File,
@@ -84,9 +107,15 @@ export class BookService {
     }
 
     /**
+     * Create a book automatically by looking up its metadata from an ISBN
+     * (Google Books, falling back to Open Library server-side).
      *
-     * @param isbn
-     * returns the book id
+     * Uses `suppressErrorDialog` because callers (e.g. batch ISBN import)
+     * render their own per-item error UI instead of the global error dialog.
+     *
+     * @param isbn ISBN code to look up.
+     * @param location Optional location id to place the new stock in.
+     * @returns The new (or matched existing) book's id.
      */
     public async createBookFromIsbn(isbn: string, location: number |null): Promise<number> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/isbn/${isbn}`, {location: location}, {
@@ -97,10 +126,11 @@ export class BookService {
     }
 
     /**
-     *
-     * @param id
-     * @param status
-     * @param print
+     * Add a new physical stock (copy) of a book at a location.
+     * @param id Book id.
+     * @param locationId Destination location id.
+     * @param status Initial stock status (BOOKED is not allowed here).
+     * @param customerId Customer to assign the copy to, or null.
      */
     public async addBookStock(id: number, locationId: number, status: BookStockStatusEnum, customerId: number |null): Promise<IBookStock> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/${id}/stock`, {
@@ -112,11 +142,7 @@ export class BookService {
         return data;
     }
 
-    /**
-     *
-     * @param id
-     * @param stockId
-     */
+    /** Remove a single physical stock of a book. */
     public async removeBookStock(id: number, stockId: number): Promise<boolean> {
         const {data} = await axiosInstance.delete(`${PATH_PREFIX}/book/${id}/stock/${stockId}`);
 
@@ -124,11 +150,12 @@ export class BookService {
     }
 
     /**
-     *
-     * @param id
-     * @param stockId
-     * @param stockStatus
-     * @param stockLocationId
+     * Update a physical stock's status, location and/or assigned customer.
+     * @param id Book id.
+     * @param stockId Stock id.
+     * @param stockStatus New status.
+     * @param stockLocationId New location id.
+     * @param customerId New customer id, or null to clear.
      */
     public async updateBookStock(id: number, stockId: number, stockStatus: BookStockStatusEnum, stockLocationId: number, customerId: number | null): Promise<IBookStock> {
         const {data} = await axiosInstance.put(`${PATH_PREFIX}/book/${id}/stock/${stockId}`, {
@@ -140,18 +167,16 @@ export class BookService {
         return data;
     }
 
-    /**
-     *
-     * @param id
-     */
+    /** Delete a book by id (and, via DB foreign keys, its stocks/author links). */
     public async deleteBook(id: number): Promise<void> {
         await axiosInstance.delete(`${PATH_PREFIX}/book/${id}`);
     }
 
 
     /**
-     *
-     * @param bookCode
+     * Look up the book + single stock behind a scanned/typed stock code,
+     * for the "add book to customer/location" flow.
+     * @param bookCode A book_stocks.code value.
      */
     public async fetchBookAddMd(bookCode: string): Promise<IBookAddMd> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/${bookCode}/add/md`);
@@ -159,8 +184,9 @@ export class BookService {
     }
 
     /**
-     *
-     * @param bookCode
+     * Bulk-return one or more book stocks: clears their assigned customer
+     * and resets their status to available.
+     * @param books Array of book_stocks.code values.
      */
     public async returnBooks(books: string[]): Promise<void> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/return`, {books: books});

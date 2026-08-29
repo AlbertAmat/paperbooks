@@ -1,3 +1,8 @@
+/**
+ * Vue application entry point. Bootstraps the app with its three plugins -
+ * i18n (translations), Vuetify (UI components/theme) and the Vue Router -
+ * then mounts it onto `#app` in client/index.html.
+ */
 import router from './router/Router'
 import '@mdi/font/css/materialdesignicons.css'
 import {createApp} from "vue";

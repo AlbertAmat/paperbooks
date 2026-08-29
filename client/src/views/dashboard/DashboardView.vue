@@ -131,6 +131,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Dashboard/overview view: KPI tiles (total books, booked, categories,
+ * customers, locations, authors), the books-added-over-time chart, and a
+ * "recently added" list, all backed by `DashboardController`.
+ */
 import PageComponent from "@/views/PageComponent.vue";
 import DashboardController from "@/controller/dashboard/DashboardController";
 import DashboardCard from "@/views/dashboard/DashboardCard.vue";

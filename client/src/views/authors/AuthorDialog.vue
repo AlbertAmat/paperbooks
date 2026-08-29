@@ -48,6 +48,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Create/edit dialog for an author. Passing an existing `author` prop
+ * switches it to edit mode (renames via `BookAuthor.update`); omitting it
+ * creates a new one via `AuthorsController.addAuthor`.
+ */
 import {computed, Ref, ref} from 'vue'
 import CustomersController from "@/controller/customers/CustomersController";
 import Customer from "@/model/customer/Customer";

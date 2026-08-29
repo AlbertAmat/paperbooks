@@ -93,6 +93,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Create/edit dialog for a book stock (physical copy): status, location,
+ * and (only when status is BOOKED) the customer it's loaned to. Passing an
+ * existing `stock` prop switches it to edit mode; omitting it creates a
+ * new one, optionally printing a barcode label immediately ("Add & Print").
+ */
 import {computed, Ref, ref, watch} from 'vue'
 import Book from "@/model/book/Book";
 import {BookStockStatusEnum} from "@/types/book/IBookStock";

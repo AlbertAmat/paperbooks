@@ -49,6 +49,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Standard page shell used by every top-level view: a sticky toolbar
+ * (page title + `prepend`/`append` action slots) and a content area that
+ * shows a loading spinner, an error alert, or the default slot, driven by
+ * the given `BaseController` subclass's state.
+ */
 import {BaseController} from "@/controller/BaseController";
 
 interface Props {

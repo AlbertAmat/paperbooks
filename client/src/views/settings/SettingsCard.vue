@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-
+/** Titled card shell used to group related fields on the settings view. */
 interface Props {
 	title: string;
 }

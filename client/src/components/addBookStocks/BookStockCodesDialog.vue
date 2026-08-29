@@ -77,6 +77,13 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Reusable "scan/type a list of book stock codes" dialog, used by both the
+ * location "add books" flow and the customer "lend books" flow. As each
+ * code is entered it's added to `bookCodes` and its metadata fetched via
+ * `bookService.fetchBookAddMd` (rendered by `BookStockItem`); the parent
+ * listens for `executeAction` with the final array of codes to submit.
+ */
 import {computed, ref, Ref} from "vue";
 import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
 import {bookService} from "@/service/book/BookService";

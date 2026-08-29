@@ -13,5 +13,5 @@
 </template>
 
 <script setup lang="ts">
-
+/** Loading placeholder shown in the search grid, shaped like `BookItem`, while the next page of results is loading. */
 </script>

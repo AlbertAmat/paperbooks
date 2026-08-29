@@ -1,3 +1,11 @@
+/**
+ * =============================================================================
+ * CategoriesRoute
+ * =============================================================================
+ * Mounted at `/api/rest/category`. CRUD for the user's book `categories`
+ * (genres/shelving sections). All routes require auth and are scoped to the
+ * caller's `user_id`.
+ */
 import { Router, Request, Response } from 'express';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import {appService} from "../AppService";
@@ -5,7 +13,13 @@ import {appService} from "../AppService";
 const router = Router();
 
 /**
-
+ * GET /category
+ * --------------
+ * List every category belonging to the user.
+ *
+ * Auth: required.
+ *
+ * Example response (200): [{ "id": 3, "name": "Fantasy" }]
  */
 //@ts-ignore
 router.get('', requireAuth, async (req: Request, res: Response) => {
@@ -30,7 +44,13 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /category
+ * ----------------
+ * Create a new category.
  *
+ * Auth: required. Body: { "name": "Fantasy" }
+ *
+ * Example response (200): { "id": 3, "name": "Fantasy" }
  */
 //@ts-ignore
 router.post('', requireAuth, async (req: Request, res: Response) => {
@@ -67,7 +87,13 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
 
 
 /**
+ * PUT /category/:id
+ * -------------------
+ * Rename a category.
  *
+ * Auth: required. Path param `id` {number}. Body: { "name": "..." }
+ *
+ * Example response (200): { "id": 3, "name": "..." }
  */
 //@ts-ignore
 router.put('/:id', requireAuth, async (req: Request, res: Response) => {
@@ -116,7 +142,13 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * DELETE /category/:id
+ * ----------------------
+ * Delete a category.
  *
+ * Auth: required. Path param `id` {number}.
+ *
+ * Responses: 200 {"message": "Category deleted successfully"} | 404 {"error": "Category not found"}.
  */
 //@ts-ignore
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {

@@ -1,3 +1,9 @@
+/**
+ * Vue Router instance for the SPA, mounted under the `/app` base path
+ * (matches the server-side catch-all in server/src/routes/AuthRoute.ts that
+ * serves index.html for any `/app/*` request, enabling deep-linking/refresh).
+ * Each entry delegates to a `router/routes/*Route.ts` singleton's `getRoute()`.
+ */
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import {searchRoute} from "@/router/routes/SearchRoute";
 import {DashboardRoute, dashboardRoute} from "@/router/routes/DashboardRoute";

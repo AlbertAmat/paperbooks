@@ -30,6 +30,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Top app bar: the global book search box (typed or via barcode scan) and
+ * the user menu. Submitting navigates to the search/library route with the
+ * query string set, letting `SearchController` pick it up.
+ */
 import {ref, Ref} from "vue";
 import {SearchRoute, searchRoute} from "@/router/routes/SearchRoute";
 import router from "@/router/Router";

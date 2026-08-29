@@ -1,3 +1,11 @@
+/**
+ * Static content + i18n for the in-app documentation view (`DocsView.vue`):
+ * each section's Markdown body is authored once per locale under
+ * `content/<locale>/NN-section.md` and imported as a raw string (see
+ * `shims-md.d.ts` for the `?raw` import type), then rendered via
+ * `MarkdownViewer.vue`. Locale is independent of `i18n.ts` - it's driven by
+ * the same current app language but resolved with `normalizeDocLocale`.
+ */
 import enGettingStarted from "./content/en/01-getting-started.md?raw";
 import esGettingStarted from "./content/es/01-getting-started.md?raw";
 import caGettingStarted from "./content/ca/01-getting-started.md?raw";
@@ -59,6 +67,7 @@ export const DEFAULT_DOC_LOCALE: DocLocale = "en";
 
 const SUPPORTED_DOC_LOCALES: DocLocale[] = ["en", "es", "ca", "it"];
 
+/** Fall back to `DEFAULT_DOC_LOCALE` ("en") for any unsupported/missing locale. */
 export function normalizeDocLocale(locale: string | undefined | null): DocLocale {
     return (SUPPORTED_DOC_LOCALES as string[]).includes(locale || "")
         ? (locale as DocLocale)
@@ -203,6 +212,7 @@ export interface DocSection {
     content: string;
 }
 
+/** All documentation sections, titled and rendered in the given locale (normalized). */
 export function getDocSections(locale: string | undefined | null): DocSection[] {
     const docLocale = normalizeDocLocale(locale);
 
@@ -214,6 +224,7 @@ export function getDocSections(locale: string | undefined | null): DocSection[] 
     }));
 }
 
+/** Look up one documentation section by id (e.g. "dashboard"); falls back to the first section if not found. */
 export function getDocSection(id: string | undefined, locale: string | undefined | null): DocSection {
     const sections = getDocSections(locale);
     return sections.find(section => section.id === id) || sections[0];

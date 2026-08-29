@@ -1,3 +1,21 @@
+/**
+ * =============================================================================
+ * BooksRoute
+ * =============================================================================
+ * Mounted at `/api/rest/book` (see server/src/routes/Routes.ts).
+ *
+ * Owns everything related to a user's book catalog:
+ *  - searching/listing/reading/updating/deleting `books`
+ *  - creating books either manually or automatically from an ISBN lookup
+ *    (Google Books API, with an Open Library fallback for metadata + cover)
+ *  - managing physical copies of a book ("book stocks": add/update/remove,
+ *    and bulk "return" of loaned/sold copies)
+ *
+ * Every route in this file (except the small pure helper functions at the
+ * bottom) requires a valid session - see `requireAuth` in
+ * server/src/middlewares/AuthMiddleware.ts. All queries are additionally
+ * scoped by `user_id` so one user can never read/modify another user's data.
+ */
 import {Router, Request, Response} from 'express';
 import {appService} from "../AppService";
 import axios, {AxiosError} from "axios";
@@ -26,7 +44,38 @@ const upload = multer({
 });
 
 /**
- * Path: /book/search
+ * GET /book/search
+ * -----------------
+ * Paginated, filterable search over the current user's books.
+ *
+ * Auth: required (session cookie).
+ *
+ * Query params (all optional):
+ *  - query        {string} Case-insensitive match against book name OR isbn.
+ *  - category_id  {number | number[] | "1,2,3"} Restrict to one or more category ids.
+ *  - page         {number} Zero-based page index. 50 results per page.
+ *  - filters      {string} Comma-separated list of `SearchFilter` values,
+ *                 e.g. "NO_STOCK" or "HAS_STOCK" (see types/search/SearchFilter.ts).
+ *
+ * Example request:
+ *  GET /api/rest/book/search?query=hobbit&category_id=3&page=0&filters=HAS_STOCK
+ *
+ * Example response (200):
+ *  {
+ *    "total": 1,
+ *    "limit": 50,
+ *    "books": [
+ *      {
+ *        "id": 12,
+ *        "name": "The Hobbit",
+ *        "image_url": "https://books.google.com/...",
+ *        "isbn": "9780261102217",
+ *        "category_id": 3,
+ *        "language_code": "en",
+ *        "authors": [{ "id": 4, "name": "J.R.R. Tolkien" }]
+ *      }
+ *    ]
+ *  }
  */
 //@ts-ignore
 router.get('/search', requireAuth, async (req: Request, res: Response) => {
@@ -150,7 +199,36 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
- * Path: /book/{id}
+ * GET /book/:id
+ * -------------
+ * Fetch full detail for a single book, including its physical stocks
+ * (with resolved location/customer names) and its authors.
+ *
+ * Auth: required. Path param `id` {number} - book id.
+ *
+ * Example request:  GET /api/rest/book/12
+ *
+ * Example response (200):
+ *  {
+ *    "id": 12,
+ *    "name": "The Hobbit",
+ *    "description": "...",
+ *    "image_url": "https://...",
+ *    "isbn": "9780261102217",
+ *    "category_id": 3,
+ *    "language_code": "en",
+ *    "publisher": "HarperCollins",
+ *    "published_date": "1937-09-21",
+ *    "pages": 310,
+ *    "format_id": 1,
+ *    "stocks": [
+ *      { "id": 1, "code": "a1b2c3d4e5", "status": 0, "location_id": 2,
+ *        "location_name": "Main shelf", "customer_id": null, "customer_name": null }
+ *    ],
+ *    "authors": [{ "id": 4, "name": "J.R.R. Tolkien" }]
+ *  }
+ *
+ * Response (404): "Book not found" - when no book with that id belongs to the caller.
  */
 //@ts-ignore
 router.get('/:id', requireAuth, async (req: Request, res: Response) => {
@@ -231,7 +309,36 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
- * Path: /book/{id}
+ * PUT /book/:id
+ * -------------
+ * Update a book's metadata and reconcile its author list.
+ *
+ * Auth: required. Path param `id` {number} - book id.
+ *
+ * Body (JSON):
+ *  {
+ *    "name": "The Hobbit",
+ *    "description": "A hobbit's unexpected journey.",
+ *    "image_url": "data:image/png;base64,..." | "https://books.google.com/...",
+ *    "isbn": "9780261102217",
+ *    "category_id": 3,
+ *    "language_code": "en",
+ *    "authors": [4, 7],            // full desired list of author ids; diffed against
+ *                                  // existing book_authors rows (added/removed accordingly)
+ *    "publisher": "HarperCollins",
+ *    "published_date": "1937-09-21",
+ *    "pages": 310,
+ *    "format_id": 1
+ *  }
+ *
+ * Notes:
+ *  - `image_url` is validated by `isAllowedImageUrl()` - only our own
+ *    data: URIs or the whitelisted Google Books / Open Library hosts are accepted.
+ *  - The whole update (books row + book_authors diff) runs in one transaction.
+ *
+ * Responses: 200 {"message": "Book updated successfully"} |
+ *            400 {"error": "Invalid image URL"} |
+ *            404 {"error": "Book not found"} | 500 on failure (rolls back).
  */
 //@ts-ignore
 router.put('/:id', requireAuth, async (req: Request, res: Response) => {
@@ -358,7 +465,16 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
- * Path: /book/{id}
+ * DELETE /book/:id
+ * ----------------
+ * Permanently delete a book (and, via DB foreign keys, its stocks/author links).
+ *
+ * Auth: required. Path param `id` {number} - book id.
+ *
+ * Example request: DELETE /api/rest/book/12
+ *
+ * Responses: 200 {"message": "Book deleted successfully"} |
+ *            404 {"error": "Book not found"} | 500 on failure.
  */
 //@ts-ignore
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
@@ -390,7 +506,19 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
 
 
 /**
- * Change book image
+ * POST /book/:id/image
+ * ---------------------
+ * Replace a book's cover image with an uploaded file.
+ *
+ * Auth: required. Path param `id` {number} - book id.
+ * Body: multipart/form-data with a single field `image` (PNG or JPEG, max 4MB -
+ * enforced by the `multer` config above). The file is stored inline as a
+ * base64 data: URI in `books.image_url` (no external file storage/CDN).
+ *
+ * Example request (curl):
+ *   curl -X POST /api/rest/book/12/image -F "image=@cover.jpg"
+ *
+ * Response (200): number of rows updated (0 or 1), e.g. `1`.
  */
 router.post('/:id/image', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
     const id = Number(req.params.id);
@@ -419,7 +547,24 @@ router.post('/:id/image', requireAuth, upload.single("image"), async (req: Reque
 });
 
 /**
- * Create book manually
+ * POST /book
+ * ----------
+ * Create a book by hand (as opposed to the ISBN auto-lookup below).
+ *
+ * Auth: required.
+ * Body: multipart/form-data
+ *  - name        {string} required (books.name is NOT NULL)
+ *  - description {string} optional
+ *  - isbn        {string} optional - rejected with 404 if it already exists for this user
+ *  - image       {file}   optional, PNG/JPEG, stored as base64 data: URI
+ *
+ * Side effect: if the user has exactly one location, the new book
+ * automatically gets one stock entry there (see `__automaticallyAddBookToLocation`).
+ *
+ * Example request (curl):
+ *   curl -X POST /api/rest/book -F "name=The Hobbit" -F "isbn=9780261102217" -F "image=@cover.jpg"
+ *
+ * Response (200): the new book's id, e.g. `42`.
  */
 //@ts-ignore
 router.post('', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
@@ -470,7 +615,29 @@ router.post('', requireAuth, upload.single("image"), async (req: Request, res: R
 });
 
 /**
- * Create book automatically base on isbn
+ * POST /book/isbn/:isbn
+ * ---------------------
+ * Create a book automatically by looking up its metadata from an ISBN,
+ * instead of typing everything in by hand.
+ *
+ * Lookup order: Google Books API (needs `GOOGLE_BOOKS_API_KEY`) -> on
+ * failure/missing key, falls back to Open Library's search API for metadata
+ * and to its covers API for the image. Categories/authors/language rows are
+ * created on the fly if they don't already exist for this user
+ * (`__ensureCategory`, `__ensureAuthors`, `ensureLanguage`).
+ *
+ * Auth: required.
+ * Path param: `isbn` {string} - required.
+ * Body (optional): { "location": "3" }  // location id to place the new stock in;
+ *   if omitted, falls back to the "exactly one location" auto-assign rule.
+ *
+ * Example request:
+ *   POST /api/rest/book/isbn/9780261102217
+ *   { "location": "2" }
+ *
+ * Response (200): the new (or already-existing, matched by isbn) book's id, e.g. `42`.
+ * Responses (404): "No ISBN code provided" | "Book not found" (no metadata match).
+ * Response (502): "External book service failed" (Google/Open Library request failed).
  */
 //@ts-ignore
 router.post(
@@ -634,6 +801,12 @@ router.post(
  * EXTERNAL API: GOOGLE BOOKS (with retry + backoff)
  * =========================================================
  */
+/**
+ * Fetch volume metadata for `isbn` from the Google Books API, retrying up to
+ * `retries` times with linear backoff on HTTP 429 (rate limited). If the
+ * request ultimately fails for any other reason (missing API key, network
+ * error, no match), falls back to `__fetchOpenLibraryMetadata`.
+ */
 async function fetchBookData(isbn: string, retries = 3): Promise<any> {
     try {
         const apiKey = appService.getGoogleApiKey();
@@ -761,6 +934,10 @@ function normalizeLanguageCode(language: string | null | undefined): string | nu
     return /^[a-z]{2}$/.test(code) ? code : null;
 }
 
+/**
+ * Insert a `languages` row for `code` if one doesn't exist yet (name defaults
+ * to the code itself, e.g. "en" - can be renamed later via the settings UI).
+ */
 async function ensureLanguage(client: any, code: string | null) {
     if (!code) return;
 
@@ -777,6 +954,10 @@ async function ensureLanguage(client: any, code: string | null) {
     }
 }
 
+/**
+ * Find-or-create a category by name for this user. Returns `null` if `name`
+ * is falsy (a book without a detected category is left uncategorized).
+ */
 async function __ensureCategory(
     client: any,
     name: string | null,
@@ -801,6 +982,10 @@ async function __ensureCategory(
     return insert.rows[0].id;
 }
 
+/**
+ * Find-or-create a book by ISBN for this user, so re-scanning the same ISBN
+ * never creates a duplicate. Returns the book id either way.
+ */
 async function __getOrCreateBook(client: any, book: any, userId: number) {
     const existing = await client.query(
         'SELECT id FROM books WHERE isbn = $1 AND user_id = $2',
@@ -834,6 +1019,10 @@ async function __getOrCreateBook(client: any, book: any, userId: number) {
     return insert.rows[0].id;
 }
 
+/**
+ * Find-or-create each author by name for this user, then link them all to
+ * `bookId` in `book_authors` (idempotent via ON CONFLICT DO NOTHING).
+ */
 async function __ensureAuthors(
     client: any,
     bookId: number,
@@ -867,6 +1056,11 @@ async function __ensureAuthors(
     }
 }
 
+/**
+ * Create a single "available" (status 0) stock entry for `bookId` at
+ * `locationId`, silently doing nothing if the location doesn't belong to
+ * `userId`. Used by the ISBN auto-create flow when a location is supplied.
+ */
 async function __addBookToLocation(
     client: any,
     bookId: number,
@@ -891,7 +1085,27 @@ async function __addBookToLocation(
 }
 
 /**
+ * POST /book/:id/stock
+ * ---------------------
+ * Add a new physical copy (stock) of a book at a location.
  *
+ * Auth: required. Path param `id` {number} - book id.
+ * Body:
+ *  {
+ *    "status": 0,            // 0 = available, 1 = sold/loaned, 2 = booked (not allowed here - use PUT stock instead)
+ *    "location_id": 2,       // required, must belong to the caller
+ *    "customer_id": null     // optional, sets the copy as already held by a customer
+ *  }
+ *
+ * A unique 10-character stock `code` is generated server-side (see `generateBookStockCode`).
+ *
+ * Example request: POST /api/rest/book/12/stock  { "status": 0, "location_id": 2 }
+ *
+ * Example response (200):
+ *  { "id": 5, "code": "a1b2c3d4e5", "status": 0, "location_id": 2,
+ *    "location_name": "Main shelf", "customer_id": null, "customer_name": null }
+ *
+ * Responses: 404 "Location not found" | 406 if status is "booked" (2) | 500 on failure.
  */
 //@ts-ignore
 router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
@@ -965,7 +1179,15 @@ router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * DELETE /book/:id/stock/:stock_id
+ * ----------------------------------
+ * Remove a single physical copy of a book.
  *
+ * Auth: required. Path params: `id` {number} book id, `stock_id` {number} stock id.
+ *
+ * Example request: DELETE /api/rest/book/12/stock/5
+ *
+ * Response (200): boolean - `true` if a row was deleted, `false` otherwise.
  */
 //@ts-ignore
 router.delete('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Response) => {
@@ -996,7 +1218,23 @@ router.delete('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Res
 });
 
 /**
+ * PUT /book/:id/stock/:stock_id
+ * -------------------------------
+ * Update a physical copy's status, location and/or assigned customer -
+ * e.g. moving it to a different shelf, marking it sold/booked, or
+ * assigning/clearing the customer it's checked out to.
  *
+ * Auth: required. Path params: `id` {number} book id, `stock_id` {number} stock id.
+ * Body:
+ *  { "status": 2, "location_id": 2, "customer_id": 7 }
+ *
+ * Example request: PUT /api/rest/book/12/stock/5
+ *
+ * Example response (200):
+ *  { "id": 5, "code": "a1b2c3d4e5", "status": 2, "location_id": 2,
+ *    "location_name": "Main shelf", "customer_id": 7, "customer_name": "Jane Doe" }
+ *
+ * Response (404): "Location not found" if `location_id` doesn't belong to the caller.
  */
 //@ts-ignore
 router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Response) => {
@@ -1063,10 +1301,23 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
 });
 
 /**
- * Path: /:bookCode/add/md
- * given a book stock code get the book metadata necessary for adding a book
+ * GET /book/:bookCode/add/md
+ * ----------------------------
+ * Look up the book + single stock behind a scanned/typed stock code, for the
+ * "add to customer" flow (e.g. scanning a barcode when lending/selling a copy).
+ *
+ * Auth: required. Path param `bookCode` {string} - a book_stocks.code value.
+ *
+ * Example request: GET /api/rest/book/a1b2c3d4e5/add/md
+ *
+ * Example response (200), shape `IBookAddMd`:
+ *  {
+ *    "id": 12, "name": "The Hobbit", "image_url": "https://...", "isbn": "9780261102217",
+ *    "stocks": [{ "id": 5, "code": "a1b2c3d4e5", "status": 0 }]
+ *  }
+ *
+ * Response (404): "Book stock not found".
  */
-//@ts-ignore
 //@ts-ignore
 router.get('/:bookCode/add/md', requireAuth, async (req: Request, res: Response) => {
     const bookCode = String(req.params.bookCode).trim();
@@ -1119,7 +1370,18 @@ router.get('/:bookCode/add/md', requireAuth, async (req: Request, res: Response)
 });
 
 /**
- * Create book manually
+ * POST /book/return
+ * -------------------
+ * Bulk-return one or more book stocks: clears their `customer_id` and
+ * resets their `status` back to 0 (available). Used e.g. when a customer
+ * brings back several borrowed books at once.
+ *
+ * Auth: required.
+ * Body: { "books": ["a1b2c3d4e5", "f6g7h8i9j0"] }  // array of book_stocks.code
+ *
+ * Example request: POST /api/rest/book/return  { "books": ["a1b2c3d4e5"] }
+ *
+ * Response: 200 (empty body) on success, 500 on failure.
  */
 //@ts-ignore
 router.post('/return', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
@@ -1185,7 +1447,9 @@ function formatPublishedDate(date: string | undefined): string | null {
 }
 
 /**
- *
+ * Generate a random 10-character alphanumeric code for a new book stock
+ * (used as the human-scannable/typeable identifier), retrying until it
+ * doesn't collide with an existing `book_stocks.code`.
  */
 async function generateBookStockCode(): Promise<string> {
     let code: string = "";

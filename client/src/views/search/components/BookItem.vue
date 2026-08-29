@@ -64,6 +64,7 @@
 </template>
 
 <script setup lang="ts">
+/** One book card in the search results grid: cover, name, first author, ISBN, category, language. */
 import {ref, Ref} from "vue";
 import BookItem from "@/model/book/BookItem";
 

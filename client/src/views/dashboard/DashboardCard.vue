@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-
+/** Titled tile shell used to lay out the dashboard's KPI/chart cards, with a `large` variant for the chart card. */
 interface Props {
 	title:  string;
 	large?:  boolean;

@@ -1,5 +1,6 @@
 import {ARoute} from "@/router/ARoute";
 
+/** Route to the current user's account settings view (`/app/settings`). */
 export class SettingsRoute extends ARoute {
 
     public static PATH = "/settings";

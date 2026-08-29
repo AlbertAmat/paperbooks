@@ -1,3 +1,4 @@
+/** Backs the categories management view: loads all categories and exposes add/delete operations. */
 import {BaseController} from "@/controller/BaseController";
 import {ShallowRef, shallowRef} from "vue";
 import ICategory from "@/types/category/ICategory";

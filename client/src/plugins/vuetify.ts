@@ -1,3 +1,7 @@
+/**
+ * Vuetify setup: registers every component/directive and defines the app's
+ * single custom light theme ("custom") plus the Material Design Icons set.
+ */
 import 'vuetify/styles'
 import {aliases, mdi} from 'vuetify/iconsets/mdi'
 import {createVuetify} from "vuetify/framework";

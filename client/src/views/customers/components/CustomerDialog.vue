@@ -72,6 +72,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Create/edit dialog for a customer: name plus optional group assignment.
+ * Passing an existing `customer` prop switches it to edit mode; omitting
+ * it creates a new one. Group changes go through `applyGroupChange` so
+ * each group's member count stays accurate without a full re-fetch.
+ */
 import {computed, Ref, ref} from 'vue'
 import CustomersController from "@/controller/customers/CustomersController";
 import {useI18n} from "vue-i18n";

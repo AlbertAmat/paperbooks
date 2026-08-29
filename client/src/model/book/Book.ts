@@ -1,3 +1,14 @@
+/**
+ * Full book detail view model (backs the book detail view), extending
+ * `BookItem` with description/publisher metadata, its list of physical
+ * `BookStock`s, and the mutating operations (`updateBook`, `changeImage`,
+ * `deleteBook`, `addBookStock`, `removeBookStock`) that call `BookService`
+ * and keep local reactive state in sync with the server.
+ *
+ * @example
+ * const book = new Book(await bookService.getBook(12));
+ * await book.addBookStock(BookStockStatusEnum.AVAILABLE, locationId, null, false);
+ */
 import BookItem from "@/model/book/BookItem";
 import IBook from "@/types/book/IBook";
 import {applicationService} from "@/service/ApplicationService";
@@ -15,52 +26,13 @@ import {printDialogController} from "@/components/printDialog/PrintDialogControl
 
 export default class Book extends BookItem {
 
-    /**
-     *
-     * @private
-     */
     private m_description: string;
-
-    /**
-     *
-     * @private
-     */
     private m_publisher: string | null;
-
-    /**
-     *
-     * @private
-     */
     private m_publishedDate: Date | null;
-
-    /**
-     *
-     * @private
-     */
     private m_pages: number;
-
-    /**
-     *
-     * @private
-     */
     private m_format: Format | null;
-
-    /**
-     *
-     * @private
-     */
     private m_stocks: ShallowRef<BookStock[]>;
-
-    /**
-     *
-     * @private
-     */
     private readonly m_dateCreated: Date;
-
-    /**
-     *
-     * @private
-     */
     private readonly m_dateUpdated: Date;
 
     public constructor(data: IBook) {
@@ -79,6 +51,7 @@ export default class Book extends BookItem {
         this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(this,stock)));
     }
 
+    /** Placeholder "empty" book (id -1) used to initialize forms before real data loads. */
     public static empty(): Book {
         return new Book({
             id: -1,
@@ -226,10 +199,13 @@ export default class Book extends BookItem {
     }
 
     /**
-     *
-     * @param status
-     * @param locationId
-     * @param print
+     * Add a new physical stock (copy) of this book, append it to the local
+     * list, show a confirmation snackbar, and optionally queue a barcode
+     * label for printing via `printDialogController`.
+     * @param status Initial stock status.
+     * @param locationId Destination location id.
+     * @param customerId Customer to assign the copy to, or null.
+     * @param print If true, add a printable barcode label to the print queue.
      */
     public async addBookStock(status: BookStockStatusEnum, locationId: number, customerId: number | null, print: boolean) {
         try {
@@ -247,6 +223,7 @@ export default class Book extends BookItem {
         }
     }
 
+    /** Delete a physical stock from the server and remove it from the local list. */
     public async removeBookStock(stockId: number) {
         try {
             const result = await bookService.removeBookStock(this.m_id, stockId);
@@ -270,9 +247,7 @@ export default class Book extends BookItem {
         }
     }
 
-    /**
-     *
-     */
+    /** Persist all current field values (name, metadata, authors, ...) to the server. */
     public async updateBook() {
         try {
             await bookService.updateBook(
@@ -296,7 +271,9 @@ export default class Book extends BookItem {
     }
 
     /**
-     *
+     * Upload a new cover image, then optimistically update the local
+     * `imageUrl` by converting the same file to a base64 data URL client-side
+     * (avoids waiting for a second round trip to re-fetch the book).
      */
     public async changeImage(image: File) {
         try {
@@ -326,6 +303,7 @@ export default class Book extends BookItem {
         }
     }
 
+    /** Delete this book on the server, then navigate back to the search/library view. */
     public async deleteBook() {
         try {
             await bookService.deleteBook(this.m_id)

@@ -1,3 +1,10 @@
+/**
+ * Registry of all authenticated REST routers, keyed by the path segment
+ * they're mounted under. `AppService.__loadRoutes()` iterates this map and
+ * mounts each router at `/api/rest` + key, e.g. `routes["/book"]` becomes
+ * `/api/rest/book`. (The unauthenticated `AuthRoute` is mounted separately,
+ * directly at `/`.)
+ */
 import { Router } from "express";
 import AppRoute from "./AppRoute";
 import BooksRoute from "./BooksRoute";

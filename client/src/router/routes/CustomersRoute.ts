@@ -1,5 +1,6 @@
 import {ARoute} from "@/router/ARoute";
 
+/** Route to the customers management view (`/app/customers`). */
 export class CustomersRoute extends ARoute {
 
     public static PATH = "/customers";

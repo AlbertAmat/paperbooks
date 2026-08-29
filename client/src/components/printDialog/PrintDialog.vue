@@ -80,7 +80,12 @@
 </template>
 
 <script setup lang="ts">
-
+/**
+ * Print-queue menu shown from the app menu: displays how many barcode
+ * labels are queued (added via `printDialogController.addLabel()` when a
+ * book stock is created) and lets the user print them all as one PDF or
+ * clear the queue. See PrintDialogController.ts.
+ */
 import {printDialogController} from "@/components/printDialog/PrintDialogController";
 import {computed} from "vue";
 import {useI18n} from "vue-i18n";

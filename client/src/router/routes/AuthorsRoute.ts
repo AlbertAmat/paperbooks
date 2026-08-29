@@ -1,5 +1,6 @@
 import {ARoute} from "@/router/ARoute";
 
+/** Route to the authors management view (`/app/authors`). */
 export class AuthorsRoute extends ARoute {
 
     public static PATH = "/authors";

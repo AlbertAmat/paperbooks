@@ -57,6 +57,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Create/edit dialog for a location. Passing an existing `location` prop
+ * switches it to edit mode; omitting it creates a new one. Either way,
+ * `ApplicationService`'s cached location list is refreshed afterward.
+ */
 import {computed, Ref, ref} from 'vue'
 import LocationsController from "@/controller/locations/LocationsController";
 import {applicationService} from "@/service/ApplicationService";

@@ -1,3 +1,4 @@
+/** View model for a physical storage location, wrapping `ILocation` with reactive rename support. */
 import ILocation from "@/types/location/ILocation";
 import {locationsService} from "@/service/locations/LocationsService";
 import {ref, Ref} from "vue";
@@ -28,6 +29,7 @@ export default class Location {
         return this.m_description.value;
     }
 
+    /** Persist a new name/description on the server and update local state. */
     public async update(name: string, description: string | null) {
         await locationsService.updateLocation(this.m_id, name, description)
         this.m_name.value = name;

@@ -1,9 +1,43 @@
+/**
+ * =============================================================================
+ * DashboardRoute
+ * =============================================================================
+ * Mounted at `/api/rest/dashboard`. A single read-only aggregate endpoint
+ * powering the dashboard view's KPIs and charts.
+ */
 import { Router, Request, Response } from 'express';
 import {appService} from "../AppService";
 import {requireAuth} from "../middlewares/AuthMiddleware";
 
 const router = Router();
 
+/**
+ * GET /dashboard
+ * ---------------
+ * Returns all the counters/series the dashboard needs in one round trip,
+ * running every query concurrently via `Promise.all`.
+ *
+ * Auth: required.
+ *
+ * Example response (200):
+ *  {
+ *    "lastBooks": [{ "id": 12, "name": "The Hobbit", "image_url": "...",
+ *                     "isbn": "9780261102217", "pages": 310, "date_created": "2026-08-01T..." }],
+ *    "totalBooks": "42",
+ *    "totalThisMonth": "3",
+ *    "totalLastMonth": "5",
+ *    "totalCategories": "6",
+ *    "totalCustomers": "10",
+ *    "booksInTime": [{ "month": "2026-08-01T00:00:00.000Z", "total_books": "3" }],
+ *    "stockStatus": [{ "status": 0, "count": "20" }, { "status": 2, "count": "5" }],
+ *    "totalBookedBooks": "5",
+ *    "totalLocations": "2",
+ *    "totalAuthors": "15"
+ *  }
+ *
+ * Note: count fields come back as strings because Postgres `COUNT(*)` yields
+ * a `bigint`, which node-postgres serializes as a string to avoid precision loss.
+ */
 //@ts-ignore
 router.get('', requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();

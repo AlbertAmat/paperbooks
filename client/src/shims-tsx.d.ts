@@ -1,3 +1,4 @@
+/** TSX support for Vue 2-style JSX typing (kept for tooling compatibility). */
 import Vue, { VNode } from 'vue'
 
 declare global {

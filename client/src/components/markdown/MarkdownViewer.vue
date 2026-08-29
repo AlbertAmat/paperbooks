@@ -3,6 +3,17 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Renders a Markdown string as sanitized HTML (used by the in-app docs
+ * view). Adds two behaviors on top of plain `marked` rendering:
+ *  - every heading gets a slugified `id` (or an explicit `{#id}` suffix),
+ *    so other content can deep-link to a section;
+ *  - in-page `#anchor` links smooth-scroll to that heading instead of
+ *    reloading, emitting `anchor-not-found` if the target doesn't exist
+ *    (e.g. a stale link into a doc section that was edited).
+ * Output is run through DOMPurify since the Markdown source could
+ * contain raw HTML.
+ */
 import {computed, ref} from "vue";
 import {marked, Tokens} from "marked";
 import DOMPurify from "dompurify";
@@ -20,6 +31,7 @@ const emit = defineEmits<Emits>();
 
 const root = ref<HTMLElement | null>(null);
 
+/** Turn heading text into a URL-safe, lowercase, hyphenated anchor id (strips accents/HTML). */
 function slugify(text: string): string {
 	return text
 		.replace(/<[^>]+>/g, "")
@@ -62,6 +74,7 @@ const renderedHtml = computed(() => {
 	return DOMPurify.sanitize(rawHtml, {ADD_ATTR: ["target"]});
 });
 
+/** Intercept clicks on in-page `#anchor` links to smooth-scroll instead of a hard navigation. */
 function onClick(event: MouseEvent) {
 	const anchor = (event.target as HTMLElement).closest("a");
 	if (!anchor) {

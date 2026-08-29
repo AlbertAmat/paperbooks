@@ -1,5 +1,6 @@
 import {ARoute} from "@/router/ARoute";
 
+/** Route to the locations management view (`/app/locations`). */
 export class LocationsRoute extends ARoute {
 
     public static PATH = "/locations";

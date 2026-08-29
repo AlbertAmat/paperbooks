@@ -18,6 +18,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Small icon button that opens a dialog using the device camera (via
+ * html5-qrcode) to scan a barcode/QR code. Emits `value` with the decoded
+ * text and auto-closes on the first successful scan. Used anywhere a stock
+ * code or ISBN can be typed, as a camera-based alternative.
+ */
 import { ref, watch} from "vue";
 import { Html5Qrcode } from "html5-qrcode";
 import {useI18n} from "vue-i18n";

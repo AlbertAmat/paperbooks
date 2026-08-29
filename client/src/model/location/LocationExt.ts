@@ -1,3 +1,7 @@
+/**
+ * `Location` extended with its book count and (lazily loaded) list of
+ * stocked books, used on the locations list/detail views.
+ */
 import Location from "@/model/location/Location";
 import ILocationExt from "@/types/location/ILocationExt";
 import {locationsService} from "@/service/locations/LocationsService";
@@ -7,22 +11,9 @@ import ILocationBook from "@/types/location/ILocationBook";
 
 export default class LocationExt extends Location{
 
-    /**
-     *
-     * @private
-     */
     private readonly m_totalBooks: number;
-
-    /**
-     *
-     * @private
-     */
     private m_books: ShallowRef<LocationBook[]> = shallowRef([]);
 
-    /**
-     *
-     * @param location
-     */
     public constructor(location: ILocationExt) {
         super(location);
         this.m_totalBooks = location.total_books;
@@ -32,20 +23,16 @@ export default class LocationExt extends Location{
         return this.m_totalBooks;
     }
 
-    /**
-     *
-     */
     public getBooks(): LocationBook[] {
         return this.m_books.value;
     }
 
+    /** Replace the local books list from raw data (e.g. after a batch move). */
     public setBooks(books: ILocationBook[]) {
         this.m_books.value = books.map((book) => new LocationBook(book));
     }
 
-    /**
-     *
-     */
+    /** Fetch and cache this location's books from the server. */
     public async fetchBooks() {
         const books = await locationsService.getLocationBooks(this.m_id);
         this.m_books.value = books.map((book) => new LocationBook(book));

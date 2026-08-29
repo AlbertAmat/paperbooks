@@ -193,6 +193,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Book detail view (`/app/book/:book_id`): editable metadata form (each
+ * field is a two-way computed bound directly to the `Book` model, setting
+ * `hasChanges` so "Save" only enables once something's actually changed),
+ * the cover image (`BookImage`), and the stock table (`BookStocks`).
+ */
 import PageComponent from "@/views/PageComponent.vue";
 import BookController from "@/controller/book/BookController";
 import CardComponent from "@/components/card/CardComponent.vue";

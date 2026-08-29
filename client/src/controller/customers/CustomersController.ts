@@ -1,4 +1,4 @@
-
+/** Backs the customers management view: loads customers + tags together and exposes add/delete operations. */
 import {BaseController} from "@/controller/BaseController";
 import {ShallowRef, shallowRef} from "vue";
 import ICustomer from "@/types/customer/ICustomer";
@@ -34,6 +34,7 @@ export default class CustomersController extends BaseController<ICustomersRespon
         return await customersService.getPageData()
     }
 
+    /** Re-run `fetchData()`/`setData()` to refresh customers + tags from the server. */
     async reload() {
         await this.__fetchData();
     }

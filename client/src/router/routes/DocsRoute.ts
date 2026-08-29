@@ -1,5 +1,6 @@
 import {ARoute} from "@/router/ARoute";
 
+/** Route to the in-app documentation view, with an optional section anchor (`/app/docs/:section?`). */
 export class DocsRoute extends ARoute {
 
     public static PATH = "/docs/:section?";
@@ -14,6 +15,7 @@ export class DocsRoute extends ARoute {
         }
     }
 
+    /** @param section Optional doc section id; omit for the docs index. */
     public getPath(section?: string) {
         return section ? `/docs/${section}` : "/docs";
     }

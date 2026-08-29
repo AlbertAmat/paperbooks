@@ -11,6 +11,7 @@
 </template>
 
 <script setup lang="ts">
+/** App-wide footer: copyright line and links to the legal documents (see LegalRoute/legalData.ts). */
 import {computed} from "vue";
 import {useI18n} from "vue-i18n";
 import {legalUiLabels, normalizeLegalLocale} from "@/views/legal/legalData";

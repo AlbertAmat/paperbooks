@@ -1,3 +1,4 @@
+/** Spanish translation of the Cookie Policy, rendered by LegalContent.vue. Content data only, edited by legal/product, not app logic. */
 import {LegalBlock} from "@/views/legal/legalTypes";
 
 export const cookiePolicyEs: LegalBlock[] = [

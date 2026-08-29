@@ -49,6 +49,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Create/edit dialog for a category. Passing an existing `category` prop
+ * switches it to edit mode; omitting it creates a new one. Either way,
+ * `ApplicationService`'s cached category list is refreshed afterward.
+ */
 import {computed, Ref, ref} from 'vue'
 import {applicationService} from "@/service/ApplicationService";
 import Category from "@/model/category/Category";

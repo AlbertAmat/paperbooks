@@ -1,5 +1,6 @@
 import {ARoute} from "@/router/ARoute";
 
+/** Route to the categories management view (`/app/categories`). */
 export class CategoriesRoute extends ARoute {
 
     public static PATH = "/categories";

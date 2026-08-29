@@ -7,6 +7,7 @@
 </template>
 
 <script setup lang="ts">
+/** Wraps `BookStockCodesDialog` to move a scanned/typed batch of book stock codes into this location. */
 import LocationExt from "@/model/location/LocationExt";
 import {computed, ref, Ref} from "vue";
 import {locationsService} from "@/service/locations/LocationsService";

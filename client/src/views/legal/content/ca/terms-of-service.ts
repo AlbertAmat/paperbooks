@@ -1,3 +1,4 @@
+/** Catalan translation of the Terms of Service, rendered by LegalContent.vue. Content data only, edited by legal/product, not app logic. */
 import {LegalBlock} from "@/views/legal/legalTypes";
 
 export const termsOfServiceCa: LegalBlock[] = [

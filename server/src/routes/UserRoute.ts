@@ -1,3 +1,12 @@
+/**
+ * =============================================================================
+ * UserRoute
+ * =============================================================================
+ * Mounted at `/api/rest/user`. Self-service account management for the
+ * currently logged-in user: profile picture, profile fields, password
+ * change, and account deletion. All routes require auth and act on the
+ * caller's own account only (id taken from the session, never from params).
+ */
 import {Router, Request, Response} from 'express';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import {appService} from "../AppService";
@@ -29,7 +38,20 @@ const upload = multer({
     }
 });
 
-// POST /image
+/**
+ * POST /user/image
+ * ------------------
+ * Upload/replace the current user's profile picture.
+ *
+ * Auth: required. Body: multipart/form-data, field `image` (PNG/JPEG, max 2MB).
+ * Stored as raw bytes in `users.image` (converted to a base64 data: URL on read,
+ * see `getUser()` in AppRoute.ts).
+ *
+ * Example request (curl): curl -X POST /api/rest/user/image -F "image=@avatar.png"
+ *
+ * Responses: 200 {"message": "Image uploaded successfully"} |
+ *            400 {"error": "No PNG file uploaded or file too large"}.
+ */
 router.post("/image", requireAuth, upload.single("image"), async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
@@ -57,6 +79,15 @@ router.post("/image", requireAuth, upload.single("image"), async (req: Request, 
     }
 });
 
+/**
+ * DELETE /user/image
+ * ---------------------
+ * Remove the current user's profile picture (sets `users.image` to NULL).
+ *
+ * Auth: required.
+ *
+ * Response (200): {"message": "Image removed successfully"}.
+ */
 router.delete("/image", requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
@@ -79,6 +110,16 @@ router.delete("/image", requireAuth, async (req: Request, res: Response) => {
     }
 });
 
+/**
+ * PUT /user
+ * ----------
+ * Update the current user's profile fields.
+ *
+ * Auth: required.
+ * Body: { "name": "Jane Doe", "email": "jane@example.com", "language": "en", "region": "US" }
+ *
+ * Response (200): {"message": "User updated successfully"}.
+ */
 router.put("", requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
@@ -108,6 +149,14 @@ router.put("", requireAuth, async (req: Request, res: Response) => {
     }
 });
 
+/**
+ * DELETE /user
+ * -------------
+ * Permanently delete the current user's account (and, via DB foreign keys,
+ * all of their books/locations/customers/etc.), then redirect to `/login`.
+ *
+ * Auth: required.
+ */
 router.delete("", requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
@@ -127,6 +176,25 @@ router.delete("", requireAuth, async (req: Request, res: Response) => {
     }
 });
 
+/**
+ * POST /user/password
+ * ----------------------
+ * Change the current user's password.
+ *
+ * Rate limited: 5 requests / 5 minutes (see `passwordChangeLimiter`), to
+ * prevent using a stolen session token to brute-force the current password.
+ * Auth: required.
+ * Body: { "currentPassword": "OldS3cret!", "newPassword": "NewS3cret!456" }
+ * (`newPassword` needs 8+ chars, an uppercase letter, a digit, a special char).
+ *
+ * On success, `users.token_version` is incremented (invalidating every other
+ * previously issued session token for this user) and a fresh token for
+ * *this* session is issued immediately, so the caller isn't logged out.
+ *
+ * Responses: 200 {"success": true, "message": "Password updated successfully"} |
+ *            400 {"success": false, "message": "...", "missing": [...]} (weak password) |
+ *            401 {"message": "Invalid current password."}.
+ */
 router.post("/password", requireAuth, passwordChangeLimiter, async (req: Request, res: Response) => {
     const { currentPassword, newPassword } = req.body;
 

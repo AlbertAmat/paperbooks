@@ -21,6 +21,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Single app-wide snackbar, mounted once in App.vue. Subscribes to
+ * `appSnackbarController` and renders whatever the latest `show()` call
+ * broadcast - see AppSnackbarController.ts for how other code triggers it.
+ */
 import {ref, onMounted, onUnmounted, computed} from "vue";
 import {appSnackbarController, SnackbarOptions, SnackbarType} from "@/components/appSnackbar/AppSnackbarController";
 

@@ -89,6 +89,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Locations management view: an expandable data table of all locations
+ * (expanding a row shows its books via `LocationBooksTable`), with inline
+ * edit/delete, an empty state when there are none, and the add/edit dialog.
+ * Deletes also sync `ApplicationService`'s cached location list.
+ */
 import PageComponent from "@/views/PageComponent.vue";
 import LocationsController from "@/controller/locations/LocationsController";
 import {computed, ref, Ref, ShallowRef, shallowRef} from "vue";

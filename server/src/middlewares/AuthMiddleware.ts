@@ -1,3 +1,19 @@
+/**
+ * Express middleware that gates every authenticated route.
+ *
+ * Flow: read the `token` httpOnly cookie -> verify its JWT signature/claims
+ * -> look up the user and compare `token_version` (a DB counter bumped on
+ * password change, so old tokens can be revoked even though JWTs are
+ * otherwise stateless) -> if valid and about to expire, silently reissue a
+ * fresh cookie -> call `next()`.
+ *
+ * In development (`ALLOW_DEV_AUTH=true`), it skips real auth entirely and
+ * fakes a session for user id 1 - never enable this in production.
+ *
+ * Usage: `router.get('/foo', requireAuth, handler)`.
+ * Failure responses: redirects to `/login` (no cookie) or `401 Unauthorized`
+ * (invalid/expired/revoked token).
+ */
 import {Request, Response, NextFunction} from "express";
 import jwt from "jsonwebtoken";
 import {appService} from "../AppService";

@@ -112,6 +112,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * "Change password" button + dialog on the settings view: live-checks the
+ * new password against the same rules the server enforces (min length,
+ * uppercase, digit, special char) and that both entries match before
+ * enabling submit, via `userService.changePassword`.
+ */
 import SettingsController from "@/controller/settings/SettingsController";
 import {ref, computed} from "vue";
 import {AxiosError} from "axios";

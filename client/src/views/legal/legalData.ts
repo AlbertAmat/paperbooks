@@ -1,3 +1,11 @@
+/**
+ * Static content + i18n for the legal view (`LegalView.vue`): privacy
+ * policy, terms of service, and cookie policy, each authored once per
+ * locale in `content/<locale>/*.ts` as `LegalBlock[]`. Locale here is
+ * independent of `i18n.ts` (there's no server round trip - it's all
+ * hardcoded per the `LegalLocale` union) but is driven by the same current
+ * app language.
+ */
 import {LegalBlock} from "@/views/legal/legalTypes";
 
 import {privacyPolicyEn} from "./content/en/privacy-policy";
@@ -21,6 +29,7 @@ export const DEFAULT_LEGAL_LOCALE: LegalLocale = "en";
 
 const SUPPORTED_LEGAL_LOCALES: LegalLocale[] = ["en", "es", "ca", "it"];
 
+/** Fall back to `DEFAULT_LEGAL_LOCALE` ("en") for any unsupported/missing locale. */
 export function normalizeLegalLocale(locale: string | undefined | null): LegalLocale {
     return (SUPPORTED_LEGAL_LOCALES as string[]).includes(locale || "")
         ? (locale as LegalLocale)
@@ -140,6 +149,7 @@ export interface LegalDoc {
     blocks: LegalBlock[];
 }
 
+/** All three legal documents, titled and rendered in the given locale (normalized). */
 export function getLegalDocs(locale: string | undefined | null): LegalDoc[] {
     const legalLocale = normalizeLegalLocale(locale);
 
@@ -151,6 +161,7 @@ export function getLegalDocs(locale: string | undefined | null): LegalDoc[] {
     }));
 }
 
+/** Look up one legal document by id (e.g. "privacy-policy"); falls back to the first doc if not found. */
 export function getLegalDoc(id: string | undefined, locale: string | undefined | null): LegalDoc {
     const docs = getLegalDocs(locale);
     return docs.find(doc => doc.id === id) || docs[0];

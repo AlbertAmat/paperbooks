@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+/** Table of the books stocked at one location (fetched on mount), with a button to add more via `LocationAddBooksDialog`. */
 import {computed, onMounted, Ref, ref} from "vue";
 import LocationExt from "@/model/location/LocationExt";
 import BookStock from "@/model/book/BookStock";

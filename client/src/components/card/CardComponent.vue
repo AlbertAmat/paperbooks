@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-
+/** Generic titled card shell (icon, title, optional count chip, optional header actions slot, body slot) used throughout the list/detail views for consistent styling. */
 interface Props {
 	title:  string;
 	icon?:  string;

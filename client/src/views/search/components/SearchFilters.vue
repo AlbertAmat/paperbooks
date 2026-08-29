@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+/** Search view's filter picker: a menu to add a `SearchFilter` and chips to remove active ones, delegating state to `SearchController`. */
 import SearchController from "@/controller/search/SearchController";
 import {SearchFilter} from "@/types/search/SearchFilter";
 import {computed} from "vue";

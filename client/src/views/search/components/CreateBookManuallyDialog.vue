@@ -83,6 +83,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * "Add a book manually" dialog: name/description/ISBN fields plus a cover
+ * image drop zone, submitted via `bookService.createBook`. Used as the
+ * fallback when a book can't be found by ISBN lookup.
+ */
 import {computed, ref, Ref, watch} from "vue";
 import {validateIsbn10, validateIsbn13} from "@/utils/IsbnVerification";
 import { VFileUpload } from 'vuetify/labs/VFileUpload'

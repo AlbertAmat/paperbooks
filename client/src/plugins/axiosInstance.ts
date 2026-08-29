@@ -1,3 +1,18 @@
+/**
+ * Shared axios instance used by every `*Service` class to call the
+ * `/api/rest/*` backend. Centralizes two cross-cutting concerns:
+ *  - `withCredentials: true` so the httpOnly session cookie is always sent.
+ *  - A response interceptor that surfaces server errors in a global error
+ *    dialog, unless the request opts out (see `suppressErrorDialog` below).
+ *
+ * @example
+ * import axiosInstance from "@/plugins/axiosInstance";
+ * const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/12`);
+ *
+ * // Skip the automatic error dialog for a request (e.g. batch imports that
+ * // render their own per-item error UI):
+ * await axiosInstance.post(url, body, { suppressErrorDialog: true } as any);
+ */
 import axios from "axios";
 import {errorDialogController} from "@/components/errorDialog/ErrorDialogController";
 import {AppError, AppErrorsList} from "@/types/AppError";

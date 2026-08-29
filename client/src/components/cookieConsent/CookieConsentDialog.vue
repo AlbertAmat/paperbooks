@@ -33,6 +33,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * One-time cookie consent banner, mounted in App.vue. Purely informational
+ * (the app only sets the strictly-necessary session cookie, no opt-out is
+ * offered) - "accept" just records the choice in `localStorage` so the
+ * banner doesn't show again.
+ */
 import {computed, onMounted, ref} from "vue";
 import {useI18n} from "vue-i18n";
 import {legalUiLabels, normalizeLegalLocale} from "@/views/legal/legalData";

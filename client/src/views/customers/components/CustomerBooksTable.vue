@@ -71,6 +71,7 @@
 </template>
 
 <script setup lang="ts">
+/** Table of the books currently on loan to a customer (fetched on mount), with a button to lend more via `CustomerAddBooksDialog`. */
 import {computed, onMounted, Ref, ref} from "vue";
 import CustomerAddBooksDialog from "@/views/customers/components/CustomerAddBooksDialog.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";

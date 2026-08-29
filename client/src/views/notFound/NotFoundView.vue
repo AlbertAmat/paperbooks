@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+/** 404 page, rendered by the router's catch-all route (see `NotFoundRoute.ts`). */
 import router from "@/router/Router";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";

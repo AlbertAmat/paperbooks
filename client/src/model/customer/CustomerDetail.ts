@@ -1,3 +1,7 @@
+/**
+ * `Customer` extended with its (lazily loaded) list of loaned books and
+ * assigned tags, used on the customer detail view/dialog.
+ */
 import {Ref, ref, ShallowRef, shallowRef} from "vue";
 import ICustomer, {ICustomerDetail} from "@/types/customer/ICustomer";
 import {customersService} from "@/service/customers/CustomersService";
@@ -7,22 +11,8 @@ import Customer from "@/model/customer/Customer";
 
 export default class CustomerDetail extends Customer {
 
-    /**
-     *
-     * @private
-     */
     private readonly m_totalBooks: Ref<number>;
-
-    /**
-     *
-     * @private
-     */
     private m_books: ShallowRef<CustomerBook[]>;
-
-    /**
-     *
-     * @private
-     */
     private m_tags: Ref<number[]> = ref([]);
 
     public constructor(data: ICustomerDetail) {
@@ -31,41 +21,27 @@ export default class CustomerDetail extends Customer {
         this.m_books = shallowRef([]);
     }
 
-    /**
-     *
-     */
     public getTotalBooks(): number {
         return this.m_totalBooks.value;
     }
 
-    /**
-     *
-     */
     public getBooks(): CustomerBook[] {
         return this.m_books.value;
     }
 
-    /**
-     *
-     * @param books
-     */
+    /** Replace the local loaned-books list from raw data. */
     public setBooks(books: ICustomerBook[]) {
         this.m_books.value = books.map((book) => new CustomerBook(book));
     }
 
-    /**
-     *
-     */
+    /** Fetch and cache this customer's currently loaned books from the server. */
     public async fetchBooks() {
         const books = await customersService.getCustomerBooks(this.m_customerId);
         this.m_books.value = books.map((book) => new CustomerBook(book));
         this.m_totalBooks.value =  this.m_books.value.length;
     }
 
-    /**
-     *
-     * @param bookStockCode
-     */
+    /** Return a single loaned book on the server and remove it from the local list. */
     public async removeBook(bookStockCode: string) {
         await customersService.removeCustomerBook(this.m_customerId, bookStockCode);
 

@@ -6,6 +6,13 @@ import {IUser} from "@/types/user/IUser";
 import ICustomer from "@/types/customer/ICustomer";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 
+/**
+ * Bootstrap payload fetched once after login from `GET /app/policy`: the
+ * current user's profile plus every reference list (categories, languages,
+ * formats, locations, customers) and UI label translations needed to
+ * render the app shell. See `ApplicationService` for how this is loaded
+ * and cached client-side.
+ */
 export default interface IPolicyResponse {
     user: IUser;
     customers: ICustomer[];

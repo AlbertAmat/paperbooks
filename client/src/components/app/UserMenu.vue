@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-
+/** Avatar dropdown in the app bar: current user's name/email plus links to settings and logout. */
 import {settingsRoute} from "@/router/routes/SettingsRoute";
 import {applicationService} from "@/service/ApplicationService";
 import {useI18n} from "vue-i18n";

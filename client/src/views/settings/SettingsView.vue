@@ -156,6 +156,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Account settings view: profile picture, name/email/language/region form
+ * (save is disabled until a field actually differs from the loaded user),
+ * password change (`ChangePasswordDialog`), and account deletion.
+ */
 import PageComponent from "@/views/PageComponent.vue";
 import SettingsController from "@/controller/settings/SettingsController";
 import {Ref, ref, computed} from "vue";

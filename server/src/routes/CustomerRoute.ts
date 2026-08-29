@@ -1,3 +1,15 @@
+/**
+ * =============================================================================
+ * CustomerRoute
+ * =============================================================================
+ * Mounted at `/api/rest/customer`. Covers two related areas:
+ *  - `customer_groups`: organizing customers into named groups (e.g. classes,
+ *    departments) - CRUD plus assigning/unassigning a customer to a group.
+ *  - `customers`: CRUD, and lending/returning books to a customer (a "loan"
+ *    is a `book_stocks` row with `status = 2` and `customer_id` set to them).
+ *
+ * All routes require auth and are scoped to the caller's `user_id`.
+ */
 import { Router, Request, Response } from 'express';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import {appService} from "../AppService";
@@ -13,8 +25,14 @@ const router = Router();
 
 
 /**
- * Get all customer groups
- * Path: /customer/group
+ * GET /customer/group
+ * ---------------------
+ * List every customer group with its member count.
+ *
+ * Auth: required.
+ *
+ * Example response (200):
+ *  [{ "id": 1, "name": "Class 4B", "description": "", "total_customers": 22 }]
  */
 //@ts-ignore
 router.get('/group', requireAuth, async (req: Request, res: Response) => {
@@ -45,8 +63,14 @@ router.get('/group', requireAuth, async (req: Request, res: Response) => {
 
 
 /**
- * Create a customer group
- * Path: /customer/group
+ * POST /customer/group
+ * ----------------------
+ * Create a new customer group.
+ *
+ * Auth: required. Body: { "name": "Class 4B", "description": "optional" }
+ *
+ * Example response (201): { "id": 1, "name": "Class 4B", "description": null }
+ * Responses: 400 "Group name is required" | 409 if the name is already taken.
  */
 //@ts-ignore
 router.post('/group', requireAuth, async (req: Request, res: Response) => {
@@ -84,8 +108,14 @@ router.post('/group', requireAuth, async (req: Request, res: Response) => {
 
 
 /**
- * Update a customer group
- * Path: /customer/group/:id
+ * PUT /customer/group/:id
+ * -------------------------
+ * Rename/update a customer group.
+ *
+ * Auth: required. Path param `id` {number}. Body: { "name": "...", "description": "..." }
+ *
+ * Responses: 200 the updated group | 400 "Group name is required" |
+ *            404 "Group not found" | 409 name already taken.
  */
 //@ts-ignore
 router.put('/group/:id', requireAuth, async (req: Request, res: Response) => {
@@ -136,10 +166,14 @@ router.put('/group/:id', requireAuth, async (req: Request, res: Response) => {
 
 
 /**
- * Delete a customer group
- * Customers belonging to the group will have group_id set to NULL
+ * DELETE /customer/group/:id
+ * ----------------------------
+ * Delete a customer group. Customers belonging to the group will have
+ * `group_id` set to NULL (they are not deleted).
  *
- * Path: /customer/group/:id
+ * Auth: required. Path param `id` {number}.
+ *
+ * Responses: 200 {"message": "Customer group deleted successfully"} | 404 "Group not found".
  */
 //@ts-ignore
 router.delete('/group/:id', requireAuth, async (req: Request, res: Response) => {
@@ -174,8 +208,14 @@ router.delete('/group/:id', requireAuth, async (req: Request, res: Response) => 
 
 
 /**
- * Assign a customer to a group
- * Path: /customer/:id/group/:groupId
+ * PUT /customer/:id/group/:groupId
+ * -----------------------------------
+ * Assign a customer to a group.
+ *
+ * Auth: required. Path params: `id` {number} customer id, `groupId` {number} group id.
+ *
+ * Example response (200): { "id": 7, "name": "Jane Doe", "group_id": 1 }
+ * Responses: 404 "Group not found" | 404 "Customer not found".
  */
 //@ts-ignore
 router.put('/:id/group/:groupId', requireAuth, async (req: Request, res: Response) => {
@@ -228,8 +268,14 @@ router.put('/:id/group/:groupId', requireAuth, async (req: Request, res: Respons
 
 
 /**
- * Remove customer from its group
- * Path: /customer/:id/group
+ * DELETE /customer/:id/group
+ * -----------------------------
+ * Remove a customer from whatever group they're in (sets `group_id` to NULL).
+ *
+ * Auth: required. Path param `id` {number} - customer id.
+ *
+ * Example response (200): { "id": 7, "name": "Jane Doe", "group_id": null }
+ * Response (404): "Customer not found".
  */
 //@ts-ignore
 router.delete('/:id/group', requireAuth, async (req: Request, res: Response) => {
@@ -270,8 +316,19 @@ router.delete('/:id/group', requireAuth, async (req: Request, res: Response) => 
  *********************************************************/
 
 /**
- * Get all the list of customers
- * Path: /customer
+ * GET /customer
+ * --------------
+ * List all customers (with their group and current loan count) plus the
+ * full list of tags available to the user, in one call.
+ *
+ * Auth: required.
+ *
+ * Example response (200):
+ *  {
+ *    "customers": [{ "id": 7, "name": "Jane Doe", "group_id": 1,
+ *                     "group_name": "Class 4B", "total_books": 2 }],
+ *    "tags": [{ "id": 1, "name": "VIP", "color": "#ff0000" }]
+ *  }
  */
 //@ts-ignore
 router.get('', requireAuth, async (req: Request, res: Response) => {
@@ -319,7 +376,13 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /customer
+ * ---------------
+ * Create a new customer.
  *
+ * Auth: required. Body: { "name": "Jane Doe" }
+ *
+ * Example response (200): { "id": 7, "name": "Jane Doe", "group_id": null, "group_name": null }
  */
 //@ts-ignore
 router.post('', requireAuth, async (req: Request, res: Response) => {
@@ -361,7 +424,13 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
 
 
 /**
+ * PUT /customer/:id
+ * -------------------
+ * Rename a customer.
  *
+ * Auth: required. Path param `id` {number}. Body: { "name": "..." }
+ *
+ * Example response (200): { "id": 7, "name": "...", "group_id": 1, "group_name": "Class 4B" }
  */
 //@ts-ignore
 router.put('/:id', requireAuth, async (req: Request, res: Response) => {
@@ -414,7 +483,13 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * DELETE /customer/:id
+ * ----------------------
+ * Delete a customer.
  *
+ * Auth: required. Path param `id` {number}.
+ *
+ * Responses: 200 {"message": "Customer deleted successfully"} | 404 {"error": "Customer not found"}.
  */
 //@ts-ignore
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
@@ -447,7 +522,15 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
 
 
 /**
- * Path: /customer/id/books
+ * GET /customer/:id/books
+ * -------------------------
+ * List the books a customer currently has on loan.
+ *
+ * Auth: required. Path param `id` {number} - customer id.
+ *
+ * Example response (200):
+ *  [{ "id": 12, "name": "The Hobbit", "image_url": "https://...",
+ *     "isbn": "9780261102217", "code": "a1b2c3d4e5" }]
  */
 //@ts-ignore
 router.get('/:id/books', requireAuth, async (req: Request, res: Response) => {
@@ -468,9 +551,17 @@ router.get('/:id/books', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
- * Path: /location/id/add/books
+ * POST /customer/:id/add/books
+ * -------------------------------
+ * Lend a batch of book stocks to a customer (by scanning/typing their stock
+ * codes): sets each stock's `customer_id` to this customer and its
+ * `status` to 2 (booked/loaned).
  *
- * Add books stock codes into a location. Used to movea stack of books between locations
+ * Auth: required. Path param `id` {number} - customer id.
+ * Body: { "books": ["a1b2c3d4e5", "f6g7h8i9j0"] }  // array of book_stocks.code
+ *
+ * Example response (200): the updated list of books on loan to this customer
+ * (same shape as GET /customer/:id/books).
  */
 //@ts-ignore
 router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) => {
@@ -506,9 +597,17 @@ router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) =
 });
 
 /**
- * Path: /location/id/books/bookStockCode
+ * DELETE /customer/:id/book/:bookStockCode
+ * --------------------------------------------
+ * Return a single book a customer had on loan: clears its `customer_id`
+ * and resets its `status` back to 0 (available).
  *
+ * Auth: required. Path params: `id` {number} customer id,
+ * `bookStockCode` {string} - book_stocks.code.
  *
+ * Example request: DELETE /api/rest/customer/7/book/a1b2c3d4e5
+ *
+ * Response: 200 (empty body) on success.
  */
 //@ts-ignore
 router.delete('/:id/book/:bookStockCode', requireAuth, async (req: Request, res: Response) => {
@@ -539,12 +638,7 @@ router.delete('/:id/book/:bookStockCode', requireAuth, async (req: Request, res:
     }
 });
 
-/**
- *
- * @param pool
- * @param customerId
- * @param userId
- */
+/** Fetch the books (with stock code) currently on loan to `customerId`. */
 async function getCustomerBooks(pool: Pool, customerId: number, userId: number) {
     const customerQueryResult = await pool.query(
         `SELECT books.id,

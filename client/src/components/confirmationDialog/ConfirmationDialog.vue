@@ -45,6 +45,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Single app-wide confirmation dialog, mounted once in App.vue. Renders
+ * whatever title/description/action `confirmationDialogController.showDialog()`
+ * was last called with, and resolves/rejects its pending promise on accept/cancel.
+ */
 import {computed, ref, Ref} from 'vue'
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController"
 import {AppLabels} from "@/plugins/i18n/AppLabels";

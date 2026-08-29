@@ -77,6 +77,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Authors management view: a data table of all authors with inline
+ * edit/delete, an empty state when there are none, and the add/edit dialog.
+ */
 import PageComponent from "@/views/PageComponent.vue";
 import {computed, ref, Ref, ShallowRef, shallowRef} from "vue";
 import AuthorDialog from "@/views/authors/AuthorDialog.vue";

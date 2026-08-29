@@ -1,25 +1,27 @@
+/**
+ * Base class for every page-level "*Controller" backing a view (see
+ * `controller/*` folder). Standardizes the load-a-page-of-data lifecycle:
+ * sets `document.title`, fetches data on construction, and tracks
+ * loading/error/data as Vue refs so the view can react to all three.
+ *
+ * Subclasses only need to implement `fetchData()` (call the relevant
+ * `*Service`) and `setData()` (turn the raw response into model instances
+ * stored on the subclass).
+ *
+ * @example
+ * class FooController extends BaseController<IFoo> {
+ *   constructor() { super("Foo"); }
+ *   async fetchData() { return fooService.getData(); }
+ *   setData(data: IFoo | null) { this.m_foo = data ? new Foo(data) : null; }
+ * }
+ */
 import {ref, Ref, shallowRef, ShallowRef} from "vue";
 
 export abstract class BaseController<I> {
 
-    /**
-     *
-     * @private
-     */
     private m_loading: Ref<boolean>;
-
-    /**
-     *
-     * @private
-     */
     private m_error: ShallowRef<any | null>;
-
-    /**
-     *
-     * @private
-     */
     private m_data: ShallowRef<I | null>;
-
     private m_pageName: string;
 
     protected constructor(name: string) {
@@ -33,21 +35,12 @@ export abstract class BaseController<I> {
         this.__fetchData();
     }
 
-    /**
-     *
-     */
+    /** Fetch this page's raw data from the backend. Implemented by each subclass. */
     abstract fetchData(): Promise<I>;
 
-    /**
-     *
-     * @param data
-     * @protected
-     */
+    /** Turn fetched raw data into the subclass's model instance(s)/state. */
     abstract setData(data: I | null): void;
 
-    /**
-     *
-     */
     public isLoading(): boolean {
         return this.m_loading.value;
     }
@@ -56,23 +49,14 @@ export abstract class BaseController<I> {
         return this.m_pageName;
     }
 
-    /**
-     *
-     */
     public hasError(): boolean {
         return this.m_error.value != null;
     }
 
-    /**
-     *
-     */
     public getError(): any | null {
         return this.m_error.value;
     }
 
-    /**
-     *
-     */
     public getData(): I | null {
         return this.m_data.value;
     }
@@ -81,6 +65,7 @@ export abstract class BaseController<I> {
         return this.m_data.value != null
     }
 
+    /** Runs `fetchData()`/`setData()` while managing the loading/error state; called once on construction. */
     protected async __fetchData() {
         try {
             this.m_loading.value = false;

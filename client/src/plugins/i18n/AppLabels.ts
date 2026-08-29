@@ -1,3 +1,9 @@
+/**
+ * Every translatable UI string key, used as the vue-i18n message key
+ * (`$t(AppLabels.ADD_BOOK)`). Actual translated text for each key comes
+ * from the `app_labels` DB table, delivered via `GET /app/policy` and
+ * registered in `i18n.ts` - this enum only defines which keys exist.
+ */
 export enum AppLabels {
     ADD_BOOK = "ADD_BOOK",
     ADD_BOOK_MANUALLY = "ADD_BOOK_MANUALLY",

@@ -129,6 +129,13 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Customers management view: two tabs - an expandable data table of
+ * customers (expanding a row shows their loaned books via
+ * `CustomerBooksTable`) with inline edit/delete, and a groups tab
+ * (`CustomerGroupsTree`). Runs `CustomersController` and
+ * `CustomerGroupsController` side by side since both tabs share one page.
+ */
 import PageComponent from "@/views/PageComponent.vue";
 import {computed, ref, Ref, ShallowRef, shallowRef} from "vue";
 import CustomerDialog from "@/views/customers/components/CustomerDialog.vue";
