@@ -2,53 +2,294 @@
 
 **The easiest way to track, organize, and share all your books.**
 
-PaperBooks is an open-source web application to help you manage all your books — whether at home, school, or work. Keep track of what you’ve read, what you’ve lent, and what’s still waiting on your reading list.
+PaperBooks is an open-source web application for managing physical book collections —
+at home, in a school library, or in a small lending library. It tracks where each book
+lives, who currently has it on loan, and its full catalog metadata (author, category,
+language, format, cover image), and it can look books up automatically by ISBN.
+
+- **Live demo / production URL:** none published yet — self-host it (see below).
+- **License:** [MIT](LICENSE)
+
+---
+
+## Table of contents
+
+- [Features](#features)
+- [Architecture](#architecture)
+  - [Client (frontend)](#client-frontend)
+  - [Server (backend)](#server-backend)
+  - [How they talk to each other](#how-they-talk-to-each-other)
+- [Project structure](#project-structure)
+- [Getting started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [1. Clone the repository](#1-clone-the-repository)
+  - [2. Set up the database](#2-set-up-the-database)
+  - [3. Configure the server](#3-configure-the-server)
+  - [4. Run the server](#4-run-the-server)
+  - [5. Run the client](#5-run-the-client)
+- [Building for production](#building-for-production)
+- [Deploying with PM2](#deploying-with-pm2)
+- [Internationalization](#internationalization)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
+
+---
 
 ## Features
 
-- Add books from anywhere: home, school, work
-- Track books you’ve read
-- Manage books you’ve lent to others
-- Organize and locate your entire collection
-- Simple, clean, and intuitive interface
+- Add books manually or by scanning/typing an ISBN (auto-filled via the Google Books
+  API, falling back to Open Library when no API key is configured)
+- Track individual physical copies ("stock") of a book independently — each copy has
+  its own status: available, booked/on loan, damaged, or not available
+- Record who a book is currently lent to, using a customer/borrower directory
+- Organize books by category, author, language, and format
+- Organize physical copies by shelf/location, so you always know where to find them
+- Print barcode/ISBN labels for shelving and quick re-scanning
+- Full-text search across the catalog
+- A dashboard with collection statistics and charts
+- Multi-language UI (English, Spanish, Catalan, Italian)
+- Built-in `/docs` help pages, rendered from Markdown, in the same languages
+- Cookie/session-based authentication with JWT, password hashing, rate limiting, and
+  secure HTTP headers out of the box
 
-## Tech Stack
+## Architecture
 
-- **Frontend:** Vue 3 + Vuetify 3
-- **Backend:** Node.js v22.17.1
-- **Package Manager:** npm 10.9.2
+PaperBooks is a classic **SPA + REST API** monorepo: a Vue 3 single-page app talks to
+an Express/PostgreSQL backend over a JSON API. In production the backend also serves
+the built frontend, so the whole app runs as a single Node.js process behind one port.
 
-## Installation
+```
+┌─────────────────────────┐        HTTPS / cookies        ┌──────────────────────────┐
+│  client/  (Vue 3 SPA)   │ ─────────────────────────────▶ │  server/ (Express API)  │
+│  Vuetify UI components  │ ◀───────────────────────────── │  JWT auth, business      │
+│  built with Vite        │        JSON over /api/rest     │  logic, PostgreSQL       │
+└─────────────────────────┘                                └────────────┬─────────────┘
+                                                                         │
+                                                                         ▼
+                                                              ┌────────────────────┐
+                                                              │   PostgreSQL DB    │
+                                                              └────────────────────┘
+```
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/AlbertLacasta/paperbooks.git
-   cd paperbooks
-   ```
-2. Install dependencies:
-   ```bash
-   cd client
-   npm install --no-save
-   ```
+### Client (frontend)
 
-  ```bash
-   cd server
-   npm install --no-save
-   ```
-3. Run the development server:
-    ```bash
-   cd client
-   npm run dev
-   ```
-   
-   ```bash
-   cd server
-   npm run dev
-   ```
+Located in [`client/`](client). A Vue 3 + Vuetify 3 single-page application built with
+Vite.
+
+- **`src/views/`** – one folder per feature area (book, authors, categories, customers,
+  locations, dashboard, search, settings, docs, legal). Each contains the page-level
+  Vue components for that feature.
+- **`src/controller/`** – view controllers that hold page state/logic and call
+  services, keeping `.vue` files focused on markup (`BaseController.ts` is the shared
+  base class).
+- **`src/service/`** – one service per resource (book, author, categories, customers,
+  locations, dashboard, search, user). Services wrap the HTTP calls to the backend
+  API (`ApplicationService.ts` is the shared Axios wrapper, configured in
+  `src/plugins/axiosInstance.ts`).
+- **`src/model/`** – TypeScript classes/interfaces mirroring the domain entities
+  (book, author, category, customer, location, format, language, user).
+- **`src/router/`** – Vue Router setup; each feature has its own route file under
+  `src/router/routes/`.
+- **`src/plugins/i18n/`** – Vue I18n configuration and the generated label map used
+  for translations (labels themselves are stored in the database — see
+  [Internationalization](#internationalization)).
+- **`src/components/`** – shared/reusable UI components (dialogs, tables, pickers,
+  the barcode/ISBN scanner, label printing, etc.).
+
+The client is served under the `/app` base path (see `vite.config.ts` and
+`router/Router.ts`) and never talks to the database directly — everything goes
+through the REST API at `/api/rest/*`.
+
+### Server (backend)
+
+Located in [`server/`](server). A Node.js + Express + TypeScript REST API backed by
+PostgreSQL.
+
+- **`src/index.ts`** – process entry point; boots the singleton `AppService`.
+- **`src/AppService.ts`** – the application core. Owns the Express app, the
+  PostgreSQL connection pool (`pg.Pool`), configuration read from environment
+  variables, the logger, and helpers for JWT sessions and password hashing
+  (bcrypt). It also wires up global middleware: `helmet` (secure headers),
+  `express-rate-limit` (brute-force/DoS mitigation), `cors` (restricted to the
+  configured frontend origin), and cookie/body parsing.
+- **`src/routes/`** – one Express router per resource, registered in `Routes.ts`
+  under the `/api/rest` prefix: `AppRoute`, `BooksRoute`, `LocationRoute`,
+  `CustomerRoute`, `AuthorRoute`, `CategoriesRoute`, `UserRoute`, `DashboardRoute`.
+  `AuthRoute` is mounted separately at the root (`/`) and handles login, register,
+  logout, and serving the built SPA in production.
+- **`src/middlewares/AuthMiddleware.ts`** – `requireAuth` guard. Verifies the JWT
+  stored in the `token` cookie, checks the user still exists and isn't disabled,
+  and silently refreshes the cookie when it's close to expiry. In development,
+  setting `ALLOW_DEV_AUTH=true` bypasses login with a fake session — never enable
+  this in production.
+- **`src/types/`** – shared TypeScript interfaces (book/stock shapes, search
+  filters, app error types).
+- **`src/utils/Logger.ts`** – lightweight file logger (`LOGGER_PATH` env var).
+- **`src/assets/`** – static assets shipped with the API: the standalone
+  `login.html`/`register.html` pages, background image, and (in production) the
+  built client bundle served from `assets/app`.
+
+Authentication is stateless JWT-in-an-HTTP-only-cookie: `/login` and `/register`
+issue a signed token containing the user id; `requireAuth` validates it on every
+protected request. Passwords are hashed with bcrypt (12 salt rounds) and never
+stored or logged in plaintext.
+
+### How they talk to each other
+
+- In **development**, Vite runs its own dev server (`npm run dev` in `client/`) and
+  proxies any request to `/api/rest/*` to the API (`http://localhost:<API_PORT>` by
+  default, see `vite.config.ts`). The API runs separately via `npm run dev` in
+  `server/` (nodemon + ts-node).
+- In **production**, the client is built into static files and the Express server
+  serves them directly (see `AuthRoute.ts`, which serves `index.html` for `/app` and
+  `/app/*`, guarded by `requireAuth`) — there is a single process and a single port.
+
+## Project structure
+
+```
+paperbooks/
+├── client/                # Vue 3 + Vuetify frontend (see client/README.md)
+│   └── src/
+│       ├── views/         # Page components, grouped by feature
+│       ├── controller/    # Page controllers (state + logic)
+│       ├── service/       # API clients, one per resource
+│       ├── model/         # Domain TypeScript models
+│       ├── router/        # Vue Router configuration
+│       ├── components/    # Shared UI components
+│       └── plugins/       # i18n, Vuetify, Axios setup
+├── server/                # Express + TypeScript REST API
+│   └── src/
+│       ├── routes/        # One Express router per resource
+│       ├── middlewares/   # requireAuth (JWT) middleware
+│       ├── types/         # Shared TypeScript types
+│       ├── utils/         # Logger, etc.
+│       └── assets/        # Static login/register pages, prod client bundle
+├── assets/
+│   ├── db/                # SQL schema + migrations (databaseSchema.sql, dated patches)
+│   └── pm2/               # Sample PM2 ecosystem config for production
+├── build.sh               # Builds client + server into ./dist and zips it
+└── LICENSE
+```
+
+## Getting started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) 22.x and npm 10.x (used to develop this project;
+  other recent LTS versions likely work but aren't tested)
+- [PostgreSQL](https://www.postgresql.org/) 13+ (any recent version should do)
+- A [Google Books API key](https://developers.google.com/books) (optional — the
+  server falls back to the free [Open Library API](https://openlibrary.org/developers/api)
+  if `GOOGLE_BOOKS_API_KEY` isn't set)
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/AlbertLacasta/paperbooks.git
+cd paperbooks
+```
+
+### 2. Set up the database
+
+Create a PostgreSQL database and load the schema, then apply the dated patch files
+in `assets/db/` in filename order (they are incremental migrations on top of the
+base schema):
+
+```bash
+createdb paperbooks
+psql -d paperbooks -f assets/db/databaseSchema.sql
+psql -d paperbooks -f assets/db/082626-1.sql
+psql -d paperbooks -f assets/db/082926-1.sql
+psql -d paperbooks -f assets/db/082926-2.sql
+```
+
+> There is no admin UI for the very first user — after loading the schema, either
+> insert a row into `users` directly, or start the server with `ALLOW_DEV_AUTH=true`
+> and use the `/register` page, then turn `ALLOW_DEV_AUTH` back off.
+
+### 3. Configure the server
+
+Create `server/.env` (this file is git-ignored) with:
+
+```dotenv
+API_PORT=3000
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=paperbooks
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+GOOGLE_BOOKS_API_KEY=            # optional, see Prerequisites
+LOGGER_PATH=./logs.log
+FRONT_END_URL=http://localhost:5173
+JWT_SECRET=replace_with_a_long_random_string
+SESSION_TIME=3600000             # milliseconds
+ALLOW_DEV_AUTH=false             # NEVER true in production
+```
+
+Generate a strong `JWT_SECRET`, for example: `openssl rand -hex 32`.
+
+### 4. Run the server
+
+```bash
+cd server
+npm install
+npm run dev      # starts the API with nodemon on API_PORT
+```
+
+### 5. Run the client
+
+```bash
+cd client
+npm install
+npm run dev       # starts Vite; proxies /api/rest to the server
+```
+
+Open the URL Vite prints (typically `http://localhost:5173/app`) in your browser.
+
+## Building for production
+
+From the repository root:
+
+```bash
+./build.sh
+```
+
+This installs dependencies, builds the client (Vite) and server (`tsc`), assembles
+everything under `./dist` (`dist/client`, `dist/server`), copies server assets, and
+produces a deployable `dist.zip`. The server serves the built client itself, so a
+single Node.js process is all you need to run in production.
+
+## Deploying with PM2
+
+A sample [PM2](https://pm2.keymetrics.io/) config is provided at
+`assets/pm2/ecosystem.config.js.sample`. Copy it, fill in your production values
+(database credentials, `JWT_SECRET`, `FRONT_END_URL`, etc.), and run:
+
+```bash
+cp assets/pm2/ecosystem.config.js.sample ecosystem.config.js
+# edit ecosystem.config.js with your production values
+pm2 start ecosystem.config.js --env production
+```
+
+## Internationalization
+
+The UI currently ships in English, Spanish, Catalan, and Italian. Labels are stored
+in the database (`app_languages` / `app_labels` tables in `databaseSchema.sql`) and
+loaded into the client's Vue I18n instance — this keeps translations editable
+without a redeploy. The `/docs` help pages are Markdown files rendered per-language
+in the client. See [Contributing](#contributing) for how to add a new language.
 
 ## Contributing
 
-PaperBooks is **open-source** and welcomes contributions! If you have ideas to improve the project, fix bugs, or add new features, feel free to open an issue or submit a pull request.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for how to
+set up your environment, coding conventions, and how to submit a pull request. All
+participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+Please **do not** open a public issue for security vulnerabilities. See
+[SECURITY.md](SECURITY.md) for how to report them responsibly.
 
 ## License
 
@@ -56,5 +297,5 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Topics
 
-books reading organization tracking lending library collection management open-source inventory personal-library cataloging
-
+books reading organization tracking lending library collection management
+open-source inventory personal-library cataloging
