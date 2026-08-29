@@ -720,9 +720,9 @@ async function fetchOpenLibraryCover(isbn: string): Promise<string | null> {
             timeout: 3000,
         });
 
-        const contentType = res.headers['content-type'];
+        const contentType = String(res.headers['content-type'] ?? '');
 
-        if (res.status === 200 && contentType?.startsWith('image/')) {
+        if (res.status === 200 && contentType.startsWith('image/')) {
             return url;
         }
 
