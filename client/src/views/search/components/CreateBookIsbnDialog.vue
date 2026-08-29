@@ -82,12 +82,35 @@
 								color="primary"
 							></v-progress-circular>
 
-							<v-icon
-								v-else-if="errorIsbnCode.includes(item)"
-								color="error"
+							<v-tooltip
+								v-else-if="notFoundIsbnCode.includes(item)"
+								:text="t(AppLabels.ISBN_BOOK_NOT_FOUND)"
+								location="top"
 							>
-								mdi-alert-circle
-							</v-icon>
+								<template v-slot:activator="{ props: tooltipProps }">
+									<v-icon
+										v-bind="tooltipProps"
+										color="warning"
+									>
+										mdi-book-alert
+									</v-icon>
+								</template>
+							</v-tooltip>
+
+							<v-tooltip
+								v-else-if="errorIsbnCode.includes(item)"
+								:text="t(AppLabels.ISBN_ADD_ERROR)"
+								location="top"
+							>
+								<template v-slot:activator="{ props: tooltipProps }">
+									<v-icon
+										v-bind="tooltipProps"
+										color="error"
+									>
+										mdi-alert-circle
+									</v-icon>
+								</template>
+							</v-tooltip>
 
 							<v-icon
 								v-else-if="createdBooks.includes(item)"
@@ -112,7 +135,7 @@
 					{{t(AppLabels.CANCEL)}}
 				</v-btn>
 				<v-btn
-					v-if="errorIsbnCode.length != 0 && createdBooks.length != 0"
+					v-if="(errorIsbnCode.length != 0 || notFoundIsbnCode.length != 0) && createdBooks.length != 0"
 					color="primary"
 					variant="elevated"
 					class="text-none mr-4"
@@ -185,6 +208,11 @@ const loadingIsbnCode: Ref<string[]> = ref([]);
  *
  */
 const errorIsbnCode: Ref<string[]> = ref([]);
+
+/**
+ *
+ */
+const notFoundIsbnCode: Ref<string[]> = ref([]);
 
 /**
  *
@@ -269,6 +297,7 @@ function delay(ms: number) {
 
 async function addBooks() {
 	errorIsbnCode.value = [];
+	notFoundIsbnCode.value = [];
 	loadingIsbnCode.value = [];
 	loading.value = true;
 
@@ -285,19 +314,12 @@ async function addBooks() {
 				router.push(bookRoute.getPath(id));
 			}
 		} catch (error:any) {
+			console.error("Failed to add book for ISBN", code, error)
 
-			const response = error.response;
-			console.log("error", error)
-			console.log("response", response)
-			if(response) {
-				const errorCode = response.status;
-				console.log("errorCode", errorCode)
-				if (errorCode && errorCode === AppError.BOOK_NOT_FOUND) {
-					console.log("inside")
-					errorIsbnCode.value.push(code);
-				}
+			if (error.response?.status === AppError.BOOK_NOT_FOUND) {
+				notFoundIsbnCode.value.push(code);
 			} else {
-				console.error(error)
+				errorIsbnCode.value.push(code);
 			}
 		} finally {
 			const index = loadingIsbnCode.value.indexOf(code);
@@ -310,7 +332,7 @@ async function addBooks() {
 
 	loading.value = false;
 
-	if (errorIsbnCode.value.length === 0 && createdBooks.value.length == totalBooks) {
+	if (errorIsbnCode.value.length === 0 && notFoundIsbnCode.value.length === 0 && createdBooks.value.length == totalBooks) {
 		dialog.value = false;
 	}
 }
@@ -323,6 +345,7 @@ watch(() => dialog.value, () => {
 		isbnCodeList.value = [];
 		createdBooks.value = [];
 		errorIsbnCode.value = [];
+		notFoundIsbnCode.value = [];
 		loadingIsbnCode.value = [];
 	}
 })

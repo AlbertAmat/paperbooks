@@ -505,6 +505,11 @@ router.post(
                 imageLinks,
             } = bookData;
 
+            // books.name is NOT NULL - without a title there's nothing to insert.
+            if (!name) {
+                return res.status(404).send('Book not found');
+            }
+
             const formattedPublishedDate = formatPublishedDate(publishedDate);
 
             /**
@@ -518,8 +523,8 @@ router.post(
                 imageUrl = await fetchOpenLibraryCover(isbnCode);
             }
 
-            const categoryName = categories?.[0] ?? null;
-            const languageCode = language ?? 'unknown';
+            const categoryName = truncate(categories?.[0] ?? null, 100);
+            const languageCode = normalizeLanguageCode(language);
 
             /**
              * =========================
@@ -552,12 +557,12 @@ router.post(
                 let bookId = await __getOrCreateBook(
                     client,
                     {
-                        name,
+                        name: truncate(name, 255),
                         description,
                         imageUrl,
                         isbnCode,
                         categoryId,
-                        publisher,
+                        publisher: truncate(publisher, 100),
                         formattedPublishedDate,
                         languageCode,
                         pages,
@@ -569,7 +574,12 @@ router.post(
                  * AUTHORS
                  */
                 if (authors?.length) {
-                    await __ensureAuthors(client, bookId, authors, userId);
+                    await __ensureAuthors(
+                        client,
+                        bookId,
+                        authors.map((author: string) => truncate(author, 100)),
+                        userId
+                    );
                 }
 
                 /**
@@ -672,26 +682,22 @@ async function __fetchOpenLibraryMetadata(isbn: string): Promise<any> {
             { timeout: 9000 }
         );
 
-        console.log("OL data: ", {
-            title: data.title,
-            authors: data.authors?.map((a: any) => a.name) ?? [],
-            description: data.description?.value ?? data.description,
-            categories: data.subjects ?? [],
-            publisher: data.publishers?.[0],
-            publishedDate: data.publish_date,
-            pageCount: data.number_of_pages,
-            language: data.languages?.[0]?.key?.replace('/languages/', ''),
-            imageLinks: null,
-        })
+        // The search endpoint returns matches under `docs`, not on the top-level object.
+        const doc = data?.docs?.[0];
+
+        if (!doc) {
+            return null;
+        }
+
         return {
-            title: data.title,
-            authors: data.authors?.map((a: any) => a.name) ?? [],
-            description: data.description?.value ?? data.description,
-            categories: data.subjects ?? [],
-            publisher: data.publishers?.[0],
-            publishedDate: data.publish_date,
-            pageCount: data.number_of_pages,
-            language: data.languages?.[0]?.key?.replace('/languages/', '').substring(0, 2),
+            title: doc.title,
+            authors: doc.author_name ?? [],
+            description: undefined,
+            categories: doc.subject ?? [],
+            publisher: doc.publisher?.[0],
+            publishedDate: doc.first_publish_year ? String(doc.first_publish_year) : undefined,
+            pageCount: doc.number_of_pages_median,
+            language: doc.language?.[0],
             imageLinks: null,
         };
     } catch (error) {
@@ -731,7 +737,29 @@ async function fetchOpenLibraryCover(isbn: string): Promise<string | null> {
  * DB HELPERS
  * =========================================================
  */
-async function ensureLanguage(client: any, code: string) {
+/**
+ * Truncates a string to fit a VARCHAR(maxLen) column instead of letting
+ * Postgres reject the whole insert with "value too long for type character varying".
+ */
+function truncate(value: string | null | undefined, maxLen: number): string | null {
+    if (value === null || value === undefined) return null;
+    return value.length > maxLen ? value.substring(0, maxLen) : value;
+}
+
+/**
+ * languages.code / books.language_code are CHAR(2) and optional, so any value
+ * that isn't a clean 2-letter code (missing, "unknown", ISO 639-2 3-letter
+ * codes, etc.) is dropped instead of overflowing the column.
+ */
+function normalizeLanguageCode(language: string | null | undefined): string | null {
+    if (!language) return null;
+    const code = language.trim().toLowerCase();
+    return /^[a-z]{2}$/.test(code) ? code : null;
+}
+
+async function ensureLanguage(client: any, code: string | null) {
+    if (!code) return;
+
     const result = await client.query(
         'SELECT code FROM languages WHERE code = $1',
         [code]

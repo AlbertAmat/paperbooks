@@ -9,6 +9,7 @@ import {settingsRoute} from "@/router/routes/SettingsRoute";
 import {customersRoute} from "@/router/routes/CustomersRoute";
 import {authorsRoute} from "@/router/routes/AuthorsRoute";
 import {docsRoute} from "@/router/routes/DocsRoute";
+import {legalRoute} from "@/router/routes/LegalRoute";
 
 // Define your routes
 const routes: Array<RouteRecordRaw> = [
@@ -25,6 +26,7 @@ const routes: Array<RouteRecordRaw> = [
     authorsRoute.getRoute(),
     settingsRoute.getRoute(),
     docsRoute.getRoute(),
+    legalRoute.getRoute(),
 
     // Not found
     notFoundRoute.getRoute(),

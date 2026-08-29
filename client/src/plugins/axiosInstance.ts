@@ -32,6 +32,12 @@ axiosInstance.interceptors.response.use(
             }
         }
 
+        // Callers that render their own per-item error UI (e.g. batch ISBN import)
+        // can opt out of the generic dialog via `suppressErrorDialog` request config.
+        if (error.config?.suppressErrorDialog) {
+            return Promise.reject(error);
+        }
+
         // This will catch:
         // - Network errors (no response)
         // - Timeout errors

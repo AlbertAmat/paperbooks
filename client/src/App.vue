@@ -39,7 +39,13 @@
 				<confirmation-dialog/>
 				<app-snackbar/>
 				<error-dialog/>
+				<cookie-consent-dialog/>
 			</v-main>
+
+			<!-- ================================================== -->
+			<!-- APP FOOTER											-->
+			<!-- ================================================== -->
+			<app-footer/>
 		</template>
 	</v-app>
 </template>
@@ -52,6 +58,8 @@ import {applicationService} from "@/service/ApplicationService";
 import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog.vue";
 import AppSnackbar from "@/components/appSnackbar/AppSnackbar.vue";
 import ErrorDialog from "@/components/errorDialog/ErrorDialog.vue";
+import AppFooter from "@/components/app/AppFooter.vue";
+import CookieConsentDialog from "@/components/cookieConsent/CookieConsentDialog.vue";
 
 onMounted(() => {
 	applicationService.fetchPolicy();
