@@ -203,10 +203,68 @@ there's nothing in the template that does this for you.
 3. Click **Apply**. Unraid pulls the image and starts the container; the "WebUI"
    link on its Docker tab entry opens straight to the login page.
 
-4. Want this reachable outside your LAN? Put your own reverse proxy or Cloudflare
-   Tunnel container in front of it exactly as in [scenario B](#b-production-with-your-own-reverse-proxy--dns)
-   or [C](#c-production-with-cloudflare-tunnel) — just remember to flip `TRUST_PROXY`
-   to `true` in the container's settings afterwards.
+By default this is only reachable on your LAN at `TOWER-IP:3000` — most Unraid users
+stop here. The rest of this section is for the minority who want it reachable from
+the internet, and covers the part that matters most once you do that: not letting a
+compromise of this one app become a compromise of everything else you self-host on
+the same box.
+
+### Making it reachable from the internet
+
+Same two choices as scenarios B and C, just running as ordinary Unraid containers
+instead of Compose services:
+
+- **Your own reverse proxy**: the [SWAG](https://docs.linuxserver.io/general/swag/)
+  or **Nginx Proxy Manager** Community Applications templates both work — point them
+  at `http://<TOWER-IP>:3000` (or the container's name/IP if it's on the custom
+  network from below) the same way you would in [scenario B](#b-production-with-your-own-reverse-proxy--dns).
+- **Cloudflare Tunnel**: the official `cloudflare/cloudflared` image runs as an
+  Unraid container the same way — same setup as [scenario C](#c-production-with-cloudflare-tunnel),
+  with the tunnel's public hostname pointing at the PaperBooks container.
+
+Either way, once traffic reaches it through a proxy/tunnel, flip `TRUST_PROXY` to
+`true` in the PaperBooks container's settings — otherwise its rate limiter can't
+tell your visitors apart from the proxy.
+
+### Keeping it from becoming a way into your other containers
+
+A typical Unraid box runs many unrelated containers, often all on the same network —
+either the default `bridge` (where, by default, every container on it can reach every
+other container's internal ports directly, regardless of what's published to the
+host) or `br0`/macvlan (where each container gets its own real LAN IP, making it just
+another device on your network as far as anything else on the LAN is concerned). The
+moment one of those containers is reachable from the internet, it's the one most
+likely to get compromised — and either networking mode above hands an attacker inside
+it a free path to everything else you're running, published ports or not.
+
+To contain that:
+
+1. **Give this app its own custom Docker network**, separate from whatever your other
+   containers use:
+   ```
+   docker network create paperbooks-net
+   ```
+   (Unraid persists custom networks created this way; some versions also expose an
+   "Add a Custom Network" option under the Docker tab's settings.) Set **Network
+   Type** to this custom network — not `bridge`, not `br0` — for the PaperBooks
+   container, its reverse proxy/tunnel container, and, ideally, a Postgres container
+   dedicated to it.
+2. **Don't use `br0`/macvlan for anything internet-facing.** It puts the container
+   directly on your LAN with its own IP, which means a compromise is no longer
+   contained by Docker at all — the attacker is now positioned like any other device
+   on your network.
+3. **Never use `Host` networking for it.** That removes container network isolation
+   entirely.
+4. **Use a Postgres dedicated to this app, not one shared with unrelated services**,
+   if you're exposing it publicly. A custom network only isolates PaperBooks from
+   containers that *aren't* on it — a database that's also reachable from your other
+   apps' network becomes the bridge between the two, undoing the isolation from
+   point 1.
+
+The result: PaperBooks and only what it needs (its proxy/tunnel, its own database)
+share a network that nothing else you self-host is on — so if it's ever compromised,
+the attacker's reach stops there instead of extending to every other service on the
+box.
 
 ---
 
@@ -234,9 +292,12 @@ there's nothing in the template that does this for you.
 - [ ] `ALLOW_DEV_AUTH=false`
 - [ ] `JWT_SECRET` generated with `openssl rand -hex 32`, not left blank or default
 - [ ] `DB_PASSWORD` is a real generated password
-- [ ] `TRUST_PROXY=true` for scenarios B/C, `false` for scenario A
+- [ ] `TRUST_PROXY=true` for scenarios B/C/D-public, `false` for A and LAN-only D
 - [ ] `APP_TAG` pinned to a version, not tracking `latest` unattended
 - [ ] Scenario A: port not forwarded on your router
 - [ ] Scenario B: app port bound to `127.0.0.1`, only 80/443 open on the firewall
 - [ ] Scenario C: `TRUST_PROXY=true` is set (easy to forget since Cloudflare "just
       works" even without it — but rate limiting silently degrades without it)
+- [ ] Scenario D, if exposed publicly: PaperBooks (+ its proxy/tunnel + its own
+      Postgres) on a dedicated custom Docker network, not `bridge` or `br0`/macvlan,
+      and not sharing that network or its database with unrelated containers
