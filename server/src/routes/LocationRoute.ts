@@ -149,7 +149,7 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
     const userId = appService.getSessionUser(req);
 
     try {
-        console.log(`Adding location with name ${name}`);
+        appService.getLogger().debug(`Adding location with name ${name}`);
         const insertLocation = await client.query(
             "INSERT INTO locations (name, description, user_id) VALUES ($1, $2, $3) RETURNING id",
             [name, description, userId]
@@ -203,7 +203,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
 
     try {
-        console.log(`Updating location ${locationId}`);
+        appService.getLogger().debug(`Updating location ${locationId}`);
 
         const queryResult = await pool.query(
             'UPDATE locations SET name = $1, description = $2 WHERE id = $3 AND user_id = $4',

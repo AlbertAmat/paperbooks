@@ -40,6 +40,7 @@
 				<app-snackbar/>
 				<error-dialog/>
 				<cookie-consent-dialog/>
+				<security-notice-dialog/>
 			</v-main>
 
 			<!-- ================================================== -->
@@ -66,6 +67,7 @@ import AppSnackbar from "@/components/appSnackbar/AppSnackbar.vue";
 import ErrorDialog from "@/components/errorDialog/ErrorDialog.vue";
 import AppFooter from "@/components/app/AppFooter.vue";
 import CookieConsentDialog from "@/components/cookieConsent/CookieConsentDialog.vue";
+import SecurityNoticeDialog from "@/components/securityNotice/SecurityNoticeDialog.vue";
 
 onMounted(() => {
 	applicationService.fetchPolicy();

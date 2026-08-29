@@ -23,7 +23,6 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
     // only development
     if (appService.allowDevAuth()) {
-        console.log("Serving DEVELOPMENT token")
         appService.getLogger().info("Serving DEVELOPMENT token")
 
         // Look up the real current token_version for the fake user so the
@@ -50,7 +49,6 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
             issuer: "paperbooks.xyz"
         }) as { user_id: number; token_version: number; exp: number };
     } catch (err: any) {
-        console.log("Error decoding JWT", err)
         appService.getLogger().error(err.toString());
         return res.status(401).json({message: "Unauthorized"});
     }

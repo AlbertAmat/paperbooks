@@ -61,7 +61,7 @@ router.post('/search', requireAuth, async (req: Request, res: Response) => {
     const userId = appService.getSessionUser(req);
 
     try {
-        console.log(`search authors with query ${query}`);
+        appService.getLogger().debug(`search authors with query ${query}`);
         // fetch new data
         const result = await pool.query(`
             SELECT authors.id,
@@ -98,7 +98,7 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
     const userId = appService.getSessionUser(req);
 
     try {
-        console.log(`Adding author with name ${name}`);
+        appService.getLogger().debug(`Adding author with name ${name}`);
         const insertAuthor = await client.query(
             "INSERT INTO authors (name, user_id) VALUES ($1, $2) RETURNING id",
             [name, userId]
@@ -147,7 +147,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
 
     try {
-        console.log(`Updating author ${authorId}`);
+        appService.getLogger().debug(`Updating author ${authorId}`);
 
         const queryResult = await pool.query(
             'UPDATE authors SET name = $1 WHERE id = $2 AND user_id = $3',
@@ -188,7 +188,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 //@ts-ignore
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    console.log("Delete author, id:", id);
+    appService.getLogger().debug(`Delete author, id: ${id}`);
 
     // Database connection
     const pool = appService.getDatabasePool();

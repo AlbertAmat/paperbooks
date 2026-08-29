@@ -63,6 +63,14 @@ export default class User {
     private readonly m_isPublicInstitution: boolean;
 
     /**
+     * Whether this account has acknowledged the security-measures notice
+     * (see SecurityNoticeDialog.vue). Stored as a reactive value so the
+     * dialog hides itself immediately after `acceptSecurityNotice()`.
+     * @private
+     */
+    private m_securityNoticeAccepted: Ref<boolean>;
+
+    /**
      * Initializes a User instance with data from the backend.
      * @param data - IUser object containing initial user information.
      */
@@ -74,6 +82,7 @@ export default class User {
         this.m_region = ref(data.region);
         this.m_image = ref(data.image);
         this.m_isPublicInstitution = data.isPublicInstitution;
+        this.m_securityNoticeAccepted = ref(data.securityNoticeAccepted);
     }
 
     /**
@@ -132,6 +141,28 @@ export default class User {
      */
     public isPublicInstitution(): boolean {
         return this.m_isPublicInstitution;
+    }
+
+    /**
+     * Returns true once this account has acknowledged the security-measures
+     * notice. Meaningless for accounts where `isPublicInstitution()` is
+     * false - see SecurityNoticeDialog.vue for how the two are combined.
+     */
+    public hasAcceptedSecurityNotice(): boolean {
+        return this.m_securityNoticeAccepted.value;
+    }
+
+    /**
+     * Acknowledges the security-measures notice, persisting it server-side
+     * so the dialog doesn't show again for this user.
+     */
+    public async acceptSecurityNotice() {
+        try {
+            await userService.acceptSecurityNotice();
+            this.m_securityNoticeAccepted.value = true;
+        } catch (e) {
+            console.error("Error while accepting security notice: ", e);
+        }
     }
 
     /**

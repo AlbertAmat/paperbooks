@@ -267,4 +267,36 @@ router.post("/password", requireAuth, passwordChangeLimiter, async (req: Request
     }
 });
 
+/**
+ * POST /user/security-notice/accept
+ * ------------------------------------
+ * Acknowledge the security-measures notice shown after login to accounts
+ * flagged as a public institution (see SecurityNoticeDialog.vue and
+ * GET /app/policy, which reports whether it's still pending as
+ * `user.securityNoticeAccepted`).
+ *
+ * Auth: required. Idempotent - accepting more than once just refreshes the
+ * acceptance timestamp.
+ *
+ * Response (200): {"message": "Security notice accepted"}.
+ */
+router.post("/security-notice/accept", requireAuth, async (req: Request, res: Response) => {
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        await pool.query(
+            `INSERT INTO user_security_notice_acknowledgements (user_id, accepted_date)
+             VALUES ($1, CURRENT_TIMESTAMP)
+             ON CONFLICT (user_id) DO UPDATE SET accepted_date = CURRENT_TIMESTAMP`,
+            [userId]
+        );
+
+        res.status(200).json({message: "Security notice accepted"});
+    } catch (err: any) {
+        console.error("Error executing query", err.stack);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 export default router;

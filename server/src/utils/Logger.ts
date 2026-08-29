@@ -58,4 +58,18 @@ export class Logger {
     error(message: string): void {
         this.writeLog("error", message);
     }
+
+    /**
+     * Log a verbose diagnostic message - request traces, raw SQL text,
+     * record names/ids - that may include personal data (borrower/author/
+     * customer names, usernames) and should never ship to production logs
+     * by default. Only written when `DEBUG_LOGGING=true`; a silent no-op
+     * otherwise, so call sites don't need to guard themselves.
+     */
+    debug(message: string): void {
+        if (process.env.DEBUG_LOGGING !== "true") {
+            return;
+        }
+        this.writeLog("debug", message);
+    }
 }

@@ -785,6 +785,21 @@ CREATE TABLE tags
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
+-- Tracks the public-institution security-measures notice shown after login
+-- (see SecurityNoticeDialog.vue / GET /app/policy / POST /user/security-notice/accept).
+-- One row per user: sent_date is set the first time the notice is served to
+-- them, accepted_date once they acknowledge it. Only meaningful for accounts
+-- with users.is_public_institution = TRUE, but not restricted to them at the
+-- schema level in case that flag is set after the fact.
+CREATE TABLE user_security_notice_acknowledgements
+(
+    id            SERIAL PRIMARY KEY,
+    user_id       INT       NOT NULL UNIQUE,
+    sent_date     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    accepted_date TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
 
 -- groups
 CREATE TABLE customer_groups

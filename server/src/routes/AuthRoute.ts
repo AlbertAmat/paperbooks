@@ -55,7 +55,7 @@ router.use("/app/assets", requireAuth, express.static(path.join(clientDistPath, 
 router.get('/app', requireAuth, async (req: Request, res: Response) => {
     const appPath = path.join(clientDistPath, "index.html");
 
-    console.log("serving /app index:", appPath)
+    appService.getLogger().debug(`serving /app index: ${appPath}`);
     res.sendFile(appPath);
 })
 
@@ -68,7 +68,7 @@ router.get('/app', requireAuth, async (req: Request, res: Response) => {
 router.get('/app/*', requireAuth, async (req: Request, res: Response) => {
     const appPath = path.join(clientDistPath, "index.html");
 
-    console.log("serving /app/* index:", appPath)
+    appService.getLogger().debug(`serving /app/* index: ${appPath}`);
     res.sendFile(appPath);
 })
 
@@ -85,10 +85,10 @@ router.get("/", (req: Request, res: Response) => {
 
     //@ts-ignore
     if (req.cookies.token) {
-        console.log("User already logged in, redirecting to /app...");
+        appService.getLogger().debug("User already logged in, redirecting to /app...");
         return res.redirect("/app"); // Redirect to /app if user is logged in
     } else {
-        console.log("User not logged in, redirecting to /login...");
+        appService.getLogger().debug("User not logged in, redirecting to /login...");
         return res.redirect("/login"); // Redirect to login page if user is not logged in
     }
 });
@@ -130,7 +130,7 @@ router.use("/background.png", (req: Request, res: Response) => {
  */
 //@ts-ignore
 router.post("/login", authLimiter,  async (req: Request, res: Response) => {
-    console.log("Handle login authentication")
+    appService.getLogger().debug("Handle login authentication");
     const {username, password} = req.body;
     if (!username || !password) {
         return res.status(400).json({message: "Missing username or password"});
@@ -142,7 +142,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
         const userResult = await pool.query(userQuery, [username, username]);
 
         if (userResult.rows.length === 0) {
-            console.log("No user found for:" + username);
+            appService.getLogger().debug("No user found for:" + username);
             return res.status(401).json({message: "Invalid username or password."});
         }
 
@@ -150,11 +150,11 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
 
         const comparePassword = await appService.comparePassword(password, user.password);
         if (!comparePassword) {
-            console.log("invalid password for user:" + username);
+            appService.getLogger().debug("invalid password for user:" + username);
             return res.status(401).json({message: "Invalid username or password."});
         }
 
-        console.log("Updating last login date for user:" + username);
+        appService.getLogger().debug("Updating last login date for user:" + username);
         // Update the last login date
         const updateLoginQuery = `
             UPDATE users
@@ -163,7 +163,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
         `;
         await pool.query(updateLoginQuery, [user.id]);
 
-        console.log("Setting session and cookie for user:" + username);
+        appService.getLogger().debug("Setting session and cookie for user:" + username);
 
         const userToken = appService.createSessionToken(user.id, user.token_version);
 
@@ -175,7 +175,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
             maxAge: appService.getSessionTime()
         });
 
-        console.log("Redirecting to /app for user:" + username);
+        appService.getLogger().debug("Redirecting to /app for user:" + username);
 
         res.json({success: true, message: "Login successful", redirectUrl: "/app"});
     } catch (error) {
@@ -217,8 +217,9 @@ router.get("/register", (req: Request, res: Response) => {
  * Example response (201):
  *  { "success": true, "message": "Register successful", "redirectUrl": "/login" }
  *
- * Responses: 400 missing/invalid fields or weak password |
- *            409 {"message": "Email or username already exists."} | 500 server error.
+ * Responses: 400 missing/invalid fields, weak password, or a duplicate
+ *            email/username (deliberately generic - see CWE-203 note below) |
+ *            500 server error.
  */
 router.post("/register", authLimiter, async (req: Request, res: Response) => {
     const { userName, email, name, password } = req.body;
@@ -261,9 +262,11 @@ router.post("/register", authLimiter, async (req: Request, res: Response) => {
         });
 
     } catch (error: any) {
-        // Handle unique constraint violation
+        // Handle unique constraint violation with a generic message - confirming
+        // that a specific email/username is already registered would let an
+        // attacker enumerate existing accounts (CWE-203).
         if (error.code === "23505") { // PostgreSQL unique violation
-            return res.status(409).json({ message: "Email or username already exists." });
+            return res.status(400).json({ message: "Unable to register with the provided information." });
         }
 
         console.error("Register error:", error);
@@ -280,7 +283,7 @@ router.post("/register", authLimiter, async (req: Request, res: Response) => {
  * AuthMiddleware.ts for the mechanism that revokes tokens instead.
  */
 router.get("/logout", (req: Request, res: Response) => {
-    console.log("Logout user")
+    appService.getLogger().debug("Logout user");
     res.clearCookie("token");
     return res.redirect("/login"); // Redirect to login;
 });

@@ -23,6 +23,11 @@ import {cookiePolicyEs} from "./content/es/cookie-policy";
 import {cookiePolicyCa} from "./content/ca/cookie-policy";
 import {cookiePolicyIt} from "./content/it/cookie-policy";
 
+import {securityMeasuresEn} from "./content/en/security-measures";
+import {securityMeasuresEs} from "./content/es/security-measures";
+import {securityMeasuresCa} from "./content/ca/security-measures";
+import {securityMeasuresIt} from "./content/it/security-measures";
+
 export type LegalLocale = "en" | "es" | "ca" | "it";
 
 export const DEFAULT_LEGAL_LOCALE: LegalLocale = "en";
@@ -47,6 +52,10 @@ export const legalUiLabels: Record<LegalLocale, {
     cookieConsentMessage: string;
     cookieConsentAccept: string;
     cookieConsentLearnMore: string;
+    securityNoticeTitle: string;
+    securityNoticeIntro: string;
+    securityNoticeAccept: string;
+    securityNoticeLearnMore: string;
 }> = {
     en: {
         pageTitle: "Legal",
@@ -59,6 +68,10 @@ export const legalUiLabels: Record<LegalLocale, {
         cookieConsentMessage: "This app only uses a strictly necessary cookie to keep you logged in. No analytics or tracking cookies are used.",
         cookieConsentAccept: "Got it",
         cookieConsentLearnMore: "Cookie Policy",
+        securityNoticeTitle: "Security measures notice",
+        securityNoticeIntro: "This account is registered as a public institution. Before continuing, please review this summary of the security measures built into Paper Book - useful evidence for your own risk assessment.",
+        securityNoticeAccept: "I acknowledge this notice",
+        securityNoticeLearnMore: "Open full document",
     },
     es: {
         pageTitle: "Legal",
@@ -71,6 +84,10 @@ export const legalUiLabels: Record<LegalLocale, {
         cookieConsentMessage: "Esta aplicación solo utiliza una cookie estrictamente necesaria para mantener tu sesión iniciada. No se usan cookies de análisis ni de seguimiento.",
         cookieConsentAccept: "Entendido",
         cookieConsentLearnMore: "Política de Cookies",
+        securityNoticeTitle: "Aviso de medidas de seguridad",
+        securityNoticeIntro: "Esta cuenta está registrada como institución pública. Antes de continuar, revisa este resumen de las medidas de seguridad integradas en Paper Book: puede servirte como evidencia para tu propia evaluación de riesgos.",
+        securityNoticeAccept: "He leído este aviso",
+        securityNoticeLearnMore: "Abrir documento completo",
     },
     ca: {
         pageTitle: "Legal",
@@ -83,6 +100,10 @@ export const legalUiLabels: Record<LegalLocale, {
         cookieConsentMessage: "Aquesta aplicació només utilitza una cookie estrictament necessària per mantenir la teva sessió iniciada. No s'utilitzen cookies d'anàlisi ni de seguiment.",
         cookieConsentAccept: "Entès",
         cookieConsentLearnMore: "Política de Cookies",
+        securityNoticeTitle: "Avís de mesures de seguretat",
+        securityNoticeIntro: "Aquest compte està registrat com a institució pública. Abans de continuar, revisa aquest resum de les mesures de seguretat integrades a Paper Book: et pot servir com a evidència per a la teva pròpia avaluació de riscos.",
+        securityNoticeAccept: "He llegit aquest avís",
+        securityNoticeLearnMore: "Obre el document complet",
     },
     it: {
         pageTitle: "Legale",
@@ -95,6 +116,10 @@ export const legalUiLabels: Record<LegalLocale, {
         cookieConsentMessage: "Questa app utilizza solo un cookie strettamente necessario per mantenere la tua sessione attiva. Non vengono utilizzati cookie di analisi o di tracciamento.",
         cookieConsentAccept: "Ho capito",
         cookieConsentLearnMore: "Cookie Policy",
+        securityNoticeTitle: "Avviso sulle misure di sicurezza",
+        securityNoticeIntro: "Questo account è registrato come istituzione pubblica. Prima di continuare, leggi questo riepilogo delle misure di sicurezza integrate in Paper Book: può servirti come prova per la tua valutazione dei rischi.",
+        securityNoticeAccept: "Ho letto questo avviso",
+        securityNoticeLearnMore: "Apri il documento completo",
     },
 };
 
@@ -138,6 +163,16 @@ const legalDocDefinitions: LegalDocDefinition[] = [
             es: {title: "Política de Cookies", blocks: cookiePolicyEs},
             ca: {title: "Política de Cookies", blocks: cookiePolicyCa},
             it: {title: "Cookie Policy", blocks: cookiePolicyIt},
+        },
+    },
+    {
+        id: "security-measures",
+        icon: "mdi-shield-check-outline",
+        translations: {
+            en: {title: "Security Measures", blocks: securityMeasuresEn},
+            es: {title: "Medidas de Seguridad", blocks: securityMeasuresEs},
+            ca: {title: "Mesures de Seguretat", blocks: securityMeasuresCa},
+            it: {title: "Misure di Sicurezza", blocks: securityMeasuresIt},
         },
     },
 ];

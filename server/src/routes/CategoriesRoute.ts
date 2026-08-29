@@ -61,7 +61,7 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
     const userId = appService.getSessionUser(req);
 
     try {
-        console.log(`Adding category with name ${name}`);
+        appService.getLogger().debug(`Adding category with name ${name}`);
         const insertCategory = await client.query(
             "INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING id",
             [name, userId]
@@ -112,7 +112,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
 
     try {
-        console.log(`Updating category ${categoryId}`);
+        appService.getLogger().debug(`Updating category ${categoryId}`);
 
         const queryResult = await pool.query(
             'UPDATE categories SET name = $1 WHERE id = $2 AND user_id = $3',
@@ -153,7 +153,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 //@ts-ignore
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    console.log("Delete category, id:", id);
+    appService.getLogger().debug(`Delete category, id: ${id}`);
 
     // Database connection
     const pool = appService.getDatabasePool();

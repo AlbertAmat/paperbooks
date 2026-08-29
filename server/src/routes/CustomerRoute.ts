@@ -393,7 +393,7 @@ router.post('', requireAuth, async (req: Request, res: Response) => {
     const userId = appService.getSessionUser(req);
 
     try {
-        console.log(`Adding customer with name ${name}`);
+        appService.getLogger().debug(`Adding customer with name ${name}`);
         const insertCustomer = await client.query(
             "INSERT INTO customers (name, user_id) VALUES ($1, $2) RETURNING id",
             [name, userId]
@@ -447,7 +447,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
 
     try {
-        console.log(`Updating customer ${customerId}`);
+        appService.getLogger().debug(`Updating customer ${customerId}`);
 
         const queryResult = await pool.query(
             'UPDATE customers SET name = $1 WHERE id = $2 AND user_id = $3',
@@ -494,7 +494,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 //@ts-ignore
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    console.log("Delete customer, id:", id);
+    appService.getLogger().debug(`Delete customer, id: ${id}`);
 
     // Database connection
     const pool = appService.getDatabasePool();

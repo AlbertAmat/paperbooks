@@ -5,15 +5,30 @@
  * @example
  * const u: IUser = {
  *   code: "jdoe", name: "Jane Doe", email: "jane@example.com",
- *   language: "en", region: "US", image: null, isPublicInstitution: false
+ *   language: "en", region: "US", image: null, isPublicInstitution: false,
+ *   securityNoticeAccepted: false
  * };
  */
 export interface IUser {
+    /** Unique immutable login code. */
     code: string;
+    /** Display name. */
     name: string;
+    /** Email address. */
     email: string;
+    /** Preferred UI language (2-letter code). */
     language: string;
+    /** Preferred region code. */
     region: string;
+    /** Base64 data-URI of the profile picture, or null if unset. */
     image: string | null;
+    /** Whether this account belongs to a public institution (e.g. a school). */
     isPublicInstitution: boolean;
+    /**
+     * Whether this account has acknowledged the security-measures notice
+     * (see SecurityNoticeDialog.vue). Always `false` for accounts where
+     * `isPublicInstitution` is `false` - the dialog only applies to
+     * public-institution accounts.
+     */
+    securityNoticeAccepted: boolean;
 }

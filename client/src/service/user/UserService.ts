@@ -22,8 +22,6 @@ class UserService {
         await axiosInstance.post(`${PATH_PREFIX}/user/image`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
-                // Add auth header if your `requireAuth` middleware uses tokens
-                Authorization: `Bearer ${localStorage.getItem("token")}`
             }
         })
     }
@@ -38,7 +36,11 @@ class UserService {
         await axiosInstance.delete(`${PATH_PREFIX}/user`)
     }
 
-    /** Change the current user's password. New password reissues the session cookie. */
+    /**
+     * Change the current user's password. New password reissues the session cookie.
+     * @param currentPassword Current (soon to be old) password, for verification.
+     * @param newPassword New password to set.
+     */
     public async changePassword(currentPassword: string, newPassword: string) {
         await axiosInstance.post(`${PATH_PREFIX}/user/password`, {
             currentPassword: currentPassword,
@@ -46,7 +48,13 @@ class UserService {
         })
     }
 
-    /** Update the current user's profile fields. */
+    /**
+     * Update the current user's profile fields.
+     * @param name New display name.
+     * @param email New email address.
+     * @param language New preferred UI language (2-letter code).
+     * @param region New preferred region code.
+     */
     public async update(name: string, email: string, language: string, region: string) {
         await axiosInstance.put(`${PATH_PREFIX}/user`, {
             name: name,
@@ -56,6 +64,16 @@ class UserService {
         })
     }
 
+    /**
+     * Acknowledge the security-measures notice shown to public-institution
+     * accounts (see SecurityNoticeDialog.vue). Records the acceptance date
+     * server-side so the dialog doesn't show again for this user.
+     */
+    public async acceptSecurityNotice() {
+        await axiosInstance.post(`${PATH_PREFIX}/user/security-notice/accept`)
+    }
+
 }
 
+/** Singleton instance shared by every part of the app. */
 export const userService = new UserService();

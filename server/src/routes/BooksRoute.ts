@@ -26,6 +26,7 @@ import {IBookAddMd} from "../types/book/IBookAddMd";
 import {Pool, PoolClient} from "pg";
 import {AppErrors} from "../types/AppErrors";
 import {SearchFilter} from "../types/search/SearchFilter";
+import {normalizeAndValidateIsbn} from "../utils/IsbnVerification";
 //@ts-ignore
 const router: Router = Router();
 
@@ -162,7 +163,7 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         if (conditions.length > 0) {
             totalQuery += ` WHERE ${conditions.join(' AND ')}`;
         }
-        console.log("execute total results query: ", totalQuery)
+        appService.getLogger().debug(`execute total results query: ${totalQuery}`);
         const totalResults = await client.query(totalQuery, params);
 
         /**
@@ -181,7 +182,7 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         `;
 
         // Use a prepared statement to fetch items by name
-        console.log("executing query: ", sqlStatement);
+        appService.getLogger().debug(`executing query: ${sqlStatement}`);
         const result = await client.query(sqlStatement, params);
 
         // Return the result (found rows)
@@ -233,7 +234,7 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
 //@ts-ignore
 router.get('/:id', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    console.log("Get book, id:", id)
+    appService.getLogger().debug(`Get book, id: ${id}`);
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
     const userId = appService.getSessionUser(req);
@@ -343,7 +344,7 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
 //@ts-ignore
 router.put('/:id', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    console.log("Update book, id:", id);
+    appService.getLogger().debug(`Update book, id: ${id}`);
     const userId = appService.getSessionUser(req);
 
     // Body params
@@ -479,7 +480,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 //@ts-ignore
 router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    console.log("Delete book, id:", id);
+    appService.getLogger().debug(`Delete book, id: ${id}`);
 
     // Database connection
     const pool = appService.getDatabasePool();
@@ -644,7 +645,7 @@ router.post(
     '/isbn/:isbn',
     requireAuth,
     async (req: Request, res: Response) => {
-        const isbnCode = req.params.isbn;
+        const isbnCode = normalizeAndValidateIsbn(req.params.isbn);
         if (!isbnCode) {
             return res.status(400).send('No ISBN code provided');
         }
@@ -855,7 +856,7 @@ async function fetchBookData(isbn: string, retries = 3): Promise<any> {
 async function __fetchOpenLibraryMetadata(isbn: string): Promise<any> {
     try {
         const { data } = await axios.get(
-            `https://openlibrary.org/search.json?isbn=${isbn}`,
+            `https://openlibrary.org/search.json?isbn=${encodeURIComponent(isbn)}`,
             { timeout: 9000 }
         );
 
@@ -890,7 +891,7 @@ async function __fetchOpenLibraryMetadata(isbn: string): Promise<any> {
  */
 async function fetchOpenLibraryCover(isbn: string): Promise<string | null> {
     try {
-        const url = `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`;
+        const url = `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-M.jpg`;
 
         const res = await axios.get(url, {
             responseType: 'arraybuffer',
@@ -1136,7 +1137,7 @@ router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
             res.status(404).send("Location not found");
         }
 
-        console.log(`Adding book stock with status ${status} in book id: ${bookId}`);
+        appService.getLogger().debug(`Adding book stock with status ${status} in book id: ${bookId}`);
         await client.query("BEGIN");
 
         const code = await generateBookStockCode();
@@ -1202,7 +1203,7 @@ router.delete('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Res
     const pool = appService.getDatabasePool();
 
     try {
-        console.log(`Removing book stock with status ${stockId} and book id: ${bookId}`);
+        appService.getLogger().debug(`Removing book stock with status ${stockId} and book id: ${bookId}`);
 
         const deleteQueryResult = await pool.query(
             'DELETE FROM book_stocks WHERE book_id = $1 AND id = $2 AND user_id = $3',
@@ -1256,7 +1257,7 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
     const pool = appService.getDatabasePool();
 
     try {
-        console.log(`Updating book stock ${stockId}`);
+        appService.getLogger().debug(`Updating book stock ${stockId}`);
 
         const existLocation = await pool.query(
             'SELECT id FROM locations WHERE id = $1 AND user_id = $2',

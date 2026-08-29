@@ -42,7 +42,8 @@ router.get('/version', (req: Request, res: Response) => {
  * Example response (200):
  *  {
  *    "user": { "code": "jdoe", "name": "Jane Doe", "email": "jane@example.com",
- *               "language": "en", "region": "US", "image": null, "isPublicInstitution": false },
+ *               "language": "en", "region": "US", "image": null, "isPublicInstitution": false,
+ *               "securityNoticeAccepted": false },
  *    "categories": [{ "id": 3, "name": "Fantasy" }],
  *    "languages": [{ "code": "en", "name": "English" }],
  *    "formats": [{ "id": 1, "name": "Paperback" }],
@@ -100,6 +101,18 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
 
     const user = await  getUser(userId);
 
+    // Public-institution accounts get a persistent security-measures notice
+    // after login until they acknowledge it (see SecurityNoticeDialog.vue).
+    // Record that it was sent the first time it's actually going to be
+    // shown; ON CONFLICT DO NOTHING makes this a no-op on every later fetch.
+    if (user.isPublicInstitution && !user.securityNoticeAccepted) {
+        try {
+            await recordSecurityNoticeSent(userId);
+        } catch (e) {
+            console.error("Error recording security notice sent date. ", e)
+        }
+    }
+
     res.status(200).json({
         user:user,
         categories: categories,
@@ -122,7 +135,7 @@ async function getCustomers(userId: number): Promise<Record<string, any>[]> {
         WHERE user_id = $1
     `
     // Use a prepared statement to fetch items by name
-    console.log("executing query: ", query);
+    appService.getLogger().debug(`executing query: ${query}`);
     const result = await pool.query(query, [userId]);
 
     // Return the result (found rows)
@@ -141,7 +154,7 @@ async function getCategories(userId: number): Promise<Record<string, any>[]> {
         WHERE user_id = $1
     `
     // Use a prepared statement to fetch items by name
-    console.log("executing query: ", query);
+    appService.getLogger().debug(`executing query: ${query}`);
     const result = await pool.query(query, [userId]);
 
     // Return the result (found rows)
@@ -158,7 +171,7 @@ async function getLanguages(): Promise<Record<string, any>[]> {
         FROM languages
     `
     // Use a prepared statement to fetch items by name
-    console.log("executing query: ", query);
+    appService.getLogger().debug(`executing query: ${query}`);
     const result = await pool.query(query);
 
     // Return the result (found rows)
@@ -175,7 +188,7 @@ async function getFormats(): Promise<Record<string, any>[]> {
         FROM formats
     `
     // Use a prepared statement to fetch items by name
-    console.log("executing query: ", query);
+    appService.getLogger().debug(`executing query: ${query}`);
     const result = await pool.query(query);
 
     // Return the result (found rows)
@@ -193,7 +206,7 @@ async function getLocations(userId: number): Promise<Record<string, any>[]> {
         WHERE user_id = $1
     `
     // Use a prepared statement to fetch items by name
-    console.log("executing query: ", query);
+    appService.getLogger().debug(`executing query: ${query}`);
     const result = await pool.query(query, [userId]);
 
     // Return the result (found rows)
@@ -213,7 +226,7 @@ async function getAppLabels(userId: number): Promise<Record<string, string>> {
            AND app_labels.language = users.language
     `
     // Use a prepared statement to fetch items by name
-    console.log("executing query: ", query);
+    appService.getLogger().debug(`executing query: ${query}`);
     const result = await pool.query(query, [userId]);
 
     // Return the result (found rows)
@@ -234,15 +247,17 @@ async function getUser(userId: number): Promise<Record<string, any>> {
     const pool = appService.getDatabasePool();
 
     const query = `
-        SELECT code,
-               name,
-               email,
-            language,
-            region,
-            image,
-            is_public_institution AS "isPublicInstitution"
-        FROM users
-        WHERE id = $1
+        SELECT u.code,
+               u.name,
+               u.email,
+               u.language,
+               u.region,
+               u.image,
+               u.is_public_institution AS "isPublicInstitution",
+               (sn.accepted_date IS NOT NULL) AS "securityNoticeAccepted"
+        FROM users u
+        LEFT JOIN user_security_notice_acknowledgements sn ON sn.user_id = u.id
+        WHERE u.id = $1
     `;
 
     const result = await pool.query(query, [userId]);
@@ -265,6 +280,24 @@ async function getUser(userId: number): Promise<Record<string, any>> {
     }
 
     return user;
+}
+
+/**
+ * Ensures a `user_security_notice_acknowledgements` row exists for `userId`,
+ * recording "now" as `sent_date` the first time it's called for that user.
+ * `ON CONFLICT DO NOTHING` makes every later call for an already-recorded
+ * user a no-op, so `sent_date` always reflects the first time the notice
+ * was actually shown.
+ */
+async function recordSecurityNoticeSent(userId: number): Promise<void> {
+    const pool = appService.getDatabasePool();
+
+    await pool.query(
+        `INSERT INTO user_security_notice_acknowledgements (user_id)
+         VALUES ($1)
+         ON CONFLICT (user_id) DO NOTHING`,
+        [userId]
+    );
 }
 
 export default router;

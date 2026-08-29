@@ -16,6 +16,7 @@ import {customersRoute} from "@/router/routes/CustomersRoute";
 import {authorsRoute} from "@/router/routes/AuthorsRoute";
 import {docsRoute} from "@/router/routes/DocsRoute";
 import {legalRoute} from "@/router/routes/LegalRoute";
+import {applicationService} from "@/service/ApplicationService";
 
 // Define your routes
 const routes: Array<RouteRecordRaw> = [
@@ -43,5 +44,23 @@ const router = createRouter({
     history: createWebHistory('/app'),
     routes,
 })
+
+/**
+ * Defense-in-depth only: the server already gates every /app/* request on a
+ * valid session cookie (httpOnly, so it can't be inspected here directly),
+ * so this can't be the sole auth check. It closes the gap where a session
+ * expires *after* the SPA has loaded - without this, a client-side
+ * navigation between routes would briefly render a protected view's shell
+ * before its own data fetch failed with 401. If the last policy fetch
+ * failed (see ApplicationService.fetchPolicy), send the user to the
+ * server-rendered /login page instead of letting the SPA render further.
+ */
+router.beforeEach((to, from, next) => {
+    if (applicationService.hasError()) {
+        window.location.href = "/login";
+        return;
+    }
+    next();
+});
 
 export default router
