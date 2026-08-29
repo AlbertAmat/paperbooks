@@ -194,21 +194,28 @@ cd paperbooks
 
 ### 2. Set up the database
 
-Create a PostgreSQL database and load the schema, then apply the dated patch files
-in `assets/db/` in filename order (they are incremental migrations on top of the
-base schema):
+Create a PostgreSQL database and load the schema — `databaseSchema.sql` is always
+kept up to date, so this is everything a new install needs:
 
 ```bash
 createdb paperbooks
 psql -d paperbooks -f assets/db/databaseSchema.sql
-psql -d paperbooks -f assets/db/082626-1.sql
-psql -d paperbooks -f assets/db/082926-1.sql
-psql -d paperbooks -f assets/db/082926-2.sql
 ```
 
 > There is no admin UI for the very first user — after loading the schema, either
 > insert a row into `users` directly, or start the server with `ALLOW_DEV_AUTH=true`
 > and use the `/register` page, then turn `ALLOW_DEV_AUTH` back off.
+
+The other, dated files in `assets/db/` (`082626-1.sql`, `082926-01.sql`, ...) are
+**not** for new installs — they're incremental migrations for a database that's
+already running an older version of the schema. Each one's header comment says what
+it does and confirms new installs should skip it. If you're upgrading an existing
+instance instead of setting one up fresh, apply only the migration files newer than
+whatever you're currently on, in filename order:
+
+```bash
+psql -d paperbooks -f assets/db/082926-02.sql   # example: apply one specific migration
+```
 
 ### 3. Configure the server
 

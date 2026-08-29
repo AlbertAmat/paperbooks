@@ -284,6 +284,16 @@ box.
   ```
   Pin `APP_TAG` to a specific version rather than `latest` so upgrades are a
   deliberate step, not a surprise on container restart.
+- **A new `APP_TAG` sometimes needs a database migration first.** `assets/db/`
+  contains `databaseSchema.sql` (always current — only used for brand-new installs)
+  plus dated files like `082926-01.sql` that are incremental changes for a database
+  that's already running an older schema; each one's header comment explains what it
+  does. Check the release notes for the version you're upgrading to, and if it
+  mentions a migration file, apply it to the running `db` container *before*
+  switching `APP_TAG` and restarting `app`:
+  ```bash
+  docker compose exec -T db psql -U <DB_USER> -d <DB_NAME> < assets/db/082926-02.sql
+  ```
 - **Postgres major-version bumps are not the same kind of upgrade.** The app-version
   upgrade above is a drop-in restart because the same Postgres major version keeps
   reading the same data files. Bumping `docker-compose.yml`'s `postgres:XX-alpine`
