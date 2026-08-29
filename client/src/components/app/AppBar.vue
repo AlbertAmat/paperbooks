@@ -66,6 +66,6 @@ function searchBarcode(value: string) {
 	left: 50%;
 	transform: translateX(-50%);
 	width: 100%;
-	max-width: 420px;
+	max-width: 320px;
 }
 </style>
