@@ -12,7 +12,7 @@
   <Overview>PaperBooks is a self-hosted app for tracking, organizing, and lending physical book collections. This template runs the app itself; it needs a PostgreSQL server to connect to (its own container, or one you already run) with the schema from assets/db/databaseSchema.sql imported once. See the Project link, DEPLOYMENT.md, for full setup instructions.</Overview>
   <Category>Productivity: Tools:</Category>
   <WebUI>http://[IP]:[PORT:3000]/login</WebUI>
-  <TemplateURL>https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/unraid/paperbooks.xml</TemplateURL>
+  <TemplateURL>https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/assets/unraid/paperbooks.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/client/public/favicon.ico</Icon>
   <ExtraParams/>
   <PostArgs/>

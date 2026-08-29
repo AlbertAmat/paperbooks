@@ -178,7 +178,7 @@ there's nothing in the template that does this for you.
 1. **Load the template.** From a browser on your LAN, visit (swap in your Tower's
    actual address):
    ```
-   http://<TOWER-IP>/Docker/AddContainer?xmlTemplate=https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/unraid/paperbooks.xml
+   http://<TOWER-IP>/Docker/AddContainer?xmlTemplate=https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/assets/unraid/paperbooks.xml
    ```
    This opens Unraid's "Add Container" page pre-filled with the image, port, path,
    and all the env vars below — that's the one-click part.
