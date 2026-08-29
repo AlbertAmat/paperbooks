@@ -1,6 +1,6 @@
 {
   "name": "paperbooks",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Version anchor for the PaperBooks release/Docker pipeline. Not published; client and server are built and versioned independently.",
   "repository": {
