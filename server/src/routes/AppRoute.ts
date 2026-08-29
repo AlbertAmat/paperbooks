@@ -202,7 +202,8 @@ async function getUser(userId: number): Promise<Record<string, any>> {
                email,
             language,
             region,
-            image
+            image,
+            is_public_institution AS "isPublicInstitution"
         FROM users
         WHERE id = $1
     `;

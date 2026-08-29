@@ -11,6 +11,18 @@
 			<v-divider></v-divider>
 
 			<v-card-text>
+				<v-alert
+					v-if="applicationService.getUser().isPublicInstitution()"
+					color="primary"
+					variant="tonal"
+					density="compact"
+					icon="mdi-shield-alert-outline"
+					style="font-size: 13px"
+					class="mb-4"
+				>
+					{{ t(AppLabels.PUBLIC_INSTITUTION_SENSITIVE_DATA_WARNING) }}
+				</v-alert>
+
 				<v-text-field
 					v-model="name"
 					:label="t(AppLabels.NAME)"
@@ -66,6 +78,7 @@ import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import CustomerDetail from "@/model/customer/CustomerDetail";
 import CustomerGroupsController from "@/controller/customers/CustomerGroupsController";
+import {applicationService} from "@/service/ApplicationService";
 
 interface Props {
 	customer?: CustomerDetail,

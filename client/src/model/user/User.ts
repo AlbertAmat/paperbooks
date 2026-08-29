@@ -56,6 +56,13 @@ export default class User {
     private m_image: Ref<string | null>;
 
     /**
+     * Whether this account belongs to a public institution (e.g. a school).
+     * Set by an administrator directly in the database — not editable from the app.
+     * @private
+     */
+    private readonly m_isPublicInstitution: boolean;
+
+    /**
      * Initializes a User instance with data from the backend.
      * @param data - IUser object containing initial user information.
      */
@@ -66,6 +73,7 @@ export default class User {
         this.m_language = ref(data.language);
         this.m_region = ref(data.region);
         this.m_image = ref(data.image);
+        this.m_isPublicInstitution = data.isPublicInstitution;
     }
 
     /**
@@ -115,6 +123,15 @@ export default class User {
      */
     public hasImage(): boolean {
         return this.m_image.value != null;
+    }
+
+    /**
+     * Returns true if this account is registered as a public institution
+     * (e.g. a school), in which case customer/group data may include
+     * students and should avoid storing sensitive personal information.
+     */
+    public isPublicInstitution(): boolean {
+        return this.m_isPublicInstitution;
     }
 
     /**

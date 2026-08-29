@@ -200,7 +200,8 @@ VALUES ('en', 'ADD_BOOK', 'Add book'),
        ('en', 'EMPTY_AUTHORS_TITLE', 'Add your first author'),
        ('en', 'EMPTY_AUTHORS_DESC', 'Add authors to link them to the books in your library.'),
        ('en', 'EMPTY_LAST_BOOKS_TITLE', 'No books yet'),
-       ('en', 'EMPTY_LAST_BOOKS_DESC', 'Books you add will show up here.');
+       ('en', 'EMPTY_LAST_BOOKS_DESC', 'Books you add will show up here.'),
+       ('en', 'PUBLIC_INSTITUTION_SENSITIVE_DATA_WARNING', 'This account is registered as a public institution. Avoid entering sensitive personal information here — use student codes or IDs that only you can identify instead of full names.');
 
 -- catalan labels
 INSERT INTO app_labels (language, code, text)
@@ -382,7 +383,8 @@ VALUES ('ca', 'ADD_BOOK', 'Afegir llibre'),
        ('ca', 'EMPTY_AUTHORS_TITLE', 'Afegeix el teu primer autor'),
        ('ca', 'EMPTY_AUTHORS_DESC', 'Afegeix autors per vincular-los als llibres de la teva biblioteca.'),
        ('ca', 'EMPTY_LAST_BOOKS_TITLE', 'Encara no hi ha llibres'),
-       ('ca', 'EMPTY_LAST_BOOKS_DESC', 'Els llibres que afegeixis apareixeran aquí.');
+       ('ca', 'EMPTY_LAST_BOOKS_DESC', 'Els llibres que afegeixis apareixeran aquí.'),
+       ('ca', 'PUBLIC_INSTITUTION_SENSITIVE_DATA_WARNING', 'Aquest compte està registrat com a institució pública. Evita introduir informació personal sensible aquí: utilitza codis o identificadors de l''alumnat que només tu puguis reconèixer, en lloc de noms complets.');
 
 -- spanish labels
 INSERT INTO app_labels (language, code, text)
@@ -564,7 +566,8 @@ VALUES ('es', 'ADD_BOOK', 'Agregar libro'),
        ('es', 'EMPTY_AUTHORS_TITLE', 'Agrega tu primer autor'),
        ('es', 'EMPTY_AUTHORS_DESC', 'Agrega autores para vincularlos a los libros de tu biblioteca.'),
        ('es', 'EMPTY_LAST_BOOKS_TITLE', 'Aún no hay libros'),
-       ('es', 'EMPTY_LAST_BOOKS_DESC', 'Los libros que agregues aparecerán aquí.');
+       ('es', 'EMPTY_LAST_BOOKS_DESC', 'Los libros que agregues aparecerán aquí.'),
+       ('es', 'PUBLIC_INSTITUTION_SENSITIVE_DATA_WARNING', 'Esta cuenta está registrada como institución pública. Evita introducir información personal sensible aquí: usa códigos o identificadores de alumnos que solo tú puedas reconocer, en lugar de nombres completos.');
 
     INSERT INTO app_labels (language, code, text)
 VALUES ('it', 'ADD_BOOK', 'Aggiungi libro'),
@@ -744,7 +747,8 @@ VALUES ('it', 'ADD_BOOK', 'Aggiungi libro'),
        ('it', 'EMPTY_AUTHORS_TITLE', 'Aggiungi il tuo primo autore'),
        ('it', 'EMPTY_AUTHORS_DESC', 'Aggiungi autori per collegarli ai libri della tua biblioteca.'),
        ('it', 'EMPTY_LAST_BOOKS_TITLE', 'Nessun libro ancora'),
-       ('it', 'EMPTY_LAST_BOOKS_DESC', 'I libri che aggiungi appariranno qui.');
+       ('it', 'EMPTY_LAST_BOOKS_DESC', 'I libri che aggiungi appariranno qui.'),
+       ('it', 'PUBLIC_INSTITUTION_SENSITIVE_DATA_WARNING', 'Questo account è registrato come istituzione pubblica. Evita di inserire qui informazioni personali sensibili: usa codici o identificativi degli studenti che solo tu possa riconoscere, invece dei nomi completi.');
 
 
 -- Users table
@@ -761,6 +765,7 @@ CREATE TABLE users
     language        CHAR(2)   DEFAULT 'en',
     region          CHAR(2)   DEFAULT 'US',
     disabled        BOOLEAN  DEFAULT TRUE,
+    is_public_institution BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (language) REFERENCES app_languages (code) ON DELETE SET NULL
 );
 

@@ -1,7 +1,7 @@
 <template>
 	<v-navigation-drawer
 		v-model="menu"
-		:rail="expanded"
+		v-model:rail="rail"
 		app
 		border="0"
 		width="230"
@@ -11,21 +11,24 @@
 		color="#011a38"
 		:dark="true"
 	>
-		<div class="d-flex align-center py-3 ml-1" :class="expanded ? 'px-1' : 'px-3'">
-			<v-avatar color="primary" rounded>
-				<v-icon color="white">
+		<div class="d-flex align-center pt-3 pb-2 ml-1 app-menu-header pr-1 pl-2" >
+			<v-avatar color="primary" rounded size="30">
+				<v-icon color="white" size="20">
 					mdi-book-open
 				</v-icon>
 			</v-avatar>
 
 			<!-- APP TITLE -->
 			<span
-				class="mx-2"
+				class="mx-2 app-menu-title"
+				:class="{'app-menu-title--visible': !rail}"
 				style="font-weight: bold; flex: 1; color: white"
 			>
 				Paper Book
 			</span>
 		</div>
+
+		<v-divider class="mt-0"></v-divider>
 
 		<v-list
 			v-model="selectedItem"
@@ -90,7 +93,7 @@ const selectedItem: Ref<string | null> = ref(null);
  *
  */
 const menu: Ref<boolean> = ref(true);
-const expanded: Ref<boolean> = ref(true);
+const rail: Ref<boolean> = ref(true);
 
 /**
  *
@@ -137,6 +140,21 @@ watch(() => route.path, (path) => {
 <style scoped>
 .app-menu {
 	color: white;
+}
+
+.app-menu-header {
+	transition: padding 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-menu-title {
+	white-space: nowrap;
+	overflow: hidden;
+	opacity: 0;
+	transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-menu-title--visible {
+	opacity: 1;
 }
 
 .app-menu >>> .v-navigation-drawer__border {

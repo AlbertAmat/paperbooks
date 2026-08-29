@@ -5,4 +5,5 @@ export interface IUser {
     language: string;
     region: string;
     image: string | null;
+    isPublicInstitution: boolean;
 }
