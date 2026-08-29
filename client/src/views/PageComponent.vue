@@ -21,7 +21,7 @@
 		</v-toolbar>
 
 		<v-container
-			style=" display: flex; flex-direction: column; flex: 1"
+			style="display: flex; flex-direction: column; flex: 1; min-height: 0"
 		>
 			<v-overlay
 				v-if="model.isLoading()"
@@ -65,5 +65,6 @@ const props = defineProps<Props>()
 	display: flex !important;
 	flex-direction: column !important;
 	flex: 1;
+	min-height: 0;
 }
 </style>

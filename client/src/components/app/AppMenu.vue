@@ -53,7 +53,7 @@
 
 			<v-list-item
 				nav
-				:disabled="true"
+				:to="docsRoute.getPath()"
 				title="Help"
 				prepend-icon="mdi-help-circle-outline"
 				density="compact"
@@ -72,6 +72,7 @@ import {locationsRoute} from "@/router/routes/LocationsRoute";
 import {categoriesRoute} from "@/router/routes/CategoriesRoute";
 import {customersRoute} from "@/router/routes/CustomersRoute";
 import {authorsRoute} from "@/router/routes/AuthorsRoute";
+import {docsRoute} from "@/router/routes/DocsRoute";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import PrintDialog from "@/components/printDialog/PrintDialog.vue"
