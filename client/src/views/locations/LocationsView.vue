@@ -13,7 +13,26 @@
 		</template>
 
 		<template v-slot:default>
+			<empty-state
+				v-if="locations.length === 0"
+				icon="mdi-map-marker-plus-outline"
+				:chip-icons="['mdi-map-marker-outline', 'mdi-warehouse', 'mdi-bookshelf', 'mdi-office-building-outline', 'mdi-map-marker-radius-outline', 'mdi-book-outline', 'mdi-store-outline', 'mdi-map-outline']"
+				:title="t(AppLabels.EMPTY_LOCATIONS_TITLE)"
+				:description="t(AppLabels.EMPTY_LOCATIONS_DESC)"
+			>
+				<v-btn
+					@click="createLocation()"
+					class="text-none"
+					color="primary"
+					small
+					variant="elevated"
+				>
+					{{t(AppLabels.ADD)}}
+				</v-btn>
+			</empty-state>
+
 			<v-data-table-virtual
+				v-else
 				:headers="headers"
 				density="compact"
 				item-value="id"
@@ -78,6 +97,7 @@ import {confirmationDialogController} from "@/components/confirmationDialog/Conf
 import {applicationService} from "@/service/ApplicationService";
 import LocationExt from "@/model/location/LocationExt";
 import LocationBooksTable from "@/views/locations/LocationBooksTable.vue";
+import EmptyState from "@/components/emptyState/EmptyState.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 

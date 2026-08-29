@@ -33,9 +33,28 @@
 				<v-tab value="groups"  class="text-none">{{t(AppLabels.GROUPS)}}</v-tab>
 			</v-tabs>
 
-			<v-window v-model="activeTab">
-				<v-window-item value="customers">
+			<v-window v-model="activeTab" style="flex: 1; height: 100%; display: flex; flex-direction: column">
+				<v-window-item value="customers" style="flex: 1; display: flex; flex-direction: column">
+					<empty-state
+						v-if="customers.length === 0"
+						icon="mdi-account-plus-outline"
+						:chip-icons="['mdi-account-outline', 'mdi-account-group-outline', 'mdi-book-account-outline', 'mdi-account-heart-outline', 'mdi-book-outline', 'mdi-account-edit-outline', 'mdi-account-multiple-outline', 'mdi-book-open-page-variant']"
+						:title="t(AppLabels.EMPTY_CUSTOMERS_TITLE)"
+						:description="t(AppLabels.EMPTY_CUSTOMERS_DESC)"
+					>
+						<v-btn
+							@click="createCustomer()"
+							class="text-none"
+							color="primary"
+							small
+							variant="elevated"
+						>
+							{{t(AppLabels.ADD)}}
+						</v-btn>
+					</empty-state>
+
 					<v-data-table-virtual
+						v-else
 						:headers="headers"
 						density="compact"
 						show-expand
@@ -118,6 +137,7 @@ import CustomersController from "@/controller/customers/CustomersController";
 import CustomerGroupsController from "@/controller/customers/CustomerGroupsController";
 import Customer from "@/model/customer/Customer";
 import CustomerBooksTable from "@/views/customers/components/CustomerBooksTable.vue";
+import EmptyState from "@/components/emptyState/EmptyState.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import ReturnBooksDialog from "@/views/customers/components/ReturnBooksDialog.vue";

@@ -13,7 +13,26 @@
 		</template>
 
 		<template v-slot:default>
+			<empty-state
+				v-if="categories.length === 0"
+				icon="mdi-tag-plus-outline"
+				:chip-icons="['mdi-tag-outline', 'mdi-shape-outline', 'mdi-bookshelf', 'mdi-tag-multiple-outline', 'mdi-book-outline', 'mdi-label-outline', 'mdi-book-open-page-variant', 'mdi-tag-heart-outline']"
+				:title="t(AppLabels.EMPTY_CATEGORIES_TITLE)"
+				:description="t(AppLabels.EMPTY_CATEGORIES_DESC)"
+			>
+				<v-btn
+					@click="createCategory()"
+					class="text-none"
+					color="primary"
+					variant="elevated"
+					small
+				>
+					{{t(AppLabels.ADD)}}
+				</v-btn>
+			</empty-state>
+
 			<v-data-table-virtual
+				v-else
 				:headers="headers"
 				density="compact"
 				:items="categories"
@@ -63,6 +82,7 @@ import {applicationService} from "@/service/ApplicationService";
 import CategoriesController from "@/controller/categories/CategoriesController";
 import Category from "@/model/category/Category";
 import CategoryDialog from "./CategoryDialog.vue"
+import EmptyState from "@/components/emptyState/EmptyState.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 

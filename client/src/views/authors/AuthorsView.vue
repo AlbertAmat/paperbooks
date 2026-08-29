@@ -13,7 +13,26 @@
 		</template>
 
 		<template v-slot:default>
+			<empty-state
+				v-if="authors.length === 0"
+				icon="mdi-account-plus-outline"
+				:chip-icons="['mdi-account-edit-outline', 'mdi-book-account-outline', 'mdi-fountain-pen-tip', 'mdi-book-open-page-variant', 'mdi-pencil-outline', 'mdi-book-outline', 'mdi-account-outline', 'mdi-notebook-outline']"
+				:title="t(AppLabels.EMPTY_AUTHORS_TITLE)"
+				:description="t(AppLabels.EMPTY_AUTHORS_DESC)"
+			>
+				<v-btn
+					@click="createAuthor()"
+					class="text-none"
+					color="primary"
+					variant="elevated"
+					small
+				>
+					{{t(AppLabels.ADD)}}
+				</v-btn>
+			</empty-state>
+
 			<v-data-table-virtual
+				v-else
 				:headers="headers"
 				density="compact"
 				height="100%"
@@ -61,6 +80,7 @@
 import PageComponent from "@/views/PageComponent.vue";
 import {computed, ref, Ref, ShallowRef, shallowRef} from "vue";
 import AuthorDialog from "@/views/authors/AuthorDialog.vue";
+import EmptyState from "@/components/emptyState/EmptyState.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import AuthorsController from "@/controller/authors/AuthorsController";
 import BookAuthor from "@/model/author/BookAuthor";

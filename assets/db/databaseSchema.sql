@@ -186,7 +186,19 @@ VALUES ('en', 'ADD_BOOK', 'Add book'),
        ('en', 'MOVE_TO_GROUP', 'Move to group'),
        ('en', 'MOVE', 'Move'),
        ('en', 'SELECTED', 'selected'),
-       ('en', 'GROUPS_DRAG_DROP_HINT', 'Drag and drop customers between groups, or select multiple to move them at once.');
+       ('en', 'GROUPS_DRAG_DROP_HINT', 'Drag and drop customers between groups, or select multiple to move them at once.'),
+       ('en', 'EMPTY_LIBRARY_TITLE', 'Add your first book'),
+       ('en', 'EMPTY_LIBRARY_DESC', 'Scan an ISBN or add a book manually to start building your library.'),
+       ('en', 'EMPTY_LOCATIONS_TITLE', 'Add your first location'),
+       ('en', 'EMPTY_LOCATIONS_DESC', 'Create shelves, rooms or branches to organize where your books live.'),
+       ('en', 'EMPTY_CUSTOMERS_TITLE', 'Add your first customer'),
+       ('en', 'EMPTY_CUSTOMERS_DESC', 'Add customers to start lending and tracking your books.'),
+       ('en', 'EMPTY_CATEGORIES_TITLE', 'Add your first category'),
+       ('en', 'EMPTY_CATEGORIES_DESC', 'Create categories to organize and classify your books.'),
+       ('en', 'EMPTY_AUTHORS_TITLE', 'Add your first author'),
+       ('en', 'EMPTY_AUTHORS_DESC', 'Add authors to link them to the books in your library.'),
+       ('en', 'EMPTY_LAST_BOOKS_TITLE', 'No books yet'),
+       ('en', 'EMPTY_LAST_BOOKS_DESC', 'Books you add will show up here.');
 
 -- catalan labels
 INSERT INTO app_labels (language, code, text)
@@ -354,7 +366,19 @@ VALUES ('ca', 'ADD_BOOK', 'Afegir llibre'),
        ('ca', 'MOVE_TO_GROUP', 'Moure al grup'),
        ('ca', 'MOVE', 'Moure'),
        ('ca', 'SELECTED', 'seleccionats'),
-       ('ca', 'GROUPS_DRAG_DROP_HINT', 'Arrossega els clients entre grups, o selecciona''n diversos per moure''ls alhora.');
+       ('ca', 'GROUPS_DRAG_DROP_HINT', 'Arrossega els clients entre grups, o selecciona''n diversos per moure''ls alhora.'),
+       ('ca', 'EMPTY_LIBRARY_TITLE', 'Afegeix el teu primer llibre'),
+       ('ca', 'EMPTY_LIBRARY_DESC', 'Escaneja un ISBN o afegeix un llibre manualment per començar a construir la teva biblioteca.'),
+       ('ca', 'EMPTY_LOCATIONS_TITLE', 'Afegeix la teva primera ubicació'),
+       ('ca', 'EMPTY_LOCATIONS_DESC', 'Crea prestatges, sales o sucursals per organitzar on viuen els teus llibres.'),
+       ('ca', 'EMPTY_CUSTOMERS_TITLE', 'Afegeix el teu primer client'),
+       ('ca', 'EMPTY_CUSTOMERS_DESC', 'Afegeix clients per començar a prestar i fer seguiment dels teus llibres.'),
+       ('ca', 'EMPTY_CATEGORIES_TITLE', 'Afegeix la teva primera categoria'),
+       ('ca', 'EMPTY_CATEGORIES_DESC', 'Crea categories per organitzar i classificar els teus llibres.'),
+       ('ca', 'EMPTY_AUTHORS_TITLE', 'Afegeix el teu primer autor'),
+       ('ca', 'EMPTY_AUTHORS_DESC', 'Afegeix autors per vincular-los als llibres de la teva biblioteca.'),
+       ('ca', 'EMPTY_LAST_BOOKS_TITLE', 'Encara no hi ha llibres'),
+       ('ca', 'EMPTY_LAST_BOOKS_DESC', 'Els llibres que afegeixis apareixeran aquí.');
 
 -- spanish labels
 INSERT INTO app_labels (language, code, text)
@@ -522,7 +546,19 @@ VALUES ('es', 'ADD_BOOK', 'Agregar libro'),
        ('es', 'MOVE_TO_GROUP', 'Mover al grupo'),
        ('es', 'MOVE', 'Mover'),
        ('es', 'SELECTED', 'seleccionados'),
-       ('es', 'GROUPS_DRAG_DROP_HINT', 'Arrastra los clientes entre grupos, o selecciona varios para moverlos a la vez.');
+       ('es', 'GROUPS_DRAG_DROP_HINT', 'Arrastra los clientes entre grupos, o selecciona varios para moverlos a la vez.'),
+       ('es', 'EMPTY_LIBRARY_TITLE', 'Agrega tu primer libro'),
+       ('es', 'EMPTY_LIBRARY_DESC', 'Escanea un ISBN o agrega un libro manualmente para empezar a construir tu biblioteca.'),
+       ('es', 'EMPTY_LOCATIONS_TITLE', 'Agrega tu primera ubicación'),
+       ('es', 'EMPTY_LOCATIONS_DESC', 'Crea estanterías, salas o sucursales para organizar dónde viven tus libros.'),
+       ('es', 'EMPTY_CUSTOMERS_TITLE', 'Agrega tu primer cliente'),
+       ('es', 'EMPTY_CUSTOMERS_DESC', 'Agrega clientes para empezar a prestar y hacer seguimiento de tus libros.'),
+       ('es', 'EMPTY_CATEGORIES_TITLE', 'Agrega tu primera categoría'),
+       ('es', 'EMPTY_CATEGORIES_DESC', 'Crea categorías para organizar y clasificar tus libros.'),
+       ('es', 'EMPTY_AUTHORS_TITLE', 'Agrega tu primer autor'),
+       ('es', 'EMPTY_AUTHORS_DESC', 'Agrega autores para vincularlos a los libros de tu biblioteca.'),
+       ('es', 'EMPTY_LAST_BOOKS_TITLE', 'Aún no hay libros'),
+       ('es', 'EMPTY_LAST_BOOKS_DESC', 'Los libros que agregues aparecerán aquí.');
 
     INSERT INTO app_labels (language, code, text)
 VALUES ('it', 'ADD_BOOK', 'Aggiungi libro'),
@@ -688,7 +724,19 @@ VALUES ('it', 'ADD_BOOK', 'Aggiungi libro'),
        ('it', 'MOVE_TO_GROUP', 'Sposta nel gruppo'),
        ('it', 'MOVE', 'Sposta'),
        ('it', 'SELECTED', 'selezionati'),
-       ('it', 'GROUPS_DRAG_DROP_HINT', 'Trascina i clienti tra i gruppi, oppure selezionane più di uno per spostarli insieme.');
+       ('it', 'GROUPS_DRAG_DROP_HINT', 'Trascina i clienti tra i gruppi, oppure selezionane più di uno per spostarli insieme.'),
+       ('it', 'EMPTY_LIBRARY_TITLE', 'Aggiungi il tuo primo libro'),
+       ('it', 'EMPTY_LIBRARY_DESC', 'Scansiona un ISBN o aggiungi un libro manualmente per iniziare a costruire la tua biblioteca.'),
+       ('it', 'EMPTY_LOCATIONS_TITLE', 'Aggiungi la tua prima posizione'),
+       ('it', 'EMPTY_LOCATIONS_DESC', 'Crea scaffali, stanze o filiali per organizzare dove si trovano i tuoi libri.'),
+       ('it', 'EMPTY_CUSTOMERS_TITLE', 'Aggiungi il tuo primo cliente'),
+       ('it', 'EMPTY_CUSTOMERS_DESC', 'Aggiungi clienti per iniziare a prestare e tenere traccia dei tuoi libri.'),
+       ('it', 'EMPTY_CATEGORIES_TITLE', 'Aggiungi la tua prima categoria'),
+       ('it', 'EMPTY_CATEGORIES_DESC', 'Crea categorie per organizzare e classificare i tuoi libri.'),
+       ('it', 'EMPTY_AUTHORS_TITLE', 'Aggiungi il tuo primo autore'),
+       ('it', 'EMPTY_AUTHORS_DESC', 'Aggiungi autori per collegarli ai libri della tua biblioteca.'),
+       ('it', 'EMPTY_LAST_BOOKS_TITLE', 'Nessun libro ancora'),
+       ('it', 'EMPTY_LAST_BOOKS_DESC', 'I libri che aggiungi appariranno qui.');
 
 
 -- Users table

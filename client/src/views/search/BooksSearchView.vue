@@ -67,64 +67,84 @@
 		<template v-slot:default>
 			<search-filters :model="model"/>
 
-			<template v-if="gridLayout">
-				<v-row no-gutters style="flex: initial">
-					<v-col
-						v-for="book in model.getBooks()"
-						:key="book.getId()"
-						cols="12"
-						sm="6"
-						md="4"
-						lg="3"
-						class="pa-1"
-						style="height: fit-content"
-					>
-						<book-item :book="book"/>
-					</v-col>
+			<empty-state
+				v-if="model.getBooks().length === 0 && !loadingBooks"
+				icon="mdi-book-plus-outline"
+				:chip-icons="['mdi-book-outline', 'mdi-bookshelf', 'mdi-book-open-page-variant', 'mdi-book-multiple-outline', 'mdi-book-open-variant', 'mdi-barcode-scan', 'mdi-book-account-outline', 'mdi-notebook-outline']"
+				:title="t(AppLabels.EMPTY_LIBRARY_TITLE)"
+				:description="t(AppLabels.EMPTY_LIBRARY_DESC)"
+			>
+				<v-btn
+					@click="createBookIsbnDialog = true"
+					class="text-none"
+					color="primary"
+					variant="elevated"
+					small
+				>
+					{{t(AppLabels.ADD_BOOK)}}
+				</v-btn>
+			</empty-state>
 
-					<template v-if="loadingBooks">
+			<template v-else>
+				<template v-if="gridLayout">
+					<v-row no-gutters style="flex: initial">
 						<v-col
-							v-for="item in model.getLimit()"
-							:key="item"
-							cols="6"
-							sm="4"
-							md="3"
-							class="pa-2"
+							v-for="book in model.getBooks()"
+							:key="book.getId()"
+							cols="12"
+							sm="6"
+							md="4"
+							lg="3"
+							class="pa-1"
 							style="height: fit-content"
 						>
-							<book-item-skeleton/>
+							<book-item :book="book"/>
 						</v-col>
+
+						<template v-if="loadingBooks">
+							<v-col
+								v-for="item in model.getLimit()"
+								:key="item"
+								cols="6"
+								sm="4"
+								md="3"
+								class="pa-2"
+								style="height: fit-content"
+							>
+								<book-item-skeleton/>
+							</v-col>
+						</template>
+					</v-row>
+
+					<!-- Infinite scroll trigger -->
+					<div ref="infiniteScrollTrigger" class="infinite-scroll-trigger"></div>
+				</template>
+
+				<v-data-table-server
+					v-else
+					fixed-header
+					striped="even"
+					:items-per-page="model.getLimit()"
+					:items-per-page-options="[model.getLimit()]"
+					:headers="headers"
+					:items="itemsJson"
+					:items-length="model.getTotalBooks()"
+					:loading="loadingBooks"
+					@update:page="loadMoreBooks"
+					style="height: 100%"
+				>
+					<template v-slot:item.image="{ value }">
+						<img
+							:src="value"
+							class="mr-2 my-0"
+							style="border-radius: 6px; height: 45px; width: 35px; object-fit: cover"
+						/>
 					</template>
-				</v-row>
-
-				<!-- Infinite scroll trigger -->
-				<div ref="infiniteScrollTrigger" class="infinite-scroll-trigger"></div>
+					<template v-slot:item.name="data">
+						<a :href="data.item.url">{{ data.item.name }}</a>
+					</template>
+				</v-data-table-server>
 			</template>
-
-			<v-data-table-server
-				v-else
-				fixed-header
-				striped="even"
-				:items-per-page="model.getLimit()"
-				:items-per-page-options="[model.getLimit()]"
-				:headers="headers"
-				:items="itemsJson"
-				:items-length="model.getTotalBooks()"
-				:loading="loadingBooks"
-				@update:page="loadMoreBooks"
-				style="height: 100%"
-			>
-				<template v-slot:item.image="{ value }">
-					<img
-						:src="value"
-						class="mr-2 my-0"
-						style="border-radius: 6px; height: 45px; width: 35px; object-fit: cover"
-					/>
-				</template>
-				<template v-slot:item.name="data">
-					<a :href="data.item.url">{{ data.item.name }}</a>
-				</template>
-			</v-data-table-server>
 		</template>
 	</page-component>
 </template>
@@ -142,6 +162,7 @@ import CreateBookManuallyDialog from "@/views/search/components/CreateBookManual
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import SearchFilters from "@/views/search/components/SearchFilters.vue";
+import EmptyState from "@/components/emptyState/EmptyState.vue";
 
 const model = new SearchController();
 

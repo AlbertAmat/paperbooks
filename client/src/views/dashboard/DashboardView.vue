@@ -81,7 +81,25 @@
 
 				<v-col class="pl-1 pr-0">
 					<dashboard-card :title="t(AppLabels.DASHBOARD_LAST_BOOKS)" style="height: 100%; max-height: 100%">
-						<v-list slim style="padding: 0;">
+						<empty-state
+							v-if="controller.getLastBooks().length === 0"
+							compact
+							icon="mdi-book-plus-outline"
+							:title="t(AppLabels.EMPTY_LAST_BOOKS_TITLE)"
+							:description="t(AppLabels.EMPTY_LAST_BOOKS_DESC)"
+						>
+							<v-btn
+								@click="goToLibrary()"
+								class="text-none"
+								color="primary"
+								variant="elevated"
+								size="small"
+							>
+								{{t(AppLabels.ADD_BOOK)}}
+							</v-btn>
+						</empty-state>
+
+						<v-list v-else slim style="padding: 0;">
 							<v-list-item
 								v-for="item in controller.getLastBooks()"
 								:to="getBookUrl(item.id)"
@@ -122,6 +140,9 @@ import {computed} from "vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import ReturnBooksDialog from "@/views/customers/components/ReturnBooksDialog.vue";
+import EmptyState from "@/components/emptyState/EmptyState.vue";
+import router from "@/router/Router";
+import {searchRoute} from "@/router/routes/SearchRoute";
 
 const controller = new DashboardController();
 
@@ -129,6 +150,10 @@ const {t} = useI18n();
 
 function getBookUrl(id: number) {
 	return bookRoute.getPath(id)
+}
+
+function goToLibrary() {
+	router.push(searchRoute.getPath());
 }
 
 const upBooksTrend = computed(() => controller.getTotalThisMonth() > controller.getTotalLastMonth())
