@@ -91,7 +91,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
 
     try {
         const pool = appService.getDatabasePool();
-        const userQuery = "SELECT id, code, password FROM users WHERE code = $1 OR email = $2 AND disabled = FALSE";
+        const userQuery = "SELECT id, code, password FROM users WHERE (code = $1 OR email = $2) AND disabled = FALSE";
         const userResult = await pool.query(userQuery, [username, username]);
 
         if (userResult.rows.length === 0) {

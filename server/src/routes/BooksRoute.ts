@@ -260,7 +260,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 
     try {
         // Validate the existence of the book
-        const bookCheck = await client.query('SELECT id FROM books WHERE id = $1', [id]);
+        const bookCheck = await client.query('SELECT id FROM books WHERE id = $1 AND user_id = $2', [id, userId]);
         if (bookCheck.rowCount === 0) {
             return res.status(404).send({error: "Book not found"});
         }

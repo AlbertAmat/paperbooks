@@ -159,9 +159,10 @@ router.post("/password", requireAuth, async (req: Request, res: Response) => {
             });
         }
 
+        const newHashedPassword = await appService.hashPassword(newPassword);
         await client.query(
             `UPDATE users SET password = $1 WHERE id = $2`,
-            [appService.hashPassword(newPassword), userId]
+            [newHashedPassword, userId]
         );
 
         return res.json({
