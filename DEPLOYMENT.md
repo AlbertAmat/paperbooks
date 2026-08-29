@@ -284,6 +284,14 @@ box.
   ```
   Pin `APP_TAG` to a specific version rather than `latest` so upgrades are a
   deliberate step, not a surprise on container restart.
+- **Postgres major-version bumps are not the same kind of upgrade.** The app-version
+  upgrade above is a drop-in restart because the same Postgres major version keeps
+  reading the same data files. Bumping `docker-compose.yml`'s `postgres:XX-alpine`
+  tag to a new *major* version is not — Postgres's on-disk format changes between
+  majors, so an existing `db-data` volume won't just start under a newer major. Back
+  it up (`docker compose exec db pg_dump -U <DB_USER> <DB_NAME>`), then either use
+  `pg_upgrade` or restore the dump into a fresh volume on the new version, before
+  changing the image tag on a database that already has data in it.
 - **Confirming what's actually running**:
   `curl http://<host>:<port>/api/rest/app/version` (adjust for your setup — through
   your proxy/tunnel URL if the port isn't published).
