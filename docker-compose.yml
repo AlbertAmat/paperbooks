@@ -32,6 +32,20 @@ services:
     volumes:
       - app-logs:/app/logs
 
+  # Optional: exposes the app to the internet via Cloudflare Tunnel instead
+  # of (or in addition to) the published port above — no inbound port or
+  # cert needed. Only starts if you opt in with the "cloudflare" profile:
+  #   docker compose --profile cloudflare up -d
+  # Requires CLOUDFLARE_TUNNEL_TOKEN in .env. If you'd rather run your own
+  # reverse proxy/DNS, just never pass that profile and this is skipped.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    profiles: ["cloudflare"]
+    command: tunnel run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - app
+
 volumes:
   db-data:
   app-logs:

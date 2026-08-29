@@ -312,6 +312,32 @@ A few things worth knowing before pointing this at a real server:
 To build a multi-arch image or push to a different registry, adjust
 `.github/workflows/docker-release.yml`.
 
+### Exposing it to the internet
+
+The `app` container only speaks plain HTTP, so it needs TLS in front of it before
+you point a real domain at it. Two ways to do that — pick one, they're independent
+of everything above:
+
+**Your own reverse proxy / DNS.** Put Nginx, Caddy, Traefik, or similar in front of
+the published port (`API_PORT`, default `3000`), terminate TLS there, and forward to
+it. Nothing in this repo needs to change for this path. Set `FRONT_END_URL` in `.env`
+to the public HTTPS URL your proxy serves, and set `TRUST_PROXY=true` so the login
+rate limiter sees your visitors' real IPs instead of your proxy's.
+
+**Cloudflare Tunnel**, if your domain's DNS is already on Cloudflare. No inbound port,
+no certificate to manage:
+
+1. In the Cloudflare dashboard: Zero Trust → Networks → Tunnels → create a tunnel,
+   add a public hostname (e.g. `books.example.com`) pointing at service
+   `http://app:3000`, and copy the tunnel token it gives you.
+2. In `.env`, set `CLOUDFLARE_TUNNEL_TOKEN` to that token, `TRUST_PROXY=true`, and
+   `FRONT_END_URL=https://books.example.com`.
+3. Start the stack with the `cloudflare` profile so the tunnel container runs too:
+   `docker compose --profile cloudflare up -d`
+
+If you skip both, the app is only reachable at `http://<server-ip>:<API_PORT>` —
+fine for local/LAN use, not for the public internet.
+
 ## Releasing a new version
 
 The repository root has a `package.json` that exists solely to anchor the release

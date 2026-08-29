@@ -101,6 +101,15 @@ export class AppService {
         this.m_port = Number(process.env.API_PORT); // API port
 
         this.m_app = express(); // Initialize Express app
+
+        // Only trust X-Forwarded-* headers when this instance is actually
+        // sitting behind a reverse proxy/tunnel (Cloudflare Tunnel, Nginx,
+        // Caddy, ...). Enabling this without a real proxy in front lets any
+        // client spoof its IP and bypass the rate limiters below.
+        if (process.env.TRUST_PROXY === "true") {
+            this.m_app.set("trust proxy", 1);
+        }
+
         this.m_app.use(bodyParser.json()); // Parse JSON request bodies
         this.m_app.use(bodyParser.urlencoded({extended: true})); // Parse URL-encoded bodies
         this.m_app.use(cookieParser()); // Parse cookies
