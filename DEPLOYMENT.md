@@ -218,9 +218,15 @@ instead of Compose services:
   or **Nginx Proxy Manager** Community Applications templates both work — point them
   at `http://<TOWER-IP>:3000` (or the container's name/IP if it's on the custom
   network from below) the same way you would in [scenario B](#b-production-with-your-own-reverse-proxy--dns).
-- **Cloudflare Tunnel**: the official `cloudflare/cloudflared` image runs as an
-  Unraid container the same way — same setup as [scenario C](#c-production-with-cloudflare-tunnel),
-  with the tunnel's public hostname pointing at the PaperBooks container.
+- **Cloudflare Tunnel**: add the official `cloudflare/cloudflared:latest` image as
+  its own container — Add Container → Repository `cloudflare/cloudflared:latest`,
+  **Network Type** set to the same custom network as PaperBooks (see below) so it can
+  reach it by container name without publishing any port, and **Extra Parameters** /
+  **Post Arguments** set to `tunnel run --token <your-tunnel-token>` (the same token
+  from Cloudflare's Zero Trust → Tunnels dashboard used in [scenario C](#c-production-with-cloudflare-tunnel)).
+  In the Cloudflare dashboard, point the tunnel's public hostname at
+  `http://<PaperBooks-container-name>:3000` — the exact name you gave the PaperBooks
+  container, resolvable over Docker's internal DNS since they share a network.
 
 Either way, once traffic reaches it through a proxy/tunnel, flip `TRUST_PROXY` to
 `true` in the PaperBooks container's settings — otherwise its rate limiter can't
