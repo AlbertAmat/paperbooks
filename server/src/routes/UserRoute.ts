@@ -2,8 +2,18 @@ import {Router, Request, Response} from 'express';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import {appService} from "../AppService";
 import multer from "multer";
+import rateLimit from "express-rate-limit";
 
 const router = Router();
+
+// Strict limiter for the current-password check, same shape as the
+// login/register limiter - without it, a stolen/short-lived session token
+// could be used to brute-force the account's current password.
+const passwordChangeLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 5,
+    message: "Too many attempts, please try again later.",
+});
 
 // Multer setup - store in memory
 const storage = multer.memoryStorage();
@@ -117,7 +127,7 @@ router.delete("", requireAuth, async (req: Request, res: Response) => {
     }
 });
 
-router.post("/password", requireAuth, async (req: Request, res: Response) => {
+router.post("/password", requireAuth, passwordChangeLimiter, async (req: Request, res: Response) => {
     const { currentPassword, newPassword } = req.body;
 
     const pool = appService.getDatabasePool();
@@ -160,10 +170,23 @@ router.post("/password", requireAuth, async (req: Request, res: Response) => {
         }
 
         const newHashedPassword = await appService.hashPassword(newPassword);
-        await client.query(
-            `UPDATE users SET password = $1 WHERE id = $2`,
+
+        // Bumping token_version invalidates every session token issued
+        // before this change (stolen tokens included) - requireAuth checks
+        // it on every request. RETURNING gets us the new value so we can
+        // reissue a token for *this* session without logging the user out.
+        const updateResult = await client.query(
+            `UPDATE users SET password = $1, token_version = token_version + 1 WHERE id = $2 RETURNING token_version`,
             [newHashedPassword, userId]
         );
+
+        const newToken = appService.createSessionToken(userId, updateResult.rows[0].token_version);
+        res.cookie("token", newToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: appService.getSessionTime()
+        });
 
         return res.json({
             success: true,

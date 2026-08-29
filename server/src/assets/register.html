@@ -63,11 +63,34 @@
             height: 20px;
             font-size: 14px;
         }
+        .success-message {
+            color: #1c7a1c;
+            background: #eaf7ea;
+            border: 1px solid #cdeacd;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-align: left;
+            display: none;
+        }
+        .success-message a {
+            color: #007bff;
+        }
     </style>
 </head>
 <body>
 <div class="register-container">
     <h2>Paper Books - Register</h2>
+
+    <div class="success-message" id="success-message">
+        Your account has been created. An administrator needs to review and
+        approve it before you can log in — you'll be able to sign in once
+        that happens.
+        <br><br>
+        <a href="/login">Go to login</a>
+    </div>
+
     <form id="registerForm" action="/register" method="POST">
         <div class="input-group">
             <input type="text" name="name" placeholder="Name" required>
@@ -132,7 +155,8 @@
             }
 
             errorMessage.style.display = "none";
-            window.location.href = data.redirectUrl || "/login";
+            form.style.display = "none";
+            document.getElementById('success-message').style.display = "block";
 
         } catch (error) {
             errorMessage.innerText = error;

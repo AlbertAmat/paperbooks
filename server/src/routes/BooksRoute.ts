@@ -81,7 +81,7 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
                 ? category_id.map(Number)
                 : String(category_id).split(',').map(Number);
 
-            conditions.push(`category_id = ANY($${conditions.length + 1})`);
+            conditions.push(`category_id = ANY($${params.length + 1})`);
             params.push(ids);
         }
 
@@ -89,12 +89,12 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
             filters.forEach((filter) => {
                 switch (filter) {
                     case SearchFilter.NO_STOCK: {
-                        conditions.push(`books.id NOT IN (SELECT book_id FROM book_stocks WHERE user_id = $${conditions.length + 1})`);
+                        conditions.push(`books.id NOT IN (SELECT book_id FROM book_stocks WHERE user_id = $${params.length + 1})`);
                         params.push(userId);
                         break;
                     }
                     case SearchFilter.HAS_STOCK: {
-                        conditions.push(`books.id IN (SELECT book_id FROM book_stocks WHERE user_id = $${conditions.length + 1})`);
+                        conditions.push(`books.id IN (SELECT book_id FROM book_stocks WHERE user_id = $${params.length + 1})`);
                         params.push(userId);
                         break;
                     }
@@ -253,6 +253,10 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
         pages,
         format_id
     } = req.body;
+
+    if (image_url && !isAllowedImageUrl(image_url)) {
+        return res.status(400).send({error: "Invalid image URL"});
+    }
 
     // Database connection
     const pool = appService.getDatabasePool();
@@ -1140,6 +1144,33 @@ router.post('/return', requireAuth, upload.single("image"), async (req: Request,
 });
 
 // Helper function to format date to YYYY-MM-DD
+// Hosts our ISBN metadata lookups (Google Books, Open Library covers) are
+// allowed to point book cover images at.
+const ALLOWED_IMAGE_HOSTS = new Set([
+    'books.google.com',
+    'covers.openlibrary.org',
+]);
+
+/**
+ * Only allow images we generated ourselves (data: URIs from the upload
+ * endpoints) or ones from the known ISBN metadata providers. Without this,
+ * a client could set books.image_url to any external URL, which the app
+ * would then load as an <img src> - a tracking-pixel / IP-disclosure vector,
+ * and it makes the CSP imgSrc allowlist meaningless.
+ */
+function isAllowedImageUrl(url: string): boolean {
+    if (url.startsWith('data:image/png;base64,') || url.startsWith('data:image/jpeg;base64,')) {
+        return true;
+    }
+    try {
+        const parsed = new URL(url);
+        return (parsed.protocol === 'http:' || parsed.protocol === 'https:')
+            && ALLOWED_IMAGE_HOSTS.has(parsed.hostname);
+    } catch {
+        return false;
+    }
+}
+
 function formatPublishedDate(date: string | undefined): string | null {
     if (!date) return null;
 

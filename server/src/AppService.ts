@@ -126,7 +126,10 @@ export class AppService {
                     scriptSrc: ["'self'", frontEndUrl, "'unsafe-inline'"],
                     styleSrc: ["'self'", "'unsafe-inline'"],
                     frameSrc: ["'self'", "data:"],
-                    imgSrc: ["'self'", "data:", "*"],
+                    // Book covers are either our own uploads (data: URIs) or fetched
+                    // from these two ISBN metadata providers - kept in sync with the
+                    // isAllowedImageUrl() allowlist in BooksRoute.ts.
+                    imgSrc: ["'self'", "data:", "https://books.google.com", "http://books.google.com", "https://covers.openlibrary.org"],
                     "script-src-attr": ["'unsafe-inline'"],
                     "script-src-elem": ["'unsafe-inline'", "'self'", frontEndUrl, "'unsafe-inline'"]
                 },
@@ -288,6 +291,26 @@ export class AppService {
         }
 
         return decoded.user_id;
+    }
+
+    /**
+     * Create a signed JWT session token. tokenVersion must match the user's
+     * current users.token_version at verification time (see requireAuth) -
+     * bumping the DB column invalidates every previously issued token for
+     * that user, e.g. on password change.
+     * @param userId
+     * @param tokenVersion
+     */
+    public createSessionToken(userId: number, tokenVersion: number): string {
+        return jwt.sign(
+            {user_id: userId, token_version: tokenVersion},
+            this.getJwtSecret(),
+            {
+                expiresIn: Math.floor(this.getSessionTime() / 1000),
+                audience: "paperbooks",
+                issuer: "paperbooks.xyz"
+            }
+        );
     }
 
     /**

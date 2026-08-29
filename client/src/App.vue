@@ -15,7 +15,7 @@
 			v-else-if="applicationService.hasError()"
 			class="error-container"
 		>
-			<p v-html="applicationService.getError()!.message"></p>
+			<p>{{ applicationService.getError()!.message }}</p>
 		</div>
 
 		<template v-else>

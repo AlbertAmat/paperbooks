@@ -757,7 +757,9 @@ CREATE TABLE users
     id              SERIAL PRIMARY KEY,
     code            VARCHAR(50) UNIQUE  NOT NULL,
     name            VARCHAR(100)        NOT NULL,
-    password        VARCHAR(64)         NOT NULL,
+    -- TEXT, not a fixed VARCHAR: bcrypt hashes are exactly 60 chars today,
+    -- but a future hashing algorithm (e.g. argon2id) may need more room.
+    password        TEXT                NOT NULL,
     email           VARCHAR(100) UNIQUE NOT NULL,
     last_login_date TIMESTAMP,
     created_date    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -766,6 +768,11 @@ CREATE TABLE users
     region          CHAR(2)   DEFAULT 'US',
     disabled        BOOLEAN  DEFAULT TRUE,
     is_public_institution BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Bumped on password change (and available for a future "log out other
+    -- sessions" action). requireAuth rejects any JWT whose token_version
+    -- claim doesn't match this, which is what lets a stateless JWT session
+    -- be revoked before it naturally expires.
+    token_version   INT NOT NULL DEFAULT 0,
     FOREIGN KEY (language) REFERENCES app_languages (code) ON DELETE SET NULL
 );
 

@@ -1,6 +1,5 @@
 import express, {Request, Response} from "express";
 import {appService} from "../AppService";
-import jwt from "jsonwebtoken";
 import path from "path";
 import rateLimit from "express-rate-limit";
 import {requireAuth} from "../middlewares/AuthMiddleware";
@@ -13,19 +12,6 @@ const authLimiter = rateLimit({
     max: 5, // only allow 5 requests per IP per window
     message: "Too many attempts, please try again after 15 minutes.",
 });
-
-// Helper: Create token
-function createToken(userId: number) {
-    return jwt.sign(
-        {user_id: userId},
-        appService.getJwtSecret(),
-        {
-            expiresIn: Math.floor(appService.getSessionTime() / 1000),
-            audience: "paperbooks",
-            issuer: "paperbooks.xyz"
-        }
-    );
-}
 
 const clientDistPath = process.env.NODE_ENV === "production" ?  path.join(__dirname, "../../../client") : path.join(__dirname, '../../../client/dist')
 router.use("/app/assets", requireAuth, express.static(path.join(clientDistPath, "assets"), {
@@ -91,7 +77,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
 
     try {
         const pool = appService.getDatabasePool();
-        const userQuery = "SELECT id, code, password FROM users WHERE (code = $1 OR email = $2) AND disabled = FALSE";
+        const userQuery = "SELECT id, code, password, token_version FROM users WHERE (code = $1 OR email = $2) AND disabled = FALSE";
         const userResult = await pool.query(userQuery, [username, username]);
 
         if (userResult.rows.length === 0) {
@@ -118,7 +104,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
 
         console.log("Setting session and cookie for user:" + username);
 
-        const userToken = createToken(user.id);
+        const userToken = appService.createSessionToken(user.id, user.token_version);
 
         // Send JWT in cookie
         res.cookie("token", userToken, {
