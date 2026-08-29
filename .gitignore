@@ -4,6 +4,7 @@ node_modules
 /dist/
 ecosystem-config.js
 /dist.zip
+/bookStorage.log
 /server/dist/middlewares/AuthMiddleware.js
 /server/dist/middlewares/AuthMiddleware.js.map
 /server/dist/routes/AppRoute.js

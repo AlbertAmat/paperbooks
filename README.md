@@ -29,6 +29,8 @@ language, format, cover image), and it can look books up automatically by ISBN.
   - [5. Run the client](#5-run-the-client)
 - [Building for production](#building-for-production)
 - [Deploying with PM2](#deploying-with-pm2)
+- [Deploying with Docker](#deploying-with-docker)
+- [Releasing a new version](#releasing-a-new-version)
 - [Internationalization](#internationalization)
 - [Contributing](#contributing)
 - [Security](#security)
@@ -271,6 +273,67 @@ cp assets/pm2/ecosystem.config.js.sample ecosystem.config.js
 # edit ecosystem.config.js with your production values
 pm2 start ecosystem.config.js --env production
 ```
+
+## Deploying with Docker
+
+Every push of a `vX.Y.Z` tag builds a production image and publishes it to GitHub
+Container Registry at `ghcr.io/albertamat/paperbooks` (see
+[Releasing a new version](#releasing-a-new-version)). The image bundles the compiled
+server and the built client into one process, same as the PM2 deployment above — there
+is no separate frontend container.
+
+To run it on a server with Docker installed:
+
+```bash
+curl -O https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/.env.example
+cp .env.example .env
+# edit .env: set JWT_SECRET, DB_PASSWORD, FRONT_END_URL, etc.
+docker compose up -d
+```
+
+This starts two containers: `db` (PostgreSQL, seeded from
+`assets/db/databaseSchema.sql` on first run) and `app` (the image above). Pin `APP_TAG`
+in `.env` to a specific released version rather than `latest` if you want upgrades to
+be a deliberate step.
+
+A few things worth knowing before pointing this at a real server:
+
+- **`ALLOW_DEV_AUTH` must stay `false`.** It bypasses login with a fake session and
+  exists only for local development.
+- **`DB_HOST`/`DB_PORT` in `.env` are ignored for the `app` container** — it always
+  connects to the `db` service on the compose network. They only configure the `db`
+  container itself.
+- **Logs** are written to `/app/logs` inside the container (`LOGGER_PATH`), persisted
+  via the `app-logs` volume.
+- To build and run the image locally instead of pulling it:
+  `docker build -t paperbooks .`
+
+To build a multi-arch image or push to a different registry, adjust
+`.github/workflows/docker-release.yml`.
+
+## Releasing a new version
+
+The repository root has a `package.json` that exists solely to anchor the release
+version (the client and server aren't published packages and keep their own internal
+version fields). To cut a release:
+
+```bash
+npm version patch   # or: minor / major
+git push --follow-tags
+```
+
+`npm version` bumps `package.json`, commits it, and creates a `vX.Y.Z` git tag.
+Pushing that tag triggers `.github/workflows/docker-release.yml`, which builds the
+Docker image, pushes `ghcr.io/albertamat/paperbooks:X.Y.Z` and `:latest`, and creates
+a matching GitHub Release with auto-generated notes.
+
+The running app version is available at `GET /api/rest/app/version` (unauthenticated),
+useful for confirming what's actually deployed.
+
+The first time you release, open the new package under **Packages** on the GitHub repo
+and set its visibility (packages default to private) so `docker pull` works without
+authentication on your server.
 
 ## Internationalization
 

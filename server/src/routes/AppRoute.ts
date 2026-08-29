@@ -5,6 +5,16 @@ import path from "path";
 
 const router = Router();
 
+// GET - version/health check, unauthenticated so it can be used by
+// container orchestrators and uptime monitors
+// /app/version
+router.get('/version', (req: Request, res: Response) => {
+    res.json({
+        version: process.env.APP_VERSION || "dev",
+        uptime: process.uptime(),
+    });
+});
+
 // GET - policy conf
 // /app/policy
 //@ts-ignore
