@@ -313,7 +313,8 @@ To build a multi-arch image or push to a different registry, adjust
 `.github/workflows/docker-release.yml`.
 
 For step-by-step instructions covering local-only self-hosting, production behind
-your own reverse proxy/DNS, and production behind Cloudflare Tunnel, see
+your own reverse proxy/DNS, production behind Cloudflare Tunnel, and a one-click
+**Unraid** template (Docker tab → Add Container, no Compose needed), see
 **[DEPLOYMENT.md](DEPLOYMENT.md)**.
 
 ## Releasing a new version

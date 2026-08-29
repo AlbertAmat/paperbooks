@@ -2,18 +2,20 @@
 
 PaperBooks ships as one Docker image (`ghcr.io/albertamat/paperbooks`) containing the
 compiled server and the built client, plus a `docker-compose.yml` that adds a
-PostgreSQL container next to it. This guide covers three ways to run that stack,
-depending on who should be able to reach it:
+PostgreSQL container next to it. This guide covers four ways to run it, depending on
+who should be able to reach it and what's managing your containers:
 
 | # | Scenario | Reachable from | TLS handled by | Extra container |
 |---|----------|-----------------|-----------------|------------------|
 | [A](#a-self-hosted-local-only--no-public-access) | Self-hosted, local only | this machine / your LAN | — (none needed) | none |
 | [B](#b-production-with-your-own-reverse-proxy--dns) | Production, your own proxy/DNS | the public internet | your proxy (Caddy/Nginx/Traefik) | none (proxy runs on the host, outside Compose) |
 | [C](#c-production-with-cloudflare-tunnel) | Production, Cloudflare Tunnel | the public internet | Cloudflare | `cloudflared` |
+| [D](#d-unraid-one-click-add-container) | Unraid, via its Docker UI | your LAN, or the internet if you add your own proxy/tunnel on top | up to you (same choices as B/C) | none — uses Unraid's own container manager instead of Compose |
 
 If you're not sure which one you want: **A** if this never leaves your home network,
 **C** if your domain's DNS already lives on Cloudflare and you'd rather not manage
-certificates, **B** for everything else (your own domain/DNS/server, full control).
+certificates, **B** for everything else (your own domain/DNS/server, full control),
+**D** if you're running Unraid and would rather use its Docker tab than Compose.
 
 ---
 
@@ -159,6 +161,52 @@ managed there.
 
 5. Firewall: nothing to open. `cloudflared` only makes outbound connections to
    Cloudflare.
+
+---
+
+## D. Unraid (one-click Add Container)
+
+Use this if you run Unraid and would rather add the app through its Docker tab than
+write a Compose file by hand.
+
+**Prerequisites:** a reachable PostgreSQL server — either an existing one (many
+Unraid boxes already run one for other apps), or add Postgres as its own container
+first (the official `postgres` Community Applications template works). Either way,
+the schema in `assets/db/databaseSchema.sql` needs to be imported into it once —
+there's nothing in the template that does this for you.
+
+1. **Load the template.** From a browser on your LAN, visit (swap in your Tower's
+   actual address):
+   ```
+   http://<TOWER-IP>/Docker/AddContainer?xmlTemplate=https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/unraid/paperbooks.xml
+   ```
+   This opens Unraid's "Add Container" page pre-filled with the image, port, path,
+   and all the env vars below — that's the one-click part.
+
+   Prefer to install it through Unraid's UI instead of a typed URL? Docker tab →
+   gear icon → **Template Repositories** → add `https://github.com/AlbertAmat/paperbooks`,
+   save. The template then shows up under **Add Container → Template** going forward,
+   and stays in sync if the template is ever updated.
+
+2. Fill in the required fields — same meaning as their `.env` counterparts elsewhere
+   in this guide:
+   - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` — pointing at the
+     Postgres server from the prerequisites step.
+   - `FRONT_END_URL` — e.g. `http://<TOWER-IP>:3000`, or your public HTTPS URL if
+     you're putting a proxy/tunnel in front (see below).
+   - `JWT_SECRET` — generate with `openssl rand -hex 32`.
+   - `ALLOW_DEV_AUTH` — leave `false`.
+   - `TRUST_PROXY` — `false` if you're only reaching it via `TOWER-IP:3000` on your
+     LAN; `true` if you add SWAG, Nginx Proxy Manager, or Cloudflare Tunnel in front
+     of it, same reasoning as scenarios B and C.
+
+3. Click **Apply**. Unraid pulls the image and starts the container; the "WebUI"
+   link on its Docker tab entry opens straight to the login page.
+
+4. Want this reachable outside your LAN? Put your own reverse proxy or Cloudflare
+   Tunnel container in front of it exactly as in [scenario B](#b-production-with-your-own-reverse-proxy--dns)
+   or [C](#c-production-with-cloudflare-tunnel) — just remember to flip `TRUST_PROXY`
+   to `true` in the container's settings afterwards.
 
 ---
 

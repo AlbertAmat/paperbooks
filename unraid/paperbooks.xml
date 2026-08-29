@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>PaperBooks</Name>
+  <Repository>ghcr.io/albertamat/paperbooks:latest</Repository>
+  <Registry>https://github.com/AlbertAmat/paperbooks/pkgs/container/paperbooks</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/AlbertAmat/paperbooks/issues</Support>
+  <Project>https://github.com/AlbertAmat/paperbooks</Project>
+  <Overview>PaperBooks is a self-hosted app for tracking, organizing, and lending physical book collections. This template runs the app itself; it needs a PostgreSQL server to connect to (its own container, or one you already run) with the schema from assets/db/databaseSchema.sql imported once. See the Project link, DEPLOYMENT.md, for full setup instructions.</Overview>
+  <Category>Productivity: Tools:</Category>
+  <WebUI>http://[IP]:[PORT:3000]/login</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/unraid/paperbooks.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/client/public/favicon.ico</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Description>Self-hosted book tracking &amp; lending library manager. Requires a separate PostgreSQL server.</Description>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>3000</HostPort>
+        <ContainerPort>3000</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/paperbooks/logs</HostDir>
+      <ContainerDir>/app/logs</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+  </Data>
+  <Config Name="WebUI Port" Target="3000" Default="3000" Mode="tcp" Description="Port the app listens on and is published on" Type="Port" Display="always" Required="true" Mask="false">3000</Config>
+  <Config Name="Logs" Target="/app/logs" Default="/mnt/user/appdata/paperbooks/logs" Mode="rw" Description="Persistent app log directory" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/paperbooks/logs</Config>
+  <Config Name="DB_HOST" Target="DB_HOST" Default="" Mode="" Description="Hostname/IP of your PostgreSQL server — e.g. another container's name on the same custom network, or your Unraid IP if Postgres runs elsewhere" Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="DB_PORT" Target="DB_PORT" Default="5432" Mode="" Description="PostgreSQL port" Type="Variable" Display="always" Required="true" Mask="false">5432</Config>
+  <Config Name="DB_NAME" Target="DB_NAME" Default="paperbooks" Mode="" Description="Database name" Type="Variable" Display="always" Required="true" Mask="false">paperbooks</Config>
+  <Config Name="DB_USER" Target="DB_USER" Default="postgres" Mode="" Description="Database user" Type="Variable" Display="always" Required="true" Mask="false">postgres</Config>
+  <Config Name="DB_PASSWORD" Target="DB_PASSWORD" Default="" Mode="" Description="Database password" Type="Variable" Display="always" Required="true" Mask="true"></Config>
+  <Config Name="FRONT_END_URL" Target="FRONT_END_URL" Default="" Mode="" Description="Public URL this app is served at, e.g. https://books.example.com or http://TOWER_IP:3000. Used for CORS/CSP." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="JWT_SECRET" Target="JWT_SECRET" Default="" Mode="" Description="Long random secret used to sign login sessions. Generate with: openssl rand -hex 32" Type="Variable" Display="always" Required="true" Mask="true"></Config>
+  <Config Name="ALLOW_DEV_AUTH" Target="ALLOW_DEV_AUTH" Default="false" Mode="" Description="NEVER set true unless only you can reach this container. Bypasses login entirely with a fake session." Type="Variable" Display="always" Required="true" Mask="false">false</Config>
+  <Config Name="TRUST_PROXY" Target="TRUST_PROXY" Default="false" Mode="" Description="Set true only if this sits behind a reverse proxy or tunnel (SWAG, Nginx Proxy Manager, Cloudflare Tunnel, ...) that sets X-Forwarded-* headers. Leave false if you're publishing the port directly." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+  <Config Name="SESSION_TIME" Target="SESSION_TIME" Default="3600000" Mode="" Description="Session/cookie lifetime in milliseconds" Type="Variable" Display="advanced" Required="false" Mask="false">3600000</Config>
+  <Config Name="GOOGLE_BOOKS_API_KEY" Target="GOOGLE_BOOKS_API_KEY" Default="" Mode="" Description="Optional: enables ISBN metadata lookups via Google Books instead of the free Open Library fallback" Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="LOGGER_PATH" Target="LOGGER_PATH" Default="/app/logs" Mode="" Description="Do not change — must match the Logs path above" Type="Variable" Display="advanced" Required="true" Mask="false">/app/logs</Config>
+  <Config Name="API_PORT" Target="API_PORT" Default="3000" Mode="" Description="Do not change — must match the WebUI Port container-side value above" Type="Variable" Display="advanced" Required="true" Mask="false">3000</Config>
+</Container>
