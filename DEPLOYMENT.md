@@ -2,7 +2,7 @@
 
 PaperBooks ships as one Docker image (`ghcr.io/albertamat/paperbooks`) containing the
 compiled server and the built client, plus a `docker-compose.yml` that adds a
-PostgreSQL container next to it. This guide covers four ways to run it, depending on
+PostgreSQL container next to it. This guide covers five ways to run it, depending on
 who should be able to reach it and what's managing your containers:
 
 | # | Scenario | Reachable from | TLS handled by | Extra container |
@@ -11,11 +11,14 @@ who should be able to reach it and what's managing your containers:
 | [B](#b-production-with-your-own-reverse-proxy--dns) | Production, your own proxy/DNS | the public internet | your proxy (Caddy/Nginx/Traefik) | none (proxy runs on the host, outside Compose) |
 | [C](#c-production-with-cloudflare-tunnel) | Production, Cloudflare Tunnel | the public internet | Cloudflare | `cloudflared` |
 | [D](#d-unraid-one-click-add-container) | Unraid, via its Docker UI | your LAN, or the internet if you add your own proxy/tunnel on top | up to you (same choices as B/C) | none — uses Unraid's own container manager instead of Compose |
+| [E](#e-public-read-only-demo) | Public read-only demo | the public internet | Cloudflare (reuses C) | `cloudflared` + a second, separate stack |
 
 If you're not sure which one you want: **A** if this never leaves your home network,
 **C** if your domain's DNS already lives on Cloudflare and you'd rather not manage
 certificates, **B** for everything else (your own domain/DNS/server, full control),
-**D** if you're running Unraid and would rather use its Docker tab than Compose.
+**D** if you're running Unraid and would rather use its Docker tab than Compose,
+**E** if you want a public demo visitors can click around read-only, separate from
+any real deployment.
 
 ---
 
@@ -271,6 +274,62 @@ The result: PaperBooks and only what it needs (its proxy/tunnel, its own databas
 share a network that nothing else you self-host is on — so if it's ever compromised,
 the attacker's reach stops there instead of extending to every other service on the
 box.
+
+---
+
+## E. Public read-only demo
+
+Use this to run a public demo (e.g. `demo.your-domain.com`) that anyone can click
+around in, without risking your real data or letting visitors leave junk behind.
+It's a second, fully separate stack — its own database, its own `.env`, its own
+Cloudflare Tunnel hostname — sharing nothing with a production instance beyond the
+same Docker image.
+
+1. Check out a second directory (or just a second `.env` + compose project name —
+   the compose file itself doesn't change) so the demo has its own named volumes:
+   ```bash
+   mkdir paperbooks-demo && cd paperbooks-demo
+   curl -O https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/docker-compose.yml
+   curl -O https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/.env.example
+   cp .env.example .env
+   ```
+
+2. In this `.env`, on top of the usual `JWT_SECRET`/`DB_PASSWORD`:
+   ```
+   FRONT_END_URL=https://demo.your-domain.com
+   TRUST_PROXY=true
+   DEMO_MODE=true
+   CLOUDFLARE_TUNNEL_TOKEN=<a second tunnel, separate from any production one>
+   ```
+   `DEMO_MODE=true` makes the server reject every request except `GET`/`HEAD`/
+   `OPTIONS` and the login endpoints with `403` (see `blockWritesInDemo` in
+   `server/src/middlewares/DemoModeMiddleware.ts`) — visitors can log in and browse,
+   but can't add, edit, delete, or register a new account.
+
+3. Follow scenario C above to add the Cloudflare public hostname
+   (`demo.your-domain.com` → `http://app:3000`) and start with
+   `docker compose -p paperbooks-demo --profile cloudflare up -d`. The `-p` flag
+   keeps this stack's volumes/network namespaced separately from any production
+   `paperbooks` stack on the same host.
+
+4. Seed it with sample data and a fixed demo login instead of real records. There's
+   no seed script in the repo yet — the simplest options are a `pg_dump` of scrubbed
+   sample data restored into the `db` container, or a hand-written SQL file applied
+   the same way. Load it once with:
+   ```bash
+   docker compose -p paperbooks-demo exec -T db psql -U "$DB_USER" -d "$DB_NAME" < demo-seed.sql
+   ```
+
+5. Reset it on a schedule so it doesn't visibly degrade between visitors — e.g. a
+   host cron entry that re-applies the seed file hourly:
+   ```
+   0 * * * * cd /path/to/paperbooks-demo && docker compose -p paperbooks-demo exec -T db psql -U "$DB_USER" -d "$DB_NAME" < demo-seed.sql
+   ```
+   `DEMO_MODE` only blocks writes over HTTP - it doesn't stop the reseed script,
+   which talks to Postgres directly.
+
+`DEMO_MODE` is an HTTP-layer guard, not a substitute for `ALLOW_DEV_AUTH=false` or a
+real `JWT_SECRET` — every other production hardening step above still applies.
 
 ---
 

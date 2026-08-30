@@ -13,6 +13,7 @@ import bcrypt from "bcrypt"; // Library for password hashing
 import helmet from "helmet"; // Middleware to set secure HTTP headers
 import rateLimit from "express-rate-limit";
 import path from "path"; // Middleware to limit repeated requests
+import {blockWritesInDemo} from "./middlewares/DemoModeMiddleware"; // Rejects writes when DEMO_MODE=true
 
 interface DatabaseConf {
     host: string;
@@ -113,6 +114,10 @@ export class AppService {
         this.m_app.use(bodyParser.json()); // Parse JSON request bodies
         this.m_app.use(bodyParser.urlencoded({extended: true})); // Parse URL-encoded bodies
         this.m_app.use(cookieParser()); // Parse cookies
+
+        // Reject state-changing requests when DEMO_MODE=true - must run
+        // before routes are mounted so it covers AuthRoute (at "/") too.
+        this.m_app.use(blockWritesInDemo);
 
         // use static from compiled app in /assets/app
         this.m_app.use(express.static(path.join(__dirname,  "assets", "app")));
