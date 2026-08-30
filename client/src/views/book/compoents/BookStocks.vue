@@ -154,7 +154,7 @@ const stocks = computed(() => {
 function addToPrintQueue(id: number) {
 	const stock = props.book.getStocks().find((stock) => stock.getId() === id);
 	if (stock) {
-		printDialogController.addLabel(props.book.getName(), stock.getCode(), stock.generateBarcodeImage());
+		printDialogController.addLabel(props.book.getName(), stock.getCode(), stock.generateBarcodeImage(), props.book.getImageUrl());
 	}
 }
 

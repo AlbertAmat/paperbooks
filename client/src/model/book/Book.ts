@@ -213,7 +213,7 @@ export default class Book extends BookItem {
             appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_STOCK_ADDED)})
 
             if(print) {
-                printDialogController.addLabel(this.m_name.value, stock.getCode(), stock.generateBarcodeImage());
+                printDialogController.addLabel(this.m_name.value, stock.getCode(), stock.generateBarcodeImage(), this.getImageUrl());
             }
         } catch (e) {
             console.error("Error while adding book stock", e)

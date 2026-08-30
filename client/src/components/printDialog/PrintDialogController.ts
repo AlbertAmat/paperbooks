@@ -10,6 +10,8 @@ export interface PrintLabelItem {
     name: string;
     /** Rendered barcode canvas (see `BookStock.generateBarcodeImage()`). */
     label: HTMLCanvasElement;
+    /** Book cover image URL/data-URI, or null if the book has none. */
+    imageUrl: string | null;
 }
 
 /**
@@ -69,8 +71,9 @@ export class PrintDialogController {
      * @param code Stock code, used as the dedupe key (a label already queued
      * for this code is rejected with a warning snackbar).
      * @param label Canvas element representing the rendered barcode label.
+     * @param imageUrl Book cover image URL/data-URI, or null if none.
      */
-    public addLabel(name: string, code: string, label: HTMLCanvasElement) {
+    public addLabel(name: string, code: string, label: HTMLCanvasElement, imageUrl: string | null) {
         if(Object.keys(this.m_labels.value).includes(code)) {
             console.warn("label already exist");
             appSnackbarController.show({
@@ -80,13 +83,23 @@ export class PrintDialogController {
             return;
         }
 
-        this.m_labels.value[code] = {name: name, label: label};
+        this.m_labels.value[code] = {name: name, label: label, imageUrl: imageUrl};
         // Trigger reactivity update by replacing the object with a shallow copy
         this.m_labels.value = { ...this.m_labels.value };
 
         appSnackbarController.show({
             message:  i18n.global.t(AppLabels.SNACKBAR_PRINT_LABEL_ADDED)
         })
+    }
+
+    /**
+     * Removes a single queued label by its stock code.
+     * @param code Stock code of the label to remove (the key used in `addLabel`).
+     */
+    public removeLabel(code: string) {
+        const labels = { ...this.m_labels.value };
+        delete labels[code];
+        this.m_labels.value = labels;
     }
 
     /**

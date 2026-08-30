@@ -47,9 +47,48 @@
 				</v-btn>
 			</v-card-title>
 
-			<v-card-text class="pt-3" style="font-size: 14px">
+			<v-card-text class="pt-3 pb-2" style="font-size: 14px">
 				{{t(AppLabels.TOTAL_LABELS_TO_PRINT)}} <b>{{controller.getTotalLabels()}}</b>
 			</v-card-text>
+
+			<v-list
+				v-if="controller.getTotalLabels() > 0"
+				density="compact"
+				class="print-queue-list py-0"
+			>
+				<v-list-item
+					v-for="(item, code) in controller.getLabels()"
+					:key="code"
+					:title="item.name"
+					:subtitle="code"
+					density="compact"
+				>
+					<template v-slot:prepend>
+						<img
+							v-if="item.imageUrl != null"
+							:src="item.imageUrl"
+							class="print-queue-thumb"
+						/>
+						<div
+							v-else
+							class="print-queue-thumb print-queue-thumb-placeholder"
+						>
+							<v-icon size="small">mdi-image-outline</v-icon>
+						</div>
+					</template>
+
+					<template v-slot:append>
+						<v-btn
+							@click="controller.removeLabel(code)"
+							:title="t(AppLabels.DELETE)"
+							icon="mdi-close"
+							variant="text"
+							density="compact"
+							size="small"
+						/>
+					</template>
+				</v-list-item>
+			</v-list>
 
 			<v-divider/>
 
@@ -112,6 +151,26 @@ const model = computed({
    instead of Vuetify's default list-item color. */
 .print-queue-item {
 	color: var(--pb-nav-text-muted);
+}
+
+.print-queue-list {
+	max-height: 240px;
+	overflow-y: auto;
+}
+
+.print-queue-thumb {
+	height: 40px;
+	width: 30px;
+	margin-right: 10px;
+	border-radius: 2px;
+	object-fit: cover;
+}
+
+.print-queue-thumb-placeholder {
+	background-color: var(--pb-surface-alt);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .print-dialog-header {
