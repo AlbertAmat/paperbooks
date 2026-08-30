@@ -6,9 +6,7 @@
 	>
 		<template v-slot:default>
 			<div v-if="file">
-				<book-file-preview :key="file.id" :book="book" class="mb-3"/>
-
-				<div class="d-flex align-center">
+				<div class="d-flex align-center my-3">
 					<v-icon size="40" class="mr-3" color="primary">
 						{{ file.file_type === 'epub' ? 'mdi-book-open-page-variant-outline' : 'mdi-file-pdf-box' }}
 					</v-icon>
@@ -37,6 +35,8 @@
 						<v-icon color="error">mdi-delete</v-icon>
 					</v-btn>
 				</div>
+
+				<book-file-preview :key="file.id" :book="book"/>
 			</div>
 
 			<template v-else>

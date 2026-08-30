@@ -259,9 +259,15 @@
 
 					<v-col cols="12" md="3" lg="3" class="px-1">
 						<book-image :book="model.getBook()"/>
-						<div v-if="model.getBook().isElectronic()" class="mt-4">
-							<book-file :book="model.getBook()"/>
-						</div>
+					</v-col>
+				</v-row>
+
+				<!-- ================================================================== -->
+				<!-- EBOOK FILE															-->
+				<!-- ================================================================== -->
+				<v-row v-if="model.getBook().isElectronic()" no-gutters class="mb-4">
+					<v-col class="px-1">
+						<book-file :book="model.getBook()"/>
 					</v-col>
 				</v-row>
 
