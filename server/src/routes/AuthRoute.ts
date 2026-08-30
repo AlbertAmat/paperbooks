@@ -11,12 +11,18 @@
  * httpOnly `token` cookie (see `AppService.createSessionToken`); every
  * subsequent request is authenticated by `requireAuth`
  * (server/src/middlewares/AuthMiddleware.ts) reading that cookie.
+ *
+ * Accounts with two-factor auth enabled (`users.totp_enabled`, managed via
+ * `/api/rest/user/2fa/*` in UserRoute.ts) don't get a `token` cookie from
+ * POST /login directly - they get a short-lived `pending_2fa_token` cookie
+ * instead, exchanged for the real session by POST /login/2fa.
  */
 import express, {Request, Response} from "express";
 import {appService} from "../AppService";
 import path from "path";
 import rateLimit from "express-rate-limit";
 import {requireAuth} from "../middlewares/AuthMiddleware";
+import {verifyTotpCode, normalizeBackupCode} from "../utils/TwoFactorAuth";
 
 const router = express.Router();
 
@@ -27,6 +33,40 @@ const authLimiter = rateLimit({
     max: 5, // only allow 5 requests per IP per window
     message: "Too many attempts, please try again after 15 minutes.",
 });
+
+// Separate from authLimiter so a legitimate user isn't left with too few
+// attempts to type their code after already spending a request on the
+// password step - but just as strict, since a 6-digit TOTP code is a much
+// smaller space to brute-force than a password.
+const twoFaLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 5,
+    message: "Too many attempts, please try again after 15 minutes.",
+});
+
+/**
+ * Checks `code` against `userId`'s unused backup codes; consumes (marks
+ * used) and returns true on a match. Codes are hashed with the same
+ * bcrypt helper as passwords (see `appService.hashPassword`), so this is a
+ * linear scan + compare rather than a direct lookup - fine at the "~10
+ * codes per user" scale these are generated at.
+ */
+async function consumeBackupCode(userId: number, code: string): Promise<boolean> {
+    const pool = appService.getDatabasePool();
+    const result = await pool.query(
+        "SELECT id, code_hash FROM user_backup_codes WHERE user_id = $1 AND used_date IS NULL",
+        [userId]
+    );
+
+    for (const row of result.rows) {
+        if (await appService.comparePassword(code, row.code_hash)) {
+            await pool.query("UPDATE user_backup_codes SET used_date = CURRENT_TIMESTAMP WHERE id = $1", [row.id]);
+            return true;
+        }
+    }
+
+    return false;
+}
 
 // Compiled Vue app: alongside the server in production (Docker image),
 // under client/dist during local development.
@@ -105,6 +145,7 @@ router.get("/login", (req: Request, res: Response) => {
     // we can improve it, by checking if the token is valid, etc ad redirect to app
     // at the moment, we will clear the token
     res.clearCookie("token");
+    res.clearCookie("pending_2fa_token");
     res.sendFile(path.join(__dirname, "..", "assets", "login.html"));
 });
 
@@ -122,9 +163,17 @@ router.use("/background.png", (req: Request, res: Response) => {
  * Unauthenticated. Body: { "username": "jdoe", "password": "S3cret!123" }
  * (`username` may be either the user's code or email).
  *
- * Example response (200):
+ * If the account has two-factor auth enabled, this only verifies the
+ * password: it sets a short-lived `pending_2fa_token` cookie and responds
+ * with `twoFactorRequired: true` instead of a session - see POST /login/2fa
+ * for the second step that actually issues the `token` session cookie.
+ *
+ * Example response (200, no 2FA):
  *  { "success": true, "message": "Login successful", "redirectUrl": "/app" }
- * Sets an httpOnly `token` cookie (JWT, expires per `SESSION_TIME` env var).
+ * Example response (200, 2FA enabled):
+ *  { "success": true, "twoFactorRequired": true, "message": "Enter your verification code" }
+ * Sets an httpOnly `token` cookie (JWT, expires per `SESSION_TIME` env var)
+ * when no 2FA step follows.
  *
  * Responses: 400 missing fields | 401 invalid credentials | 500 server error.
  */
@@ -138,7 +187,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
 
     try {
         const pool = appService.getDatabasePool();
-        const userQuery = "SELECT id, code, password, token_version FROM users WHERE (code = $1 OR email = $2) AND disabled = FALSE";
+        const userQuery = "SELECT id, code, password, token_version, totp_enabled FROM users WHERE (code = $1 OR email = $2) AND disabled = FALSE";
         const userResult = await pool.query(userQuery, [username, username]);
 
         if (userResult.rows.length === 0) {
@@ -152,6 +201,20 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
         if (!comparePassword) {
             appService.getLogger().debug("invalid password for user:" + username);
             return res.status(401).json({message: "Invalid username or password."});
+        }
+
+        if (user.totp_enabled) {
+            appService.getLogger().debug("Password OK, awaiting 2FA code for user:" + username);
+
+            const pendingToken = appService.createPending2faToken(user.id);
+            res.cookie("pending_2fa_token", pendingToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: 5 * 60 * 1000
+            });
+
+            return res.json({success: true, twoFactorRequired: true, message: "Enter your verification code"});
         }
 
         appService.getLogger().debug("Updating last login date for user:" + username);
@@ -180,6 +243,84 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
         res.json({success: true, message: "Login successful", redirectUrl: "/app"});
     } catch (error) {
         console.error("Login error:", error);
+        return res.status(500).json({message: "Internal server error"});
+    }
+});
+
+/**
+ * POST /login/2fa
+ * -----------------
+ * Second step of login for accounts with two-factor auth enabled: verifies
+ * a TOTP code (or a one-time backup code) against the `pending_2fa_token`
+ * cookie set by POST /login, then issues the real session cookie.
+ *
+ * Rate limited: 5 requests / 5 minutes / IP (see `twoFaLimiter`).
+ * Unauthenticated (relies on the short-lived pending cookie instead).
+ * Body: { "code": "123456" } (either the 6-digit authenticator code, or an
+ * "XXXXXXXX-XXXXXXXX" backup code).
+ *
+ * Example response (200):
+ *  { "success": true, "message": "Login successful", "redirectUrl": "/app" }
+ * Sets an httpOnly `token` cookie and clears `pending_2fa_token`.
+ *
+ * Responses: 400 missing code | 401 no/expired pending login or invalid code |
+ *            500 server error.
+ */
+//@ts-ignore
+router.post("/login/2fa", twoFaLimiter, async (req: Request, res: Response) => {
+    const {code} = req.body;
+    //@ts-ignore
+    const pendingToken = req.cookies.pending_2fa_token;
+
+    if (!code) {
+        return res.status(400).json({message: "Missing verification code"});
+    }
+
+    const userId = appService.verifyPending2faToken(pendingToken);
+    if (userId === null) {
+        res.clearCookie("pending_2fa_token");
+        return res.status(401).json({message: "Your login has expired. Please log in again."});
+    }
+
+    try {
+        const pool = appService.getDatabasePool();
+        const userResult = await pool.query(
+            "SELECT id, token_version, totp_secret FROM users WHERE id = $1 AND disabled = FALSE AND totp_enabled = TRUE",
+            [userId]
+        );
+
+        if (userResult.rows.length === 0) {
+            res.clearCookie("pending_2fa_token");
+            return res.status(401).json({message: "Your login has expired. Please log in again."});
+        }
+
+        const user = userResult.rows[0];
+        const rawCode = String(code).trim();
+
+        let verified = await verifyTotpCode(user.totp_secret, rawCode);
+        if (!verified) {
+            verified = await consumeBackupCode(user.id, normalizeBackupCode(rawCode));
+        }
+
+        if (!verified) {
+            return res.status(401).json({message: "Invalid verification code."});
+        }
+
+        res.clearCookie("pending_2fa_token");
+
+        await pool.query(`UPDATE users SET last_login_date = CURRENT_TIMESTAMP WHERE id = $1`, [user.id]);
+
+        const userToken = appService.createSessionToken(user.id, user.token_version);
+        res.cookie("token", userToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: appService.getSessionTime()
+        });
+
+        res.json({success: true, message: "Login successful", redirectUrl: "/app"});
+    } catch (error) {
+        console.error("2FA verification error:", error);
         return res.status(500).json({message: "Internal server error"});
     }
 });

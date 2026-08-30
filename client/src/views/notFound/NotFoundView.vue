@@ -1,12 +1,13 @@
 <template>
 	<div class="not-found-view">
-		<div>
-			<h1 class="text-center" style="font-size: 60px">404</h1>
-			<p>{{t(AppLabels.NOT_FOUND_DESC)}}</p>
+		<div class="text-center">
+			<v-icon size="48" color="var(--pb-accent)" class="mb-2">mdi-book-remove-outline</v-icon>
+			<h1 class="not-found-title pb-display">404</h1>
+			<p class="not-found-desc">{{t(AppLabels.NOT_FOUND_DESC)}}</p>
 			<v-btn
 				@click="goToHome()"
 				color="primary"
-				block
+				variant="elevated"
 				class="text-none mt-4"
 			>
 				{{t(AppLabels.NOT_FOUND_GO_HOME)}}
@@ -34,5 +35,18 @@ function goToHome() {
 	align-items: center;
 	justify-content: center;
 	height: 100%;
+	background: var(--pb-bg);
+}
+
+.not-found-title {
+	font-size: 56px;
+	font-weight: 600;
+	color: var(--pb-text);
+	margin: 0;
+}
+
+.not-found-desc {
+	color: var(--pb-text-muted);
+	max-width: 320px;
 }
 </style>

@@ -13,35 +13,30 @@ import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class BookController extends BaseController<IBook>{
 
-    /**
-     *
-     * @private
-     */
+    /** The currently loaded book, or an empty placeholder before load completes. */
     private m_book: ShallowRef<Book> = shallowRef(Book.empty());
 
     public constructor() {
         super(i18n.global.t(AppLabels.BOOK));
     }
 
+    /** @returns The book matching the current route's `book_id` param, fetched from the server. */
     async fetchData(): Promise<IBook> {
         const bookId = Number(router.currentRoute.value.params.book_id);
         return await bookService.getBook(bookId);
     }
 
+    /** @param data Raw book detail data from the server. */
     setData(data: IBook): void {
         this.m_book.value = new Book(data);
     }
 
-    /**
-     *
-     */
+    /** @returns Whether a book has been loaded. */
     public hasBook(): boolean {
         return this.m_book.value != null;
     }
 
-    /**
-     *
-     */
+    /** @returns The currently loaded book. */
     public getBook(): Book {
         return this.m_book.value;
     }

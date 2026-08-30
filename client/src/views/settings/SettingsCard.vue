@@ -1,7 +1,7 @@
 <template>
-	<v-card class="mb-5 pb-4">
+	<v-card class="mb-5 pb-4 settings-card">
 		<v-card-title>
-			<span style="font-size: 16px; font-weight: 550">{{ title }}</span>
+			<span class="pb-display settings-card-title">{{ title }}</span>
 		</v-card-title>
 		<v-divider class="mt-2 mb-5"></v-divider>
 
@@ -19,3 +19,16 @@ interface Props {
 
 const props = defineProps<Props>();
 </script>
+
+<style scoped>
+.settings-card {
+	border-radius: var(--pb-radius) !important;
+	border: 1px solid var(--pb-border);
+	background: var(--pb-surface) !important;
+}
+
+.settings-card-title {
+	font-size: 17px;
+	font-weight: 600;
+}
+</style>

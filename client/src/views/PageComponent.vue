@@ -4,14 +4,13 @@
 		<!-- PAGE BAR											-->
 		<!-- ================================================== -->
 		<v-toolbar
-			color="white"
 			density="compact"
-			elevation="1"
+			elevation="0"
 			style="position: sticky; top: 0; left: 0; z-index: 2"
-			class="px-5 page-toolbar"
+			class="px-6 page-toolbar"
 		>
 			<!-- Page name -->
-			<h4 class="page-toolbar-title">{{ model.getPageName() }}</h4>
+			<h4 class="page-toolbar-title pb-display">{{ model.getPageName() }}</h4>
 
 			<slot name="prepend"></slot>
 
@@ -75,40 +74,44 @@ const props = defineProps<Props>()
 }
 
 .page-toolbar {
-	height: 35px !important;
+	height: 52px !important;
+	background: var(--pb-surface) !important;
+	border-bottom: 1px solid var(--pb-border);
 
 	:deep(.v-toolbar__content) {
-		height: 35px !important;
-		min-height: 35px !important;
+		height: 52px !important;
+		min-height: 52px !important;
 	}
 
 	.page-toolbar-title {
 		margin: 0;
-		font-size: 14px;
+		font-size: 18px;
+		font-weight: 600;
 		line-height: 1;
 		white-space: nowrap;
+		color: var(--pb-text);
 	}
 
 	:deep(.v-btn) {
-		height: 26px !important;
-		min-height: 26px !important;
-		font-size: 12px;
+		height: 32px !important;
+		min-height: 32px !important;
+		font-size: 13px;
 
 		&.v-btn--icon {
-			width: 26px !important;
+			width: 32px !important;
 		}
 	}
 
 	:deep(.v-btn__content) {
-		font-size: 12px;
+		font-size: 13px;
 	}
 
 	:deep(.v-btn .v-icon) {
-		font-size: 16px;
+		font-size: 18px;
 	}
 
 	:deep(.v-chip) {
-		height: 20px !important;
+		height: 22px !important;
 		font-size: 11px;
 	}
 

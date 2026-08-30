@@ -47,7 +47,7 @@
 			/>
 			<div
 				v-else
-				style="background-color: #f1f1f1; height: 55px; width: 30px; margin-right: 10px; display: flex; align-items: center; justify-content: center"
+				style="background-color: var(--pb-surface-alt); height: 55px; width: 30px; margin-right: 10px; display: flex; align-items: center; justify-content: center"
 			>
 				<v-icon>mdi-image-outline</v-icon>
 			</div>

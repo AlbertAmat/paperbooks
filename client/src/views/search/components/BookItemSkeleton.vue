@@ -2,8 +2,7 @@
 	<v-card
 		height="134px"
 		flat
-		style="border-radius: 8px;"
-		class="app-border-2"
+		style="border-radius: var(--pb-radius-sm); border: 1px solid var(--pb-border); background: var(--pb-surface)"
 	>
 		<v-skeleton-loader
 			:elevation="0"

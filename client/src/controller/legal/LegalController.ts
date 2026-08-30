@@ -14,14 +14,17 @@ export default class LegalController extends BaseController<boolean> {
         super(legalUiLabels[normalizeLegalLocale(i18n.global.locale.value)].pageTitle);
     }
 
+    /** @returns Always `true` - this controller has no server data to fetch. */
     async fetchData(): Promise<boolean> {
         return true;
     }
 
+    /** @param data Unused - this controller has no state to populate. */
     setData(data: boolean | null): void {
         // DO NOTHING
     }
 
+    /** @returns The localized legal page title for the current locale. */
     public getPageName(): string {
         return legalUiLabels[normalizeLegalLocale(i18n.global.locale.value)].pageTitle;
     }

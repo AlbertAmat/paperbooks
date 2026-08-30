@@ -14,20 +14,28 @@ import {ICustomersResponse} from "@/types/customer/ICustomersResponse";
  */
 class CustomersService {
 
-    /** Fetch the customers list view's data: all customers plus all available tags. */
+    /** @returns The customers list view's data: all customers plus all available tags. */
     public async getPageData(): Promise<ICustomersResponse> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/customer`)
         return data;
     }
 
-    /** Rename a customer. */
+    /**
+     * Rename a customer.
+     * @param id Customer id to update.
+     * @param name New customer name.
+     */
     public async updateCustomer(id: number, name: string) {
         await axiosInstance.put(`${PATH_PREFIX}/customer/${id}`, {
             name: name,
         })
     }
 
-    /** Create a new customer. */
+    /**
+     * Create a new customer.
+     * @param name New customer's name.
+     * @returns The created customer.
+     */
     public async addCustomer(name: string): Promise<ICustomerDetail> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/customer`, {
             name: name,
@@ -36,12 +44,19 @@ class CustomersService {
         return data;
     }
 
-    /** Delete a customer. */
+    /**
+     * Delete a customer.
+     * @param customerId Customer id to delete.
+     */
     public async deleteCustomer(customerId: number): Promise<void> {
         await axiosInstance.delete(`${PATH_PREFIX}/customer/${customerId}`)
     }
 
-    /** List the books currently on loan to a customer. */
+    /**
+     * List the books currently on loan to a customer.
+     * @param customerId Customer id.
+     * @returns The books currently on loan to that customer.
+     */
     public async getCustomerBooks(customerId:number): Promise<ICustomerBook[]> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/customer/${customerId}/books`);
         return data;
@@ -51,6 +66,7 @@ class CustomersService {
      * Lend a batch of book stocks to a customer.
      * @param customerId Customer id.
      * @param books Array of book stock codes.
+     * @returns The updated list of books on loan to this customer.
      */
     public async addBooks(customerId: number, books: string[]): Promise<ICustomerBook[]> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/customer/${customerId}/add/books`, {books: books});
@@ -67,4 +83,5 @@ class CustomersService {
     }
 }
 
+/** Singleton instance shared by every part of the app. */
 export const customersService = new CustomersService();

@@ -15,7 +15,11 @@ import {IBookAddMd} from "@/types/book/IBookAddMd";
  */
 export class BookService {
 
-    /** Fetch full detail for a single book, including its stocks and authors. */
+    /**
+     * Fetch full detail for a single book, including its stocks and authors.
+     * @param id Book id.
+     * @returns The full book detail.
+     */
     public async getBook(id: number): Promise<IBook> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/${id}`, {});
         return data;
@@ -68,6 +72,10 @@ export class BookService {
 
     /**
      * Create a book manually (as opposed to `createBookFromIsbn`).
+     * @param name Book title.
+     * @param description Free-text description, or null.
+     * @param isbn ISBN code, or null.
+     * @param image Cover image file, or null.
      * @returns The new book's id.
      */
     public async createBook(
@@ -95,7 +103,11 @@ export class BookService {
         return data;
     }
 
-    /** Replace a book's cover image with an uploaded file. */
+    /**
+     * Replace a book's cover image with an uploaded file.
+     * @param id Book id.
+     * @param image New cover image file.
+     */
     public async changeImage(
         id: number,
         image: File,
@@ -131,6 +143,7 @@ export class BookService {
      * @param locationId Destination location id.
      * @param status Initial stock status (BOOKED is not allowed here).
      * @param customerId Customer to assign the copy to, or null.
+     * @returns The created stock.
      */
     public async addBookStock(id: number, locationId: number, status: BookStockStatusEnum, customerId: number |null): Promise<IBookStock> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/${id}/stock`, {
@@ -142,7 +155,12 @@ export class BookService {
         return data;
     }
 
-    /** Remove a single physical stock of a book. */
+    /**
+     * Remove a single physical stock of a book.
+     * @param id Book id.
+     * @param stockId Stock id to remove.
+     * @returns Whether a stock was actually removed.
+     */
     public async removeBookStock(id: number, stockId: number): Promise<boolean> {
         const {data} = await axiosInstance.delete(`${PATH_PREFIX}/book/${id}/stock/${stockId}`);
 
@@ -156,6 +174,7 @@ export class BookService {
      * @param stockStatus New status.
      * @param stockLocationId New location id.
      * @param customerId New customer id, or null to clear.
+     * @returns The updated stock.
      */
     public async updateBookStock(id: number, stockId: number, stockStatus: BookStockStatusEnum, stockLocationId: number, customerId: number | null): Promise<IBookStock> {
         const {data} = await axiosInstance.put(`${PATH_PREFIX}/book/${id}/stock/${stockId}`, {
@@ -167,7 +186,10 @@ export class BookService {
         return data;
     }
 
-    /** Delete a book by id (and, via DB foreign keys, its stocks/author links). */
+    /**
+     * Delete a book by id (and, via DB foreign keys, its stocks/author links).
+     * @param id Book id to delete.
+     */
     public async deleteBook(id: number): Promise<void> {
         await axiosInstance.delete(`${PATH_PREFIX}/book/${id}`);
     }
@@ -177,6 +199,7 @@ export class BookService {
      * Look up the book + single stock behind a scanned/typed stock code,
      * for the "add book to customer/location" flow.
      * @param bookCode A book_stocks.code value.
+     * @returns The matched book plus its single stock.
      */
     public async fetchBookAddMd(bookCode: string): Promise<IBookAddMd> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/${bookCode}/add/md`);
@@ -195,4 +218,5 @@ export class BookService {
 
 }
 
+/** Singleton instance shared by every part of the app. */
 export const bookService = new BookService();

@@ -3,7 +3,6 @@
 		v-model="isVisible"
 		:timeout="-1"
 		location="bottom"
-		color="white"
 		multi-line
 		:elevation="4"
 		class="cookie-consent"
@@ -65,5 +64,8 @@ onMounted(() => {
 <style scoped lang="scss">
 .cookie-consent :deep(.v-snackbar__wrapper) {
 	max-width: 640px;
+	background: var(--pb-surface);
+	border: 1px solid var(--pb-border);
+	color: var(--pb-text);
 }
 </style>

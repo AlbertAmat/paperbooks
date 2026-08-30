@@ -181,6 +181,7 @@ export class ApplicationService {
     /**
      * Replaces the current categories list with a new one.
      * Useful when categories are updated or re-fetched.
+     * @param items New full list of categories.
      */
     public setCategories(items: Category[]) {
         this.m_categories = items;
@@ -235,6 +236,7 @@ export class ApplicationService {
 
     /**
      * Replaces the current locations list with a new one.
+     * @param items New full list of locations.
      */
     public setLocations(items: Location[]) {
         this.m_locations = items;

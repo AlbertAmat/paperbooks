@@ -9,11 +9,19 @@ import {ICustomerGroup} from "@/types/customer/ICustomerGroup";
 import {customerGroupService} from "@/service/customers/CustomerGroupService";
 
 export default class CustomerGroup {
+    /** Group id, immutable once loaded. */
     private readonly m_id: number;
+
+    /** Group name. */
     private readonly m_name: Ref<string>;
+
+    /** Group description, or undefined if unset. */
     private readonly m_description: Ref<string | undefined>;
+
+    /** Number of customers currently in this group. */
     private readonly m_totalCustomers: Ref<number>;
 
+    /** @param data Raw customer group data from the server. */
     public constructor(data: ICustomerGroup) {
         this.m_id = data.id;
         this.m_name = ref(data.name);
@@ -21,35 +29,31 @@ export default class CustomerGroup {
         this.m_totalCustomers = ref(data.total_customers ?? 0);
     }
 
-    /**
-     *
-     */
+    /** @returns The group id. */
     public getId(): number {
         return this.m_id;
     }
 
-    /**
-     *
-     */
+    /** @returns The group name. */
     public getName(): string {
         return this.m_name.value;
     }
 
-    /**
-     *
-     */
+    /** @returns The group description, or undefined if unset. */
     public getDescription(): string | undefined {
         return this.m_description.value;
     }
 
-    /**
-     *
-     */
+    /** @returns The number of customers currently in this group. */
     public getTotalCustomers(): number {
         return this.m_totalCustomers.value;
     }
 
-    /** Persist a new name/description on the server and update local state. */
+    /**
+     * Persist a new name/description on the server and update local state.
+     * @param name New group name.
+     * @param description New group description, or undefined to clear it.
+     */
     public async update(name: string, description?: string) {
         await customerGroupService.updateGroup(this.m_id, name, description);
         this.m_name.value = name;

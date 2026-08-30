@@ -78,7 +78,7 @@ watch(dialog, async (val) => {
 
 <style scoped>
 #barcode-reader {
-	border: 2px dashed #ccc;
+	border: 2px dashed var(--pb-border-strong);
 	border-radius: 8px;
 	overflow: hidden;
 }

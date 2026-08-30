@@ -5,6 +5,7 @@
  */
 import router from './router/Router'
 import '@mdi/font/css/materialdesignicons.css'
+import "@/assets/styles/theme.scss";
 import {createApp} from "vue";
 import App from "@/App.vue";
 import vuetify from "@/plugins/vuetify";

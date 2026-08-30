@@ -14,12 +14,12 @@
 					<v-row no-gutters class="pa-0">
 						<v-col cols="4" class="px-1 pb-1">
 							<dashboard-card :title="t(AppLabels.OVERVIEW)">
-								<h2>
+								<h2 class="pb-kpi-number pb-display">
 									{{ controller.getTotalBooks() }}
 
 									<v-icon
 										size="18"
-										:color="upBooksTrend ? 'green' : 'red'"
+										:color="upBooksTrend ? 'success' : 'error'"
 									>
 										{{ upBooksTrend ? 'mdi-arrow-top-right' : 'mdi-arrow-bottom-left' }}
 									</v-icon>
@@ -32,7 +32,7 @@
 							<dashboard-card :title="t(AppLabels.BOOKED_BOOKS)">
 								<div style="display:flex; width: 100%; align-items: center">
 									<div style="flex: 1">
-										<h2>{{ controller.getTotalBookedBooks() }}</h2>
+										<h2 class="pb-kpi-number pb-display">{{ controller.getTotalBookedBooks() }}</h2>
 										<span
 											class="v-card-subtitle pl-0 mt-1">{{ t(AppLabels.DASHBOARD_TOTAL) }}</span>
 									</div>
@@ -42,28 +42,28 @@
 
 						<v-col cols="4" class="px-1 pb-1">
 							<dashboard-card :title="t(AppLabels.CATEGORIES)">
-								<h2>{{ controller.getTotalCategories() }}</h2>
+								<h2 class="pb-kpi-number pb-display">{{ controller.getTotalCategories() }}</h2>
 								<span class="v-card-subtitle pl-0 mt-1">{{ t(AppLabels.DASHBOARD_TOTAL) }}</span>
 							</dashboard-card>
 						</v-col>
 
 						<v-col cols="4" class="px-1 pb-1">
 							<dashboard-card :title="t(AppLabels.CUSTOMERS)">
-								<h2>{{ controller.getTotalCustomers() }}</h2>
+								<h2 class="pb-kpi-number pb-display">{{ controller.getTotalCustomers() }}</h2>
 								<span class="v-card-subtitle pl-0 mt-1">{{ t(AppLabels.DASHBOARD_TOTAL) }}</span>
 							</dashboard-card>
 						</v-col>
 
 						<v-col cols="4" class="px-1 pb-1">
 							<dashboard-card :title="t(AppLabels.LOCATIONS)">
-								<h2>{{ controller.getTotalLocations() }}</h2>
+								<h2 class="pb-kpi-number pb-display">{{ controller.getTotalLocations() }}</h2>
 								<span class="v-card-subtitle pl-0 mt-1">{{ t(AppLabels.DASHBOARD_TOTAL) }}</span>
 							</dashboard-card>
 						</v-col>
 
 						<v-col cols="4" class="px-1 pb-1">
 							<dashboard-card :title="t(AppLabels.AUTHORS)">
-								<h2>{{ controller.getTotalAuthors() }}</h2>
+								<h2 class="pb-kpi-number pb-display">{{ controller.getTotalAuthors() }}</h2>
 								<span class="v-card-subtitle pl-0 mt-1">{{ t(AppLabels.DASHBOARD_TOTAL) }}</span>
 							</dashboard-card>
 						</v-col>
@@ -116,7 +116,7 @@
 									/>
 									<div
 										v-else
-										style="background-color: #f1f1f1; height: 40px; width: 30px; margin-right: 10px; display: flex; align-items: center; justify-content: center"
+										style="background-color: var(--pb-surface-alt); height: 40px; width: 30px; margin-right: 10px; display: flex; align-items: center; justify-content: center"
 									>
 										<v-icon>mdi-image-outline</v-icon>
 									</div>
@@ -163,3 +163,11 @@ function goToLibrary() {
 
 const upBooksTrend = computed(() => controller.getTotalThisMonth() > controller.getTotalLastMonth())
 </script>
+
+<style scoped>
+.pb-kpi-number {
+	font-size: 28px;
+	font-weight: 600;
+	color: var(--pb-text);
+}
+</style>

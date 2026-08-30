@@ -1,20 +1,23 @@
 <template>
 	<v-app>
-		<v-overlay
+		<div
 			v-if="applicationService.isLoading()"
-			:opacity="0"
-			absolute
+			class="app-boot"
 		>
+			<v-icon size="34" color="primary" class="mb-3">mdi-book-open-page-variant</v-icon>
 			<v-progress-circular
 				color="primary"
 				indeterminate
+				size="26"
+				width="2"
 			/>
-		</v-overlay>
+		</div>
 
 		<div
 			v-else-if="applicationService.hasError()"
-			class="error-container"
+			class="app-boot app-boot--error"
 		>
+			<v-icon size="34" color="error" class="mb-3">mdi-book-alert-outline</v-icon>
 			<p>{{ applicationService.getError()!.message }}</p>
 		</div>
 
@@ -58,7 +61,7 @@
  * error state if it failed, or the app shell (menu, top bar, footer,
  * router-view content, and the app-wide dialog/snackbar singletons) once ready.
  */
-import {onMounted} from 'vue';
+import {onMounted, watch} from 'vue';
 import AppBar from "@/components/app/AppBar.vue";
 import AppMenu from "@/components/app/AppMenu.vue";
 import {applicationService} from "@/service/ApplicationService";
@@ -68,9 +71,17 @@ import ErrorDialog from "@/components/errorDialog/ErrorDialog.vue";
 import AppFooter from "@/components/app/AppFooter.vue";
 import CookieConsentDialog from "@/components/cookieConsent/CookieConsentDialog.vue";
 import SecurityNoticeDialog from "@/components/securityNotice/SecurityNoticeDialog.vue";
+import {applyTheme} from "@/plugins/theme";
 
-onMounted(() => {
-	applicationService.fetchPolicy();
+onMounted(async () => {
+	await applicationService.fetchPolicy();
+
+	if (!applicationService.hasError()) {
+		applyTheme(applicationService.getUser().getTheme());
+
+		// Keep the shell in sync if the user switches theme in Settings.
+		watch(() => applicationService.getUser().getTheme(), (theme) => applyTheme(theme));
+	}
 })
 </script>
 
@@ -98,9 +109,24 @@ html, body {
 	flex: 1;
 }
 
-.error-container {
-	background-color: red;
-	color: white;
+.app-boot {
 	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background: var(--pb-bg);
+	color: var(--pb-text-muted);
+}
+
+.app-boot--error {
+	color: var(--pb-text);
+}
+
+.app-boot--error p {
+	font-family: var(--pb-font-body);
+	max-width: 420px;
+	text-align: center;
+	margin: 0 16px;
 }
 </style>

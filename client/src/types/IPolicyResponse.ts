@@ -14,11 +14,18 @@ import {AppLabels} from "@/plugins/i18n/AppLabels";
  * and cached client-side.
  */
 export default interface IPolicyResponse {
+    /** The logged-in user's profile. */
     user: IUser;
+    /** Every customer belonging to the user. */
     customers: ICustomer[];
+    /** Every category belonging to the user. */
     categories: ICategory[];
+    /** Every language option (global, not user-scoped). */
     languages: ILanguage[];
+    /** Every book format option (global, not user-scoped). */
     formats: IFormat[];
+    /** Every location belonging to the user. */
     locations: ILocation[];
+    /** UI translation strings for the user's language, keyed by `AppLabels`. */
     labels: Record<AppLabels, string>;
 }

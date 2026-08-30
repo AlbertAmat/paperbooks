@@ -15,18 +15,15 @@
 import {RouteRecordRaw} from "vue-router";
 
 export abstract class ARoute {
-    /**
-     * Each route must define its own path.
-     */
+    /** Each route must define its own Vue Router path pattern. */
     public static PATH: string;
 
-    /**
-     * Each route must implement getRoute to return Vue Router config.
-     */
+    /** @returns The Vue Router route config (name, path, lazy component) for this route. */
     public abstract getRoute(): RouteRecordRaw;
 
     /**
-     * Each route must implement getPath to return a navigable URL string.
+     * @param args Route-specific values to substitute into the path (e.g. an id), if any.
+     * @returns A navigable URL string for this route.
      */
     public abstract getPath(...args: any[]): string;
 }

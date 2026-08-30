@@ -5,7 +5,10 @@ import IBookItem from "@/types/book/IBookItem";
  * pagination info (`total` results overall, `limit` per page).
  */
 export interface ISearchResponse {
+    /** Total number of matching books across all pages. */
     total: number;
+    /** Number of results per page. */
     limit: number;
+    /** Books in this page of results. */
     books: IBookItem[];
 }

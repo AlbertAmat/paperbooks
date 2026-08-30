@@ -11,12 +11,19 @@ import {IBookStockBase} from "@/types/book/IBookStockBase";
  * };
  */
 export interface IBookStock extends IBookStockBase{
+    /** Stock id. */
     id: number;
+    /** Unique stock code (scannable/typeable). */
     code: string;
+    /** Current lifecycle status. */
     status:BookStockStatusEnum;
+    /** Id of the location this stock is stored at. */
     location_id: number;
+    /** Name of the location this stock is stored at. */
     location_name: string;
+    /** Id of the customer this stock is loaned/booked to. */
     customer_id: number;
+    /** Name of the customer this stock is loaned/booked to. */
     customer_name: string;
 }
 

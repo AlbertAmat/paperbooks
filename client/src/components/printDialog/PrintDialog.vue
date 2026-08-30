@@ -12,7 +12,7 @@
 				:title="t(AppLabels.PRINT_QUEUE)"
 				prepend-icon="mdi-printer-outline"
 				density="compact"
-				class="mx-2"
+				class="mx-2 print-queue-item"
 			>
 				<template v-slot:prepend>
 					<v-badge
@@ -22,7 +22,7 @@
 					>
 						<v-icon
 							icon="mdi-printer-outline"
-							:color="printDialogController.getTotalLabels() == 0 ? 'white' : 'primary'"
+							:color="printDialogController.getTotalLabels() == 0 ? undefined : 'primary'"
 						/>
 					</v-badge>
 				</template>
@@ -59,7 +59,7 @@
 					@click="controller.cancel()"
 					variant="text"
 					density="compact"
-					color="red"
+					color="error"
 					class="mr-3 text-none"
 				>
 					{{t(AppLabels.CLEAR_QUEUE)}}
@@ -107,10 +107,18 @@ const model = computed({
 </script>
 
 <style scoped lang="scss">
+/* Matches AppMenu.vue's .app-menu-item - this activator sits in the same
+   nav list (below the divider), so it needs the same muted nav text color
+   instead of Vuetify's default list-item color. */
+.print-queue-item {
+	color: var(--pb-nav-text-muted);
+}
+
 .print-dialog-header {
 	display:flex;
 	align-items: center;
-	background-color: #011a38;
-	color: white;
+	font-family: var(--pb-font-display);
+	background-color: var(--pb-nav-bg);
+	color: var(--pb-nav-text);
 }
 </style>

@@ -13,14 +13,17 @@ export default class DocsController extends BaseController<boolean> {
         super(docsUiLabels[normalizeDocLocale(i18n.global.locale.value)].pageTitle);
     }
 
+    /** @returns Always `true` - this controller has no server data to fetch. */
     async fetchData(): Promise<boolean> {
         return true;
     }
 
+    /** @param data Unused - this controller has no state to populate. */
     setData(data: boolean | null): void {
         // DO NOTHING
     }
 
+    /** @returns The localized documentation page title for the current locale. */
     public getPageName(): string {
         return docsUiLabels[normalizeDocLocale(i18n.global.locale.value)].pageTitle;
     }

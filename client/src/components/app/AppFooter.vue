@@ -1,5 +1,5 @@
 <template>
-	<v-footer app border="t" color="white" class="app-footer px-5">
+	<v-footer app border="t" class="app-footer px-5">
 		<span class="text-medium-emphasis">© {{ year }} {{ uiLabels.footerCopyright }}</span>
 
 		<v-spacer></v-spacer>
@@ -29,6 +29,8 @@ const uiLabels = computed(() => legalUiLabels[normalizeLegalLocale(locale.value)
 	font-size: 13px;
 	min-height: 40px !important;
 	height: 40px;
+	background: var(--pb-surface) !important;
+	color: var(--pb-text-muted);
 
 	a {
 		margin-left: 20px;
@@ -36,6 +38,7 @@ const uiLabels = computed(() => legalUiLabels[normalizeLegalLocale(locale.value)
 		text-decoration: none;
 
 		&:hover {
+			color: var(--pb-primary);
 			text-decoration: underline;
 		}
 	}

@@ -89,7 +89,7 @@
 							>
 								<v-icon
 									small
-									color="red"
+									color="error"
 								>
 									mdi-delete
 								</v-icon>

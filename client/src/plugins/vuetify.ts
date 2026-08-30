@@ -1,6 +1,10 @@
 /**
  * Vuetify setup: registers every component/directive and defines the app's
- * single custom light theme ("custom") plus the Material Design Icons set.
+ * two themes ("beige" - warm/light, all beige & terracotta, no blue -
+ * "library" - dark/blue) plus the Material Design Icons set. The active
+ * theme is switched at runtime by `applyTheme()` (see plugins/theme.ts),
+ * driven by the logged-in user's saved preference (`users.theme`). These
+ * color sets mirror the CSS custom properties in assets/styles/theme.scss.
  */
 import 'vuetify/styles'
 import {aliases, mdi} from 'vuetify/iconsets/mdi'
@@ -12,16 +16,30 @@ export default createVuetify({
     components,
     directives,
     theme: {
-        defaultTheme: 'custom',
+        defaultTheme: 'beige',
         themes: {
-            custom: {
+            beige: {
                 dark: false,
                 colors: {
-                    background: '#f6f8fc',
+                    background: '#f7f2ea',
+                    surface: '#ffffff',
+                    primary: '#c97b3d',
+                    secondary: '#c97b3d',
+                    accent: '#c97b3d',
+                    error: '#d64545',
+                    success: '#3f8f5f',
+                }
+            },
+            library: {
+                dark: true,
+                colors: {
+                    background: '#0a0e17',
+                    surface: '#0d1420',
                     primary: '#1c7ff1',
                     secondary: '#78dcf6',
                     accent: '#f5fb7b',
-                    error: '#ff3535',
+                    error: '#ff5c5c',
+                    success: '#4fce85',
                 }
             },
         },
@@ -30,5 +48,16 @@ export default createVuetify({
         defaultSet: 'mdi',
         aliases,
         sets: {mdi},
+    },
+    defaults: {
+        VCard: {
+            rounded: 'lg',
+        },
+        VBtn: {
+            rounded: 'lg',
+        },
+        VTextField: {
+            rounded: 'lg',
+        },
     },
 })

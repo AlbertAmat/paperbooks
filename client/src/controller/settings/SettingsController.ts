@@ -15,16 +15,19 @@ export default class SettingsController extends BaseController<User> {
         super(i18n.global.t(AppLabels.SETTINGS));
     }
 
+    /** @returns The already-loaded current user from `ApplicationService`. */
     async fetchData(): Promise<User> {
         return new Promise((resolve, reject) => {
             resolve(applicationService.getUser());
         });
     }
 
+    /** @param data Unused - `getUser()` always reads live from `ApplicationService`. */
     setData(data: User | null): void {
         // DO NOTHING
     }
 
+    /** @returns The current user. */
     public getUser(): User {
         return applicationService.getUser();
     }

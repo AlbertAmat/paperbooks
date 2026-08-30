@@ -1,13 +1,13 @@
 <template>
 	<v-card
 		:variant="outline ? 'outlined' : 'flat'"
+		class="pb-panel-card"
 	>
 		<v-card-title
 			v-if="!dense"
-			class="d-flex align-center"
-			style="font-size: 16px"
+			class="d-flex align-center pb-display pb-panel-card-title"
 		>
-			<v-icon v-if="icon" class="mr-2">{{icon}}</v-icon>
+			<v-icon v-if="icon" class="mr-2" color="primary">{{icon}}</v-icon>
 
 			{{ title }}
 
@@ -43,3 +43,16 @@ const props = withDefaults(defineProps<Props>(), {
 	dense: false
 })
 </script>
+
+<style scoped>
+.pb-panel-card {
+	border-radius: var(--pb-radius) !important;
+	border-color: var(--pb-border) !important;
+	background: var(--pb-surface) !important;
+}
+
+.pb-panel-card-title {
+	font-size: 17px;
+	font-weight: 600;
+}
+</style>

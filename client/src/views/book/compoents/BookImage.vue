@@ -46,7 +46,7 @@
 			/>
 		</v-card>
 	</v-hover>
-	<div style="text-align: center; width: 100%; color: #afafaf">{{t(AppLabels.BOOK_HOVER_INFO)}}</div>
+	<div style="text-align: center; width: 100%; color: var(--pb-text-muted)">{{t(AppLabels.BOOK_HOVER_INFO)}}</div>
 </template>
 
 <script setup lang="ts">
@@ -116,6 +116,6 @@ async function loadImage(file: File) {
 	flex-direction: column;
 	color: white;
 	cursor: pointer;
-	background-color: #1c7ff1;
+	background-color: rgba(var(--v-theme-primary), 0.92);
 }
 </style>

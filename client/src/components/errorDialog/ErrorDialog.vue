@@ -7,8 +7,7 @@
 	>
 		<v-card>
 			<v-card-title
-				style="background-color: red; color: white; display: flex; align-items: center"
-				class="py-3 pr-2"
+				class="bg-error py-3 pr-2 d-flex align-center"
 			>
 				<v-icon
 					color="white"

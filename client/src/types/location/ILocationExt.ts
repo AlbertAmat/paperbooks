@@ -5,5 +5,6 @@ import ILocation from "@/types/location/ILocation";
  * list view.
  */
 export default interface ILocationExt extends ILocation{
+    /** Total number of book stocks at this location. */
     total_books: number;
 }

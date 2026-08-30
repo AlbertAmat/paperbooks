@@ -24,8 +24,11 @@ export default class BookStock {
     /** Display label + color for each `BookStockStatusEnum` value, for status chips/selects. */
     public static BookStockStatus = [
         {
+            /** The status this entry describes. */
             value: BookStockStatusEnum.BOOKED,
+            /** Localized display text for this status. */
             text: i18n.global.t(AppLabels.BOOKED),
+            /** Chip/badge color for this status. */
             color: "#3F51B5"
         },
         {
@@ -45,54 +48,34 @@ export default class BookStock {
         },
     ]
 
-    /**
-     * The book id as reference
-     * @private
-     */
+    /** The book this stock belongs to (needed to print its name on the barcode label). */
     private readonly m_book: ABook;
 
-    /**
-     * The book stock id
-     * @private
-     */
+    /** The book stock id. */
     private readonly m_id: number;
 
-    /**
-     * Unike hash code (where the first number is the book id)
-     * @private
-     */
+    /** Unique code identifying this stock (scannable/typeable). */
     private readonly m_code: string;
 
-    /**
-     *
-     * @private
-     */
+    /** Current lifecycle status. */
     private m_status: Ref<BookStockStatusEnum>;
 
-    /**
-     *
-     * @private
-     */
+    /** Id of the location this stock is stored at, or null if none. */
     private m_locationId: Ref<number | null>;
 
-    /**
-     *
-     * @private
-     */
+    /** Name of the location this stock is stored at, or null if none. */
     private m_locationName: string | null;
 
-    /**
-     * The customer id that has booked the book
-     * @private
-     */
+    /** Id of the customer this stock is loaned/booked to, or null if none. */
     private m_customerId: Ref<number | null>;
 
-    /**
-     * The customer name that has booked the book
-     * @private
-     */
+    /** Name of the customer this stock is loaned/booked to, or null if none. */
     private m_customerName: string | null;
 
+    /**
+     * @param book Owning book (used to print its name on the barcode label).
+     * @param stock Raw stock data from the server.
+     */
     public constructor(book: ABook, stock: IBookStock) {
         this.m_book = book;
         this.m_id = stock.id;
@@ -106,39 +89,37 @@ export default class BookStock {
         this.m_customerName = stock.customer_name;
     }
 
-    /**
-     *
-     */
+    /** @returns The stock id. */
     public getId(): number {
         return this.m_id;
     }
 
-    /**
-     *
-     */
+    /** @returns The stock's unique code. */
     public getCode(): string {
         return this.m_code
     }
 
-    /**
-     *
-     */
+    /** @returns The stock's current status. */
     public getStatus(): BookStockStatusEnum {
         return this.m_status.value;
     }
 
+    /** @returns The id of the location this stock is stored at, or null if none. */
     public getLocationId(): number | null {
         return this.m_locationId.value;
     }
 
+    /** @returns The name of the location this stock is stored at, or null if none. */
     public getLocationName(): string | null {
         return this.m_locationName;
     }
 
+    /** @returns The id of the customer this stock is loaned/booked to, or null if none. */
     public getCustomerId(): number | null {
         return this.m_customerId.value;
     }
 
+    /** @returns The name of the customer this stock is loaned/booked to, or null if none. */
     public getCustomerName(): string | null {
         return this.m_customerName;
     }
@@ -147,6 +128,7 @@ export default class BookStock {
      * Render a CODE128 barcode of this stock's code onto a canvas, with the
      * book name and code printed below it - used for the printable labels
      * in `PrintDialog.vue`.
+     * @returns A canvas containing the rendered barcode + label text.
      */
     public generateBarcodeImage(): HTMLCanvasElement {
         // Create a barcode-only canvas
@@ -186,7 +168,12 @@ export default class BookStock {
         return finalCanvas;
     }
 
-    /** Persist a new status/location/customer for this stock and sync local reactive state. */
+    /**
+     * Persist a new status/location/customer for this stock and sync local reactive state.
+     * @param status New status.
+     * @param locationId New location id.
+     * @param customerId New customer id, or null to clear it.
+     */
     public async update(status: BookStockStatusEnum, locationId: number, customerId: number | null) {
         try {
             const data = await bookService.updateBookStock(this.m_book.getId(), this.m_id, status, locationId, customerId);

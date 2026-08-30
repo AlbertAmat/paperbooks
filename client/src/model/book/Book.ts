@@ -26,15 +26,31 @@ import {printDialogController} from "@/components/printDialog/PrintDialogControl
 
 export default class Book extends BookItem {
 
+    /** Free-text description. */
     private m_description: string;
+
+    /** Publisher name, or null if unset. */
     private m_publisher: string | null;
+
+    /** Publication date, or null if unset. */
     private m_publishedDate: Date | null;
+
+    /** Page count. */
     private m_pages: number;
+
+    /** Book format (e.g. paperback/hardcover), or null if unset. */
     private m_format: Format | null;
+
+    /** Physical stocks (copies) of this book. */
     private m_stocks: ShallowRef<BookStock[]>;
+
+    /** Timestamp the book was created. */
     private readonly m_dateCreated: Date;
+
+    /** Timestamp the book was last updated. */
     private readonly m_dateUpdated: Date;
 
+    /** @param data Raw full book detail data from the server. */
     public constructor(data: IBook) {
         super(data);
         this.m_description = data.description || "";
@@ -51,7 +67,7 @@ export default class Book extends BookItem {
         this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(this,stock)));
     }
 
-    /** Placeholder "empty" book (id -1) used to initialize forms before real data loads. */
+    /** @returns A placeholder "empty" book (id -1) used to initialize forms before real data loads. */
     public static empty(): Book {
         return new Book({
             id: -1,
@@ -72,128 +88,92 @@ export default class Book extends BookItem {
         })
     }
 
-    /**
-     *
-     */
+    /** @returns The book's description. */
     public getDescription(): string {
         return this.m_description;
     }
 
-    /**
-     *
-     */
+    /** @param value New description. */
     public setDescription(value: string) {
         this.m_description = value;
     }
 
-    /**
-     *
-     */
+    /** @returns Whether the book has a publisher set. */
     public hasPublisher(): boolean {
         return this.m_publisher != null;
     }
 
-    /**
-     *
-     */
+    /** @returns The publisher name, or null if unset. */
     public getPublisher(): string | null {
         return this.m_publisher;
     }
 
-    /**
-     *
-     */
+    /** @param value New publisher name, or null to clear it. */
     public setPublisher(value: string | null) {
         this.m_publisher = value;
     }
 
-    /**
-     *
-     */
+    /** @returns Whether the book has a publish date set. */
     public hasPublishDate(): boolean {
         return this.m_publishedDate != null;
     }
 
-    /**
-     *
-     */
+    /** @returns The publish date, or null if unset. */
     public getPublishDate(): Date | null {
         return this.m_publishedDate;
     }
 
-    /**
-     *
-     */
+    /** @param value New publish date, or null to clear it. */
     public setPublishDate(value: Date | null) {
         this.m_publishedDate = value;
     }
 
-    /**
-     *
-     */
+    /** @returns The timestamp the book was created. */
     public getDateCreated(): Date {
         return this.m_dateCreated;
     }
 
-    /**
-     *
-     */
+    /** @returns The creation timestamp formatted for display in the user's locale. */
     public getFormatedDateCreated(): string {
         return this.m_dateCreated.toLocaleString();
     }
 
-    /**
-     *
-     */
+    /** @returns The timestamp the book was last updated. */
     public getDateUpdated(): Date {
         return this.m_dateUpdated;
     }
 
-    /**
-     *
-     */
+    /** @returns The last-updated timestamp formatted for display in the user's locale. */
     public getFormatedDateUpdated(): string {
         return this.m_dateUpdated.toLocaleString();
     }
 
-    /**
-     *
-     */
+    /** @returns The page count. */
     public getNumberOfPages(): number {
         return this.m_pages;
     }
 
-    /**
-     *
-     */
+    /** @param value New page count. */
     public setNumberOfPages(value: number) {
         this.m_pages = value;
     }
 
-    /**
-     *
-     */
+    /** @returns Whether the book has a format set. */
     public hasFormat(): boolean {
         return this.m_format != null;
     }
 
-    /**
-     *
-     */
+    /** @returns The book's format, or null if unset. */
     public getFormat(): Format | null {
         return this.m_format;
     }
 
-    /**
-     *
-     */
+    /** @param format New format, or null to clear it. */
     public setFormat(format: Format | null) {
         return this.m_format = format;
     }
 
-    /**
-     *
-     */
+    /** @returns The book's physical stocks (copies). */
     public getStocks(): BookStock[] {
         return this.m_stocks.value;
     }
@@ -223,7 +203,10 @@ export default class Book extends BookItem {
         }
     }
 
-    /** Delete a physical stock from the server and remove it from the local list. */
+    /**
+     * Delete a physical stock from the server and remove it from the local list.
+     * @param stockId Id of the stock to remove.
+     */
     public async removeBookStock(stockId: number) {
         try {
             const result = await bookService.removeBookStock(this.m_id, stockId);
@@ -274,12 +257,14 @@ export default class Book extends BookItem {
      * Upload a new cover image, then optimistically update the local
      * `imageUrl` by converting the same file to a base64 data URL client-side
      * (avoids waiting for a second round trip to re-fetch the book).
+     * @param image New cover image file.
      */
     public async changeImage(image: File) {
         try {
             await bookService.changeImage(this.m_id, image);
             appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_IMAGE_UPDATED)})
 
+            /** @param file Image file to encode. @returns A `data:` URL for the file's contents. */
             function fileToBase64(file: File): Promise<string> {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();

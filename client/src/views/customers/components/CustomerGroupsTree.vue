@@ -54,7 +54,7 @@
 									:disabled="deleteLoading.includes(row.id!)"
 									class="mx-1"
 								>
-									<v-icon small color="red">mdi-delete</v-icon>
+									<v-icon small color="error">mdi-delete</v-icon>
 								</v-btn>
 							</template>
 						</td>
@@ -62,7 +62,7 @@
 
 					<tr v-if="expandedKeys.has(row.key)">
 						<td :colspan="5" class="pa-0">
-							<v-sheet class="pa-3" color="grey-lighten-5">
+							<v-sheet class="pa-3" style="background: var(--pb-surface-alt)">
 								<div v-if="(selectedByGroup[row.key] || []).length > 0" class="d-flex align-center mb-3">
 									<span class="mr-3"><b>{{ (selectedByGroup[row.key] || []).length }}</b> {{ t(AppLabels.SELECTED) }}</span>
 									<v-select
@@ -134,7 +134,7 @@
 													:disabled="removeLoading.includes(member.getCustomerId())"
 													@click="removeMember(row, member)"
 												>
-													<v-icon small color="red">mdi-close</v-icon>
+													<v-icon small color="error">mdi-close</v-icon>
 												</v-btn>
 											</td>
 										</tr>

@@ -11,7 +11,7 @@
 				/>
 				<div
 					v-else
-					style="background-color: #f1f1f1; height: 60px; width: 35px; margin-right: 10px; display: flex; align-items: center; justify-content: center"
+					style="background-color: var(--pb-surface-alt); height: 60px; width: 35px; margin-right: 10px; display: flex; align-items: center; justify-content: center"
 				>
 					<v-icon>mdi-image-outline</v-icon>
 				</div>
@@ -40,7 +40,7 @@
 					icon
 					@click="$emit('remove')"
 				>
-					<v-icon color="red">mdi-close</v-icon>
+					<v-icon color="error">mdi-close</v-icon>
 				</v-btn>
 			</template>
 		</v-list-item>

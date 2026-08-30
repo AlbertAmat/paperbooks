@@ -10,42 +10,39 @@ import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class CategoriesController extends BaseController<ICategory[]> {
 
-    /**
-     *
-     * @private
-     */
+    /** All categories belonging to the user, populated by `setData()`. */
     private m_categories: ShallowRef<Category[]> = shallowRef([]);
 
     public constructor() {
         super(i18n.global.t(AppLabels.CATEGORIES));
     }
 
+    /** @returns Every category belonging to the user, fetched from the server. */
     async fetchData(): Promise<ICategory[]> {
         return await categoriesService.getCategories()
     }
 
+    /** @param data Raw category list from the server. */
     setData(data: ICategory[]) {
         this.m_categories.value = data.map(category => new Category(category));
     }
 
-    /**
-     *
-     */
+    /** @returns The currently loaded categories. */
     public getCategories(): Category[] {
         return this.m_categories.value;
     }
 
     /**
-     *
+     * @param id Category id to look up.
+     * @returns The matching category, or undefined if not loaded.
      */
     public getCategory(id: number): Category | undefined {
         return this.m_categories.value.find(category => category.getCategoryId() === id);
     }
 
     /**
-     *
-     * @param name
-     * @param description
+     * Create a new category and append it to the local list.
+     * @param name New category's name.
      */
     public async addCategory(name: string) {
         try {
@@ -58,8 +55,8 @@ export default class CategoriesController extends BaseController<ICategory[]> {
     }
 
     /**
-     *
-     * @param id
+     * Delete a category and remove it from the local list.
+     * @param id Category id to delete.
      */
     public async deleteCategory(id: number) {
         const index = this.m_categories.value.findIndex(category => category.getCategoryId() === id);

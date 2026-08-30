@@ -13,5 +13,6 @@ import {IBookStockBase} from "@/types/book/IBookStockBase";
  * };
  */
 export interface IBookAddMd extends IBookBase {
+    /** The single matched stock (always exactly one entry). */
     stocks: IBookStockBase[];
 }

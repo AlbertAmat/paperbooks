@@ -4,8 +4,11 @@ import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppS
 import {i18n} from "@/plugins/i18n/i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 
+/** A single queued printable barcode label. */
 export interface PrintLabelItem {
+    /** Book name printed alongside the barcode. */
     name: string;
+    /** Rendered barcode canvas (see `BookStock.generateBarcodeImage()`). */
     label: HTMLCanvasElement;
 }
 
@@ -62,8 +65,10 @@ export class PrintDialogController {
 
     /**
      * Adds a new label canvas to the collection.
-     * @param name - unique name for the label
-     * @param label - canvas element representing the label
+     * @param name Book name to print alongside the barcode.
+     * @param code Stock code, used as the dedupe key (a label already queued
+     * for this code is rejected with a warning snackbar).
+     * @param label Canvas element representing the rendered barcode label.
      */
     public addLabel(name: string, code: string, label: HTMLCanvasElement) {
         if(Object.keys(this.m_labels.value).includes(code)) {
@@ -139,4 +144,5 @@ export class PrintDialogController {
     }
 }
 
+/** Singleton instance shared by every part of the app. */
 export const printDialogController = new PrintDialogController();

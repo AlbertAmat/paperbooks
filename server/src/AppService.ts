@@ -312,6 +312,49 @@ export class AppService {
     }
 
     /**
+     * Create a short-lived pending-2FA token: proves the caller already
+     * passed the password check for `userId`, but is NOT a session token -
+     * it carries no `token_version` claim and uses a distinct `audience`,
+     * so even if it ended up in the `token` cookie by mistake, requireAuth
+     * (which checks for audience "paperbooks") would reject it. Kept in a
+     * separate `pending_2fa_token` cookie, never `token` (see AuthRoute.ts).
+     * @param userId
+     */
+    public createPending2faToken(userId: number): string {
+        return jwt.sign(
+            {user_id: userId},
+            this.getJwtSecret(),
+            {
+                expiresIn: 5 * 60, // 5 minutes - just long enough to type a code
+                audience: "paperbooks-2fa-pending",
+                issuer: "paperbooks.xyz"
+            }
+        );
+    }
+
+    /**
+     * Verifies a pending-2FA token (see `createPending2faToken`).
+     * @param token
+     * @returns The user id it was issued for, or `null` if missing/invalid/expired.
+     */
+    public verifyPending2faToken(token: string | undefined): number | null {
+        if (!token) {
+            return null;
+        }
+
+        try {
+            const decoded = jwt.verify(token, this.getJwtSecret(), {
+                algorithms: ["HS256"],
+                audience: "paperbooks-2fa-pending",
+                issuer: "paperbooks.xyz"
+            }) as { user_id: number };
+            return decoded.user_id;
+        } catch {
+            return null;
+        }
+    }
+
+    /**
      * Hash a plain text password
      * @param plainPassword User's password
      */

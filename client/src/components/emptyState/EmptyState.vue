@@ -11,16 +11,16 @@
 				class="empty-state__chip"
 				:style="chip.style"
 			>
-				<v-icon :size="chip.iconSize" color="grey-darken-1">{{ chip.icon }}</v-icon>
+				<v-icon :size="chip.iconSize" color="var(--pb-text-muted)">{{ chip.icon }}</v-icon>
 			</div>
 
 			<div class="empty-state__center">
-				<v-icon size="26" color="grey-darken-2">{{ icon }}</v-icon>
+				<v-icon size="26" color="var(--pb-accent)">{{ icon }}</v-icon>
 			</div>
 		</div>
 
 		<div v-else class="empty-state__icon-compact">
-			<v-icon size="20" color="grey-darken-2">{{ icon }}</v-icon>
+			<v-icon size="20" color="var(--pb-accent)">{{ icon }}</v-icon>
 		</div>
 
 		<h3 class="empty-state__title">{{ title }}</h3>
@@ -138,7 +138,7 @@ const chips = computed(() => {
 	left: 50%;
 	transform: translate(-50%, -50%);
 	border-radius: 50%;
-	border: 1px solid rgba(0, 0, 0, 0.06);
+	border: 1px solid var(--pb-border);
 }
 
 .empty-state__ring--sm {
@@ -160,13 +160,13 @@ const chips = computed(() => {
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	background: #fff;
+	background: var(--pb-surface);
 	border-radius: 10px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-	border: 1px solid rgba(0, 0, 0, 0.04);
+	box-shadow: var(--pb-shadow);
+	border: 1px solid var(--pb-border);
 }
 
 .empty-state__center {
@@ -177,12 +177,12 @@ const chips = computed(() => {
 	width: 60px;
 	height: 60px;
 	border-radius: 16px;
-	background: #fff;
+	background: var(--pb-surface);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-	border: 1px solid rgba(0, 0, 0, 0.06);
+	box-shadow: var(--pb-shadow);
+	border: 1px solid var(--pb-border);
 	z-index: 1;
 }
 
@@ -190,25 +190,26 @@ const chips = computed(() => {
 	width: 40px;
 	height: 40px;
 	border-radius: 12px;
-	background: #fff;
+	background: var(--pb-surface);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-	border: 1px solid rgba(0, 0, 0, 0.06);
+	box-shadow: var(--pb-shadow);
+	border: 1px solid var(--pb-border);
 	margin-bottom: 10px;
 }
 
 .empty-state__title {
-	font-size: 17px;
-	font-weight: 700;
-	color: rgba(0, 0, 0, 0.87);
+	font-family: var(--pb-font-display);
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--pb-text);
 	margin: 0;
 }
 
 .empty-state__description {
 	font-size: 13px;
-	color: rgba(0, 0, 0, 0.6);
+	color: var(--pb-text-muted);
 	margin: 4px 0 0;
 	max-width: 320px;
 }

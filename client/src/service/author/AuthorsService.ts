@@ -15,6 +15,7 @@ export class AuthorsService {
      * Case-insensitive substring search over the user's authors, for the
      * author picker/autocomplete when editing a book.
      * @param query Search text, e.g. "tolk".
+     * @returns Matching authors.
      */
     public async searchAuthors(query: string): Promise<IBookAuthor[]> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/author/search`, {
@@ -23,20 +24,28 @@ export class AuthorsService {
         return data;
     }
 
-    /** Fetch every author belonging to the user. */
+    /** @returns Every author belonging to the user. */
     public async getAuthors(): Promise<IBookAuthor[]> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/author`)
         return data;
     }
 
-    /** Rename an existing author. */
+    /**
+     * Rename an existing author.
+     * @param id Author id to update.
+     * @param name New author name.
+     */
     public async updateAuthor(id: number, name: string) {
         await axiosInstance.put(`${PATH_PREFIX}/author/${id}`, {
             name: name,
         })
     }
 
-    /** Create a new author and return the created record. */
+    /**
+     * Create a new author and return the created record.
+     * @param name New author's name.
+     * @returns The created author.
+     */
     public async addAuthor(name: string): Promise<IBookAuthor> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/author`, {
             name: name,
@@ -45,11 +54,15 @@ export class AuthorsService {
         return data;
     }
 
-    /** Delete an author by id. */
+    /**
+     * Delete an author by id.
+     * @param id Author id to delete.
+     */
     public async deleteAuthor(id: number): Promise<void> {
         await axiosInstance.delete(`${PATH_PREFIX}/author/${id}`)
     }
 
 }
 
+/** Singleton instance shared by every part of the app. */
 export const authorsService = new AuthorsService();

@@ -15,30 +15,45 @@
 import { ref, Ref } from "vue";
 
 export class ConfirmationDialogController {
+    /** Whether the dialog is currently visible. */
     private m_visible: Ref<boolean> = ref(false);
+
+    /** Current dialog title. */
     private m_title = "";
+
+    /** Current dialog description/body text. */
     private m_desc = "";
+
+    /** Current confirm button label. */
     private m_action = "";
 
+    /** Resolver for the pending `showDialog()` promise, or null if none is pending. */
     private m_resolver: ((value: boolean) => void) | null = null;
+
+    /** Rejecter for the pending `showDialog()` promise, or null if none is pending. */
     private m_reject: ((value: boolean) => void) | null = null;
 
+    /** @returns Whether the dialog is currently visible. */
     public isVisible(): boolean {
         return this.m_visible.value;
     }
 
+    /** @param value New visibility. */
     public setVisible(value: boolean) {
         this.m_visible.value = value;
     }
 
+    /** @returns The current dialog title. */
     public getTitle() {
         return this.m_title;
     }
 
+    /** @returns The current dialog description/body text. */
     public getDescription() {
         return this.m_desc;
     }
 
+    /** @returns The current confirm button label. */
     public getAction() {
         return this.m_action;
     }
@@ -50,6 +65,7 @@ export class ConfirmationDialogController {
      * @param title Dialog title.
      * @param desc Dialog description/body text.
      * @param action Label for the confirm button.
+     * @returns A promise resolving `true` on confirm, rejecting `false` on cancel.
      */
     public showDialog(title: string, desc: string, action: string): Promise<boolean> {
         this.m_title = title;
@@ -85,4 +101,5 @@ export class ConfirmationDialogController {
     }
 }
 
+/** Singleton instance shared by every part of the app. */
 export const confirmationDialogController = new ConfirmationDialogController();

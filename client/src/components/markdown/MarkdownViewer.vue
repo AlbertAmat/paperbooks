@@ -101,24 +101,25 @@ function onClick(event: MouseEvent) {
 <style scoped lang="scss">
 .markdown-viewer {
 	line-height: 1.6;
-	color: rgba(0, 0, 0, 0.87);
+	color: var(--pb-text);
 
 	:deep(h1), :deep(h2), :deep(h3), :deep(h4) {
+		font-family: var(--pb-font-display);
 		font-weight: 600;
-		color: #011a38;
+		color: var(--pb-text);
 		margin-top: 1.6em;
 		margin-bottom: 0.6em;
 		line-height: 1.3;
 	}
 
 	:deep(h1) {
-		font-size: 26px;
+		font-size: 28px;
 		margin-top: 0;
 	}
 
 	:deep(h2) {
-		font-size: 21px;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		font-size: 22px;
+		border-bottom: 1px solid var(--pb-border);
 		padding-bottom: 0.3em;
 	}
 
@@ -149,7 +150,7 @@ function onClick(event: MouseEvent) {
 	}
 
 	:deep(a) {
-		color: #1c7ff1;
+		color: var(--pb-primary);
 		text-decoration: none;
 	}
 
@@ -158,15 +159,17 @@ function onClick(event: MouseEvent) {
 	}
 
 	:deep(code) {
-		background: rgba(0, 0, 0, 0.05);
+		font-family: var(--pb-font-mono);
+		background: var(--pb-surface-alt);
 		border-radius: 4px;
 		padding: 0.15em 0.4em;
 		font-size: 0.9em;
 	}
 
 	:deep(pre) {
-		background: #011a38;
-		color: #f6f8fc;
+		font-family: var(--pb-font-mono);
+		background: var(--pb-nav-bg);
+		color: var(--pb-nav-text);
 		border-radius: 8px;
 		padding: 14px 16px;
 		overflow-x: auto;
@@ -182,9 +185,9 @@ function onClick(event: MouseEvent) {
 	:deep(blockquote) {
 		margin: 0 0 1em 0;
 		padding: 0.4em 1em;
-		border-left: 4px solid #1c7ff1;
-		background: rgba(28, 127, 241, 0.06);
-		color: rgba(0, 0, 0, 0.7);
+		border-left: 4px solid var(--pb-primary);
+		background: var(--pb-surface-alt);
+		color: var(--pb-text-muted);
 	}
 
 	:deep(img) {
@@ -200,18 +203,18 @@ function onClick(event: MouseEvent) {
 	}
 
 	:deep(th), :deep(td) {
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--pb-border);
 		padding: 8px 10px;
 		text-align: left;
 	}
 
 	:deep(th) {
-		background: rgba(0, 0, 0, 0.03);
+		background: var(--pb-surface-alt);
 	}
 
 	:deep(hr) {
 		border: none;
-		border-top: 1px solid rgba(0, 0, 0, 0.1);
+		border-top: 1px solid var(--pb-border);
 		margin: 2em 0;
 	}
 }

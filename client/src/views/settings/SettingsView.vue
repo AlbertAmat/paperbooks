@@ -13,7 +13,7 @@
 			</v-btn>
 		</template>
 		<template v-slot:default>
-			<div style="height: 100%; width: 100%; padding-top: 10px;">
+			<div style="width: 100%; padding-top: 10px; padding-bottom: 10px;">
 				<settings-card :title="t(AppLabels.USERCONF_MY_PROFILE)">
 					<div style="display: flex; margin-bottom: 30px">
 						<v-avatar
@@ -78,6 +78,74 @@
 					</div>
 				</settings-card>
 
+				<settings-card :title="t(AppLabels.USERCONF_APPEARANCE)">
+					<div class="theme-picker">
+						<button
+							type="button"
+							class="theme-swatch"
+							:class="{'theme-swatch--active': controller.getUser().getTheme() === 'beige'}"
+							:disabled="switchingTheme"
+							@click="selectTheme('beige')"
+						>
+							<span class="theme-swatch-preview theme-swatch-preview--beige">
+								<span class="theme-swatch-nav"></span>
+								<span class="theme-swatch-card"></span>
+							</span>
+							<span class="theme-swatch-label">
+								<span class="theme-swatch-name">{{t(AppLabels.USERCONF_THEME_BEIGE)}}</span>
+								<span class="theme-swatch-desc">{{t(AppLabels.USERCONF_THEME_BEIGE_DESC)}}</span>
+							</span>
+							<v-icon
+								v-if="controller.getUser().getTheme() === 'beige'"
+								color="primary"
+								class="theme-swatch-check"
+							>mdi-check-circle</v-icon>
+						</button>
+
+						<button
+							type="button"
+							class="theme-swatch"
+							:class="{'theme-swatch--active': controller.getUser().getTheme() === 'library'}"
+							:disabled="switchingTheme"
+							@click="selectTheme('library')"
+						>
+							<span class="theme-swatch-preview theme-swatch-preview--library">
+								<span class="theme-swatch-nav"></span>
+								<span class="theme-swatch-card"></span>
+							</span>
+							<span class="theme-swatch-label">
+								<span class="theme-swatch-name">{{t(AppLabels.USERCONF_THEME_LIBRARY)}}</span>
+								<span class="theme-swatch-desc">{{t(AppLabels.USERCONF_THEME_LIBRARY_DESC)}}</span>
+							</span>
+							<v-icon
+								v-if="controller.getUser().getTheme() === 'library'"
+								color="primary"
+								class="theme-swatch-check"
+							>mdi-check-circle</v-icon>
+						</button>
+					</div>
+
+					<div style="display: flex; align-items: center; width: 100%; min-width: 0; margin-top: 24px">
+						<div style="flex: 1; padding-right: 80px">
+							<p style="font-size: 14px; font-weight: 530">{{t(AppLabels.USERCONF_COMPACT_MENU)}}</p>
+							<p
+								class="v-card-subtitle pl-0"
+								style="white-space: normal"
+							>
+								{{t(AppLabels.USERCONF_COMPACT_MENU_DESC)}}
+							</p>
+						</div>
+						<v-switch
+							:model-value="controller.getUser().isSidebarRail()"
+							color="primary"
+							hide-details
+							:loading="switchingSidebarRail"
+							:disabled="switchingSidebarRail"
+							@update:model-value="toggleSidebarRail"
+						/>
+					</div>
+				</settings-card>
+
 				<settings-card :title="t(AppLabels.USERCONF_LANGUAGE_REGION)">
 					<div style="width: 100%; display: flex">
 						<v-select
@@ -106,14 +174,24 @@
 					</div>
 				</settings-card>
 				<settings-card :title="t(AppLabels.USERCONF_ACCOUNT_SECURITY)">
-					<v-text-field
-						v-model="email"
-						:label="t(AppLabels.USERCONF_EMAIL)"
-						density="compact"
-						variant="outlined"
-						hide-details
-						class="mb-4  settings-filed"
-					/>
+					<div style="display: flex; align-items: center; width: 100%; min-width: 0; margin-bottom: 16px">
+						<div style="flex: 1; padding-right: 80px">
+							<p style="font-size: 14px; font-weight: 530">{{t(AppLabels.USERCONF_EMAIL)}}</p>
+							<p
+								class="v-card-subtitle pl-0"
+								style="white-space: normal"
+							>
+								{{t(AppLabels.USERCONF_EMAIL_DESC)}}
+							</p>
+						</div>
+						<v-text-field
+							v-model="email"
+							density="compact"
+							variant="outlined"
+							hide-details
+							style="max-width: 280px; width: 100%"
+						/>
+					</div>
 
 					<div style="display: flex; align-items: center; width: 100%; min-width: 0">
 						<div style="flex: 1; padding-right: 80px">
@@ -128,9 +206,32 @@
 						<change-password-dialog :controller="controller"/>
 					</div>
 
+					<div style="display: flex; align-items: center; width: 100%; min-width: 0; margin-top: 16px">
+						<div style="flex: 1; padding-right: 80px">
+							<p style="font-size: 14px; font-weight: 530">
+								{{t(AppLabels.TWOFA_TITLE)}}
+								<v-chip
+									:color="controller.getUser().isTotpEnabled() ? 'success' : undefined"
+									size="x-small"
+									class="ml-2"
+								>
+									{{controller.getUser().isTotpEnabled() ? t(AppLabels.TWOFA_STATUS_ENABLED) : t(AppLabels.TWOFA_STATUS_DISABLED)}}
+								</v-chip>
+							</p>
+							<p
+								class="v-card-subtitle pl-0"
+								style="white-space: normal"
+							>
+								{{t(AppLabels.TWOFA_DESC)}}
+							</p>
+						</div>
+						<two-factor-setup-dialog v-if="!controller.getUser().isTotpEnabled()" :controller="controller"/>
+						<two-factor-disable-dialog v-else :controller="controller"/>
+					</div>
+
 					<div style="display: flex; align-items: center; margin-top: 16px">
 						<div style="flex: 1; min-width: 0">
-							<p style="color: #c62f2f; font-weight: 530">{{t(AppLabels.USERCONF_DELETE)}}</p>
+							<p style="color: rgb(var(--v-theme-error)); font-weight: 530">{{t(AppLabels.USERCONF_DELETE)}}</p>
 							<p
 								class="v-card-subtitle pl-0"
 								style="white-space: normal"
@@ -167,8 +268,11 @@ import {Ref, ref, computed} from "vue";
 import SettingsCard from "@/views/settings/SettingsCard.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import ChangePasswordDialog from "@/views/settings/ChangePasswordDialog.vue";
+import TwoFactorSetupDialog from "@/views/settings/TwoFactorSetupDialog.vue";
+import TwoFactorDisableDialog from "@/views/settings/TwoFactorDisableDialog.vue";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {useI18n} from "vue-i18n";
+import {applyTheme} from "@/plugins/theme";
 
 const controller = new SettingsController();
 
@@ -193,6 +297,16 @@ const uploadingImage: Ref<boolean> = ref(false);
  *
  */
 const loadingDelete: Ref<boolean> = ref(false);
+
+/**
+ *
+ */
+const switchingTheme: Ref<boolean> = ref(false);
+
+/**
+ *
+ */
+const switchingSidebarRail: Ref<boolean> = ref(false);
 
 const name: Ref<string> = ref(controller.getUser().getName());
 const email: Ref<string> = ref(controller.getUser().getEmail());
@@ -246,6 +360,37 @@ async function save() {
 		)
 	} finally {
 		saving.value = false;
+	}
+}
+
+/** Applies the picked theme immediately (for instant feedback), then persists it. */
+async function selectTheme(theme: string) {
+	if (theme === controller.getUser().getTheme() || switchingTheme.value) {
+		return;
+	}
+
+	try {
+		switchingTheme.value = true;
+		applyTheme(theme);
+		await controller.getUser().setTheme(theme);
+	} finally {
+		switchingTheme.value = false;
+	}
+}
+
+/** Persists the compact-menu (sidebar rail) preference; AppMenu.vue picks up the change reactively. */
+async function toggleSidebarRail(checked: boolean | null) {
+	const value = !!checked;
+
+	if (value === controller.getUser().isSidebarRail() || switchingSidebarRail.value) {
+		return;
+	}
+
+	try {
+		switchingSidebarRail.value = true;
+		await controller.getUser().setSidebarRail(value);
+	} finally {
+		switchingSidebarRail.value = false;
 	}
 }
 
@@ -313,5 +458,102 @@ function changeImage() {
 <style scoped>
 .settings-filed {
 	width: 50%;
+}
+
+.theme-picker {
+	display: flex;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.theme-swatch {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	width: 260px;
+	padding: 12px 14px;
+	border: 1px solid var(--pb-border);
+	border-radius: var(--pb-radius-sm);
+	background: var(--pb-surface);
+	cursor: pointer;
+	text-align: left;
+	font: inherit;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.theme-swatch:hover:not(:disabled) {
+	border-color: var(--pb-border-strong);
+}
+
+.theme-swatch--active {
+	border-color: var(--pb-primary);
+	box-shadow: 0 0 0 1px var(--pb-primary);
+}
+
+.theme-swatch-preview {
+	width: 56px;
+	height: 44px;
+	border-radius: 8px;
+	overflow: hidden;
+	display: flex;
+	flex-shrink: 0;
+	/* Fixed (not theme-token) border: each swatch renders its own theme's
+	   colors regardless of which theme is currently active, so this needs
+	   to read against both a near-white and a near-black preview. */
+	border: 1px solid rgba(128, 128, 128, 0.4);
+}
+
+.theme-swatch-nav {
+	width: 16px;
+	height: 100%;
+	/* Mirrors AppMenu.vue's real sidebar border-right - same fixed
+	   mid-contrast color as the outer preview border, for the same reason
+	   (this strip's own background always stays dark, in both swatches). */
+	border-right: 1px solid rgba(128, 128, 128, 0.4);
+}
+
+.theme-swatch-card {
+	flex: 1;
+}
+
+.theme-swatch-preview--beige .theme-swatch-nav {
+	background: #2b2318;
+}
+
+.theme-swatch-preview--beige .theme-swatch-card {
+	background: #f7f2ea;
+}
+
+.theme-swatch-preview--library .theme-swatch-nav {
+	background: #0a0e17;
+}
+
+.theme-swatch-preview--library .theme-swatch-card {
+	background: #0d1420;
+}
+
+.theme-swatch-label {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+}
+
+.theme-swatch-name {
+	font-weight: 600;
+	font-size: 14px;
+	color: var(--pb-text);
+}
+
+.theme-swatch-desc {
+	font-size: 12px;
+	color: var(--pb-text-muted);
+}
+
+.theme-swatch-check {
+	position: absolute;
+	top: 8px;
+	right: 8px;
 }
 </style>

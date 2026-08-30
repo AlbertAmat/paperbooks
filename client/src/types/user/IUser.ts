@@ -20,10 +20,16 @@ export interface IUser {
     language: string;
     /** Preferred region code. */
     region: string;
+    /** UI theme preference: "beige" (warm/light) or "library" (dark/blue). */
+    theme: string;
+    /** Whether the left nav collapses to icon-only "rail" mode (expanding on hover). Off by default. */
+    sidebarRail: boolean;
     /** Base64 data-URI of the profile picture, or null if unset. */
     image: string | null;
     /** Whether this account belongs to a public institution (e.g. a school). */
     isPublicInstitution: boolean;
+    /** Whether two-factor authentication (TOTP) is enabled for this account. */
+    totpEnabled: boolean;
     /**
      * Whether this account has acknowledged the security-measures notice
      * (see SecurityNoticeDialog.vue). Always `false` for accounts where

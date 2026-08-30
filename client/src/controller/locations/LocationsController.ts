@@ -10,42 +10,40 @@ import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class LocationsController extends BaseController<ILocationExt[]> {
 
-    /**
-     *
-     * @private
-     */
+    /** All locations belonging to the user, populated by `setData()`. */
     private m_locations: ShallowRef<LocationExt[]> = shallowRef([]);
 
     public constructor() {
         super(i18n.global.t(AppLabels.LOCATIONS));
     }
 
+    /** @returns Every location belonging to the user, fetched from the server. */
     async fetchData(): Promise<ILocationExt[]> {
         return await locationsService.getLocations()
     }
 
+    /** @param data Raw location list from the server. */
     setData(data: ILocationExt[]) {
         this.m_locations.value = data.map(location => new LocationExt(location));
     }
 
-    /**
-     *
-     */
+    /** @returns The currently loaded locations. */
     public getLocations(): LocationExt[] {
         return this.m_locations.value;
     }
 
     /**
-     *
+     * @param id Location id to look up.
+     * @returns The matching location, or undefined if not loaded.
      */
     public getLocation(id: number): LocationExt | undefined {
         return this.m_locations.value.find(location => location.getId() === id);
     }
 
     /**
-     *
-     * @param name
-     * @param description
+     * Create a new location and append it to the local list.
+     * @param name New location's name.
+     * @param description New location's description, or null.
      */
     public async addLocation(name: string, description: string | null) {
         try {
@@ -58,8 +56,8 @@ export default class LocationsController extends BaseController<ILocationExt[]> 
     }
 
     /**
-     *
-     * @param locationId
+     * Delete a location and remove it from the local list.
+     * @param locationId Location id to delete.
      */
     public async deleteLocation(locationId: number) {
         const index = this.m_locations.value.findIndex(location => location.getId() === locationId);

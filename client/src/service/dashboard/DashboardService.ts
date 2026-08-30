@@ -10,11 +10,12 @@ import IDashboard from "@/types/dashboard/IDashboard";
  */
 class DashboardService {
 
-    /** Fetch every KPI/chart series the dashboard view needs, in one call. */
+    /** @returns Every KPI/chart series the dashboard view needs, in one call. */
     public async getData(): Promise<IDashboard> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/dashboard`)
         return data;
     }
 }
 
+/** Singleton instance shared by every part of the app. */
 export const dashboardService = new DashboardService();

@@ -22,7 +22,9 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.3.0",
+    "otplib": "^13.5.0",
     "pg": "^8.13.1",
+    "qrcode": "^1.5.4",
     "uuid": "^11.1.1"
   },
   "devDependencies": {
@@ -33,6 +35,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/pg": "^8.11.10",
+    "@types/qrcode": "^1.5.6",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "tslint": "^6.1.3",

@@ -6,7 +6,7 @@
 					v-bind="props"
 					class="text-none"
 					elevation="0"
-					style=" border: 1px solid #ECECEC"
+					style=" border: 1px solid var(--pb-border)"
 				>
 					<v-icon class="mr-2" size="22">mdi-plus</v-icon>
 					{{t(AppLabels.ADD_FILTER)}}

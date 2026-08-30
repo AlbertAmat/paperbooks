@@ -4,62 +4,43 @@ import {ITag} from "@/types/customer/ITag";
 
 export class Tag {
 
-    /**
-     *
-     * @private
-     */
+    /** Tag id, immutable once loaded. */
     private readonly m_id: number;
 
-    /**
-     *
-     * @private
-     */
+    /** Tag name. */
     private m_name: Ref<string>;
 
-    /**
-     *
-     * @private
-     */
+    /** Tag color (CSS color string, e.g. "#ff0000"). */
     private m_color: Ref<string>;
 
+    /** @param data Raw tag data from the server. */
     public constructor(data: ITag) {
         this.m_id = data.id;
         this.m_name = ref(data.name);
         this.m_color = ref(data.color);
     }
 
-    /**
-     * Get tag id
-     */
+    /** @returns The tag id. */
     public getId(): number {
         return this.m_id;
     }
 
-    /**
-     * Get tag name
-     */
+    /** @returns The tag name. */
     public getName(): string {
         return this.m_name.value;
     }
 
-    /**
-     * Set tag name
-     */
+    /** @param value New tag name. */
     public setName(value: string) {
         return this.m_name.value;
     }
 
-    /**
-     * Get tag color
-     */
+    /** @returns The tag color. */
     public getColor(): string {
         return this.m_color.value;
     }
 
-    /**
-     *
-     * @param value
-     */
+    /** @param value New tag color. */
     public setColor(value: string) {
         this.m_color.value = value;
     }

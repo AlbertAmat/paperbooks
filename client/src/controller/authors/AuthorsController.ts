@@ -10,48 +10,39 @@ import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class AuthorsController extends BaseController<IBookAuthor[]> {
 
-    /**
-     *
-     * @private
-     */
+    /** All authors belonging to the user, populated by `setData()`. */
     private m_authors: ShallowRef<BookAuthor[]> = shallowRef([]);
 
     public constructor() {
         super(i18n.global.t(AppLabels.AUTHORS));
     }
 
-    /**
-     *
-     */
+    /** @returns Every author belonging to the user, fetched from the server. */
     async fetchData(): Promise<IBookAuthor[]> {
         return await authorsService.getAuthors()
     }
 
-    /**
-     *
-     * @param data
-     */
+    /** @param data Raw author list from the server. */
     setData(data: IBookAuthor[]) {
         this.m_authors.value = data.map(author => new BookAuthor(author));
     }
 
-    /**
-     *
-     */
+    /** @returns The currently loaded authors. */
     public getAuthors(): BookAuthor[] {
         return this.m_authors.value;
     }
 
     /**
-     *
+     * @param id Author id to look up.
+     * @returns The matching author, or undefined if not loaded.
      */
     public getAuthor(id: number): BookAuthor | undefined {
         return this.m_authors.value.find(author => author.getAuthorId() === id);
     }
 
     /**
-     *
-     * @param name
+     * Create a new author and append it to the local list.
+     * @param name New author's name.
      */
     public async addAuthor(name: string) {
         try {
@@ -64,8 +55,8 @@ export default class AuthorsController extends BaseController<IBookAuthor[]> {
     }
 
     /**
-     *
-     * @param customerId
+     * Delete an author and remove it from the local list.
+     * @param id Author id to delete.
      */
     public async deleteAuthor(id: number) {
         const index = this.m_authors.value.findIndex(author => author.getAuthorId() === id);

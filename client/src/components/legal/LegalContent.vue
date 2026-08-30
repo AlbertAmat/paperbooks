@@ -39,11 +39,14 @@ defineProps<Props>()
 <style scoped lang="scss">
 .legal-content {
 	max-width: 820px;
+	color: var(--pb-text);
 
 	h3 {
+		font-family: var(--pb-font-display);
 		margin-top: 24px;
 		margin-bottom: 8px;
-		font-size: 16px;
+		font-size: 18px;
+		font-weight: 600;
 	}
 
 	p {
@@ -68,12 +71,12 @@ defineProps<Props>()
 		th, td {
 			text-align: left;
 			padding: 8px 12px;
-			border: 1px solid rgba(0, 0, 0, 0.12);
+			border: 1px solid var(--pb-border);
 			vertical-align: top;
 		}
 
 		th {
-			background-color: rgba(0, 0, 0, 0.04);
+			background-color: var(--pb-surface-alt);
 		}
 	}
 }

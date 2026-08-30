@@ -3,32 +3,27 @@
 		v-model="menu"
 		v-model:rail="rail"
 		app
-		border="0"
-		width="230"
+		width="240"
 		class="app-menu"
-		expand-on-hover
+		:expand-on-hover="railEnabled"
 		permanent
-		color="#011a38"
 		:dark="true"
 	>
-		<div class="d-flex align-center pt-3 pb-2 ml-1 app-menu-header pr-1 pl-2" >
-			<v-avatar color="primary" rounded size="30">
+		<div class="d-flex align-center pt-4 pb-3 ml-1 app-menu-header pr-1 pl-4">
+			<v-avatar color="primary" rounded="lg" size="32">
 				<v-icon color="white" size="20">
-					mdi-book-open
+					mdi-book-open-page-variant
 				</v-icon>
 			</v-avatar>
 
 			<!-- APP TITLE -->
 			<span
-				class="mx-2 app-menu-title"
+				class="mx-2 app-menu-title pb-display"
 				:class="{'app-menu-title--visible': !rail}"
-				style="font-weight: bold; flex: 1; color: white"
 			>
 				Paper Book
 			</span>
 		</div>
-
-		<v-divider class="mt-0"></v-divider>
 
 		<v-list
 			v-model="selectedItem"
@@ -36,7 +31,7 @@
 			density="compact"
 			slim
 			nav
-			style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;"
+			class="app-menu-list"
 		>
 			<v-list-item
 				v-for="(item, index) in items"
@@ -47,11 +42,13 @@
 				:title="item.name"
 				:prepend-icon="item.icon"
 				density="compact"
-				:style="{'font-weight': selectedItem == item.path ? 'bold !important' : ''}"
+				class="app-menu-item"
 			/>
 		</v-list>
 
 		<div style="width: 100%;" class="pb-3">
+			<v-divider class="app-menu-divider mb-2"></v-divider>
+
 			<print-dialog/>
 
 			<v-list-item
@@ -60,7 +57,7 @@
 				title="Help"
 				prepend-icon="mdi-help-circle-outline"
 				density="compact"
-				class="mx-2"
+				class="mx-2 app-menu-item"
 			/>
 		</div>
 	</v-navigation-drawer>
@@ -68,11 +65,16 @@
 
 <script setup lang="ts">
 /**
- * Left-hand navigation drawer (collapses to icon-only "rail" mode, expands
- * on hover): links to every top-level view, plus the print queue and help/docs.
+ * Left-hand navigation drawer: links to every top-level view, plus the print
+ * queue and help/docs. Stays fully expanded by default; if the user turns on
+ * "Compact menu" in Settings (`users.sidebar_rail`, off by default) it
+ * collapses to icon-only "rail" mode instead, expanding again on hover.
+ * Styled as a dark "shelf frame" (see --pb-nav-* tokens) in both themes -
+ * like the frame of a bookshelf standing in a bright or dim room.
  */
-import {Ref, ref, watch} from "vue";
+import {computed, Ref, ref, watch} from "vue";
 import {useRoute} from "vue-router";
+import {applicationService} from "@/service/ApplicationService";
 import {dashboardRoute} from "@/router/routes/DashboardRoute";
 import {searchRoute} from "@/router/routes/SearchRoute";
 import {locationsRoute} from "@/router/routes/LocationsRoute";
@@ -97,7 +99,17 @@ const selectedItem: Ref<string | null> = ref(null);
  *
  */
 const menu: Ref<boolean> = ref(true);
-const rail: Ref<boolean> = ref(true);
+
+/** Whether rail (icon-only, expand-on-hover) mode is enabled - the user's saved Settings preference. Off by default. */
+const railEnabled = computed(() => applicationService.getUser().isSidebarRail());
+
+const rail: Ref<boolean> = ref(railEnabled.value);
+
+// Keep the drawer in sync if the user toggles the preference in Settings
+// without a page reload: rail mode fully off means always expanded.
+watch(railEnabled, (enabled) => {
+	rail.value = enabled;
+});
 
 /**
  *
@@ -143,7 +155,9 @@ watch(() => route.path, (path) => {
 
 <style scoped>
 .app-menu {
-	color: white;
+	background: var(--pb-nav-bg) !important;
+	color: var(--pb-nav-text);
+	border-right: 1px solid var(--pb-nav-border-strong) !important;
 }
 
 .app-menu-header {
@@ -155,10 +169,44 @@ watch(() => route.path, (path) => {
 	overflow: hidden;
 	opacity: 0;
 	transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	flex: 1;
+	font-weight: 600;
+	font-size: 17px;
+	color: var(--pb-nav-text);
 }
 
 .app-menu-title--visible {
 	opacity: 1;
+}
+
+.app-menu-list {
+	flex: 1;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	padding-top: 4px;
+}
+
+.app-menu-item {
+	border-radius: 10px;
+	margin: 2px 8px;
+	color: var(--pb-nav-text-muted);
+}
+
+.app-menu-divider {
+	border-color: var(--pb-nav-border) !important;
+}
+
+.app-menu :deep(.v-list-item--active) {
+	background: var(--pb-nav-active-bg);
+	color: var(--pb-nav-accent);
+	font-weight: 600;
+	border-left: 3px solid var(--pb-nav-accent);
+	padding-left: calc(var(--v-list-item-padding-left, 16px) - 3px) !important;
+}
+
+.app-menu :deep(.v-list-item--active .v-icon) {
+	color: var(--pb-nav-accent);
 }
 
 .app-menu >>> .v-navigation-drawer__border {

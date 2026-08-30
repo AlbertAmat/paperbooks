@@ -1,9 +1,14 @@
 /** Options for a single snackbar notification (see `appSnackbarController.show()`). */
 export interface SnackbarOptions {
+    /** Text shown in the snackbar. */
     message: string;
+    /** Label for the optional action button, e.g. "Undo". */
     actionLabel?: string;
+    /** Callback invoked when the action button is clicked. */
     onAction?: () => void;
+    /** How long the snackbar stays visible, in milliseconds (default 4000ms). */
     duration?: number; // default 4000ms
+    /** Visual style (`SnackbarType`); defaults to `SnackbarType.SUCCESS`. */
     type?: number; // default 4000ms
 };
 
@@ -24,9 +29,13 @@ export enum SnackbarType {
  * appSnackbarController.show({ message: i18n.global.t(AppLabels.SNACKBAR_BOOK_UPDATED) });
  */
 export class AppSnackbarController {
+    /** Subscribed listeners notified on every `show()`/`clear()` call. */
     private listeners: ((options: SnackbarOptions | null) => void)[] = [];
 
-    /** Broadcast a snackbar to show. */
+    /**
+     * Broadcast a snackbar to show.
+     * @param options Snackbar content/behavior.
+     */
     show(options: SnackbarOptions) {
         this.emit(options);
     }
@@ -36,7 +45,11 @@ export class AppSnackbarController {
         this.emit(null);
     }
 
-    /** Register a listener (typically the AppSnackbar component); returns an unsubscribe function. */
+    /**
+     * Register a listener (typically the AppSnackbar component).
+     * @param listener Called with the latest options, or null when cleared.
+     * @returns An unsubscribe function.
+     */
     subscribe(listener: (options: SnackbarOptions | null) => void) {
         this.listeners.push(listener);
         return () => {
@@ -44,9 +57,11 @@ export class AppSnackbarController {
         };
     }
 
+    /** @param options Options to broadcast to every subscriber, or null to clear. */
     private emit(options: SnackbarOptions | null) {
         this.listeners.forEach((listener) => listener(options));
     }
 }
 
+/** Singleton instance shared by every part of the app. */
 export const appSnackbarController = new AppSnackbarController();

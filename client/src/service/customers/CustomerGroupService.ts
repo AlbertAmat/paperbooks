@@ -12,7 +12,7 @@ import {ICustomerGroup} from "@/types/customer/ICustomerGroup";
  */
 class CustomerGroupService {
 
-    /** Fetch every customer group, with each group's member count. */
+    /** @returns Every customer group, with each group's member count. */
     public async getGroups(): Promise<ICustomerGroup[]> {
         const {data} = await axiosInstance.get(
             `${PATH_PREFIX}/customer/group`
@@ -21,7 +21,12 @@ class CustomerGroupService {
         return data;
     }
 
-    /** Create a new customer group. */
+    /**
+     * Create a new customer group.
+     * @param name New group's name.
+     * @param description New group's description, optional.
+     * @returns The created group.
+     */
     public async addGroup(
         name: string,
         description?: string
@@ -37,7 +42,13 @@ class CustomerGroupService {
         return data;
     }
 
-    /** Rename/update a customer group's description. */
+    /**
+     * Rename/update a customer group's description.
+     * @param id Group id to update.
+     * @param name New group name.
+     * @param description New group description, optional.
+     * @returns The updated group.
+     */
     public async updateGroup(
         id: number,
         name: string,
@@ -54,14 +65,21 @@ class CustomerGroupService {
         return data;
     }
 
-    /** Delete a customer group (members are kept, ungrouped). */
+    /**
+     * Delete a customer group (members are kept, ungrouped).
+     * @param id Group id to delete.
+     */
     public async deleteGroup(id: number): Promise<void> {
         await axiosInstance.delete(
             `${PATH_PREFIX}/customer/group/${id}`
         );
     }
 
-    /** Assign a customer to a group. */
+    /**
+     * Assign a customer to a group.
+     * @param customerId Customer id to assign.
+     * @param groupId Group id to assign the customer to.
+     */
     public async assignCustomerToGroup(
         customerId: number,
         groupId: number
@@ -71,7 +89,10 @@ class CustomerGroupService {
         );
     }
 
-    /** Remove a customer from whichever group they're in. */
+    /**
+     * Remove a customer from whichever group they're in.
+     * @param customerId Customer id to unassign.
+     */
     public async removeCustomerFromGroup(
         customerId: number
     ): Promise<void> {
@@ -81,4 +102,5 @@ class CustomerGroupService {
     }
 }
 
+/** Singleton instance shared by every part of the app. */
 export const customerGroupService = new CustomerGroupService();

@@ -14,22 +14,17 @@ import CustomerGroup from "@/model/customer/CustomerGroup";
 
 export default class CustomersController extends BaseController<ICustomersResponse> {
 
-    /**
-     * Stores the list of customers
-     * @private
-     */
+    /** All customers belonging to the user, populated by `setData()`. */
     private m_customers: ShallowRef<CustomerDetail[]> = shallowRef([]);
 
-    /**
-     * Stores the list of tags
-     * @private
-     */
+    /** All tags available to the user, populated by `setData()`. */
     private m_tags: ShallowRef<Tag[]> = shallowRef([]);
 
     public constructor() {
         super(i18n.global.t(AppLabels.CUSTOMERS));
     }
 
+    /** @returns The customers list view's data: all customers plus all available tags. */
     async fetchData(): Promise<ICustomersResponse> {
         return await customersService.getPageData()
     }
@@ -39,44 +34,42 @@ export default class CustomersController extends BaseController<ICustomersRespon
         await this.__fetchData();
     }
 
+    /** @param data Raw customers + tags data from the server. */
     setData(data: ICustomersResponse) {
         this.m_customers.value = data.customers.map(customer => new CustomerDetail(customer));
         this.m_tags.value = data.tags.map(tag => new Tag(tag));
     }
 
-    /**
-     *
-     */
+    /** @returns The currently loaded customers. */
     public getCustomers(): CustomerDetail[] {
         return this.m_customers.value;
     }
 
     /**
-     *
+     * @param id Customer id to look up.
+     * @returns The matching customer, or undefined if not loaded.
      */
     public getCustomer(id: number): CustomerDetail | undefined {
         return this.m_customers.value.find(customer => customer.getCustomerId() === id);
     }
 
-    /**
-     *
-     */
+    /** @returns The currently loaded tags. */
     public getTags(): Tag[] {
         return this.m_tags.value;
     }
 
     /**
-     *
-     * @param id
+     * @param id Tag id to look up.
+     * @returns The matching tag, or undefined if not loaded.
      */
     public getTag(id: number): Tag | undefined {
         return this.m_tags.value.find(tag => tag.getId() == id);
     }
 
     /**
-     *
-     * @param name
-     * @param group
+     * Create a new customer, optionally assigning it to a group, and append it to the local list.
+     * @param name New customer's name.
+     * @param group Group to assign the new customer to, optional.
      */
     public async addCustomer(name: string, group?: CustomerGroup) {
         try {
@@ -94,8 +87,8 @@ export default class CustomersController extends BaseController<ICustomersRespon
     }
 
     /**
-     *
-     * @param customerId
+     * Delete a customer and remove it from the local list.
+     * @param customerId Customer id to delete.
      */
     public async deleteCustomer(customerId: number) {
         const index = this.m_customers.value.findIndex(customer => customer.getCustomerId() === customerId);

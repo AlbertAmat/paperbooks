@@ -13,16 +13,10 @@ import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class CustomerGroupsController {
 
-    /**
-     * Stores the list of customer groups
-     * @private
-     */
+    /** All customer groups, populated by `reload()`. */
     private m_groups: ShallowRef<CustomerGroup[]> = shallowRef([]);
 
-    /**
-     *
-     * @private
-     */
+    /** Whether a `reload()` call is currently in flight. */
     private m_loading: Ref<boolean> = ref(false);
 
     public constructor() {
@@ -42,22 +36,19 @@ export default class CustomerGroupsController {
         }
     }
 
-    /**
-     *
-     */
+    /** @returns Whether a `reload()` call is currently in flight. */
     public isLoading(): boolean {
         return this.m_loading.value;
     }
 
-    /**
-     *
-     */
+    /** @returns The currently loaded customer groups. */
     public getGroups(): CustomerGroup[] {
         return this.m_groups.value;
     }
 
     /**
-     *
+     * @param id Group id to look up, or null/falsy.
+     * @returns The matching group, or undefined if not loaded or `id` is falsy.
      */
     public getGroup(id: number | null): CustomerGroup | undefined {
         if (!id) {
@@ -67,9 +58,9 @@ export default class CustomerGroupsController {
     }
 
     /**
-     *
-     * @param name
-     * @param description
+     * Create a new customer group and append it to the local list.
+     * @param name New group's name.
+     * @param description New group's description, optional.
      */
     public async addGroup(name: string, description?: string) {
         try {
@@ -82,8 +73,8 @@ export default class CustomerGroupsController {
     }
 
     /**
-     *
-     * @param id
+     * Delete a customer group and remove it from the local list.
+     * @param id Group id to delete.
      */
     public async deleteGroup(id: number) {
         const index = this.m_groups.value.findIndex(group => group.getId() === id);

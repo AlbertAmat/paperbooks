@@ -16,24 +16,33 @@ import {AppLabels} from "@/plugins/i18n/AppLabels";
 
 export default class BookAuthor {
 
+    /** Author id, immutable once loaded. */
     private readonly m_authorId: number;
 
+    /** Author display name. */
     private m_authorName: Ref<string>;
 
+    /** @param data Raw author data from the server. */
     public constructor(data: IBookAuthor) {
         this.m_authorId = data.id;
         this.m_authorName = ref(data.name);
     }
 
+    /** @returns The author id. */
     public getAuthorId(): number {
         return this.m_authorId;
     }
 
+    /** @returns The author's display name. */
     public getAuthorName(): string {
         return this.m_authorName.value;
     }
 
-    /** Persist a new name via `AuthorsService`, then update local state and show a confirmation snackbar. */
+    /**
+     * Persist a new name via `AuthorsService`, then update local state and
+     * show a confirmation snackbar.
+     * @param name New author name.
+     */
     public async update(name: string) {
         await authorsService.updateAuthor(this.m_authorId, name);
         appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_AUTHOR_UPDATED)})

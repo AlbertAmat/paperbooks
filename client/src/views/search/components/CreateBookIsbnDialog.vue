@@ -114,7 +114,7 @@
 
 							<v-icon
 								v-else-if="createdBooks.includes(item)"
-								color="green"
+								color="success"
 							>
 								mdi-check
 							</v-icon>

@@ -14,7 +14,9 @@
 			hide-details
 			clearable
 			prepend-inner-icon="mdi-magnify"
-			variant="underlined"
+			variant="solo"
+			flat
+			rounded="pill"
 			@keydown.enter="doSearch()"
 			class="app-bar-search"
 		>
@@ -62,6 +64,11 @@ function searchBarcode(value: string) {
 </script>
 
 <style scoped lang="scss">
+.app-bar {
+	background: var(--pb-surface) !important;
+	border-color: var(--pb-border) !important;
+}
+
 .app-bar :deep(.v-toolbar__content) {
 	position: relative;
 }
@@ -71,6 +78,11 @@ function searchBarcode(value: string) {
 	left: 50%;
 	transform: translateX(-50%);
 	width: 100%;
-	max-width: 320px;
+	max-width: 340px;
+}
+
+.app-bar-search :deep(.v-field) {
+	background: var(--pb-surface-alt);
+	border: 1px solid var(--pb-border);
 }
 </style>

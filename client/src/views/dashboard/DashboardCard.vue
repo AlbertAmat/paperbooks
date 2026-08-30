@@ -1,15 +1,13 @@
 <template>
-	<v-card :class="cardCssClass" class="dashboard-card" elevation="0">
+	<v-card :class="cardCssClass" class="dashboard-card pb-spine-top" elevation="0">
 		<v-card-title
-			class="d-flex align-center"
-			:class="large ? 'py-3' : 'pt-2'"
-			:style="{fontSize: large ? '18px' : '15px'}"
-			style="font-weight: 550"
+			class="d-flex align-center pb-eyebrow"
+			:class="large ? 'py-3' : 'pt-3'"
 		>
 			{{ title }}
 		</v-card-title>
-		<v-divider v-if="large"></v-divider>
-		<v-card-text class="mx-1 mb-1 pa-2" style="background-color: white; border-radius: 10px; flex: 1">
+		<v-divider v-if="large" class="dashboard-card-divider"></v-divider>
+		<v-card-text class="mx-1 mb-1 pa-2 dashboard-card-body">
 			<slot></slot>
 		</v-card-text>
 	</v-card>
@@ -28,9 +26,20 @@ const props = defineProps<Props>()
 
 <style scoped>
 .dashboard-card {
-	border: 1px solid #e8e7e7;
-	border-radius: 10px;
+	border: 1px solid var(--pb-border);
+	border-radius: var(--pb-radius);
+	background: var(--pb-surface) !important;
 	display: flex;
 	flex-direction: column;
+}
+
+.dashboard-card-divider {
+	border-color: var(--pb-border) !important;
+}
+
+.dashboard-card-body {
+	background-color: var(--pb-surface-alt);
+	border-radius: var(--pb-radius-sm);
+	flex: 1;
 }
 </style>

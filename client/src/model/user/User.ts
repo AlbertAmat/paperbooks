@@ -56,6 +56,21 @@ export default class User {
     private m_image: Ref<string | null>;
 
     /**
+     * UI theme preference ("beige" or "library"). Stored as a reactive
+     * value so Settings can reflect a change immediately.
+     * @private
+     */
+    private m_theme: Ref<string>;
+
+    /**
+     * Whether the left nav collapses to icon-only "rail" mode (expanding on
+     * hover) instead of staying fully expanded. Stored as a reactive value
+     * so the nav (AppMenu.vue) reflects a change immediately.
+     * @private
+     */
+    private m_sidebarRail: Ref<boolean>;
+
+    /**
      * Whether this account belongs to a public institution (e.g. a school).
      * Set by an administrator directly in the database — not editable from the app.
      * @private
@@ -71,6 +86,14 @@ export default class User {
     private m_securityNoticeAccepted: Ref<boolean>;
 
     /**
+     * Whether two-factor authentication (TOTP) is enabled for this account.
+     * Stored as a reactive value so the settings view updates immediately
+     * after enabling/disabling (see TwoFactorSetupDialog.vue / TwoFactorDisableDialog.vue).
+     * @private
+     */
+    private m_totpEnabled: Ref<boolean>;
+
+    /**
      * Initializes a User instance with data from the backend.
      * @param data - IUser object containing initial user information.
      */
@@ -81,8 +104,11 @@ export default class User {
         this.m_language = ref(data.language);
         this.m_region = ref(data.region);
         this.m_image = ref(data.image);
+        this.m_theme = ref(data.theme);
+        this.m_sidebarRail = ref(data.sidebarRail);
         this.m_isPublicInstitution = data.isPublicInstitution;
         this.m_securityNoticeAccepted = ref(data.securityNoticeAccepted);
+        this.m_totpEnabled = ref(data.totpEnabled);
     }
 
     /**
@@ -135,6 +161,53 @@ export default class User {
     }
 
     /**
+     * Returns the current UI theme preference ("beige" or "library").
+     */
+    public getTheme(): string {
+        return this.m_theme.value;
+    }
+
+    /**
+     * Persists a new UI theme preference and updates the local reactive
+     * value on success. The caller (SettingsView) applies the theme
+     * immediately client-side rather than waiting on this to resolve.
+     * @param theme "beige" or "library".
+     */
+    public async setTheme(theme: string) {
+        try {
+            await userService.updateTheme(theme);
+            this.m_theme.value = theme;
+            appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_APPEARANCE_UPDATED)});
+        } catch (e) {
+            console.error("Error while updating theme: ", e);
+        }
+    }
+
+    /**
+     * Returns whether the left nav collapses to icon-only "rail" mode
+     * (expanding on hover) instead of staying fully expanded.
+     */
+    public isSidebarRail(): boolean {
+        return this.m_sidebarRail.value;
+    }
+
+    /**
+     * Persists a new left-nav rail-mode preference and updates the local
+     * reactive value on success. The caller (SettingsView) applies it
+     * immediately client-side rather than waiting on this to resolve.
+     * @param sidebarRail Whether rail mode is enabled.
+     */
+    public async setSidebarRail(sidebarRail: boolean) {
+        try {
+            await userService.updateSidebarRail(sidebarRail);
+            this.m_sidebarRail.value = sidebarRail;
+            appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_APPEARANCE_UPDATED)});
+        } catch (e) {
+            console.error("Error while updating sidebar rail preference: ", e);
+        }
+    }
+
+    /**
      * Returns true if this account is registered as a public institution
      * (e.g. a school), in which case customer/group data may include
      * students and should avoid storing sensitive personal information.
@@ -150,6 +223,25 @@ export default class User {
      */
     public hasAcceptedSecurityNotice(): boolean {
         return this.m_securityNoticeAccepted.value;
+    }
+
+    /**
+     * Returns true if two-factor authentication is currently enabled.
+     */
+    public isTotpEnabled(): boolean {
+        return this.m_totpEnabled.value;
+    }
+
+    /**
+     * Updates the local reactive two-factor-auth flag. The enable/disable
+     * network calls themselves live in TwoFactorSetupDialog.vue and
+     * TwoFactorDisableDialog.vue (they need inline error display on
+     * failure, same as ChangePasswordDialog.vue) - this is only called
+     * once one of those actually succeeds.
+     * @param enabled
+     */
+    public setTotpEnabled(enabled: boolean) {
+        this.m_totpEnabled.value = enabled;
     }
 
     /**

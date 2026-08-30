@@ -13,19 +13,28 @@ import ILocationBook from "@/types/location/ILocationBook";
  */
 class LocationsService {
 
-    /** Fetch every location, with each one's total book count. */
+    /** @returns Every location, with each one's total book count. */
     public async getLocations(): Promise<ILocationExt[]> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/location`)
         return data;
     }
 
-    /** List the books currently stocked at a location. */
+    /**
+     * List the books currently stocked at a location.
+     * @param id Location id.
+     * @returns The books stocked at that location.
+     */
     public async getLocationBooks(id: number): Promise<ILocationBook[]> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/location/${id}/books`)
         return data;
     }
 
-    /** Rename/update a location's description. */
+    /**
+     * Rename/update a location's description.
+     * @param id Location id to update.
+     * @param name New location name.
+     * @param description New location description, or null to clear it.
+     */
     public async updateLocation(id: number, name: string, description: string | null) {
         await axiosInstance.put(`${PATH_PREFIX}/location/${id}`, {
             name: name,
@@ -33,7 +42,12 @@ class LocationsService {
         })
     }
 
-    /** Create a new location. */
+    /**
+     * Create a new location.
+     * @param name New location's name.
+     * @param description New location's description, or null.
+     * @returns The created location.
+     */
     public async addLocation(name: string, description: string | null): Promise<ILocationExt> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/location`, {
             name: name,
@@ -43,7 +57,10 @@ class LocationsService {
         return data;
     }
 
-    /** Delete a location. */
+    /**
+     * Delete a location.
+     * @param locationId Location id to delete.
+     */
     public async deleteLocation(locationId: number): Promise<void> {
         await axiosInstance.delete(`${PATH_PREFIX}/location/${locationId}`)
     }
@@ -52,6 +69,7 @@ class LocationsService {
      * Move a batch of book stocks into this location.
      * @param locationId Destination location id.
      * @param books Array of book stock codes.
+     * @returns The updated list of books now at this location.
      */
     public async addBooks(locationId: number, books: string[]): Promise<ILocationBook[]> {
         const {data} = await axiosInstance.post(`${PATH_PREFIX}/location/${locationId}/add/books`, {books: books});
@@ -59,4 +77,5 @@ class LocationsService {
     }
 }
 
+/** Singleton instance shared by every part of the app. */
 export const locationsService = new LocationsService();

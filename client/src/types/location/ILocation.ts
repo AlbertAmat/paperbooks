@@ -6,7 +6,10 @@
  * const l: ILocation = { id: 2, name: "Main shelf", description: "Front room" };
  */
 export default interface ILocation {
+    /** Location id. */
     id: number;
+    /** Location name. */
     name: string;
+    /** Location description, or null if unset. */
     description: string | null;
 }

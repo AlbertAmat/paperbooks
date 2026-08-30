@@ -8,8 +8,6 @@ import {IBookBase} from "@/types/book/IBookBase";
  * const b: ICustomerBook = { id: 12, name: "The Hobbit", image_url: null, isbn: "...", code: "a1b2c3d4e5" };
  */
 export interface ICustomerBook extends IBookBase{
-    /**
-     * Book stock code
-     */
+    /** Book stock code. */
     code: string;
 }

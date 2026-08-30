@@ -17,6 +17,7 @@ class SearchService {
      * @param category_id Restrict to a single category id, or null for all.
      * @param page Zero-based page index (50 results per page).
      * @param filters Extra `SearchFilter` values to narrow by stock availability.
+     * @returns A page of matching books plus pagination info.
      */
     public async searchBooks(
         query: string | null,
@@ -38,4 +39,5 @@ class SearchService {
     }
 }
 
+/** Singleton instance shared by every part of the app. */
 export const searchService = new SearchService();

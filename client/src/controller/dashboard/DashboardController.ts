@@ -67,6 +67,10 @@ export default class DashboardController extends BaseController<IDashboard> {
      */
     private m_totalLocations: number = 0;
 
+    /**
+     * Total number of authors in the system.
+     * @private
+     */
     private m_totalAuthors: number = 0;
 
     /**
@@ -142,6 +146,9 @@ export default class DashboardController extends BaseController<IDashboard> {
         return this.m_totalLastMonth;
     }
 
+    /**
+     * Returns the total number of authors.
+     */
     public getTotalAuthors(): number {
         return this.m_totalAuthors;
     }

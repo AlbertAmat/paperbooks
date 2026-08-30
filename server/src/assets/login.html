@@ -105,6 +105,28 @@
 
         <a href="/register" style="margin-top: 10px; display: block; font-size: 12px">No account? Register and start using the app</a>
     </form>
+
+    <!-- Second step, shown after POST /login responds with twoFactorRequired: true.
+         Same input accepts either a 6-digit authenticator code or a backup code -
+         the server tries both (see POST /login/2fa in AuthRoute.ts). -->
+    <form id="twoFaForm" style="display: none;">
+        <p style="font-size: 14px; margin: 0 0 15px; text-align: left;">
+            Enter the 6-digit code from your authenticator app, or one of your backup codes.
+        </p>
+        <div class="input-group">
+            <input type="text" name="code" id="twoFaCode" placeholder="Verification code" autocomplete="one-time-code" required>
+        </div>
+
+        <div
+                class="error-message"
+                id="twofa-error-message"
+                style="display: none;"
+        >
+            Invalid code
+        </div>
+
+        <button type="submit" class="login-btn">Verify</button>
+    </form>
 </div>
 <script>
     function togglePassword() {
@@ -138,6 +160,13 @@
             // Hide error if login is successful
             errorMessage.style.display = "none";
 
+            if (data.twoFactorRequired) {
+                form.style.display = "none";
+                document.getElementById('twoFaForm').style.display = "block";
+                document.getElementById('twoFaCode').focus();
+                return;
+            }
+
             // Redirect on successful login
             window.location.href = data.redirectUrl;
 
@@ -145,6 +174,38 @@
             errorMessage.innerText = "An error occurred. Please try again.";
             errorMessage.style.display = "block";
             console.error("Login error:", error);
+        }
+    });
+
+    document.getElementById('twoFaForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const form = this;
+        const code = form.code.value;
+        const errorMessage = document.getElementById('twofa-error-message');
+
+        try {
+            const response = await fetch("/login/2fa", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({code})
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                errorMessage.innerText = data.message;
+                errorMessage.style.display = "block";
+                return;
+            }
+
+            errorMessage.style.display = "none";
+            window.location.href = data.redirectUrl;
+
+        } catch (error) {
+            errorMessage.innerText = "An error occurred. Please try again.";
+            errorMessage.style.display = "block";
+            console.error("2FA verification error:", error);
         }
     });
 </script>

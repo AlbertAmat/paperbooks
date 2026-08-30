@@ -13,7 +13,10 @@ import {IBookBase} from "@/types/book/IBookBase";
  * };
  */
 export default interface IBookItem extends IBookBase{
+    /** Category id, or null if uncategorized. */
     category_id: number | null;
+    /** 2-letter language code, or null if unset. */
     language_code: string | null;
+    /** Authors attached to this book. */
     authors: IBookAuthor[];
 }
