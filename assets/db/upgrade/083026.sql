@@ -271,9 +271,58 @@ VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('it', 'STILL_ON_LOAN', 'Ancora in prestito'),
        ('it', 'NO_LOANS_FOUND', 'Nessun prestito trovato con questi filtri');
 
+-- Library search: "on loan"/"recent" quick filters, an upload-date range
+-- filter, and a sort-order picker (see BooksRoute.ts's `/search` and the
+-- new `/counters` endpoint powering the "Library" nav section's badges).
+INSERT INTO app_labels (language, code, text)
+VALUES ('en', 'ON_LOAN_FILTER', 'On loan'),
+       ('en', 'RECENT_FILTER', 'Recent'),
+       ('en', 'UPLOAD_DATE_FILTER', 'Upload date'),
+       ('en', 'SORT_BY', 'Sort by'),
+       ('en', 'SORT_NAME_ASC', 'Name (A-Z)'),
+       ('en', 'SORT_NAME_DESC', 'Name (Z-A)'),
+       ('en', 'SORT_DATE_NEWEST', 'Newest first'),
+       ('en', 'SORT_DATE_OLDEST', 'Oldest first'),
+       ('en', 'APPLY', 'Apply'),
+       ('en', 'CLEAR', 'Clear'),
+
+       ('ca', 'ON_LOAN_FILTER', 'En préstec'),
+       ('ca', 'RECENT_FILTER', 'Recent'),
+       ('ca', 'UPLOAD_DATE_FILTER', 'Data de pujada'),
+       ('ca', 'SORT_BY', 'Ordenar per'),
+       ('ca', 'SORT_NAME_ASC', 'Nom (A-Z)'),
+       ('ca', 'SORT_NAME_DESC', 'Nom (Z-A)'),
+       ('ca', 'SORT_DATE_NEWEST', 'Més recents primer'),
+       ('ca', 'SORT_DATE_OLDEST', 'Més antics primer'),
+       ('ca', 'APPLY', 'Aplicar'),
+       ('ca', 'CLEAR', 'Netejar'),
+
+       ('es', 'ON_LOAN_FILTER', 'En préstamo'),
+       ('es', 'RECENT_FILTER', 'Reciente'),
+       ('es', 'UPLOAD_DATE_FILTER', 'Fecha de subida'),
+       ('es', 'SORT_BY', 'Ordenar por'),
+       ('es', 'SORT_NAME_ASC', 'Nombre (A-Z)'),
+       ('es', 'SORT_NAME_DESC', 'Nombre (Z-A)'),
+       ('es', 'SORT_DATE_NEWEST', 'Más recientes primero'),
+       ('es', 'SORT_DATE_OLDEST', 'Más antiguos primero'),
+       ('es', 'APPLY', 'Aplicar'),
+       ('es', 'CLEAR', 'Limpiar'),
+
+       ('it', 'ON_LOAN_FILTER', 'In prestito'),
+       ('it', 'RECENT_FILTER', 'Recente'),
+       ('it', 'UPLOAD_DATE_FILTER', 'Data di caricamento'),
+       ('it', 'SORT_BY', 'Ordina per'),
+       ('it', 'SORT_NAME_ASC', 'Nome (A-Z)'),
+       ('it', 'SORT_NAME_DESC', 'Nome (Z-A)'),
+       ('it', 'SORT_DATE_NEWEST', 'Più recenti prima'),
+       ('it', 'SORT_DATE_OLDEST', 'Meno recenti prima'),
+       ('it', 'APPLY', 'Applica'),
+       ('it', 'CLEAR', 'Cancella');
+
 -- App menu's "Help" link to /docs was hardcoded in English; give it a
 -- translatable label like every other menu item.
 INSERT INTO app_labels (language, code, text)
 VALUES ('en', 'HELP', 'Help'),
        ('ca', 'HELP', 'Ajuda'),
        ('es', 'HELP', 'Ayuda'),
+       ('it', 'HELP', 'Aiuto');

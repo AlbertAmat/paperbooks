@@ -12,6 +12,19 @@
 		</template>
 
 		<template v-slot:append>
+			<v-select
+				:model-value="model.getSort()"
+				:items="sortOptions"
+				item-title="title"
+				item-value="value"
+				:label="t(AppLabels.SORT_BY)"
+				density="compact"
+				variant="outlined"
+				hide-details
+				class="search-toolbar-sort mr-3"
+				@update:model-value="model.setSort($event)"
+			/>
+
 			<v-btn
 				density="compact"
 				color="primary"
@@ -158,7 +171,8 @@
  */
 import {Ref, ref, onMounted, onUnmounted, computed, watch, nextTick} from "vue";
 import PageComponent from "@/views/PageComponent.vue";
-import SearchController from "@/controller/search/SearchController";
+import SearchController, {activeSearchController} from "@/controller/search/SearchController";
+import {SortType} from "@/types/search/SortType";
 import BookItem from "@/views/search/components/BookItem.vue";
 import BookItemSkeleton from "@/views/search/components/BookItemSkeleton.vue";
 import CreateBookIsbnDialog from "@/views/search/components/CreateBookIsbnDialog.vue";
@@ -191,6 +205,13 @@ const loadingBooks: Ref<boolean> = ref(false);
  *
  */
 const infiniteScrollTrigger: Ref<HTMLElement | null> = ref(null);
+
+const sortOptions = [
+	{title: t(AppLabels.SORT_NAME_ASC), value: SortType.NAME_ASC},
+	{title: t(AppLabels.SORT_NAME_DESC), value: SortType.NAME_DESC},
+	{title: t(AppLabels.SORT_DATE_NEWEST), value: SortType.DATE_NEWEST},
+	{title: t(AppLabels.SORT_DATE_OLDEST), value: SortType.DATE_OLDEST}
+]
 
 /**
  * Book rows for the list layout: cover, name/author, ISBN, category and
@@ -250,10 +271,18 @@ function handleScroll() {
 onMounted(async () => {
 	// Attach scroll listener
 	document.getElementById("scroller")!.addEventListener("scroll", handleScroll);
+
+	// Let the global app bar's filter icon (see AppBar.vue) find and drive
+	// this view's controller while it's on screen.
+	activeSearchController.value = model;
 });
 
 onUnmounted(() => {
 	document.getElementById("scroller")!.removeEventListener("scroll", handleScroll);
+
+	if (activeSearchController.value === model) {
+		activeSearchController.value = null;
+	}
 });
 
 watch(() => router.currentRoute.value.query, () => {
@@ -268,6 +297,11 @@ watch(() => model.getBooks(), () => {
 </script>
 
 <style scoped>
+.search-toolbar-sort {
+	max-width: 176px;
+	flex: 0 0 auto;
+}
+
 .book-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));

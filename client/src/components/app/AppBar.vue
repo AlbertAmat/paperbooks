@@ -21,6 +21,7 @@
 			class="app-bar-search"
 		>
 			<template v-slot:append-inner>
+				<search-toolbar-filter-menu/>
 				<barcode-scanner @value="searchBarcode"/>
 			</template>
 		</v-text-field>
@@ -42,6 +43,7 @@ import {SearchRoute, searchRoute} from "@/router/routes/SearchRoute";
 import router from "@/router/Router";
 import UserMenu from "@/components/app/UserMenu.vue";
 import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
+import SearchToolbarFilterMenu from "@/components/app/SearchToolbarFilterMenu.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 

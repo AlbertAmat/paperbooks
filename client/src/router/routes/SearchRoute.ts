@@ -1,4 +1,5 @@
 import {ARoute} from "@/router/ARoute";
+import {SearchFilter} from "@/types/search/SearchFilter";
 
 /** Route to the book search/library view (`/app/library/search`), with an optional preset query string. */
 export class SearchRoute extends ARoute {
@@ -14,6 +15,9 @@ export class SearchRoute extends ARoute {
 
     /** Query string param name the search view reads its initial category filter from. */
     public static CATEGORY_QUERY_PARAM = "category";
+
+    /** Query string param name the search view reads its initial `SearchFilter`(s) from (comma-separated). */
+    public static FILTERS_QUERY_PARAM = "filters";
 
     /** @returns The Vue Router route config for the search/library view. */
     public getRoute() {
@@ -41,6 +45,14 @@ export class SearchRoute extends ARoute {
      */
     public getPathForCategory(categoryId: number) {
         return `${SearchRoute.PATH}?${SearchRoute.CATEGORY_QUERY_PARAM}=${categoryId}`;
+    }
+
+    /**
+     * @param filter `SearchFilter` to pre-filter the search/library view by.
+     * @returns The navigable URL for the search/library view, pre-filtered.
+     */
+    public getPathForFilter(filter: SearchFilter) {
+        return `${SearchRoute.PATH}?${SearchRoute.FILTERS_QUERY_PARAM}=${filter}`;
     }
 }
 

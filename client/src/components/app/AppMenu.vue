@@ -32,12 +32,91 @@
 
 		<v-list
 			v-model="selectedItem"
+			v-model:opened="opened"
 			:lines="false"
 			density="compact"
 			slim
 			nav
 			class="app-menu-list"
 		>
+			<v-list-item
+				nav
+				:to="dashboardRoute.getPath()"
+				:value="dashboardRoute.getPath()"
+				:title="t(AppLabels.DASHBOARD)"
+				prepend-icon="mdi-chart-box-outline"
+				density="compact"
+				class="app-menu-item"
+			/>
+
+			<v-list-group value="library">
+				<template v-slot:activator="{ props: activatorProps, isOpen }">
+					<v-list-item
+						v-bind="activatorProps"
+						nav
+						:to="searchRoute.getPath()"
+						:active="false"
+						:title="t(AppLabels.LIBRARY)"
+						prepend-icon="mdi-bookshelf"
+						density="compact"
+						class="app-menu-item"
+					>
+						<template v-slot:append>
+							<v-chip size="x-small" variant="tonal" class="app-menu-count mr-1">{{ counters.total }}</v-chip>
+							<v-icon size="18" class="app-menu-expand-icon">{{ isOpen ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+						</template>
+					</v-list-item>
+				</template>
+
+				<v-list-item
+					:to="searchRoute.getPath()"
+					:active="isLibraryViewAllActive"
+					:title="t(AppLabels.VIEW_ALL)"
+					density="compact"
+					class="app-menu-item app-menu-subitem"
+				>
+					<template v-slot:append>
+						<v-chip size="x-small" variant="tonal" class="app-menu-count">{{ counters.total }}</v-chip>
+					</template>
+				</v-list-item>
+
+				<v-list-item
+					:to="searchRoute.getPathForFilter(SearchFilter.RECENT)"
+					:active="isLibraryRecentActive"
+					:title="t(AppLabels.RECENT_FILTER)"
+					density="compact"
+					class="app-menu-item app-menu-subitem"
+				>
+					<template v-slot:append>
+						<v-chip size="x-small" variant="tonal" class="app-menu-count">{{ counters.recent }}</v-chip>
+					</template>
+				</v-list-item>
+
+				<v-list-item
+					:to="searchRoute.getPathForFilter(SearchFilter.ON_LOAN)"
+					:active="isLibraryOnLoanActive"
+					:title="t(AppLabels.ON_LOAN_FILTER)"
+					density="compact"
+					class="app-menu-item app-menu-subitem"
+				>
+					<template v-slot:append>
+						<v-chip size="x-small" variant="tonal" class="app-menu-count">{{ counters.onLoan }}</v-chip>
+					</template>
+				</v-list-item>
+
+				<v-list-item
+					:to="searchRoute.getPathForFilter(SearchFilter.NO_STOCK)"
+					:active="isLibraryNoStockActive"
+					:title="t(AppLabels.NO_STOCK_FILTER)"
+					density="compact"
+					class="app-menu-item app-menu-subitem"
+				>
+					<template v-slot:append>
+						<v-chip size="x-small" variant="tonal" class="app-menu-count">{{ counters.noStock }}</v-chip>
+					</template>
+				</v-list-item>
+			</v-list-group>
+
 			<v-list-item
 				v-for="(item, index) in items"
 				:key="index"
@@ -77,7 +156,7 @@
  * Styled as a dark "shelf frame" (see --pb-nav-* tokens) in both themes -
  * like the frame of a bookshelf standing in a bright or dim room.
  */
-import {computed, Ref, ref, watch} from "vue";
+import {computed, onMounted, Ref, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useTheme} from "vuetify";
 import {applicationService} from "@/service/ApplicationService";
@@ -89,9 +168,13 @@ import {customersRoute} from "@/router/routes/CustomersRoute";
 import {authorsRoute} from "@/router/routes/AuthorsRoute";
 import {loansRoute} from "@/router/routes/LoansRoute";
 import {docsRoute} from "@/router/routes/DocsRoute";
+import {SearchRoute} from "@/router/routes/SearchRoute";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import PrintDialog from "@/components/printDialog/PrintDialog.vue"
+import {SearchFilter} from "@/types/search/SearchFilter";
+import {IBookCounters} from "@/types/search/IBookCounters";
+import {searchService} from "@/service/search/SearchService";
 
 const route = useRoute()
 
@@ -109,6 +192,38 @@ const selectedItem: Ref<string | null> = ref(null);
  */
 const menu: Ref<boolean> = ref(true);
 
+/** Which nav list-groups are currently expanded (Vuetify's `v-list` `opened` model) - starts with "library" open if that's the current page. */
+const opened: Ref<string[]> = ref(route.path === SearchRoute.PATH ? ["library"] : []);
+
+/** Lightweight book totals (all/recent/on loan/no stock) shown as badges on the "Library" section and its quick filters. */
+const counters: Ref<IBookCounters> = ref({total: 0, recent: 0, onLoan: 0, noStock: 0});
+
+/**
+ * The "Library" quick filters all point to the same route path (only the
+ * `filters` query param differs), so Vuetify's default `:to`-based active
+ * detection (path-only, non-exact) would mark all four of them - and the
+ * group header - active at once. Compute exact matches instead so only the
+ * one actually selected lights up.
+ */
+const currentLibraryFilter = computed<string | undefined>(() => {
+	if (route.path !== SearchRoute.PATH) return undefined;
+	const filtersParam = route.query[SearchRoute.FILTERS_QUERY_PARAM];
+	return filtersParam ? String(filtersParam) : undefined;
+});
+
+const isLibraryViewAllActive = computed(() => route.path === SearchRoute.PATH && !currentLibraryFilter.value);
+const isLibraryRecentActive = computed(() => currentLibraryFilter.value === SearchFilter.RECENT);
+const isLibraryOnLoanActive = computed(() => currentLibraryFilter.value === SearchFilter.ON_LOAN);
+const isLibraryNoStockActive = computed(() => currentLibraryFilter.value === SearchFilter.NO_STOCK);
+
+onMounted(async () => {
+	try {
+		counters.value = await searchService.getCounters();
+	} catch (e) {
+		console.error("Error while fetching book counters", e);
+	}
+});
+
 /** Whether rail (icon-only, expand-on-hover) mode is enabled - the user's saved Settings preference. Off by default. */
 const railEnabled = computed(() => applicationService.getUser().isSidebarRail());
 
@@ -124,16 +239,6 @@ watch(railEnabled, (enabled) => {
  *
  */
 const items = [
-	{
-		name: t(AppLabels.DASHBOARD),
-		icon: "mdi-chart-box-outline",
-		path: dashboardRoute.getPath()
-	},
-	{
-		name: t(AppLabels.LIBRARY),
-		icon: "mdi-bookshelf",
-		path: searchRoute.getPath()
-	},
 	{
 		name: t(AppLabels.LOCATIONS),
 		icon: "mdi-map-marker-radius",
@@ -163,6 +268,9 @@ const items = [
 
 watch(() => route.path, (path) => {
 	selectedItem.value = path || null;
+	if (path === SearchRoute.PATH && !opened.value.includes("library")) {
+		opened.value = [...opened.value, "library"];
+	}
 }, {immediate: true})
 
 </script>
@@ -207,6 +315,26 @@ watch(() => route.path, (path) => {
 	color: var(--pb-nav-text-muted);
 }
 
+.app-menu-subitem {
+	font-size: 13px;
+	min-height: 34px;
+}
+
+.app-menu-count {
+	background: transparent !important;
+	color: var(--pb-nav-text-muted) !important;
+	font-size: 11px;
+	pointer-events: none;
+}
+
+.app-menu :deep(.v-list-item--active) .app-menu-count {
+	color: var(--pb-nav-accent) !important;
+}
+
+.app-menu-expand-icon {
+	color: var(--pb-nav-text-muted);
+}
+
 .app-menu-divider {
 	border-color: var(--pb-nav-border) !important;
 }
@@ -215,8 +343,14 @@ watch(() => route.path, (path) => {
 	background: var(--pb-nav-active-bg);
 	color: var(--pb-nav-accent);
 	font-weight: 600;
-	border-left: 3px solid var(--pb-nav-accent);
-	padding-left: calc(var(--v-list-item-padding-left, 16px) - 3px) !important;
+	/*
+	 * An inset box-shadow (not a real border) doesn't take up box-model
+	 * space, so it never needs a padding-left compensation - which,
+	 * for a sub-item, previously clobbered Vuetify's own inline indent
+	 * style and made the active sub-item's left edge jump out to the
+	 * same position as a top-level item.
+	 */
+	box-shadow: inset 3px 0 0 0 var(--pb-nav-accent);
 }
 
 .app-menu :deep(.v-list-item--active .v-icon) {

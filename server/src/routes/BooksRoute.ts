@@ -27,6 +27,7 @@ import {IBookFile} from "../types/book/IBookFile";
 import {Pool, PoolClient} from "pg";
 import {AppErrors} from "../types/AppErrors";
 import {SearchFilter} from "../types/search/SearchFilter";
+import {SortType} from "../types/search/SortType";
 import {normalizeAndValidateIsbn} from "../utils/IsbnVerification";
 import {isValidEpub, isValidPdf} from "../utils/FileSignature";
 import {recordLoan, recordReturn} from "../utils/LoanHistory";
@@ -73,10 +74,15 @@ const fileUpload = multer({
  *  - category_id  {number | number[] | "1,2,3"} Restrict to one or more category ids.
  *  - page         {number} Zero-based page index. 50 results per page.
  *  - filters      {string} Comma-separated list of `SearchFilter` values,
- *                 e.g. "NO_STOCK" or "HAS_STOCK" (see types/search/SearchFilter.ts).
+ *                 e.g. "NO_STOCK", "HAS_STOCK", "ON_LOAN" or "RECENT"
+ *                 (see types/search/SearchFilter.ts).
+ *  - date_from    {string} Restrict to books added on/after this date (YYYY-MM-DD).
+ *  - date_to      {string} Restrict to books added on/before this date (YYYY-MM-DD).
+ *  - sort         {string} A `SortType` value - "NAME_ASC" (default), "NAME_DESC",
+ *                 "DATE_NEWEST" or "DATE_OLDEST" (see types/search/SortType.ts).
  *
  * Example request:
- *  GET /api/rest/book/search?query=hobbit&category_id=3&page=0&filters=HAS_STOCK
+ *  GET /api/rest/book/search?query=hobbit&category_id=3&page=0&filters=HAS_STOCK&sort=DATE_NEWEST
  *
  * Example response (200):
  *  {
@@ -103,6 +109,11 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
     const category_id = req.query.category_id;
     const page = Math.max(0, Number(req.query.page)) || 0;
     const filters: SearchFilter[] = req.query.filters ? String(req.query.filters).split(",") as SearchFilter[] : [];
+    const dateFrom = req.query.date_from ? String(req.query.date_from) : undefined;
+    const dateTo = req.query.date_to ? String(req.query.date_to) : undefined;
+    const sort = Object.values(SortType).includes(req.query.sort as SortType)
+        ? req.query.sort as SortType
+        : SortType.NAME_ASC;
 
     const userId = appService.getSessionUser(req);
 
@@ -165,8 +176,25 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
                         params.push(userId);
                         break;
                     }
+                    case SearchFilter.ON_LOAN: {
+                        conditions.push(`books.id IN (SELECT book_id FROM book_stocks WHERE user_id = $${params.length + 1} AND status = 2)`);
+                        params.push(userId);
+                        break;
+                    }
+                    case SearchFilter.RECENT: {
+                        conditions.push(`books.date_created >= NOW() - INTERVAL '30 days'`);
+                        break;
+                    }
                 }
             })
+        }
+
+        if (dateFrom) {
+            conditions.push(`books.date_created >= $${params.push(dateFrom)}`);
+        }
+
+        if (dateTo) {
+            conditions.push(`books.date_created < $${params.push(dateTo)}::date + INTERVAL '1 day'`);
         }
 
         if (conditions.length > 0) {
@@ -186,15 +214,23 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         /**
          * Results
          */
+        const ORDER_BY_CLAUSES: Record<SortType, string> = {
+            [SortType.NAME_ASC]: "books.name ASC",
+            [SortType.NAME_DESC]: "books.name DESC",
+            [SortType.DATE_NEWEST]: "books.date_created DESC",
+            [SortType.DATE_OLDEST]: "books.date_created ASC"
+        };
+
         sqlStatement += `
-            GROUP BY 
+            GROUP BY
                 books.id,
                 books.name,
                 books.image_url,
                 books.isbn,
                 books.category_id,
-                books.language_code
-            ORDER BY books.name
+                books.language_code,
+                books.date_created
+            ORDER BY ${ORDER_BY_CLAUSES[sort]}
             LIMIT ${MAX_ROWS} OFFSET ${skip};
         `;
 
@@ -213,6 +249,43 @@ router.get('/search', requireAuth, async (req: Request, res: Response) => {
         res.status(500).send('Internal Server Error');
     } finally {
         client.release();
+    }
+});
+
+/**
+ * GET /book/counters
+ * --------------------
+ * Lightweight counters for the current user's library, powering the
+ * "Library" section of the left nav (see `AppMenu.vue`) and its quick
+ * filters - cheap enough to fetch on every page load, unlike a full search.
+ *
+ * Auth: required.
+ *
+ * Example response (200):
+ *  { "total": 42, "recent": 3, "onLoan": 5, "noStock": 10 }
+ */
+//@ts-ignore
+router.get('/counters', requireAuth, async (req: Request, res: Response) => {
+    const userId = appService.getSessionUser(req);
+    const pool = appService.getDatabasePool();
+
+    try {
+        const [total, recent, onLoan, noStock] = await Promise.all([
+            pool.query(`SELECT COUNT(*) FROM books WHERE user_id = $1`, [userId]),
+            pool.query(`SELECT COUNT(*) FROM books WHERE user_id = $1 AND date_created >= NOW() - INTERVAL '30 days'`, [userId]),
+            pool.query(`SELECT COUNT(*) FROM books WHERE user_id = $1 AND id IN (SELECT book_id FROM book_stocks WHERE user_id = $1 AND status = 2)`, [userId]),
+            pool.query(`SELECT COUNT(*) FROM books WHERE user_id = $1 AND id NOT IN (SELECT book_id FROM book_stocks WHERE user_id = $1)`, [userId]),
+        ]);
+
+        res.status(200).json({
+            total: Number(total.rows[0].count),
+            recent: Number(recent.rows[0].count),
+            onLoan: Number(onLoan.rows[0].count),
+            noStock: Number(noStock.rows[0].count),
+        });
+    } catch (err: any) {
+        console.error('Error executing query', err.stack);
+        res.status(500).send('Internal Server Error');
     }
 });
 
