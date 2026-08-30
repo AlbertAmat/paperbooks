@@ -46,7 +46,7 @@ const props = defineProps<Props>()
 
 const chartData = computed(() => ({
 	labels: props.data.map(item =>
-		new Date(item.month).toLocaleDateString('en-US', {
+		new Date(item.month).toLocaleDateString(undefined, {
 			year: 'numeric',
 			month: 'short'
 		})
