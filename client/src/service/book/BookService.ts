@@ -147,6 +147,17 @@ export class BookService {
     }
 
     /**
+     * Fetch a book's backed-up epub/pdf file's raw bytes, for in-page preview
+     * (as opposed to the `/file/download` link, which forces a browser save).
+     * @param id Book id.
+     * @returns The file's contents as a `Blob`.
+     */
+    public async downloadFileBlob(id: number): Promise<Blob> {
+        const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/${id}/file/download`, {responseType: "blob"});
+        return data;
+    }
+
+    /**
      * Create a book automatically by looking up its metadata from an ISBN
      * (Google Books, falling back to Open Library server-side).
      *

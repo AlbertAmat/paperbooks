@@ -1,5 +1,17 @@
 <template>
 	<page-component :model="controller">
+		<template v-slot:append>
+			<v-btn
+				@click="reportDialog = true"
+				prepend-icon="mdi-file-excel-outline"
+				class="text-none"
+				color="primary"
+				variant="elevated"
+			>
+				{{ t(AppLabels.GENERATE_REPORT) }}
+			</v-btn>
+		</template>
+
 		<template v-slot:default>
 			<div class="loans-filters">
 				<v-select
@@ -98,6 +110,11 @@
 			</v-data-table-server>
 		</template>
 	</page-component>
+
+	<loan-report-dialog
+		v-model="reportDialog"
+		:controller="controller"
+	/>
 </template>
 
 <script setup lang="ts">
@@ -109,7 +126,8 @@
 import PageComponent from "@/views/PageComponent.vue";
 import LoansController from "@/controller/loans/LoansController";
 import EmptyState from "@/components/emptyState/EmptyState.vue";
-import {computed} from "vue";
+import LoanReportDialog from "@/views/loans/LoanReportDialog.vue";
+import {computed, ref} from "vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {bookRoute} from "@/router/routes/BookRoute";
@@ -118,6 +136,7 @@ import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarControl
 import notFound from "@/assets/images/notFound.jpg";
 
 const controller = new LoansController();
+const reportDialog = ref(false);
 
 const {t} = useI18n();
 

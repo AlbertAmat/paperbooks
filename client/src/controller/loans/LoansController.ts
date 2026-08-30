@@ -8,7 +8,9 @@ import ILoansResponse, {ILoan} from "@/types/loans/ILoan";
 import {loansService} from "@/service/loans/LoansService";
 import {bookService} from "@/service/book/BookService";
 import {customerGroupService} from "@/service/customers/CustomerGroupService";
+import {customersService} from "@/service/customers/CustomersService";
 import {ICustomerGroup} from "@/types/customer/ICustomerGroup";
+import {ICustomerDetail} from "@/types/customer/ICustomer";
 import {i18n} from "@/plugins/i18n/i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {ref, Ref} from "vue";
@@ -39,12 +41,16 @@ export default class LoansController extends BaseController<ILoansResponse> {
     /** Every customer group, for the group filter dropdown. */
     private m_groups: Ref<ICustomerGroup[]> = ref([]);
 
+    /** Every customer, for the report dialog's customer filter. */
+    private m_customers: Ref<ICustomerDetail[]> = ref([]);
+
     /** Stock codes currently being returned, so their row can show a loading state. */
     private m_returning: Ref<string[]> = ref([]);
 
     public constructor() {
         super(i18n.global.t(AppLabels.LOANS));
         customerGroupService.getGroups().then((groups) => this.m_groups.value = groups);
+        customersService.getPageData().then((data) => this.m_customers.value = data.customers);
     }
 
     /** @returns The first page of loans for the current filters. */
@@ -103,6 +109,11 @@ export default class LoansController extends BaseController<ILoansResponse> {
     /** @returns Every customer group, for the group filter dropdown. */
     public getGroups(): ICustomerGroup[] {
         return this.m_groups.value;
+    }
+
+    /** @returns Every customer, for the report dialog's customer filter. */
+    public getCustomers(): ICustomerDetail[] {
+        return this.m_customers.value;
     }
 
     /** @returns The currently active customer group filter, or null for all groups. */

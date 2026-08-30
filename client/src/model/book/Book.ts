@@ -24,6 +24,7 @@ import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppS
 import {i18n} from "@/plugins/i18n/i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {printDialogController} from "@/components/printDialog/PrintDialogController";
+import {ELECTRONIC_FORMAT_NAME} from "@/Constants";
 
 export default class Book extends BookItem {
 
@@ -177,6 +178,11 @@ export default class Book extends BookItem {
     /** @param format New format, or null to clear it. */
     public setFormat(format: Format | null) {
         return this.m_format = format;
+    }
+
+    /** @returns Whether this book's format is the digital/ebook edition (`ELECTRONIC_FORMAT_NAME`) - gates the file upload/preview card on the detail view. */
+    public isElectronic(): boolean {
+        return this.m_format?.getFormatName() === ELECTRONIC_FORMAT_NAME;
     }
 
     /** @returns The book's physical stocks (copies). */

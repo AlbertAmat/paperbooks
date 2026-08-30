@@ -42,6 +42,54 @@ SET loaned_at = NOW()
 WHERE status = 2
   AND loaned_at IS NULL;
 
+-- Persistent log of every loan and its return, independent of book_stocks
+-- (which only tracks the *current* loan - customer_id/loaned_at are wiped
+-- on return). Powers the Loans view's Excel report. Book/customer/group
+-- names are snapshotted at loan time so the report stays readable even if
+-- one of them is later renamed or deleted; the *_id columns are kept (as
+-- ON DELETE SET NULL) only to support filtering the report by group/customer.
+CREATE TABLE loan_history
+(
+    id            SERIAL PRIMARY KEY,
+    user_id       INT          NOT NULL,
+    book_id       INT,
+    book_name     VARCHAR(255) NOT NULL,
+    stock_id      INT,
+    stock_code    CHAR(10)     NOT NULL,
+    customer_id   INT,
+    customer_name VARCHAR(100) NOT NULL,
+    group_id      INT,
+    group_name    VARCHAR(100),
+    loaned_at     TIMESTAMP    NOT NULL,
+    returned_at   TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES books (id) ON DELETE SET NULL,
+    FOREIGN KEY (stock_id) REFERENCES book_stocks (id) ON DELETE SET NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE SET NULL,
+    FOREIGN KEY (group_id) REFERENCES customer_groups (id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_loan_history_user_loaned_at ON loan_history (user_id, loaned_at DESC);
+
+-- Backfill: create an open loan_history entry for every copy already on
+-- loan, so returning it later (which closes out the most recent open entry
+-- for its stock_code) doesn't silently disappear from the report instead of
+-- showing up as a completed loan.
+INSERT INTO loan_history (user_id, book_id, book_name, stock_id, stock_code, customer_id, customer_name, group_id, group_name, loaned_at)
+SELECT bs.user_id, bs.book_id, b.name, bs.id, bs.code, c.id, c.name, cg.id, cg.name, COALESCE(bs.loaned_at, NOW())
+FROM book_stocks bs
+         JOIN books b ON b.id = bs.book_id
+         JOIN customers c ON c.id = bs.customer_id
+         LEFT JOIN customer_groups cg ON cg.id = c.group_id
+WHERE bs.status = 2;
+
+-- New "Electronic" book format: when set, the book detail view shows the
+-- ebook file upload/preview card instead of the physical-copy affordances.
+INSERT INTO formats (name)
+VALUES ('Electronic')
+ON CONFLICT (name) DO NOTHING;
+
 INSERT INTO app_labels (language, code, text)
 VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('en', 'USERCONF_THEME_BEIGE', 'Reading Room'),
@@ -59,6 +107,7 @@ VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('en', 'EBOOK_FILE_DRAG_AND_DROP', 'Drag and drop an epub or pdf'),
        ('en', 'EBOOK_FILE_HOVER_INFO', '(Backup copy in case you lose your e-reader)'),
        ('en', 'ONLY_EBOOK_FILES_ALLOWED', 'Only EPUB or PDF files are allowed'),
+       ('en', 'PREVIEW_UNAVAILABLE', 'Preview unavailable'),
        ('en', 'FILE_TOO_LARGE', 'File is too large (max 100MB)'),
        ('en', 'DOWNLOAD', 'Download'),
        ('en', 'SNACKBAR_BOOK_FILE_UPLOADED', 'Ebook file uploaded'),
@@ -78,6 +127,14 @@ VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('en', 'EMPTY_LOANS_DESC', 'Books currently loaned to a customer will show up here.'),
        ('en', 'VIEW_ALL', 'View all'),
        ('en', 'DASHBOARD_LOANS_NOTE', 'Showing the 5 most recent loans'),
+       ('en', 'EDIT', 'Edit'),
+       ('en', 'GENERATE_REPORT', 'Generate report'),
+       ('en', 'LOAN_REPORT_TITLE', 'Loan report'),
+       ('en', 'CUSTOMER', 'Customer'),
+       ('en', 'ALL_CUSTOMERS', 'All customers'),
+       ('en', 'RETURNED_ON', 'Returned on'),
+       ('en', 'STILL_ON_LOAN', 'Still on loan'),
+       ('en', 'NO_LOANS_FOUND', 'No loans found for the selected filters'),
 
        ('ca', 'USERCONF_APPEARANCE', 'Aparença'),
        ('ca', 'USERCONF_THEME_BEIGE', 'Sala de lectura'),
@@ -95,6 +152,7 @@ VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('ca', 'EBOOK_FILE_DRAG_AND_DROP', 'Arrossega i deixa anar un epub o pdf'),
        ('ca', 'EBOOK_FILE_HOVER_INFO', '(Còpia de seguretat per si perdeu el vostre lector electrònic)'),
        ('ca', 'ONLY_EBOOK_FILES_ALLOWED', 'Només es permeten fitxers EPUB o PDF'),
+       ('ca', 'PREVIEW_UNAVAILABLE', 'Vista prèvia no disponible'),
        ('ca', 'FILE_TOO_LARGE', 'El fitxer és massa gran (màxim 100MB)'),
        ('ca', 'DOWNLOAD', 'Descarregar'),
        ('ca', 'SNACKBAR_BOOK_FILE_UPLOADED', 'S’ha pujat el fitxer digital'),
@@ -114,6 +172,14 @@ VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('ca', 'EMPTY_LOANS_DESC', 'Els llibres actualment prestats a un client apareixeran aquí.'),
        ('ca', 'VIEW_ALL', 'Veure-ho tot'),
        ('ca', 'DASHBOARD_LOANS_NOTE', 'Es mostren els 5 préstecs més recents'),
+       ('ca', 'EDIT', 'Editar'),
+       ('ca', 'GENERATE_REPORT', 'Generar informe'),
+       ('ca', 'LOAN_REPORT_TITLE', 'Informe de préstecs'),
+       ('ca', 'CUSTOMER', 'Client'),
+       ('ca', 'ALL_CUSTOMERS', 'Tots els clients'),
+       ('ca', 'RETURNED_ON', 'Retornat el'),
+       ('ca', 'STILL_ON_LOAN', 'Encara en préstec'),
+       ('ca', 'NO_LOANS_FOUND', 'No s''ha trobat cap préstec amb aquests filtres'),
 
        ('es', 'USERCONF_APPEARANCE', 'Apariencia'),
        ('es', 'USERCONF_THEME_BEIGE', 'Sala de lectura'),
@@ -131,6 +197,7 @@ VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('es', 'EBOOK_FILE_DRAG_AND_DROP', 'Arrastra y suelta un epub o pdf'),
        ('es', 'EBOOK_FILE_HOVER_INFO', '(Copia de seguridad por si pierdes tu lector electrónico)'),
        ('es', 'ONLY_EBOOK_FILES_ALLOWED', 'Solo se permiten archivos EPUB o PDF'),
+       ('es', 'PREVIEW_UNAVAILABLE', 'Vista previa no disponible'),
        ('es', 'FILE_TOO_LARGE', 'El archivo es demasiado grande (máximo 100MB)'),
        ('es', 'DOWNLOAD', 'Descargar'),
        ('es', 'SNACKBAR_BOOK_FILE_UPLOADED', 'Se ha subido el archivo digital'),
@@ -150,6 +217,14 @@ VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('es', 'EMPTY_LOANS_DESC', 'Los libros actualmente prestados a un cliente aparecerán aquí.'),
        ('es', 'VIEW_ALL', 'Ver todo'),
        ('es', 'DASHBOARD_LOANS_NOTE', 'Se muestran los 5 préstamos más recientes'),
+       ('es', 'EDIT', 'Editar'),
+       ('es', 'GENERATE_REPORT', 'Generar informe'),
+       ('es', 'LOAN_REPORT_TITLE', 'Informe de préstamos'),
+       ('es', 'CUSTOMER', 'Cliente'),
+       ('es', 'ALL_CUSTOMERS', 'Todos los clientes'),
+       ('es', 'RETURNED_ON', 'Devuelto el'),
+       ('es', 'STILL_ON_LOAN', 'Aún en préstamo'),
+       ('es', 'NO_LOANS_FOUND', 'No se ha encontrado ningún préstamo con estos filtros'),
 
        ('it', 'USERCONF_APPEARANCE', 'Aspetto'),
        ('it', 'USERCONF_THEME_BEIGE', 'Sala lettura'),
@@ -167,6 +242,7 @@ VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('it', 'EBOOK_FILE_DRAG_AND_DROP', 'Trascina e rilascia un epub o pdf'),
        ('it', 'EBOOK_FILE_HOVER_INFO', '(Copia di backup nel caso perdessi il tuo e-reader)'),
        ('it', 'ONLY_EBOOK_FILES_ALLOWED', 'Sono consentiti solo file EPUB o PDF'),
+       ('it', 'PREVIEW_UNAVAILABLE', 'Anteprima non disponibile'),
        ('it', 'FILE_TOO_LARGE', 'Il file è troppo grande (massimo 100MB)'),
        ('it', 'DOWNLOAD', 'Scarica'),
        ('it', 'SNACKBAR_BOOK_FILE_UPLOADED', 'File digitale caricato'),
@@ -185,4 +261,12 @@ VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('it', 'EMPTY_LOANS_TITLE', 'Nessun libro in prestito'),
        ('it', 'EMPTY_LOANS_DESC', 'I libri attualmente prestati a un cliente appariranno qui.'),
        ('it', 'VIEW_ALL', 'Vedi tutto'),
-       ('it', 'DASHBOARD_LOANS_NOTE', 'Vengono mostrati i 5 prestiti più recenti');
+       ('it', 'DASHBOARD_LOANS_NOTE', 'Vengono mostrati i 5 prestiti più recenti'),
+       ('it', 'EDIT', 'Modifica'),
+       ('it', 'GENERATE_REPORT', 'Genera report'),
+       ('it', 'LOAN_REPORT_TITLE', 'Report prestiti'),
+       ('it', 'CUSTOMER', 'Cliente'),
+       ('it', 'ALL_CUSTOMERS', 'Tutti i clienti'),
+       ('it', 'RETURNED_ON', 'Restituito il'),
+       ('it', 'STILL_ON_LOAN', 'Ancora in prestito'),
+       ('it', 'NO_LOANS_FOUND', 'Nessun prestito trovato con questi filtri');

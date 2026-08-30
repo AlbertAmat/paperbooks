@@ -14,16 +14,40 @@
 			>
 				<v-icon>mdi-delete-outline</v-icon>
 			</v-btn>
+
+			<template v-if="editing">
+				<v-btn
+					class="text-none mr-2"
+					variant="text"
+					@click="cancelEditing()"
+					:disabled="loadingUpdate"
+					small
+				>
+					{{t(AppLabels.CANCEL)}}
+				</v-btn>
+				<v-btn
+					class="text-none"
+					color="primary"
+					:disabled="!hasChanges"
+					@click="updateBook()"
+					:loading="loadingUpdate"
+					small
+					variant="elevated"
+				>
+					{{t(AppLabels.SAVE)}}
+				</v-btn>
+			</template>
+
 			<v-btn
+				v-else
 				class="text-none"
 				color="primary"
-				:disabled="!hasChanges"
-				@click="updateBook()"
-				:loading="loadingUpdate"
-				small
 				variant="elevated"
+				small
+				prepend-icon="mdi-pencil-outline"
+				@click="startEditing()"
 			>
-				{{t(AppLabels.SAVE)}}
+				{{t(AppLabels.EDIT)}}
 			</v-btn>
 		</template>
 
@@ -40,147 +64,202 @@
 							dense
 						>
 							<template v-slot:default>
-								<div class="d-flex pt-2">
-									<!-- Name -->
-									<v-text-field
-										v-model="name"
-										:disabled="disableFields"
-										:label="t(AppLabels.NAME)"
-										density="compact"
-										variant="outlined"
-										class="mr-1"
-									></v-text-field>
+								<!-- ============================================== -->
+								<!-- VIEW MODE									-->
+								<!-- ============================================== -->
+								<div v-if="!editing" class="pb-book-view pt-2">
+									<h2 class="pb-display pb-book-view-title">{{ name || t(AppLabels.NAME) }}</h2>
+									<div v-if="isbn" class="pb-mono pb-book-view-isbn">ISBN {{ isbn }}</div>
 
-									<!-- ISBN code -->
-									<v-text-field
-										v-model="isbn"
-										:disabled="disableFields"
-										label="ISBN"
-										density="compact"
-										variant="outlined"
-										class="ml-1"
-									></v-text-field>
+									<div class="pb-book-view-grid">
+										<div class="pb-book-view-field">
+											<div class="pb-eyebrow">{{t(AppLabels.CATEGORY)}}</div>
+											<div class="pb-book-view-value">{{ categoryName || emptyValue }}</div>
+										</div>
+										<div class="pb-book-view-field">
+											<div class="pb-eyebrow">{{t(AppLabels.LANGUAGE)}}</div>
+											<div class="pb-book-view-value">{{ languageName || emptyValue }}</div>
+										</div>
+										<div class="pb-book-view-field">
+											<div class="pb-eyebrow">{{t(AppLabels.FORMAT)}}</div>
+											<div class="pb-book-view-value">{{ formatName || emptyValue }}</div>
+										</div>
+										<div class="pb-book-view-field">
+											<div class="pb-eyebrow">{{t(AppLabels.PAGES)}}</div>
+											<div class="pb-book-view-value">{{ pages || emptyValue }}</div>
+										</div>
+										<div class="pb-book-view-field">
+											<div class="pb-eyebrow">{{t(AppLabels.PUBLISHER)}}</div>
+											<div class="pb-book-view-value">{{ publisher || emptyValue }}</div>
+										</div>
+										<div class="pb-book-view-field">
+											<div class="pb-eyebrow">{{t(AppLabels.PUBLISHED_DATE)}}</div>
+											<div class="pb-book-view-value">{{ publishedDateDisplay || emptyValue }}</div>
+										</div>
+									</div>
+
+									<div class="pb-book-view-field mt-3">
+										<div class="pb-eyebrow">{{t(AppLabels.AUTHORS)}}</div>
+										<div v-if="authors.length" class="d-flex flex-wrap ga-1 mt-1">
+											<v-chip v-for="author in authors" :key="author.value" density="comfortable" variant="outlined">
+												{{ author.text }}
+											</v-chip>
+										</div>
+										<div v-else class="pb-book-view-value">{{ emptyValue }}</div>
+									</div>
+
+									<div v-if="description" class="pb-book-view-field mt-3">
+										<div class="pb-eyebrow">{{t(AppLabels.DESCRIPTION)}}</div>
+										<p class="pb-book-view-description">{{ description }}</p>
+									</div>
 								</div>
 
-								<div class="d-flex">
-									<!-- Category -->
-									<v-select
-										v-model="category"
+								<!-- ============================================== -->
+								<!-- EDIT MODE									-->
+								<!-- ============================================== -->
+								<div v-else class="pt-2">
+									<div class="d-flex">
+										<!-- Name -->
+										<v-text-field
+											v-model="name"
+											:disabled="disableFields"
+											:label="t(AppLabels.NAME)"
+											density="compact"
+											variant="outlined"
+											class="mr-1"
+										></v-text-field>
+
+										<!-- ISBN code -->
+										<v-text-field
+											v-model="isbn"
+											:disabled="disableFields"
+											label="ISBN"
+											density="compact"
+											variant="outlined"
+											class="ml-1"
+										></v-text-field>
+									</div>
+
+									<div class="d-flex">
+										<!-- Category -->
+										<v-select
+											v-model="category"
+											:disabled="disableFields"
+											:items="categoriesJson()"
+											:label="t(AppLabels.CATEGORY)"
+											density="compact"
+											variant="outlined"
+											item-value="value"
+											item-title="text"
+											clearable
+											class="mr-1"
+											style="width: 50%"
+										></v-select>
+
+										<!-- Language -->
+										<v-select
+											v-model="language"
+											:disabled="disableFields"
+											:items="languagesJson()"
+											:label="t(AppLabels.LANGUAGE)"
+											density="compact"
+											variant="outlined"
+											item-value="value"
+											item-title="text"
+											clearable
+											class="ml-1"
+											style="width: 50%"
+										></v-select>
+									</div>
+
+									<div class="d-flex">
+										<!-- Format -->
+										<v-select
+											v-model="format"
+											:disabled="disableFields"
+											:items="formatsJson()"
+											:label="t(AppLabels.FORMAT)"
+											density="compact"
+											variant="outlined"
+											item-value="value"
+											item-title="text"
+											clearable
+											class="mr-1"
+											style="width: 50%"
+										></v-select>
+
+										<!-- Pages -->
+										<v-text-field
+											v-model="pages"
+											:disabled="disableFields"
+											:label="t(AppLabels.PAGES)"
+											type="number"
+											density="compact"
+											variant="outlined"
+											class="ml-1"
+											style="width: 50%"
+										></v-text-field>
+									</div>
+
+									<!-- Authors -->
+									<v-autocomplete
+										v-model="authors"
+										:items="loadedAuthorsJSON"
+										:loading="loadingAuthors"
+										@update:search="searchAuthors"
 										:disabled="disableFields"
-										:items="categoriesJson()"
-										:label="t(AppLabels.CATEGORY)"
 										density="compact"
 										variant="outlined"
 										item-value="value"
 										item-title="text"
-										clearable
-										class="mr-1"
-										style="width: 50%"
-									></v-select>
+										:label="t(AppLabels.AUTHORS)"
+										color="primary"
+										:placeholder="t(AppLabels.ADD_AUTHOR)"
+										dense
+										multiple
+									></v-autocomplete>
 
-									<!-- Language -->
-									<v-select
-										v-model="language"
+									<div class="d-flex">
+										<!-- Publisher -->
+										<v-text-field
+											v-model="publisher"
+											:label="t(AppLabels.PUBLISHER)"
+											:disabled="disableFields"
+											density="compact"
+											variant="outlined"
+											class="mr-1"
+											style="width: 50%"
+										></v-text-field>
+
+										<!-- Published date -->
+										<v-text-field
+											v-model="publishedDate"
+											:label="t(AppLabels.PUBLISHED_DATE)"
+											:disabled="disableFields"
+											type="date"
+											density="compact"
+											variant="outlined"
+											class="ml-1"
+											style="width: 50%"
+										></v-text-field>
+									</div>
+
+									<!-- Description -->
+									<v-textarea
+										v-model="description"
 										:disabled="disableFields"
-										:items="languagesJson()"
-										:label="t(AppLabels.LANGUAGE)"
 										density="compact"
 										variant="outlined"
-										item-value="value"
-										item-title="text"
-										clearable
-										class="ml-1"
-										style="width: 50%"
-									></v-select>
+										:label="t(AppLabels.DESCRIPTION)"
+									></v-textarea>
 								</div>
-
-								<div class="d-flex">
-									<!-- Format -->
-									<v-select
-										v-model="format"
-										:disabled="disableFields"
-										:items="formatsJson()"
-										:label="t(AppLabels.FORMAT)"
-										density="compact"
-										variant="outlined"
-										item-value="value"
-										item-title="text"
-										clearable
-										class="mr-1"
-										style="width: 50%"
-									></v-select>
-
-									<!-- Pages -->
-									<v-text-field
-										v-model="pages"
-										:disabled="disableFields"
-										:label="t(AppLabels.PAGES)"
-										type="number"
-										density="compact"
-										variant="outlined"
-										class="ml-1"
-										style="width: 50%"
-									></v-text-field>
-								</div>
-
-								<!-- Authors -->
-								<v-autocomplete
-									v-model="authors"
-									:items="loadedAuthorsJSON"
-									:loading="loadingAuthors"
-									@update:search="searchAuthors"
-									:disabled="disableFields"
-									density="compact"
-									variant="outlined"
-									item-value="value"
-									item-title="text"
-									:label="t(AppLabels.AUTHORS)"
-									color="primary"
-									:placeholder="t(AppLabels.ADD_AUTHOR)"
-									dense
-									multiple
-								></v-autocomplete>
-
-								<div class="d-flex">
-									<!-- Publisher -->
-									<v-text-field
-										v-model="publisher"
-										:label="t(AppLabels.PUBLISHER)"
-										:disabled="disableFields"
-										density="compact"
-										variant="outlined"
-										class="mr-1"
-										style="width: 50%"
-									></v-text-field>
-
-									<!-- Published date -->
-									<v-text-field
-										v-model="publishedDate"
-										:label="t(AppLabels.PUBLISHED_DATE)"
-										:disabled="disableFields"
-										type="date"
-										density="compact"
-										variant="outlined"
-										class="ml-1"
-										style="width: 50%"
-									></v-text-field>
-								</div>
-
-								<!-- Description -->
-								<v-textarea
-									v-model="description"
-									:disabled="disableFields"
-									density="compact"
-									variant="outlined"
-									:label="t(AppLabels.DESCRIPTION)"
-								></v-textarea>
 							</template>
 						</card-component>
 					</v-col>
 
 					<v-col cols="12" md="3" lg="3" class="px-1">
 						<book-image :book="model.getBook()"/>
-						<div class="mt-4">
+						<div v-if="model.getBook().isElectronic()" class="mt-4">
 							<book-file :book="model.getBook()"/>
 						</div>
 					</v-col>
@@ -197,10 +276,14 @@
 
 <script setup lang="ts">
 /**
- * Book detail view (`/app/book/:book_id`): editable metadata form (each
- * field is a two-way computed bound directly to the `Book` model, setting
- * `hasChanges` so "Save" only enables once something's actually changed),
- * the cover image (`BookImage`), and the stock table (`BookStocks`).
+ * Book detail view (`/app/book/:book_id`): a read-only view of the book's
+ * metadata by default (`editing === false`), switching to the editable form
+ * (each field a two-way computed bound directly to the `Book` model,
+ * setting `hasChanges` so "Save" only enables once something's actually
+ * changed) when "Edit" is pressed. "Cancel" restores a snapshot taken when
+ * editing started. Also shows the cover image (`BookImage`), the ebook
+ * file upload/preview (`BookFile`, only for `Electronic`-format books), and
+ * the stock table (`BookStocks`).
  */
 import PageComponent from "@/views/PageComponent.vue";
 import BookController from "@/controller/book/BookController";
@@ -220,10 +303,32 @@ const model = new BookController();
 
 const {t} = useI18n();
 
+/** Placeholder shown for an unset view-mode field. */
+const emptyValue = "—";
+
 /**
  *
  */
 const hasChanges: Ref<boolean> = ref(false);
+
+/** Whether the metadata card is showing the editable form (true) or the read-only view (false). */
+const editing: Ref<boolean> = ref(false);
+
+/** Snapshot of every editable field, taken when editing starts, restored on cancel. */
+interface BookSnapshot {
+	name: string;
+	isbn: string | null;
+	categoryId: number | null;
+	languageCode: string | null;
+	formatId: number | null;
+	pages: number;
+	authors: BookAuthor[];
+	publisher: string | null;
+	publishedDate: Date | null;
+	description: string;
+}
+
+let snapshot: BookSnapshot | null = null;
 
 /**
  *
@@ -300,6 +405,8 @@ const format = computed({
 	}
 })
 
+const formatName = computed(() => model.getBook().getFormat()?.getFormatName() ?? null);
+
 const language = computed({
 	get() {
 		return model.getBook().getLanguageCode();
@@ -310,6 +417,8 @@ const language = computed({
 	}
 })
 
+const languageName = computed(() => applicationService.getLanguage(model.getBook().getLanguageCode())?.getLanguageName() ?? null);
+
 const category = computed({
 	get() {
 		return model.getBook().getCategoryId();
@@ -319,6 +428,8 @@ const category = computed({
 		hasChanges.value = true;
 	}
 })
+
+const categoryName = computed(() => applicationService.getCategory(model.getBook().getCategoryId())?.getCategoryName() ?? null);
 
 const publisher = computed({
 	get() {
@@ -347,6 +458,11 @@ const publishedDate = computed({
 		model.getBook().setPublishDate(val ? new Date(val) : null);
 		hasChanges.value = true;
 	}
+})
+
+const publishedDateDisplay = computed(() => {
+	const date = model.getBook().getPublishDate();
+	return date ? date.toLocaleDateString() : null;
 })
 
 const isbn = computed({
@@ -424,6 +540,44 @@ function deleteBook() {
 	})
 }
 
+/** Snapshot the current field values and switch the metadata card to the editable form. */
+function startEditing() {
+	const book = model.getBook();
+	snapshot = {
+		name: book.getName(),
+		isbn: book.getIsbn(),
+		categoryId: book.getCategoryId(),
+		languageCode: book.getLanguageCode(),
+		formatId: book.getFormat()?.getFormatId() ?? null,
+		pages: book.getNumberOfPages(),
+		authors: book.getAuthors(),
+		publisher: book.getPublisher(),
+		publishedDate: book.getPublishDate(),
+		description: book.getDescription(),
+	};
+	editing.value = true;
+}
+
+/** Restore the pre-edit snapshot and switch the metadata card back to the read-only view. */
+function cancelEditing() {
+	if (snapshot) {
+		const book = model.getBook();
+		book.setName(snapshot.name);
+		book.setIsbn(snapshot.isbn);
+		book.setCategoryId(snapshot.categoryId);
+		book.setLanguageCode(snapshot.languageCode);
+		book.setFormat(snapshot.formatId != null ? applicationService.getFormat(snapshot.formatId) || null : null);
+		book.setNumberOfPages(snapshot.pages);
+		book.setAuthors(snapshot.authors);
+		book.setPublisher(snapshot.publisher);
+		book.setPublishDate(snapshot.publishedDate);
+		book.setDescription(snapshot.description);
+	}
+
+	hasChanges.value = false;
+	editing.value = false;
+}
+
 /**
  *
  */
@@ -432,6 +586,8 @@ async function updateBook() {
 		try {
 			loadingUpdate.value = true;
 			await model.getBook().updateBook();
+			hasChanges.value = false;
+			editing.value = false;
 		} finally {
 			loadingUpdate.value = false;
 		}
@@ -463,3 +619,39 @@ async function searchAuthors(prompt: string) {
 	}
 }
 </script>
+
+<style scoped lang="scss">
+.pb-book-view-title {
+	font-size: 26px;
+	font-weight: 600;
+	color: var(--pb-text);
+	line-height: 1.2;
+}
+
+.pb-book-view-isbn {
+	margin-top: 4px;
+	font-size: 13px;
+	color: var(--pb-text-muted);
+}
+
+.pb-book-view-grid {
+	margin-top: 20px;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 16px 24px;
+}
+
+.pb-book-view-value {
+	margin-top: 2px;
+	font-size: 15px;
+	color: var(--pb-text);
+}
+
+.pb-book-view-description {
+	margin: 4px 0 0;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--pb-text);
+	white-space: pre-wrap;
+}
+</style>

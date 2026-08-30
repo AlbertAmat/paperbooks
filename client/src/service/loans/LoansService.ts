@@ -1,6 +1,7 @@
 import {PATH_PREFIX} from "@/Constants";
 import axiosInstance from "@/plugins/axiosInstance";
 import ILoansResponse from "@/types/loans/ILoan";
+import ILoanHistoryEntry from "@/types/loans/ILoanHistory";
 
 /**
  * Thin HTTP client for the `/api/rest/loans` endpoint (see server/src/routes/LoansRoute.ts).
@@ -34,6 +35,33 @@ class LoansService {
         });
 
         return data;
+    }
+
+    /**
+     * Unpaginated loan history for the Excel report: every loan (returned or
+     * not) in a date range, optionally narrowed by group and/or customer.
+     * @param dateFrom Only loans made on/after this date ("YYYY-MM-DD"). Required.
+     * @param dateTo Only loans made on/before this date ("YYYY-MM-DD"). Required.
+     * @param groupId Restrict to customers in this group, or null for all.
+     * @param customerId Restrict to this customer, or null for all.
+     * @returns Every matching loan, newest first.
+     */
+    public async getLoanHistory(
+        dateFrom: string,
+        dateTo: string,
+        groupId: number | null,
+        customerId: number | null
+    ): Promise<ILoanHistoryEntry[]> {
+        const {data} = await axiosInstance.get(`${PATH_PREFIX}/loans/report`, {
+            params: {
+                date_from: dateFrom,
+                date_to: dateTo,
+                group_id: groupId,
+                customer_id: customerId
+            }
+        });
+
+        return data.rows;
     }
 }
 

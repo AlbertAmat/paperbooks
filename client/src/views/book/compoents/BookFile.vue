@@ -5,34 +5,38 @@
 		dense
 	>
 		<template v-slot:default>
-			<div v-if="file" class="d-flex align-center">
-				<v-icon size="40" class="mr-3" color="primary">
-					{{ file.file_type === 'epub' ? 'mdi-book-open-page-variant-outline' : 'mdi-file-pdf-box' }}
-				</v-icon>
-				<div class="flex-grow-1" style="min-width: 0">
-					<div class="text-truncate">{{ file.file_name }}</div>
-					<div class="text-caption" style="color: var(--pb-text-muted)">
-						{{ formattedSize }} &middot; {{ formattedDate }}
+			<div v-if="file">
+				<book-file-preview :key="file.id" :book="book" class="mb-3"/>
+
+				<div class="d-flex align-center">
+					<v-icon size="40" class="mr-3" color="primary">
+						{{ file.file_type === 'epub' ? 'mdi-book-open-page-variant-outline' : 'mdi-file-pdf-box' }}
+					</v-icon>
+					<div class="flex-grow-1" style="min-width: 0">
+						<div class="text-truncate">{{ file.file_name }}</div>
+						<div class="text-caption" style="color: var(--pb-text-muted)">
+							{{ formattedSize }} &middot; {{ formattedDate }}
+						</div>
 					</div>
+					<v-btn
+						icon
+						variant="text"
+						density="comfortable"
+						:href="downloadUrl"
+					>
+						<v-icon>mdi-download</v-icon>
+					</v-btn>
+					<v-btn
+						icon
+						variant="text"
+						density="comfortable"
+						:loading="deleteLoading"
+						:disabled="deleteLoading"
+						@click="removeFile"
+					>
+						<v-icon color="error">mdi-delete</v-icon>
+					</v-btn>
 				</div>
-				<v-btn
-					icon
-					variant="text"
-					density="comfortable"
-					:href="downloadUrl"
-				>
-					<v-icon>mdi-download</v-icon>
-				</v-btn>
-				<v-btn
-					icon
-					variant="text"
-					density="comfortable"
-					:loading="deleteLoading"
-					:disabled="deleteLoading"
-					@click="removeFile"
-				>
-					<v-icon color="error">mdi-delete</v-icon>
-				</v-btn>
 			</div>
 
 			<template v-else>
@@ -76,6 +80,7 @@
  */
 import Book from "@/model/book/Book";
 import CardComponent from "@/components/card/CardComponent.vue";
+import BookFilePreview from "@/views/book/compoents/BookFilePreview.vue";
 import {computed, ref, Ref} from "vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";

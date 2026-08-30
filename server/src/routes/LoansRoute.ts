@@ -4,7 +4,8 @@
  * =============================================================================
  * Mounted at `/api/rest/loans`. Read-only, paginated/filterable listing of
  * books currently on loan (a `book_stocks` row with `status = 2`), for the
- * Loans management view. Returning a book is handled by the existing
+ * Loans management view, plus an unpaginated `loan_history` export backing
+ * that view's Excel report. Returning a book is handled by the existing
  * `POST /book/return` (see BooksRoute.ts) - this route only lists.
  */
 import { Router, Request, Response } from 'express';
@@ -107,6 +108,84 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
             limit: MAX_ROWS,
             loans: result.rows
         });
+    } catch (err: any) {
+        console.error('Error executing query', err.stack);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+/**
+ * GET /loans/report
+ * -------------------
+ * Unpaginated loan history for the Loans view's Excel report: every loan
+ * (returned or not) in a date range, optionally narrowed by customer group
+ * and/or customer. Backed by `loan_history`, not `book_stocks`, so returned
+ * loans are included too.
+ *
+ * Auth: required.
+ *
+ * Query params:
+ *  - date_from    {string} REQUIRED. "YYYY-MM-DD" - only loans made on/after this date.
+ *  - date_to      {string} REQUIRED. "YYYY-MM-DD" - only loans made on/before this date.
+ *  - group_id     {number} Restrict to customers in this group.
+ *  - customer_id  {number} Restrict to this customer.
+ *
+ * Example request: GET /api/rest/loans/report?date_from=2026-01-01&date_to=2026-08-30
+ *
+ * Example response (200):
+ *  {
+ *    "rows": [
+ *      { "bookName": "The Hobbit", "stockCode": "a1b2c3d4e5",
+ *        "customerName": "Maria Puig", "groupName": "Class 4B",
+ *        "loanedAt": "2026-08-01T05:39:03.026Z", "returnedAt": null }
+ *    ]
+ *  }
+ *
+ * Response (400): "date_from and date_to are required" if either is missing.
+ */
+//@ts-ignore
+router.get('/report', requireAuth, async (req: Request, res: Response) => {
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    const dateFrom = req.query.date_from ? String(req.query.date_from) : null;
+    const dateTo = req.query.date_to ? String(req.query.date_to) : null;
+    const groupId = req.query.group_id ? Number(req.query.group_id) : null;
+    const customerId = req.query.customer_id ? Number(req.query.customer_id) : null;
+
+    if (!dateFrom || !dateTo) {
+        return res.status(400).send('date_from and date_to are required');
+    }
+
+    try {
+        const params: any[] = [userId, dateFrom, dateTo];
+        const conditions: string[] = [
+            `user_id = $1`,
+            `loaned_at >= $2::date`,
+            `loaned_at < $3::date + INTERVAL '1 day'`
+        ];
+
+        if (groupId) {
+            conditions.push(`group_id = $${params.push(groupId)}`);
+        }
+        if (customerId) {
+            conditions.push(`customer_id = $${params.push(customerId)}`);
+        }
+
+        const result = await pool.query(
+            `SELECT book_name     AS "bookName",
+                    stock_code    AS "stockCode",
+                    customer_name AS "customerName",
+                    group_name    AS "groupName",
+                    loaned_at     AS "loanedAt",
+                    returned_at   AS "returnedAt"
+             FROM loan_history
+             WHERE ${conditions.join(' AND ')}
+             ORDER BY loaned_at DESC`,
+            params
+        );
+
+        res.status(200).json({rows: result.rows});
     } catch (err: any) {
         console.error('Error executing query', err.stack);
         res.status(500).send('Internal Server Error');

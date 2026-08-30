@@ -29,6 +29,7 @@ import {AppErrors} from "../types/AppErrors";
 import {SearchFilter} from "../types/search/SearchFilter";
 import {normalizeAndValidateIsbn} from "../utils/IsbnVerification";
 import {isValidEpub, isValidPdf} from "../utils/FileSignature";
+import {recordLoan, recordReturn} from "../utils/LoanHistory";
 //@ts-ignore
 const router: Router = Router();
 
@@ -1432,6 +1433,15 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
             res.status(404).send("Location not found");
         }
 
+        // Needed to detect a status transition into/out of "booked" below,
+        // since loan_history (unlike loaned_at) can't be updated in the same
+        // statement as book_stocks.
+        const previousStock = await pool.query(
+            'SELECT status FROM book_stocks WHERE id = $1 AND book_id = $2 AND user_id = $3',
+            [stockId, bookId, userId]
+        );
+        const previousStatus = previousStock.rows[0]?.status;
+
         // loaned_at is set only on the transition *into* booked (status wasn't
         // already 2) and cleared on any transition out of it, so re-saving an
         // already-booked stock (e.g. just moving its location) doesn't reset
@@ -1470,6 +1480,14 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
             `,
             [stockId, userId]
         );
+
+        const updatedStock = stockQueryResult.rows[0];
+        const newStatus = Number(status);
+        if (updatedStock && Number(previousStatus) !== 2 && newStatus === 2) {
+            await recordLoan(pool, userId, updatedStock.code, Number(customer_id));
+        } else if (updatedStock && Number(previousStatus) === 2 && newStatus !== 2) {
+            await recordReturn(pool, userId, updatedStock.code);
+        }
 
         res.status(200).json(stockQueryResult.rows[0]);
     } catch (error) {
@@ -1569,12 +1587,13 @@ router.post('/return', requireAuth, upload.single("image"), async (req: Request,
     const userId = appService.getSessionUser(req);
 
     try {
-        books.forEach(async (bookStockCode: string) => {
+        for (const bookStockCode of books) {
             await pool.query(
                 'UPDATE book_stocks SET customer_id = $1, status = $2, loaned_at = NULL WHERE code = $3 AND user_id = $4',
                 [null, 0, bookStockCode, userId]
             );
-        })
+            await recordReturn(pool, userId, bookStockCode);
+        }
 
         res.status(200).send();
     } catch (error) {

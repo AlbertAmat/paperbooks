@@ -14,6 +14,7 @@ import { Router, Request, Response } from 'express';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import {appService} from "../AppService";
 import {Pool} from "pg";
+import {recordLoan, recordReturn} from "../utils/LoanHistory";
 
 const router = Router();
 
@@ -585,6 +586,7 @@ router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) =
                 'UPDATE book_stocks SET customer_id = $1, status = $2, loaned_at = NOW() WHERE code = $3 AND user_id = $4',
                 [customerId, 2, bookStockCode, userId]
             );
+            await recordLoan(pool, userId, bookStockCode, customerId);
         }
 
         const customerBooks = await getCustomerBooks(pool, customerId, userId);
@@ -630,6 +632,7 @@ router.delete('/:id/book/:bookStockCode', requireAuth, async (req: Request, res:
             'UPDATE book_stocks SET status = $1, customer_id = $2, loaned_at = NULL WHERE code = $3 AND customer_id = $4 AND user_id = $5',
             [0, null, bookStockCode, customerId, userId]
         );
+        await recordReturn(pool, userId, bookStockCode);
 
         res.status(200).send();
     } catch (err: any) {
