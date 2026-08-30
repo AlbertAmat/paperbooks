@@ -46,26 +46,41 @@ export default class SearchController extends BaseController<ISearchResponse> {
         super(i18n.global.t(AppLabels.LIBRARY));
         this.m_books = shallowRef([]);
 
-        // Pick up any `SearchFilter`(s) passed in the route (e.g. a deep link
-        // from the "Library" nav's "Recent"/"On loan" quick filters) so the
+        // Pick up any `SearchFilter`(s)/date range passed in the route (e.g. a
+        // deep link from the "Library" nav's quick filters, or the global
+        // filter menu in AppBar.vue navigating here from another page) so the
         // filter chips reflect it immediately - `fetchData()` above already
-        // used the same route param for the actual initial fetch.
+        // used the same route params for the actual initial fetch.
         const params = router.currentRoute.value.query;
         const filtersParam = params[SearchRoute.FILTERS_QUERY_PARAM];
         if (filtersParam) {
             this.m_filters.value = String(filtersParam).split(",") as SearchFilter[];
         }
+        const dateFromParam = params[SearchRoute.DATE_FROM_QUERY_PARAM];
+        const dateToParam = params[SearchRoute.DATE_TO_QUERY_PARAM];
+        this.m_dateFrom.value = dateFromParam ? String(dateFromParam) : null;
+        this.m_dateTo.value = dateToParam ? String(dateToParam) : null;
 
-        // The "Library" nav's quick filters are plain router-links to this
-        // same route with a different `filters` query param - since Vue
-        // Router reuses this already-mounted view/controller instance rather
-        // than remounting it, apply the new filter set whenever that param
-        // changes instead of only once at construction time.
+        // These route params can also be a plain router-link to this same
+        // route with different values (quick filters, the global filter menu)
+        // - since Vue Router reuses this already-mounted view/controller
+        // instance rather than remounting it, apply the new values whenever
+        // they change instead of only once at construction time.
         watch(() => router.currentRoute.value.query[SearchRoute.FILTERS_QUERY_PARAM], (newFiltersParam) => {
             this.m_filters.value = newFiltersParam ? String(newFiltersParam).split(",") as SearchFilter[] : [];
             this.m_page.value = 0;
             this.fetchBooks(true);
         });
+
+        watch(
+            () => [router.currentRoute.value.query[SearchRoute.DATE_FROM_QUERY_PARAM], router.currentRoute.value.query[SearchRoute.DATE_TO_QUERY_PARAM]],
+            ([newDateFrom, newDateTo]) => {
+                this.m_dateFrom.value = newDateFrom ? String(newDateFrom) : null;
+                this.m_dateTo.value = newDateTo ? String(newDateTo) : null;
+                this.m_page.value = 0;
+                this.fetchBooks(true);
+            }
+        );
     }
 
     /**
@@ -80,6 +95,8 @@ export default class SearchController extends BaseController<ISearchResponse> {
         const categoryId = params[SearchRoute.CATEGORY_QUERY_PARAM] ? Number(params[SearchRoute.CATEGORY_QUERY_PARAM]) : null;
         const filtersParam = params[SearchRoute.FILTERS_QUERY_PARAM];
         const filters = filtersParam ? String(filtersParam).split(",") as SearchFilter[] : [];
+        const dateFromParam = params[SearchRoute.DATE_FROM_QUERY_PARAM];
+        const dateToParam = params[SearchRoute.DATE_TO_QUERY_PARAM];
 
         return await searchService.searchBooks(
             query,
@@ -87,8 +104,8 @@ export default class SearchController extends BaseController<ISearchResponse> {
             0,
             filters,
             SortType.NAME_ASC,
-            null,
-            null
+            dateFromParam ? String(dateFromParam) : null,
+            dateToParam ? String(dateToParam) : null
         )
     }
 

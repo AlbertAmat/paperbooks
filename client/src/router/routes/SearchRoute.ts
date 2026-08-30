@@ -19,6 +19,12 @@ export class SearchRoute extends ARoute {
     /** Query string param name the search view reads its initial `SearchFilter`(s) from (comma-separated). */
     public static FILTERS_QUERY_PARAM = "filters";
 
+    /** Query string param name the search view reads its initial "added on/after" date filter from (YYYY-MM-DD). */
+    public static DATE_FROM_QUERY_PARAM = "date_from";
+
+    /** Query string param name the search view reads its initial "added on/before" date filter from (YYYY-MM-DD). */
+    public static DATE_TO_QUERY_PARAM = "date_to";
+
     /** @returns The Vue Router route config for the search/library view. */
     public getRoute() {
         return  {
@@ -53,6 +59,29 @@ export class SearchRoute extends ARoute {
      */
     public getPathForFilter(filter: SearchFilter) {
         return `${SearchRoute.PATH}?${SearchRoute.FILTERS_QUERY_PARAM}=${filter}`;
+    }
+
+    /**
+     * Build the search/library view URL from any combination of filters/date
+     * range - used by the global filter menu (see `SearchToolbarFilterMenu.vue`)
+     * to jump there pre-filtered from any other page.
+     * @param options `filters` and/or `dateFrom`/`dateTo` (YYYY-MM-DD) to apply; any omitted/empty one is left out of the URL entirely.
+     */
+    public getPathForFilters(options: { filters?: SearchFilter[]; dateFrom?: string | null; dateTo?: string | null }) {
+        const params = new URLSearchParams();
+
+        if (options.filters && options.filters.length > 0) {
+            params.set(SearchRoute.FILTERS_QUERY_PARAM, options.filters.join(","));
+        }
+        if (options.dateFrom) {
+            params.set(SearchRoute.DATE_FROM_QUERY_PARAM, options.dateFrom);
+        }
+        if (options.dateTo) {
+            params.set(SearchRoute.DATE_TO_QUERY_PARAM, options.dateTo);
+        }
+
+        const queryString = params.toString();
+        return queryString ? `${SearchRoute.PATH}?${queryString}` : SearchRoute.PATH;
     }
 }
 

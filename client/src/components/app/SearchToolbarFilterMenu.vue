@@ -1,6 +1,5 @@
 <template>
 	<v-menu
-		v-if="activeSearchController"
 		v-model="filterMenu"
 		:close-on-content-click="false"
 	>
@@ -61,25 +60,34 @@
 
 <script setup lang="ts">
 /**
- * Filter icon + menu docked in the global search box (see `AppBar.vue`),
- * self-contained the same way `BarcodeScanner.vue` is - Vuetify's `v-menu`
- * overlay breaks when inlined directly inside a `v-text-field`'s
- * `append-inner` slot template, so it's split out into its own component
- * instead (matches the working pattern already used for the barcode button).
- * Only rendered while the library page is mounted (see `activeSearchController`),
- * driving that page's own `SearchController` directly.
+ * Filter icon + menu docked in the global search box (see `AppBar.vue`), so
+ * it's always visible - self-contained the same way `BarcodeScanner.vue` is,
+ * since Vuetify's `v-menu` overlay breaks when inlined directly inside a
+ * `v-text-field`'s `append-inner` slot template.
+ *
+ * While the library page is mounted (see `activeSearchController`), it drives
+ * that page's own `SearchController` directly - filters apply live, no
+ * navigation. From any other page there's no live controller to mutate, so
+ * toggling a filter/applying a date range instead navigates to the library
+ * page with that filter set already in the URL (`SearchRoute.getPathForFilters`);
+ * `SearchController` picks the same params back up on mount.
  */
 import {computed, ref, Ref, watch} from "vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {activeSearchController} from "@/controller/search/SearchController";
 import {SearchFilter} from "@/types/search/SearchFilter";
+import router from "@/router/Router";
+import {searchRoute} from "@/router/routes/SearchRoute";
 
 const {t} = useI18n();
 
 const filterMenu: Ref<boolean> = ref(false);
 const dateFromInput: Ref<string | null> = ref(null);
 const dateToInput: Ref<string | null> = ref(null);
+
+/** Staged filter selection, used only while there's no live `activeSearchController` (see file doc). */
+const pendingFilters: Ref<SearchFilter[]> = ref([]);
 
 const filterOptions = [
 	{title: t(AppLabels.NO_STOCK_FILTER), value: SearchFilter.NO_STOCK},
@@ -88,32 +96,70 @@ const filterOptions = [
 	{title: t(AppLabels.RECENT_FILTER), value: SearchFilter.RECENT}
 ];
 
-const hasActiveFilters = computed(() => activeSearchController.value?.hasActiveFilters() ?? false);
+const hasActiveFilters = computed(() => {
+	if (activeSearchController.value) {
+		return activeSearchController.value.hasActiveFilters();
+	}
+	return pendingFilters.value.length > 0;
+});
 
 function isFilterActive(filter: SearchFilter): boolean {
-	return activeSearchController.value?.getFilters().includes(filter) ?? false;
+	if (activeSearchController.value) {
+		return activeSearchController.value.getFilters().includes(filter);
+	}
+	return pendingFilters.value.includes(filter);
 }
 
 function toggleFilter(filter: SearchFilter) {
 	const controller = activeSearchController.value;
-	if (!controller) return;
-	if (controller.getFilters().includes(filter)) {
-		controller.removeFilter(filter);
-	} else {
-		controller.addFilter(filter);
+	if (controller) {
+		if (controller.getFilters().includes(filter)) {
+			controller.removeFilter(filter);
+		} else {
+			controller.addFilter(filter);
+		}
+		return;
 	}
+
+	// Not on the library page - jump there with the toggled filter set applied
+	// instead of mutating a controller that doesn't exist yet.
+	pendingFilters.value = pendingFilters.value.includes(filter)
+		? pendingFilters.value.filter((f) => f !== filter)
+		: [...pendingFilters.value, filter];
+
+	router.push(searchRoute.getPathForFilters({
+		filters: pendingFilters.value,
+		dateFrom: dateFromInput.value,
+		dateTo: dateToInput.value
+	}));
 }
 
-// Reset the date draft to whatever's actually active each time the menu opens.
+// Reset the draft filters/dates to whatever's actually active each time the
+// menu opens - the live controller's state while on the library page, or a
+// blank slate (not last page's leftover picks) everywhere else.
 watch(filterMenu, (open) => {
-	if (open && activeSearchController.value) {
+	if (!open) return;
+	if (activeSearchController.value) {
 		dateFromInput.value = activeSearchController.value.getDateFrom();
 		dateToInput.value = activeSearchController.value.getDateTo();
+	} else {
+		pendingFilters.value = [];
+		dateFromInput.value = null;
+		dateToInput.value = null;
 	}
 });
 
 function applyDateRange() {
-	activeSearchController.value?.setDateRange(dateFromInput.value || null, dateToInput.value || null);
+	const controller = activeSearchController.value;
+	if (controller) {
+		controller.setDateRange(dateFromInput.value || null, dateToInput.value || null);
+	} else {
+		router.push(searchRoute.getPathForFilters({
+			filters: pendingFilters.value,
+			dateFrom: dateFromInput.value || null,
+			dateTo: dateToInput.value || null
+		}));
+	}
 	filterMenu.value = false;
 }
 
