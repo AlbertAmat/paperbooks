@@ -87,34 +87,20 @@
 
 			<template v-else>
 				<template v-if="gridLayout">
-					<v-row no-gutters style="flex: initial">
-						<v-col
+					<div class="book-grid">
+						<book-item
 							v-for="book in model.getBooks()"
 							:key="book.getId()"
-							cols="12"
-							sm="6"
-							md="4"
-							lg="3"
-							class="pa-1"
-							style="height: fit-content"
-						>
-							<book-item :book="book"/>
-						</v-col>
+							:book="book"
+						/>
 
 						<template v-if="loadingBooks">
-							<v-col
+							<book-item-skeleton
 								v-for="item in model.getLimit()"
 								:key="item"
-								cols="6"
-								sm="4"
-								md="3"
-								class="pa-2"
-								style="height: fit-content"
-							>
-								<book-item-skeleton/>
-							</v-col>
+							/>
 						</template>
-					</v-row>
+					</div>
 
 				</template>
 
@@ -282,6 +268,13 @@ watch(() => model.getBooks(), () => {
 </script>
 
 <style scoped>
+.book-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+	gap: 16px 12px;
+	padding: 4px;
+}
+
 .book-list {
 	overflow: hidden;
 }
