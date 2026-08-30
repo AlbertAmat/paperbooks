@@ -8,9 +8,13 @@ In alto, un titolo mostra quanti libri hai aggiunto questo mese, con una freccia
 
 A destra, uno scaffale a scorrimento orizzontale mostra le copertine dei libri aggiunti più di recente. Clicca su una copertina per andare direttamente alla sua [pagina di dettaglio](#book-details).
 
-## Riga di statistiche
+## Sfogliare per categoria
 
-Sotto lo scaffale, una riga di statistiche compatte mostra i totali del tuo catalogo: libri totali, libri prenotati, categorie, clienti, ubicazioni e autori.
+Sotto l'intestazione, il tuo catalogo viene suddiviso in uno scaffale a parte per categoria — ciascuno con il suo nome, il conteggio dei libri e una riga di copertine a scorrimento orizzontale. Clicca sull'intestazione di uno scaffale per aprire quella categoria nella [Libreria](#searching-the-library), oppure su una copertina per andare direttamente a quel libro.
+
+## Prestiti in corso
+
+Una scheda elenca tutte le copie attualmente in prestito, con copertina, libro e a chi è stata prestata. Se ci sono più prestiti di quanti ne entrino nell'elenco, una nota te lo segnala — clicca su **Vedi tutto** per consultare l'elenco completo nella pagina [Prestiti](#lending-and-returns). Quando non c'è nulla in prestito, la scheda lo indica semplicemente.
 
 ## Libri aggiunti nel tempo
 

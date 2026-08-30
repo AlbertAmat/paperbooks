@@ -51,3 +51,5 @@ Usa las acciones de fila a la derecha de cada entrada de stock:
 Junto a la imagen de portada puedes, opcionalmente, guardar una copia de seguridad del **archivo epub o pdf** del libro — útil si lo has descargado y transferido a un lector electrónico, ya que entonces el lector se convierte en el único lugar donde vive esa copia. Haz clic o arrastra y suelta un archivo (máximo 100MB) para subirlo; un libro conserva como máximo un archivo, así que subir uno nuevo sustituye al anterior.
 
 Una vez subido, puedes **descargarlo** de nuevo en cualquier momento (por ejemplo, si pierdes o restableces tu lector electrónico) o **eliminarlo** (con confirmación). Esto está pensado únicamente como copia de seguridad personal de archivos sobre los que ya tienes los derechos — no como un lugar para obtener libros de otras fuentes.
+
+En los libros con formato **Electrónico**, el archivo subido también muestra una vista previa justo debajo de la tarjeta de subida: los PDF se abren con el visor integrado del navegador, y los EPUB se muestran página a página con botones **‹**/**›** para pasar de página — sin necesidad de descargar el archivo solo para consultarlo.

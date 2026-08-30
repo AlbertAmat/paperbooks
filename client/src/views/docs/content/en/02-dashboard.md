@@ -8,9 +8,13 @@ At the top, a headline shows how many books you've added this month, with an arr
 
 To the right, a horizontally scrolling shelf shows the covers of your most recently added books. Click any cover to jump straight to that book's [detail page](#book-details).
 
-## Stats strip
+## Browse by category
 
-Below the shelf, a row of compact stats gives you the totals for your catalog: total books, booked books, categories, customers, locations, and authors.
+Below the hero, your catalog is broken down into its own shelf per category — each with its name, its book count, and a horizontally scrolling row of covers. Click a shelf's header to open that category in the [Library](#searching-the-library), or click any cover to jump straight to that book.
+
+## Currently on loan
+
+A card lists every copy currently on loan, showing its cover, book, and who has it. If there are more loans than fit in the list, a note tells you so — click **View all** to see the complete list on the [Loans](#lending-and-returns) page. When nothing is out, the card simply says so.
 
 ## Books added over time
 

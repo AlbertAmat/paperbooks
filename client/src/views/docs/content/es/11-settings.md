@@ -7,6 +7,15 @@ Abre tu menú de perfil en la esquina superior derecha y elige **Configuración*
 - Haz clic en **Cambiar imagen** para subir una nueva foto de perfil, o en **Quitar imagen** para eliminarla.
 - Actualiza tu **nombre**. El **código** de tu cuenta se muestra como referencia, pero no se puede cambiar.
 
+## Apariencia
+
+Elige entre dos temas:
+
+- **Sala de lectura** — cálido, claro y con tonos de papel.
+- **Estantería abierta** — oscuro, en tonos fríos, cómodo para los ojos de noche.
+
+Al seleccionar un tema, se aplica al instante. Justo debajo, el interruptor **Menú compacto** reduce la barra lateral izquierda a solo iconos, expandiéndola de nuevo al pasar el ratón por encima — útil en pantallas más pequeñas.
+
 ## Idioma y región
 
 Elige tu **idioma** y **región** preferidos para la interfaz de la aplicación.
@@ -15,6 +24,7 @@ Elige tu **idioma** y **región** preferidos para la interfaz de la aplicación.
 
 - Actualiza la **dirección de correo electrónico** asociada a tu cuenta.
 - Haz clic en **Cambiar contraseña** para establecer una nueva contraseña.
+- En **Autenticación de dos factores**, haz clic en **Activar** para exigir un código de una aplicación autenticadora al iniciar sesión: escanea el código QR (o introduce su clave manualmente) con una app como Google Authenticator, Authy o 1Password, y confirma con el código de 6 dígitos que muestre. Recibirás un conjunto de **códigos de respaldo** de un solo uso — guárdalos en un lugar seguro, ya que solo se muestran una vez y te permiten iniciar sesión si alguna vez pierdes el acceso a tu aplicación autenticadora. Una vez configurada, una etiqueta la marca como **Activada**; haz clic en **Desactivar** y confirma tu contraseña para volver a apagarla.
 - Usa **Eliminar cuenta** si necesitas eliminar tu cuenta de forma permanente. Esta acción no se puede deshacer, así que se te pedirá confirmación antes.
 
 Recuerda hacer clic en **Guardar**, en la esquina superior derecha, después de hacer cambios — permanece desactivado hasta que hayas editado algo.

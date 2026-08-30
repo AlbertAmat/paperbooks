@@ -35,3 +35,13 @@ The **Loans** page gives you a single list of every copy currently on loan — i
 - Click **Return** on any row to bring that single copy back — no need to know its stock code.
 
 It's the fastest way to answer "what's out right now, and to whom" without going through each customer individually.
+
+## Exporting a loan report
+
+Click **Generate report** in the top-right corner of the Loans page to export an Excel (.xlsx) file of loan history — including copies that have already been returned, not just what's currently out.
+
+1. Pick a **From** and **To** date — required, since the report always covers a date range.
+2. Optionally narrow it down to one **Group** or **Customer**.
+3. Click **Generate report** to download the file.
+
+Each row lists the book, stock code, customer, group, the date it was loaned, and either its return date or **Still on loan**.

@@ -51,3 +51,5 @@ Usa le azioni della riga a destra di ogni voce di stock:
 Accanto all'immagine di copertina puoi, facoltativamente, salvare una copia di backup del **file epub o pdf** del libro — utile se lo hai scaricato e trasferito su un e-reader, dato che a quel punto il lettore diventa l'unico posto in cui vive quella copia. Clicca o trascina e rilascia un file (massimo 100MB) per caricarlo; un libro conserva al massimo un file, quindi caricarne uno nuovo sostituisce quello precedente.
 
 Una volta caricato, puoi **scaricarlo** di nuovo in qualsiasi momento (ad esempio se perdi o ripristini il tuo e-reader) o **eliminarlo** (con conferma). Questo è pensato puramente come backup personale di file di cui hai già i diritti — non come un luogo da cui procurarsi libri da altre fonti.
+
+Per i libri con formato **Elettronico**, il file caricato mostra anche un'anteprima proprio sotto la scheda di caricamento: i PDF si aprono con il visualizzatore integrato del browser, mentre gli EPUB vengono mostrati pagina per pagina con i pulsanti **‹**/**›** per sfogliarli — senza bisogno di scaricare il file solo per controllarlo.

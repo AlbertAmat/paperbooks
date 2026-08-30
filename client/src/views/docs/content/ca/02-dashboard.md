@@ -8,9 +8,13 @@ A la part superior, un titular mostra quants llibres has afegit aquest mes, amb 
 
 A la dreta, un prestatge amb desplaçament horitzontal mostra les portades dels teus llibres afegits més recentment. Fes clic a qualsevol portada per anar directament a la seva [pàgina de detalls](#book-details).
 
-## Fila d'estadístiques
+## Explorar per categoria
 
-Sota el prestatge, una fila d'estadístiques compactes et dona els totals del teu catàleg: llibres totals, llibres reservats, categories, clients, ubicacions i autors.
+Sota la capçalera, el teu catàleg es reparteix en un prestatge propi per categoria — cadascun amb el seu nom, el seu recompte de llibres i una fila de portades amb desplaçament horitzontal. Fes clic a la capçalera d'un prestatge per obrir aquella categoria a la [Biblioteca](#searching-the-library), o a qualsevol portada per anar directament a aquell llibre.
+
+## Préstecs en curs
+
+Una targeta mostra tots els exemplars actualment en préstec, amb la seva portada, el llibre i qui el té. Si hi ha més préstecs dels que hi caben a la llista, una nota t'ho indica — fes clic a **Veure-ho tot** per consultar la llista completa a la pàgina de [Préstecs](#lending-and-returns). Quan no hi ha res prestat, la targeta simplement ho indica.
 
 ## Llibres afegits al llarg del temps
 

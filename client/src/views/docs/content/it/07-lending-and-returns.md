@@ -35,3 +35,13 @@ La pagina **Prestiti** mostra un unico elenco di tutte le copie attualmente in p
 - Clicca su **Restituisci** su qualsiasi riga per restituire subito quella copia - senza bisogno di conoscerne il codice di stock.
 
 È il modo più rapido per sapere "cosa è fuori in questo momento, e a chi" senza dover controllare cliente per cliente.
+
+## Esportare un report dei prestiti
+
+Clicca su **Genera report**, nell'angolo in alto a destra della pagina Prestiti, per esportare un file Excel (.xlsx) con lo storico dei prestiti — comprese le copie già restituite, non solo quelle attualmente fuori.
+
+1. Scegli una data **Da** e **A** — obbligatorie, dato che il report copre sempre un intervallo di date.
+2. Facoltativamente, restringilo a un **Gruppo** o **Cliente** specifico.
+3. Clicca su **Genera report** per scaricare il file.
+
+Ogni riga mostra il libro, il codice di stock, il cliente, il gruppo, la data in cui è stato prestato e la sua data di restituzione, oppure **Ancora in prestito**.

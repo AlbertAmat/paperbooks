@@ -51,3 +51,5 @@ Use the row actions on the right of each stock entry:
 Next to the cover image you can optionally back up the actual **epub or pdf file** for the book — useful if you've downloaded it and transferred it to an e-reader, since the reader then becomes the only place that copy lives. Click or drag-and-drop a file (max 100MB) to upload it; a book keeps at most one file, so uploading a new one replaces the previous one.
 
 Once uploaded, you can **download** it again at any time (e.g. after losing or resetting your e-reader) or **delete** it (with confirmation). This is meant purely as a personal backup of files you already have the rights to — not a place to source books from elsewhere.
+
+For books with the **Electronic** format, the uploaded file also gets an in-page preview right below the upload card: PDFs open in your browser's built-in viewer, and EPUBs render page by page with **‹**/**›** buttons to turn pages — no need to download the file just to check it.

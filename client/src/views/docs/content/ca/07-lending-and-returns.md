@@ -35,3 +35,13 @@ La pàgina de **Préstecs** et dona una única llista de tots els exemplars actu
 - Fes clic a **Retornar** en qualsevol fila per retornar aquell exemplar concret — sense necessitat de saber el seu codi d'estoc.
 
 És la manera més ràpida de saber "què hi ha fora ara mateix, i a qui" sense haver de repassar client per client.
+
+## Exportar un informe de préstecs
+
+Fes clic a **Generar informe**, a la cantonada superior dreta de la pàgina de Préstecs, per exportar un fitxer Excel (.xlsx) amb l'historial de préstecs — incloent-hi els exemplars ja retornats, no només els que estan en préstec ara mateix.
+
+1. Tria una data **Des de** i **Fins a** — obligatòries, ja que l'informe sempre cobreix un interval de dates.
+2. Opcionalment, restringeix-lo a un **Grup** o **Client** concret.
+3. Fes clic a **Generar informe** per descarregar el fitxer.
+
+Cada fila mostra el llibre, el codi d'estoc, el client, el grup, la data en què es va prestar i la seva data de devolució, o bé **Encara en préstec**.

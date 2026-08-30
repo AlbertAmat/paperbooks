@@ -59,7 +59,7 @@
 			<v-list-item
 				nav
 				:to="docsRoute.getPath()"
-				title="Help"
+				:title="t(AppLabels.HELP)"
 				prepend-icon="mdi-help-circle-outline"
 				density="compact"
 				class="mx-2 app-menu-item"

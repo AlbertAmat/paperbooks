@@ -270,3 +270,10 @@ VALUES ('en', 'USERCONF_APPEARANCE', 'Appearance'),
        ('it', 'RETURNED_ON', 'Restituito il'),
        ('it', 'STILL_ON_LOAN', 'Ancora in prestito'),
        ('it', 'NO_LOANS_FOUND', 'Nessun prestito trovato con questi filtri');
+
+-- App menu's "Help" link to /docs was hardcoded in English; give it a
+-- translatable label like every other menu item.
+INSERT INTO app_labels (language, code, text)
+VALUES ('en', 'HELP', 'Help'),
+       ('ca', 'HELP', 'Ajuda'),
+       ('es', 'HELP', 'Ayuda'),

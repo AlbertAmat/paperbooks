@@ -35,3 +35,13 @@ La página de **Préstamos** te ofrece una única lista de todos los ejemplares 
 - Haz clic en **Devolver** en cualquier fila para devolver ese ejemplar en concreto — sin necesidad de saber su código de stock.
 
 Es la forma más rápida de saber "qué hay fuera ahora mismo, y con quién" sin tener que repasar cliente por cliente.
+
+## Exportar un informe de préstamos
+
+Haz clic en **Generar informe**, en la esquina superior derecha de la página de Préstamos, para exportar un archivo Excel (.xlsx) con el historial de préstamos — incluidos los ejemplares ya devueltos, no solo los que están prestados ahora.
+
+1. Elige una fecha **Desde** y **Hasta** — obligatorias, ya que el informe siempre cubre un rango de fechas.
+2. Opcionalmente, restríngelo a un **Grupo** o **Cliente** concreto.
+3. Haz clic en **Generar informe** para descargar el archivo.
+
+Cada fila muestra el libro, el código de stock, el cliente, el grupo, la fecha en que se prestó y su fecha de devolución, o bien **Aún en préstamo**.
