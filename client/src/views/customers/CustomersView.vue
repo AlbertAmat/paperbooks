@@ -2,8 +2,6 @@
 	<page-component :model="controller">
 		<template v-slot:append>
 			<template v-if="activeTab === 'customers'">
-				<return-books-dialog @refresh="reloadCustomers()"/>
-
 				<v-btn
 					@click="createCustomer()"
 					class="text-none ml-3"
@@ -148,7 +146,6 @@ import CustomerBooksTable from "@/views/customers/components/CustomerBooksTable.
 import EmptyState from "@/components/emptyState/EmptyState.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
-import ReturnBooksDialog from "@/views/customers/components/ReturnBooksDialog.vue";
 import CustomerGroupsTree from "@/views/customers/components/CustomerGroupsTree.vue";
 import CustomerDetail from "@/model/customer/CustomerDetail";
 
@@ -239,10 +236,6 @@ async function deleteItem(customerId: number) {
 			deleteLoading.value.splice(deleteLoading.value.indexOf(customerId), 1);
 		}
 	});
-}
-
-function reloadCustomers() {
-	controller.reload();
 }
 
 /**

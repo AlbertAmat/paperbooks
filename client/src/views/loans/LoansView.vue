@@ -1,10 +1,12 @@
 <template>
 	<page-component :model="controller">
 		<template v-slot:append>
+			<return-books-dialog @refresh="controller.refresh()"/>
+
 			<v-btn
 				@click="reportDialog = true"
 				prepend-icon="mdi-file-excel-outline"
-				class="text-none"
+				class="text-none ml-3"
 				color="primary"
 				variant="elevated"
 			>
@@ -121,12 +123,14 @@
 /**
  * Loans management view: a filterable (customer group, loan date range),
  * paginated table of every book currently on loan, with a per-row Return
- * action, backed by `LoansController`.
+ * action and a bulk `ReturnBooksDialog` in the toolbar, backed by
+ * `LoansController`.
  */
 import PageComponent from "@/views/PageComponent.vue";
 import LoansController from "@/controller/loans/LoansController";
 import EmptyState from "@/components/emptyState/EmptyState.vue";
 import LoanReportDialog from "@/views/loans/LoanReportDialog.vue";
+import ReturnBooksDialog from "@/views/loans/components/ReturnBooksDialog.vue";
 import {computed, ref} from "vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";

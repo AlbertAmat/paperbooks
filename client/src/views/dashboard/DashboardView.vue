@@ -186,7 +186,7 @@ import {bookRoute} from "@/router/routes/BookRoute";
 import {computed} from "vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
-import ReturnBooksDialog from "@/views/customers/components/ReturnBooksDialog.vue";
+import ReturnBooksDialog from "@/views/loans/components/ReturnBooksDialog.vue";
 import EmptyState from "@/components/emptyState/EmptyState.vue";
 import router from "@/router/Router";
 import {searchRoute} from "@/router/routes/SearchRoute";

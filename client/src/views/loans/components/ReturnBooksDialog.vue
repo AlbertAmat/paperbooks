@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 /**
- * "Return books" button + dialog (shown on the dashboard and customers
+ * "Return books" button + dialog (shown on the dashboard and loans
  * views): wraps `BookStockCodesDialog` to bulk-return a scanned/typed batch
  * of book stock codes via `bookService.returnBooks`, then emits `refresh`
  * so the parent can reload its data.
