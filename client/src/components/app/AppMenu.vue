@@ -132,11 +132,6 @@ const items = [
 		path: locationsRoute.getPath()
 	},
 	{
-		name: t(AppLabels.CATEGORIES),
-		icon: "mdi-shape-outline",
-		path: categoriesRoute.getPath()
-	},
-	{
 		name: t(AppLabels.CUSTOMERS),
 		icon: "mdi-account-school-outline",
 		path: customersRoute.getPath()
@@ -145,6 +140,11 @@ const items = [
 		name: t(AppLabels.LOANS),
 		icon: "mdi-book-arrow-right-outline",
 		path: loansRoute.getPath()
+	},
+	{
+		name: t(AppLabels.CATEGORIES),
+		icon: "mdi-shape-outline",
+		path: categoriesRoute.getPath()
 	},
 	{
 		name: t(AppLabels.AUTHORS),
