@@ -34,8 +34,8 @@ axiosInstance.interceptors.response.use(
         // - Show a toast notification
         // - Retry logic
         // TODO: HANDLE CUSTOM ERRORS
-        const errorCode = error.response.status;
-        if(AppErrorsList.includes(errorCode)) {
+        const errorCode = error.response?.status;
+        if(errorCode !== undefined && AppErrorsList.includes(errorCode)) {
             switch (errorCode as AppError) {
                 case AppError.BOOK_NOT_FOUND: {
                     // Component will handle the error

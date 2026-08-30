@@ -176,7 +176,10 @@ export class AppService {
         });
 
         // JWT secret and session configuration
-        this.m_jwtSecret    = String(process.env.JWT_SECRET);
+        if (!process.env.JWT_SECRET) {
+            throw new Error("JWT_SECRET environment variable is required");
+        }
+        this.m_jwtSecret    = process.env.JWT_SECRET;
         this.m_sessionTime  = Number(process.env.SESSION_TIME);
         this.m_allowDevAuth = process.env.ALLOW_DEV_AUTH == "true";
 
@@ -288,7 +291,11 @@ export class AppService {
 
         let decoded;
         try {
-            decoded = jwt.verify(token, this.getJwtSecret()) as { user_id: number; exp: number };
+            decoded = jwt.verify(token, this.getJwtSecret(), {
+                algorithms: ["HS256"],
+                audience: "paperbooks",
+                issuer: "paperbooks.xyz"
+            }) as { user_id: number; exp: number };
         } catch (err) {
             throw new Error("Error while getting session user");
         }

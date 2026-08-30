@@ -581,6 +581,14 @@ router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) =
     const userId = appService.getSessionUser(req);
 
     try {
+        const existCustomer = await pool.query(
+            'SELECT id FROM customers WHERE id = $1 AND user_id = $2',
+            [customerId, userId]
+        );
+        if (existCustomer.rowCount !== 1) {
+            return res.status(404).send('Customer not found');
+        }
+
         for (const bookStockCode of books) {
             await pool.query(
                 'UPDATE book_stocks SET customer_id = $1, status = $2, loaned_at = NOW() WHERE code = $3 AND user_id = $4',

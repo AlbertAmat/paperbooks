@@ -375,7 +375,7 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
             FROM books
                      LEFT JOIN book_stocks ON books.id = book_stocks.book_id
                      LEFT JOIN locations ON book_stocks.location_id = locations.id
-                     LEFT JOIN customers ON book_stocks.customer_id = customers.id
+                     LEFT JOIN customers ON book_stocks.customer_id = customers.id AND customers.user_id = $2
                      LEFT JOIN book_authors ON books.id = book_authors.book_id
                      LEFT JOIN authors ON book_authors.author_id = authors.id
                      LEFT JOIN book_files ON books.id = book_files.book_id
@@ -829,7 +829,7 @@ router.post('', requireAuth, upload.single("image"), async (req: Request, res: R
                 [isbn, userId]
             );
             if (existIsbn.rowCount == 1) {
-                res.status(404).send("Book with provided ISBN code already exist");
+                return res.status(404).send("Book with provided ISBN code already exist");
             }
         }
 
@@ -1373,7 +1373,17 @@ router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
             [locationId, userId]
         );
         if (existLocation.rowCount != 1) {
-            res.status(404).send("Location not found");
+            return res.status(404).send("Location not found");
+        }
+
+        if (customerId) {
+            const existCustomer = await pool.query(
+                'SELECT id FROM customers WHERE id = $1 AND user_id = $2',
+                [customerId, userId]
+            );
+            if (existCustomer.rowCount != 1) {
+                return res.status(404).send("Customer not found");
+            }
         }
 
         appService.getLogger().debug(`Adding book stock with status ${status} in book id: ${bookId}`);
@@ -1398,7 +1408,7 @@ router.post('/:id/stock', requireAuth, async (req: Request, res: Response) => {
                     customers.id   as customer_id,
                     customers.name as customer_name
              FROM book_stocks
-                      LEFT JOIN customers ON book_stocks.customer_id = customers.id
+                      LEFT JOIN customers ON book_stocks.customer_id = customers.id AND customers.user_id = $2
                       LEFT JOIN locations ON book_stocks.location_id = locations.id
              WHERE book_stocks.id = $1
                AND book_stocks.user_id = $2
@@ -1503,7 +1513,17 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
             [location_id, userId]
         );
         if (existLocation.rowCount != 1) {
-            res.status(404).send("Location not found");
+            return res.status(404).send("Location not found");
+        }
+
+        if (customer_id) {
+            const existCustomer = await pool.query(
+                'SELECT id FROM customers WHERE id = $1 AND user_id = $2',
+                [customer_id, userId]
+            );
+            if (existCustomer.rowCount != 1) {
+                return res.status(404).send("Customer not found");
+            }
         }
 
         // Needed to detect a status transition into/out of "booked" below,
@@ -1546,7 +1566,7 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
                     customers.id   as customer_id,
                     customers.name as customer_name
              FROM book_stocks
-                      LEFT JOIN customers ON book_stocks.customer_id = customers.id
+                      LEFT JOIN customers ON book_stocks.customer_id = customers.id AND customers.user_id = $2
                       LEFT JOIN locations ON book_stocks.location_id = locations.id
              WHERE book_stocks.id = $1
                AND book_stocks.user_id = $2
