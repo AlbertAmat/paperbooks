@@ -69,8 +69,7 @@ const props = defineProps<Props>()
 	position: relative;
 	display: flex !important;
 	flex-direction: column !important;
-	flex: 1;
-	min-height: 0;
+	min-height: 100%;
 }
 
 .page-toolbar {

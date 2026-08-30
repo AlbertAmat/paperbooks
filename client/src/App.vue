@@ -96,17 +96,17 @@ html, body {
 	overflow: hidden;
 }
 
+/*
+ * Deliberately NOT display:flex here: Vuetify reserves space for the fixed
+ * app-bar/drawer/footer via padding-* (--v-layout-*) on this same element,
+ * and flex containers with overflow:auto ignore their own padding-bottom
+ * once scrolled (a long-standing Chromium/Firefox bug) - the last ~footer's
+ * worth of content would get clipped under the fixed footer. Plain block
+ * layout respects the padding correctly.
+ */
 .app-main {
 	height: 100%;
-	display: flex;
-	flex-direction: column;
 	overflow: auto;
-}
-
-.app-main .v-main__wrap {
-	display: flex !important;
-	flex-direction: column;
-	flex: 1;
 }
 
 .app-boot {
