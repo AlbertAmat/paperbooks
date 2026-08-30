@@ -3,8 +3,6 @@
 		<v-card
 			v-bind="props"
 			style="width: 100%; padding: 0"
-			height="450px"
-			min-height="450px"
 			variant="text"
 			@drop.prevent="handleDrop"
 			@dragover.prevent
@@ -12,8 +10,7 @@
 		>
 			<v-img
 				cover
-				max-height="450px"
-				min-height="450px"
+				aspect-ratio="2/3"
 				:src="showFallbackImage ? notFound : book.getImageUrl()"
 				@error="showFallbackImage = true"
 			>
