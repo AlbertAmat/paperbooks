@@ -149,11 +149,6 @@ router.get("/login", (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, "..", "assets", "login.html"));
 });
 
-/** GET /background.png - static background image used by the login/register pages. */
-router.use("/background.png", (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, "..", "assets", "background.png"));
-});
-
 /**
  * POST /login
  * ------------
