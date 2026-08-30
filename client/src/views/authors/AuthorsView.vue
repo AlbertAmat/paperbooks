@@ -31,40 +31,14 @@
 				</v-btn>
 			</empty-state>
 
-			<v-data-table-virtual
+			<entity-list-card
 				v-else
-				:headers="headers"
-				density="compact"
-				height="100%"
 				:items="authors"
-				fixed-header
-			>
-				<template v-slot:item.actions="{ item }">
-					<v-icon
-						@click="editAuthor(item.id)"
-						small
-						class="mx-1"
-					>
-						mdi-pencil
-					</v-icon>
-					<v-btn
-						icon
-						variant="text"
-						density="compact"
-						@click="deleteItem(item.id)"
-						:loading="deleteLoading.includes(item.id)"
-						:disabled="deleteLoading.includes(item.id)"
-						class="mx-1"
-					>
-						<v-icon
-							small
-							color="error"
-						>
-							mdi-delete
-						</v-icon>
-					</v-btn>
-				</template>
-			</v-data-table-virtual>
+				icon="mdi-fountain-pen-tip"
+				:delete-loading="deleteLoading"
+				@edit="editAuthor"
+				@delete="deleteItem"
+			/>
 
 			<author-dialog
 				v-if="dialog"
@@ -78,13 +52,14 @@
 
 <script setup lang="ts">
 /**
- * Authors management view: a data table of all authors with inline
+ * Authors management view: a row list of all authors with inline
  * edit/delete, an empty state when there are none, and the add/edit dialog.
  */
 import PageComponent from "@/views/PageComponent.vue";
 import {computed, ref, Ref, ShallowRef, shallowRef} from "vue";
 import AuthorDialog from "@/views/authors/AuthorDialog.vue";
 import EmptyState from "@/components/emptyState/EmptyState.vue";
+import EntityListCard from "@/components/entityList/EntityListCard.vue";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import AuthorsController from "@/controller/authors/AuthorsController";
 import BookAuthor from "@/model/author/BookAuthor";
@@ -109,14 +84,6 @@ const selectedAuthor: ShallowRef<BookAuthor | undefined> = shallowRef(undefined)
  *
  */
 const deleteLoading: Ref<number[]> = ref([]);
-
-const headers = [
-	{
-		title: t(AppLabels.NAME),
-		value: 'name',
-	},
-	{title: t(AppLabels.ACTIONS), value: 'actions', align: 'end',}
-];
 
 /**
  *

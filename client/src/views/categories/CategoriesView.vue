@@ -31,38 +31,14 @@
 				</v-btn>
 			</empty-state>
 
-			<v-data-table-virtual
+			<entity-list-card
 				v-else
-				:headers="headers"
-				density="compact"
 				:items="categories"
-			>
-				<template v-slot:item.actions="{ item }">
-					<v-icon
-						@click="editCategory(item.id)"
-						small
-						class="mx-1"
-					>
-						mdi-pencil
-					</v-icon>
-					<v-btn
-						icon
-						variant="text"
-						density="compact"
-						@click="deleteItem(item.id)"
-						:loading="deleteLoading.includes(item.id)"
-						:disabled="deleteLoading.includes(item.id)"
-						class="mx-1"
-					>
-						<v-icon
-							small
-							color="error"
-						>
-							mdi-delete
-						</v-icon>
-					</v-btn>
-				</template>
-			</v-data-table-virtual>
+				icon="mdi-tag-outline"
+				:delete-loading="deleteLoading"
+				@edit="editCategory"
+				@delete="deleteItem"
+			/>
 
 			<category-dialog
 				v-if="dialog"
@@ -76,7 +52,7 @@
 
 <script setup lang="ts">
 /**
- * Categories management view: a data table of all categories with inline
+ * Categories management view: a row list of all categories with inline
  * edit/delete, an empty state when there are none, and the add/edit dialog.
  * Deletes also sync `ApplicationService`'s cached category list, since it's
  * used app-wide (e.g. the book edit form's category picker).
@@ -89,6 +65,7 @@ import CategoriesController from "@/controller/categories/CategoriesController";
 import Category from "@/model/category/Category";
 import CategoryDialog from "./CategoryDialog.vue"
 import EmptyState from "@/components/emptyState/EmptyState.vue";
+import EntityListCard from "@/components/entityList/EntityListCard.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 
@@ -110,14 +87,6 @@ const selectedCategory: ShallowRef<Category | undefined> = shallowRef(undefined)
  *
  */
 const deleteLoading: Ref<number[]> = ref([]);
-
-const headers = [
-	{
-		title: t(AppLabels.NAME),
-		value: 'name',
-	},
-	{title: t(AppLabels.ACTIONS), value: 'actions', align: 'end',}
-];
 
 /**
  *

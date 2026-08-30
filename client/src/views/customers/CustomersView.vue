@@ -53,59 +53,60 @@
 						</v-btn>
 					</empty-state>
 
-					<v-data-table-virtual
-						v-else
-						:headers="headers"
-						density="compact"
-						show-expand
-						item-value="id"
-						:items="customers"
-					>
-						<template v-slot:item.totalBooks="{ item }">
-							<v-chip density="compact">{{ item.totalBooks }}</v-chip>
-						</template>
+					<div v-else class="entity-card-list">
+						<div
+							v-for="customer in customers"
+							:key="customer.id"
+							class="pb-card entity-card"
+						>
+							<div class="entity-card-header" @click="toggleExpand(customer.id)">
+								<v-icon color="primary" size="20">mdi-account-outline</v-icon>
 
-						<template v-slot:item.groupName="{ item }">
-							<v-chip v-if="item.groupName" density="compact">{{ item.groupName }}</v-chip>
-							<span v-else class="text-medium-emphasis">{{ t(AppLabels.NO_GROUP) }}</span>
-						</template>
+								<div class="entity-card-title-group">
+									<span class="entity-card-name">{{ customer.name }}</span>
+								</div>
 
-						<template v-slot:item.actions="{ item }">
-							<v-icon
-								@click="editCustomer(item.id)"
-								small
-								class="mx-1"
-							>
-								mdi-pencil
-							</v-icon>
-							<v-btn
-								icon
-								variant="text"
-								density="compact"
-								@click="deleteItem(item.id)"
-								:loading="deleteLoading.includes(item.id)"
-								:disabled="deleteLoading.includes(item.id)"
-								class="mx-1"
-							>
+								<v-chip v-if="customer.groupName" density="compact" class="entity-card-group">{{ customer.groupName }}</v-chip>
+								<span v-else class="text-medium-emphasis entity-card-group">{{ t(AppLabels.NO_GROUP) }}</span>
+
+								<v-chip density="compact" class="entity-card-count">{{ customer.totalBooks }}</v-chip>
+
+								<div class="entity-card-actions" @click.stop>
+									<v-icon
+										@click="editCustomer(customer.id)"
+										size="small"
+										class="mx-1"
+									>
+										mdi-pencil
+									</v-icon>
+									<v-btn
+										icon
+										variant="text"
+										density="compact"
+										@click="deleteItem(customer.id)"
+										:loading="deleteLoading.includes(customer.id)"
+										:disabled="deleteLoading.includes(customer.id)"
+										class="mx-1"
+									>
+										<v-icon size="small" color="error">mdi-delete</v-icon>
+									</v-btn>
+								</div>
+
 								<v-icon
-									small
-									color="error"
+									class="entity-card-chevron"
+									:class="{'entity-card-chevron--open': expanded.includes(customer.id)}"
 								>
-									mdi-delete
+									mdi-chevron-down
 								</v-icon>
-							</v-btn>
-						</template>
+							</div>
 
-						<template v-slot:expanded-row="{ columns, item }">
-							<tr>
-								<td :colspan="columns.length" class="py-2">
-									<v-sheet rounded="lg" border>
-										<customer-books-table :customer="controller.getCustomer(item.id)"/>
-									</v-sheet>
-								</td>
-							</tr>
-						</template>
-					</v-data-table-virtual>
+							<v-expand-transition>
+								<div v-if="expanded.includes(customer.id)" class="entity-card-body">
+									<customer-books-table :customer="controller.getCustomer(customer.id)"/>
+								</div>
+							</v-expand-transition>
+						</div>
+					</div>
 				</v-window-item>
 
 				<v-window-item value="groups">
@@ -130,11 +131,11 @@
 
 <script setup lang="ts">
 /**
- * Customers management view: two tabs - an expandable data table of
- * customers (expanding a row shows their loaned books via
- * `CustomerBooksTable`) with inline edit/delete, and a groups tab
- * (`CustomerGroupsTree`). Runs `CustomersController` and
- * `CustomerGroupsController` side by side since both tabs share one page.
+ * Customers management view: two tabs - a card per customer (expanding a
+ * card shows their loaned books via `CustomerBooksTable`) with inline
+ * edit/delete, and a groups tab (`CustomerGroupsTree`). Runs
+ * `CustomersController` and `CustomerGroupsController` side by side since
+ * both tabs share one page.
  */
 import PageComponent from "@/views/PageComponent.vue";
 import {computed, ref, Ref, ShallowRef, shallowRef} from "vue";
@@ -181,28 +182,10 @@ const selectedCustomer: ShallowRef<CustomerDetail | undefined> = shallowRef(unde
  */
 const deleteLoading: Ref<number[]> = ref([]);
 
-const headers = [
-	{
-		title: t(AppLabels.NAME),
-		value: 'name',
-	},
-	{
-		title: t(AppLabels.TOTAL_BOOKS),
-		value: 'tags',
-	},
-	{
-		title: t(AppLabels.TAGS),
-		value: 'totalBooks',
-	},
-	{
-		title: t(AppLabels.GROUP),
-		value: 'groupName',
-	},
-	{
-		title: t(AppLabels.ACTIONS),
-		value: 'actions',
-		align: 'end',}
-];
+/**
+ * Ids of the customer cards currently expanded to show their loaned books.
+ */
+const expanded: Ref<number[]> = ref([]);
 
 /**
  *
@@ -212,7 +195,6 @@ const customers = computed(() => {
 		return {
 			id: customer.getCustomerId(),
 			name: customer.getCustomerName(),
-			tags: customer.getTags(),
 			totalBooks: customer.getTotalBooks(),
 			groupName: customer.getGroupName()
 		}
@@ -263,4 +245,79 @@ function reloadCustomers() {
 	controller.reload();
 }
 
+/**
+ *
+ * @param customerId
+ */
+function toggleExpand(customerId: number) {
+	const index = expanded.value.indexOf(customerId);
+	if (index === -1) {
+		expanded.value.push(customerId);
+	} else {
+		expanded.value.splice(index, 1);
+	}
+}
+
 </script>
+
+<style scoped>
+.entity-card-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.entity-card {
+	overflow: hidden;
+}
+
+.entity-card-header {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 14px 18px;
+	cursor: pointer;
+}
+
+.entity-card-title-group {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.entity-card-name {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--pb-text);
+}
+
+.entity-card-group {
+	flex-shrink: 0;
+	font-size: 12.5px;
+}
+
+.entity-card-count {
+	flex-shrink: 0;
+}
+
+.entity-card-actions {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.entity-card-chevron {
+	flex-shrink: 0;
+	transition: transform 0.15s ease;
+	opacity: 0.7;
+}
+
+.entity-card-chevron--open {
+	transform: rotate(180deg);
+}
+
+.entity-card-body {
+	border-top: 1px solid var(--pb-border);
+}
+</style>

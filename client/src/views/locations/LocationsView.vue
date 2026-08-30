@@ -31,52 +31,58 @@
 				</v-btn>
 			</empty-state>
 
-			<v-data-table-virtual
-				v-else
-				:headers="headers"
-				density="compact"
-				item-value="id"
-				show-expand
-				:items="locations"
-			>
-				<template v-slot:item.totalBooks="{ item }">
-					<v-chip density="compact">{{ item.totalBooks }}</v-chip>
-				</template>
-				<template v-slot:item.actions="{ item }">
-					<v-icon
-						@click="editLocation(item.id)"
-						small
-						class="mx-1"
-					>
-						mdi-pencil
-					</v-icon>
-					<v-btn
-						icon
-						variant="text"
-						density="compact"
-						@click="deleteItem(item.id)"
-						:loading="deleteLoading.includes(item.id)"
-						:disabled="deleteLoading.includes(item.id)"
-						class="mx-1"
-					>
+			<div v-else class="entity-card-list">
+				<div
+					v-for="location in locations"
+					:key="location.id"
+					class="pb-card entity-card"
+				>
+					<div class="entity-card-header" @click="toggleExpand(location.id)">
+						<v-icon color="primary" size="20">mdi-map-marker-outline</v-icon>
+
+						<div class="entity-card-title-group">
+							<span class="entity-card-name">{{ location.name }}</span>
+							<span v-if="location.description" class="entity-card-desc">{{ location.description }}</span>
+						</div>
+
+						<v-chip density="compact" class="entity-card-count">{{ location.totalBooks }}</v-chip>
+
+						<div class="entity-card-actions" @click.stop>
+							<v-icon
+								@click="editLocation(location.id)"
+								size="small"
+								class="mx-1"
+							>
+								mdi-pencil
+							</v-icon>
+							<v-btn
+								icon
+								variant="text"
+								density="compact"
+								@click="deleteItem(location.id)"
+								:loading="deleteLoading.includes(location.id)"
+								:disabled="deleteLoading.includes(location.id)"
+								class="mx-1"
+							>
+								<v-icon size="small" color="error">mdi-delete</v-icon>
+							</v-btn>
+						</div>
+
 						<v-icon
-							small
-							color="error"
+							class="entity-card-chevron"
+							:class="{'entity-card-chevron--open': expanded.includes(location.id)}"
 						>
-							mdi-delete
+							mdi-chevron-down
 						</v-icon>
-					</v-btn>
-				</template>
-				<template v-slot:expanded-row="{ columns, item }">
-					<tr>
-						<td :colspan="columns.length" class="py-2">
-							<v-sheet rounded="lg" border>
-								<location-books-table :location="controller.getLocation(item.id)"/>
-							</v-sheet>
-						</td>
-					</tr>
-				</template>
-			</v-data-table-virtual>
+					</div>
+
+					<v-expand-transition>
+						<div v-if="expanded.includes(location.id)" class="entity-card-body">
+							<location-books-table :location="controller.getLocation(location.id)"/>
+						</div>
+					</v-expand-transition>
+				</div>
+			</div>
 
 			<location-dialog
 				v-if="dialog"
@@ -90,10 +96,10 @@
 
 <script setup lang="ts">
 /**
- * Locations management view: an expandable data table of all locations
- * (expanding a row shows its books via `LocationBooksTable`), with inline
- * edit/delete, an empty state when there are none, and the add/edit dialog.
- * Deletes also sync `ApplicationService`'s cached location list.
+ * Locations management view: a card per location (expanding a card shows
+ * its books via `LocationBooksTable`), with inline edit/delete, an empty
+ * state when there are none, and the add/edit dialog. Deletes also sync
+ * `ApplicationService`'s cached location list.
  */
 import PageComponent from "@/views/PageComponent.vue";
 import LocationsController from "@/controller/locations/LocationsController";
@@ -126,15 +132,10 @@ const selectedLocation: ShallowRef<LocationExt | undefined> = shallowRef(undefin
  */
 const deleteLoading: Ref<number[]> = ref([]);
 
-const headers = [
-	{
-		title: t(AppLabels.NAME),
-		value: 'name',
-	},
-	{title: t(AppLabels.DESCRIPTION), value: 'description'},
-	{title: t(AppLabels.TOTAL_BOOKS), value: 'totalBooks'},
-	{title: t(AppLabels.ACTIONS), value: 'actions', align: 'end',}
-];
+/**
+ * Ids of the location cards currently expanded to show their books.
+ */
+const expanded: Ref<number[]> = ref([]);
 
 /**
  *
@@ -190,4 +191,82 @@ async function deleteItem(locationId: number) {
 		}
 	});
 }
+
+/**
+ *
+ * @param locationId
+ */
+function toggleExpand(locationId: number) {
+	const index = expanded.value.indexOf(locationId);
+	if (index === -1) {
+		expanded.value.push(locationId);
+	} else {
+		expanded.value.splice(index, 1);
+	}
+}
 </script>
+
+<style scoped>
+.entity-card-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.entity-card {
+	overflow: hidden;
+}
+
+.entity-card-header {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 14px 18px;
+	cursor: pointer;
+}
+
+.entity-card-title-group {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.entity-card-name {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--pb-text);
+}
+
+.entity-card-desc {
+	font-size: 12.5px;
+	color: var(--pb-text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.entity-card-count {
+	flex-shrink: 0;
+}
+
+.entity-card-actions {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.entity-card-chevron {
+	flex-shrink: 0;
+	transition: transform 0.15s ease;
+	opacity: 0.7;
+}
+
+.entity-card-chevron--open {
+	transform: rotate(180deg);
+}
+
+.entity-card-body {
+	border-top: 1px solid var(--pb-border);
+}
+</style>

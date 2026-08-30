@@ -116,34 +116,48 @@
 						</template>
 					</v-row>
 
-					<!-- Infinite scroll trigger -->
-					<div ref="infiniteScrollTrigger" class="infinite-scroll-trigger"></div>
 				</template>
 
-				<v-data-table-server
-					v-else
-					fixed-header
-					striped="even"
-					:items-per-page="model.getLimit()"
-					:items-per-page-options="[model.getLimit()]"
-					:headers="headers"
-					:items="itemsJson"
-					:items-length="model.getTotalBooks()"
-					:loading="loadingBooks"
-					@update:page="loadMoreBooks"
-					style="height: 100%"
-				>
-					<template v-slot:item.image="{ value }">
+				<div v-else class="pb-card book-list">
+					<router-link
+						v-for="(book, index) in listBooks"
+						:key="book.id"
+						:to="book.url"
+						class="book-list-row"
+						:class="{'book-list-row--border': index !== listBooks.length - 1}"
+					>
 						<img
-							:src="value"
-							class="mr-2 my-0"
-							style="border-radius: 6px; height: 45px; width: 35px; object-fit: cover"
+							v-if="book.image"
+							:src="book.image"
+							class="book-list-cover"
 						/>
-					</template>
-					<template v-slot:item.name="data">
-						<a :href="data.item.url">{{ data.item.name }}</a>
-					</template>
-				</v-data-table-server>
+						<div v-else class="book-list-cover book-list-cover--placeholder">
+							<v-icon size="18" color="var(--pb-text-muted)">mdi-image-outline</v-icon>
+						</div>
+
+						<div class="book-list-title-group">
+							<span class="book-list-name">{{ book.name }}</span>
+							<span v-if="book.author" class="book-list-author">{{ book.author }}</span>
+						</div>
+
+						<span v-if="book.isbn" class="book-list-isbn pb-mono">{{ book.isbn }}</span>
+
+						<v-chip v-if="book.category" density="compact" variant="tonal" class="book-list-chip">
+							{{ book.category }}
+						</v-chip>
+
+						<v-chip v-if="book.language" density="compact" variant="outlined" class="book-list-chip">
+							{{ book.language }}
+						</v-chip>
+					</router-link>
+				</div>
+
+				<!-- Infinite scroll trigger -->
+				<div ref="infiniteScrollTrigger" class="infinite-scroll-trigger"></div>
+
+				<div v-if="loadingBooks && !gridLayout" class="book-list-loading">
+					<v-progress-circular indeterminate size="20" width="2" color="primary"/>
+				</div>
 			</template>
 		</template>
 	</page-component>
@@ -151,10 +165,10 @@
 
 <script setup lang="ts">
 /**
- * Book search/library view: a grid (infinite scroll, via an IntersectionObserver-
- * style scroll-position check on `#scroller`) or table layout of search
- * results, filters, and the two "add book" entry points (ISBN or manual).
- * Re-runs the search whenever the route's query string changes.
+ * Book search/library view: a grid or row-list layout of search results
+ * (both infinite-scroll, via a scroll-position check against `#scroller`),
+ * filters, and the two "add book" entry points (ISBN or manual). Re-runs
+ * the search whenever the route's query string changes.
  */
 import {Ref, ref, onMounted, onUnmounted, computed, watch} from "vue";
 import PageComponent from "@/views/PageComponent.vue";
@@ -192,25 +206,23 @@ const loadingBooks: Ref<boolean> = ref(false);
  */
 const infiniteScrollTrigger: Ref<HTMLElement | null> = ref(null);
 
-const headers = [
-	{title: t(AppLabels.IMAGE), 	key: 'image', 	sortable: false,},
-	{title: t(AppLabels.NAME),	 	key: 'name', 	sortable: false,},
-	{title: 'ISBN', 				key: 'isbn',	 sortable: false,},
-	{title: t(AppLabels.CATEGORY),	key: 'category', sortable: false,},
-	{title: t(AppLabels.LANGUAGE), 	key: 'language', sortable: false,},
-]
-
-const itemsJson = computed(() => {
+/**
+ * Book rows for the list layout: cover, name/author, ISBN, category and
+ * language, resolved from the app-wide category/language caches.
+ */
+const listBooks = computed(() => {
 	return model.getBooks().map((book) => {
 		const category = applicationService.getCategory(book.getCategoryId());
 		const language = applicationService.getLanguage(book.getLanguageCode());
 		return {
+			id: book.getId(),
 			image: book.getImageUrl(),
 			name: book.getName(),
+			author: book.hasAuthors() ? book.getAuthors()[0].getAuthorName() : null,
 			isbn: book.getIsbn(),
 			category: category?.getCategoryName(),
 			language: language?.getLanguageName(),
-			url: window.location.origin + "/app" + book.getUrl()
+			url: book.getUrl()
 		}
 	})
 })
@@ -218,15 +230,11 @@ const itemsJson = computed(() => {
 /**
  *
  */
-async function loadMoreBooks(page?: number) {
+async function loadMoreBooks() {
 	if (model.hasNextPage() && !loadingBooks.value) {
 		try {
 			loadingBooks.value = true;
-			if (page != undefined) {
-				model.setPage(page - 1);
-			} else {
-				model.nextPage(); // Increment page
-			}
+			model.nextPage();
 			await model.fetchBooks();
 		} finally {
 			loadingBooks.value = false;
@@ -235,13 +243,11 @@ async function loadMoreBooks(page?: number) {
 }
 
 function handleScroll() {
-	if (gridLayout.value) {
-		const trigger = infiniteScrollTrigger.value;
-		if (trigger) {
-			const rect = trigger.getBoundingClientRect();
-			if (rect.top < window.innerHeight) {
-				loadMoreBooks();
-			}
+	const trigger = infiniteScrollTrigger.value;
+	if (trigger) {
+		const rect = trigger.getBoundingClientRect();
+		if (rect.top < window.innerHeight) {
+			loadMoreBooks();
 		}
 	}
 }
@@ -259,3 +265,93 @@ watch(() => router.currentRoute.value.query, () => {
 	model.fetchBooks(true);
 }, {immediate: true})
 </script>
+
+<style scoped>
+.book-list {
+	overflow: hidden;
+}
+
+.book-list-row {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 10px 18px;
+	text-decoration: none;
+	color: inherit;
+	transition: background-color 0.15s ease;
+}
+
+.book-list-row:hover {
+	background: var(--pb-surface-alt);
+}
+
+.book-list-row--border {
+	border-bottom: 1px solid var(--pb-border);
+}
+
+.book-list-cover {
+	flex-shrink: 0;
+	height: 48px;
+	width: 34px;
+	border-radius: 4px;
+	object-fit: cover;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.book-list-cover--placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--pb-surface-alt);
+	box-shadow: none;
+}
+
+.book-list-title-group {
+	flex: 1 1 220px;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.book-list-name {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--pb-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.book-list-author {
+	font-size: 12px;
+	color: var(--pb-text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.book-list-isbn {
+	flex: 0 0 140px;
+	font-size: 12px;
+	color: var(--pb-text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.book-list-chip {
+	flex-shrink: 0;
+}
+
+.book-list-loading {
+	display: flex;
+	justify-content: center;
+	padding: 14px 0;
+}
+
+@media (max-width: 720px) {
+	.book-list-isbn {
+		display: none;
+	}
+}
+</style>
