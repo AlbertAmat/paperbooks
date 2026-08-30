@@ -1,3 +1,8 @@
+-- Consolidated migration for all schema changes made on 2026-08-26.
+-- Brings an already-installed database in line with today's databaseSchema.sql.
+-- (New installs should use databaseSchema.sql directly and skip this file.)
+
+-- Customer groups: organize customers into named groups.
 CREATE TABLE customer_groups
 (
     id          SERIAL PRIMARY KEY,

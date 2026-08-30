@@ -5,6 +5,18 @@
 			:class="large ? 'py-3' : 'pt-3'"
 		>
 			{{ title }}
+
+			<v-chip
+				v-if="counter !== undefined"
+				density="compact"
+				class="dashboard-card-counter ml-2"
+			>
+				{{ counter }}
+			</v-chip>
+
+			<v-spacer></v-spacer>
+
+			<slot name="actions"></slot>
 		</v-card-title>
 		<v-divider v-if="large" class="dashboard-card-divider"></v-divider>
 		<v-card-text class="mx-1 mb-1 pa-2 dashboard-card-body">
@@ -14,11 +26,12 @@
 </template>
 
 <script setup lang="ts">
-/** Titled tile shell used to lay out the dashboard's KPI/chart cards, with a `large` variant for the chart card. */
+/** Titled tile shell used to lay out the dashboard's KPI/chart cards, with a `large` variant for the chart card, an optional count chip, and an `actions` header slot (e.g. a "View all" link). */
 interface Props {
 	title:  string;
 	large?:  boolean;
 	cardCssClass?:  string;
+	counter?: number;
 }
 
 const props = defineProps<Props>()
@@ -35,6 +48,11 @@ const props = defineProps<Props>()
 
 .dashboard-card-divider {
 	border-color: var(--pb-border) !important;
+}
+
+.dashboard-card-counter {
+	font-family: var(--pb-font-mono);
+	font-size: 11px;
 }
 
 .dashboard-card-body {

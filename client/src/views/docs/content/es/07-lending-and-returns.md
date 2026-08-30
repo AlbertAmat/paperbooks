@@ -26,3 +26,12 @@ Cuando un ejemplar vuelve, usa el botón **Devolver libros** — disponible tant
 5. Haz clic en **Devolver** para marcarlos todos como disponibles de nuevo.
 
 Una vez devuelto, el estado de un ejemplar vuelve a **Disponible** y queda libre para volver a prestarse.
+
+## La vista de Préstamos
+
+La página de **Préstamos** te ofrece una única lista de todos los ejemplares actualmente prestados — su libro, quién lo tiene, su grupo y la fecha en que se prestó.
+
+- Filtra por **Grupo** para ver solo lo que tiene una clase/departamento, o por un rango de fechas **Desde**/**Hasta** para ver los préstamos de un periodo concreto.
+- Haz clic en **Devolver** en cualquier fila para devolver ese ejemplar en concreto — sin necesidad de saber su código de stock.
+
+Es la forma más rápida de saber "qué hay fuera ahora mismo, y con quién" sin tener que repasar cliente por cliente.

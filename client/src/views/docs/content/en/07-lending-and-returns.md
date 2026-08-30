@@ -26,3 +26,12 @@ When a copy comes back, use the **Return books** button — available on both th
 5. Click **Return** to mark them all as available again.
 
 Once returned, a copy's status changes back to **Available** and it's freed up to be lent out again.
+
+## The Loans view
+
+The **Loans** page gives you a single list of every copy currently on loan — its book, who has it, their group, and the date it was loaned out.
+
+- Filter by **Group** to see only what one class/department has out, or by a **From**/**To** date range to see loans from a particular period.
+- Click **Return** on any row to bring that single copy back — no need to know its stock code.
+
+It's the fastest way to answer "what's out right now, and to whom" without going through each customer individually.

@@ -32,7 +32,11 @@ const router = Router();
  *    "stockStatus": [{ "status": 0, "count": "20" }, { "status": 2, "count": "5" }],
  *    "totalBookedBooks": "5",
  *    "totalLocations": "2",
- *    "totalAuthors": "15"
+ *    "totalAuthors": "15",
+ *    "categoryShelves": [{ "id": 3, "name": "Fantasy", "count": "10",
+ *                          "books": [{ "id": 12, "name": "The Hobbit", "image_url": "..." }] }],
+ *    "currentlyOnLoan": [{ "bookId": 12, "bookName": "The Hobbit", "imageUrl": "...",
+ *                          "customerId": 4, "customerName": "Maria Puig" }]
  *  }
  *
  * Note: count fields come back as strings because Postgres `COUNT(*)` yields
@@ -55,7 +59,9 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
             stockStatus,
             totalBookedBooks,
             totalLocations,
-            totalAuthors
+            totalAuthors,
+            categoryShelfRows,
+            currentlyOnLoan
         ] = await Promise.all([
             pool.query(`
                     SELECT b.id,
@@ -79,8 +85,68 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
             pool.query(`SELECT status, COUNT(*) AS count FROM book_stocks WHERE user_id = $1 GROUP BY status`, [userId]),
             pool.query(`SELECT COUNT(*) AS count FROM book_stocks WHERE user_id = $1 AND customer_id IS NOT NULL`, [userId]),
             pool.query(`SELECT COUNT(*) AS count FROM locations WHERE user_id = $1`, [userId]),
-            pool.query(`SELECT COUNT(*) AS count FROM authors WHERE user_id = $1`, [userId])
+            pool.query(`SELECT COUNT(*) AS count FROM authors WHERE user_id = $1`, [userId]),
+            // Top 6 categories by book count, each with a sample of its 10
+            // most recently added books - powers the dashboard's category
+            // pills and the "browse by category" shelves underneath them.
+            pool.query(`
+                    WITH top_categories AS (
+                        SELECT c.id, c.name, COUNT(b.id) AS count
+                        FROM categories c
+                                 LEFT JOIN books b ON b.category_id = c.id AND b.user_id = c.user_id
+                        WHERE c.user_id = $1
+                        GROUP BY c.id, c.name
+                        ORDER BY count DESC, c.name ASC
+                            LIMIT 6
+                    ),
+                         ranked_books AS (
+                             SELECT b.id, b.name, b.image_url, b.category_id,
+                                    ROW_NUMBER() OVER (PARTITION BY b.category_id ORDER BY b.date_created DESC) AS rn
+                             FROM books b
+                             WHERE b.user_id = $1
+                               AND b.category_id IN (SELECT id FROM top_categories)
+                         )
+                    SELECT tc.id AS category_id, tc.name AS category_name, tc.count,
+                           rb.id AS book_id, rb.name AS book_name, rb.image_url
+                    FROM top_categories tc
+                             LEFT JOIN ranked_books rb ON rb.category_id = tc.id AND rb.rn <= 10
+                    ORDER BY tc.count DESC, tc.name, rb.rn
+            `, [userId]),
+            // The 5 most recent loans, with who they're loaned to - turns the
+            // "booked books" count into an actual list on the dashboard.
+            pool.query(`
+                    SELECT b.id AS "bookId", b.name AS "bookName", b.image_url AS "imageUrl",
+                           c.id AS "customerId", c.name AS "customerName"
+                    FROM book_stocks bs
+                             JOIN books b ON b.id = bs.book_id AND b.user_id = bs.user_id
+                             JOIN customers c ON c.id = bs.customer_id AND c.user_id = bs.user_id
+                    WHERE bs.user_id = $1
+                      AND bs.status = 2
+                    ORDER BY bs.id DESC
+                        LIMIT 5
+            `, [userId])
         ]);
+
+        // Fold the denormalized category/book rows into one entry per
+        // category, each carrying its sample of books.
+        const categoryShelvesById = new Map<number, { id: number; name: string; count: string; books: { id: number; name: string; image_url: string | null }[] }>();
+        for (const row of categoryShelfRows.rows) {
+            if (!categoryShelvesById.has(row.category_id)) {
+                categoryShelvesById.set(row.category_id, {
+                    id: row.category_id,
+                    name: row.category_name,
+                    count: row.count,
+                    books: []
+                });
+            }
+            if (row.book_id !== null) {
+                categoryShelvesById.get(row.category_id)!.books.push({
+                    id: row.book_id,
+                    name: row.book_name,
+                    image_url: row.image_url
+                });
+            }
+        }
 
         res.json({
             lastBooks: lastBooks.rows,
@@ -94,6 +160,8 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
             totalBookedBooks: totalBookedBooks.rows[0].count,
             totalLocations: totalLocations.rows[0].count,
             totalAuthors: totalAuthors.rows[0].count,
+            categoryShelves: Array.from(categoryShelvesById.values()),
+            currentlyOnLoan: currentlyOnLoan.rows,
         });
 
     } catch (err) {

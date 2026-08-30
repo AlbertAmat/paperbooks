@@ -3,6 +3,7 @@ import IBook from "@/types/book/IBook";
 import {BookStockStatusEnum, IBookStock} from "@/types/book/IBookStock";
 import axiosInstance from "@/plugins/axiosInstance";
 import {IBookAddMd} from "@/types/book/IBookAddMd";
+import {IBookFile} from "@/types/book/IBookFile";
 
 /**
  * Thin HTTP client for the `/api/rest/book` endpoints (see server/src/routes/BooksRoute.ts):
@@ -116,6 +117,33 @@ export class BookService {
         formData.set("image", image);
 
         await axiosInstance.post(`${PATH_PREFIX}/book/${id}/image`, formData);
+    }
+
+    /**
+     * Upload (or replace) the backed-up epub/pdf file for a book.
+     * @param id Book id.
+     * @param file New epub/pdf file.
+     * @returns The uploaded file's metadata.
+     */
+    public async uploadFile(
+        id: number,
+        file: File,
+    ): Promise<IBookFile> {
+        const formData = new FormData();
+        formData.set("file", file);
+
+        const {data} = await axiosInstance.post(`${PATH_PREFIX}/book/${id}/file`, formData);
+        return data;
+    }
+
+    /**
+     * Delete a book's backed-up epub/pdf file, if any.
+     * @param id Book id.
+     * @returns Whether a file was actually deleted.
+     */
+    public async deleteFile(id: number): Promise<boolean> {
+        const {data} = await axiosInstance.delete(`${PATH_PREFIX}/book/${id}/file`);
+        return data;
     }
 
     /**

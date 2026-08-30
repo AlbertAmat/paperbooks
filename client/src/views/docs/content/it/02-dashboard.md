@@ -2,21 +2,19 @@
 
 La Dashboard è la prima cosa che vedi quando apri Paper Book. Ti offre un riepilogo a colpo d'occhio dell'intera collezione.
 
-## Schede di riepilogo
+## Questo mese, e il tuo scaffale
 
-In alto trovi una riga di schede statistiche:
+In alto, un titolo mostra quanti libri hai aggiunto questo mese, con una freccia che indica se il conteggio è aumentato o diminuito rispetto al mese scorso. Accanto, delle etichette di categoria mostrano come si suddivide il tuo catalogo per categoria — a partire da **Tutti**, il conteggio totale di tutti i libri.
 
-- **Riepilogo** — il numero totale di libri nel tuo catalogo, con una freccia che mostra se il conteggio è aumentato o diminuito rispetto al mese scorso.
-- **Libri prenotati** — quante copie sono attualmente prestate ai clienti.
-- **Categorie**, **Clienti**, **Ubicazioni**, **Autori** — il numero totale di ciascuno, così puoi vedere a colpo d'occhio quanto è organizzato il tuo catalogo.
+A destra, uno scaffale a scorrimento orizzontale mostra le copertine dei libri aggiunti più di recente. Clicca su una copertina per andare direttamente alla sua [pagina di dettaglio](#book-details).
+
+## Riga di statistiche
+
+Sotto lo scaffale, una riga di statistiche compatte mostra i totali del tuo catalogo: libri totali, libri prenotati, categorie, clienti, ubicazioni e autori.
 
 ## Libri aggiunti nel tempo
 
-Sotto le schede statistiche, un grafico mostra quanti libri sono stati aggiunti nel tempo — utile per vedere la crescita della tua collezione o individuare una recente ondata di catalogazione.
-
-## Libri aggiunti di recente
-
-Sul lato destro, il pannello **Ultimi libri** elenca i titoli aggiunti più di recente, con la loro immagine di copertina e l'ISBN. Clicca su uno di essi per andare direttamente alla sua [pagina di dettaglio](#book-details).
+In basso, un grafico mostra quanti libri sono stati aggiunti nel tempo — utile per vedere la crescita della tua collezione o individuare una recente ondata di catalogazione.
 
 ## Restituire libri dalla Dashboard
 

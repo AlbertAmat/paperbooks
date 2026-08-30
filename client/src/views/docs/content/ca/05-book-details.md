@@ -45,3 +45,9 @@ Fes servir les accions de fila a la dreta de cada entrada d'estoc:
 - 🗑️ **Elimina** l'exemplar (amb confirmació).
 
 > **Consell:** Per deixar un exemplar en préstec a algú, marca'n l'estat com a **Reservat** i tria un client aquí, o bé fes servir el flux de préstec des de la fila d'un client — consulta [Préstecs i devolucions](#lending-and-returns).
+
+## Còpia de seguretat del fitxer digital
+
+Al costat de la imatge de portada pots, opcionalment, fer una còpia de seguretat del **fitxer epub o pdf** del llibre — útil si l'has baixat i transferit a un lector electrònic, ja que llavors el lector es converteix en l'únic lloc on viu aquella còpia. Fes clic o arrossega i deixa anar un fitxer (màxim 100MB) per pujar-lo; un llibre conserva com a màxim un fitxer, així que pujar-ne un de nou substitueix l'anterior.
+
+Un cop pujat, el pots **descarregar** de nou en qualsevol moment (per exemple, si perds o restableixes el teu lector electrònic) o **eliminar-lo** (amb confirmació). Això està pensat purament com a còpia de seguretat personal de fitxers dels quals ja tens els drets — no com un lloc per obtenir llibres d'altres fonts.

@@ -2,21 +2,19 @@
 
 El Panel de control es lo primero que ves al abrir Paper Book. Te ofrece un resumen general de toda tu colección de un vistazo.
 
-## Tarjetas de resumen
+## Este mes, y tu estantería
 
-En la parte superior encontrarás una fila de tarjetas con estadísticas:
+En la parte superior, un titular muestra cuántos libros has añadido este mes, con una flecha que indica si ha subido o bajado respecto al mes anterior. Junto a él, unas etiquetas de categoría muestran cómo se reparte tu catálogo por categorías — empezando por **Todos**, el recuento total de todos los libros.
 
-- **Resumen** — el número total de libros en tu catálogo, con una flecha que indica si el recuento ha subido o bajado respecto al mes anterior.
-- **Libros reservados** — cuántos ejemplares están actualmente prestados a clientes.
-- **Categorías**, **Clientes**, **Ubicaciones**, **Autores** — el número total de cada uno, para que puedas ver de un vistazo lo bien organizado que está tu catálogo.
+A la derecha, una estantería con desplazamiento horizontal muestra las portadas de tus libros añadidos más recientemente. Haz clic en cualquier portada para ir directamente a su [página de detalle](#book-details).
+
+## Fila de estadísticas
+
+Debajo de la estantería, una fila de estadísticas compactas te da los totales de tu catálogo: libros totales, libros reservados, categorías, clientes, ubicaciones y autores.
 
 ## Libros añadidos a lo largo del tiempo
 
-Debajo de las tarjetas de resumen, un gráfico muestra cuántos libros se han añadido a lo largo del tiempo — útil para ver el crecimiento de tu colección o detectar un impulso reciente de catalogación.
-
-## Libros añadidos recientemente
-
-En el lado derecho, el panel **Últimos libros** muestra los títulos añadidos más recientemente, con su portada e ISBN. Haz clic en cualquiera de ellos para ir directamente a su [página de detalle](#book-details).
+En la parte inferior, un gráfico muestra cuántos libros se han añadido a lo largo del tiempo — útil para ver el crecimiento de tu colección o detectar un impulso reciente de catalogación.
 
 ## Devolver libros desde el Panel de control
 

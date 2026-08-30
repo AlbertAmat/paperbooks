@@ -180,6 +180,9 @@
 
 					<v-col cols="12" md="3" lg="3" class="px-1">
 						<book-image :book="model.getBook()"/>
+						<div class="mt-4">
+							<book-file :book="model.getBook()"/>
+						</div>
 					</v-col>
 				</v-row>
 
@@ -209,6 +212,7 @@ import {applicationService} from "@/service/ApplicationService";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import {authorsService} from "@/service/author/AuthorsService";
 import BookImage from "@/views/book/compoents/BookImage.vue";
+import BookFile from "@/views/book/compoents/BookFile.vue";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {useI18n} from "vue-i18n";
 

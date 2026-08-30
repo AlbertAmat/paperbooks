@@ -8,7 +8,7 @@ import {BookStockStatusEnum} from "@/types/book/IBookStock";
  * const d: IDashboard = {
  *   lastBooks: [], totalBooks: 42, totalThisMonth: 3, totalLastMonth: 5,
  *   totalCategories: 6, totalCustomers: 10, totalLocations: 2, totalBookedBooks: 5,
- *   totalAuthors: 15, booksInTime: [], stockStatus: []
+ *   totalAuthors: 15, booksInTime: [], stockStatus: [], categoryShelves: [], currentlyOnLoan: []
  * };
  */
 export default interface IDashboard {
@@ -34,6 +34,46 @@ export default interface IDashboard {
     booksInTime: IBooksInTime[];
     /** Count of book stocks grouped by lifecycle status. */
     stockStatus: IDashboardStockSatuts[];
+    /** Top categories by book count, most-populated first, each with a sample of its most recent books - for the dashboard's category pills and "browse by category" shelves. */
+    categoryShelves: IDashboardCategoryShelf[];
+    /** Books currently on loan, with who they're loaned to. */
+    currentlyOnLoan: IDashboardLoan[];
+}
+
+/** A category with a sample of its books, for the dashboard's category pills and shelves. */
+export interface IDashboardCategoryShelf {
+    /** Category id. */
+    id: number;
+    /** Category name. */
+    name: string;
+    /** Total number of books in this category. */
+    count: number;
+    /** Sample of the category's most recently added books (up to 10). */
+    books: IDashboardShelfBook[];
+}
+
+/** Minimal book fields shown in a dashboard cover shelf. */
+export interface IDashboardShelfBook {
+    /** Book id. */
+    id: number;
+    /** Book title. */
+    name: string;
+    /** Cover image URL/data-URI, or null if none. */
+    image_url: string | null;
+}
+
+/** One book currently on loan, for the dashboard's "currently on loan" list. */
+export interface IDashboardLoan {
+    /** Book id. */
+    bookId: number;
+    /** Book title. */
+    bookName: string;
+    /** Cover image URL/data-URI, or null if none. */
+    imageUrl: string | null;
+    /** Customer id. */
+    customerId: number;
+    /** Customer name. */
+    customerName: string;
 }
 
 /** Count of book stocks grouped by lifecycle status, for the stock-status chart. */

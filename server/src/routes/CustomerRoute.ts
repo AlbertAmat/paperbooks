@@ -582,7 +582,7 @@ router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) =
     try {
         for (const bookStockCode of books) {
             await pool.query(
-                'UPDATE book_stocks SET customer_id = $1, status = $2 WHERE code = $3 AND user_id = $4',
+                'UPDATE book_stocks SET customer_id = $1, status = $2, loaned_at = NOW() WHERE code = $3 AND user_id = $4',
                 [customerId, 2, bookStockCode, userId]
             );
         }
@@ -627,7 +627,7 @@ router.delete('/:id/book/:bookStockCode', requireAuth, async (req: Request, res:
 
     try {
         await pool.query(
-            'UPDATE book_stocks SET status = $1, customer_id = $2 WHERE code = $3 AND customer_id = $4 AND user_id = $5',
+            'UPDATE book_stocks SET status = $1, customer_id = $2, loaned_at = NULL WHERE code = $3 AND customer_id = $4 AND user_id = $5',
             [0, null, bookStockCode, customerId, userId]
         );
 

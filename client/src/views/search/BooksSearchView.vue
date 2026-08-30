@@ -170,7 +170,7 @@
  * filters, and the two "add book" entry points (ISBN or manual). Re-runs
  * the search whenever the route's query string changes.
  */
-import {Ref, ref, onMounted, onUnmounted, computed, watch} from "vue";
+import {Ref, ref, onMounted, onUnmounted, computed, watch, nextTick} from "vue";
 import PageComponent from "@/views/PageComponent.vue";
 import SearchController from "@/controller/search/SearchController";
 import BookItem from "@/views/search/components/BookItem.vue";
@@ -242,11 +242,20 @@ async function loadMoreBooks() {
 	}
 }
 
+/**
+ * Distance (px) below the viewport at which the trigger still counts as
+ * "reached". Without this buffer, the trigger (zero-height, the very last
+ * element) sits exactly flush with the viewport bottom at max scroll, so
+ * `rect.top < window.innerHeight` is never true there - the last page is
+ * unreachable by scrolling.
+ */
+const SCROLL_TRIGGER_MARGIN = 300;
+
 function handleScroll() {
 	const trigger = infiniteScrollTrigger.value;
 	if (trigger) {
 		const rect = trigger.getBoundingClientRect();
-		if (rect.top < window.innerHeight) {
+		if (rect.top < window.innerHeight + SCROLL_TRIGGER_MARGIN) {
 			loadMoreBooks();
 		}
 	}
@@ -264,6 +273,12 @@ onUnmounted(() => {
 watch(() => router.currentRoute.value.query, () => {
 	model.fetchBooks(true);
 }, {immediate: true})
+
+// If a loaded page doesn't fill/overflow the scroller, no 'scroll' event
+// will ever fire to pull in the next page - check after every load instead.
+watch(() => model.getBooks(), () => {
+	nextTick(handleScroll);
+})
 </script>
 
 <style scoped>

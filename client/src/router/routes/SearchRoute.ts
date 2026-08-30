@@ -12,6 +12,9 @@ export class SearchRoute extends ARoute {
     /** Query string param name the search view reads its initial search text from. */
     public static QUERY_PARAM = "query";
 
+    /** Query string param name the search view reads its initial category filter from. */
+    public static CATEGORY_QUERY_PARAM = "category";
+
     /** @returns The Vue Router route config for the search/library view. */
     public getRoute() {
         return  {
@@ -30,6 +33,14 @@ export class SearchRoute extends ARoute {
             return `${SearchRoute.PATH}?${SearchRoute.QUERY_PARAM}=${encodeURIComponent(query)}`;
         }
         return SearchRoute.PATH;
+    }
+
+    /**
+     * @param categoryId Category id to pre-filter the search/library view by.
+     * @returns The navigable URL for the search/library view, filtered to that category.
+     */
+    public getPathForCategory(categoryId: number) {
+        return `${SearchRoute.PATH}?${SearchRoute.CATEGORY_QUERY_PARAM}=${categoryId}`;
     }
 }
 

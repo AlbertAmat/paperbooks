@@ -2,21 +2,19 @@
 
 El Tauler de control és el primer que veus quan obres Paper Book. Et dona un resum ràpid de tota la teva col·lecció.
 
-## Targetes de resum
+## Aquest mes, i el teu prestatge
 
-A la part superior trobaràs una fila de targetes estadístiques:
+A la part superior, un titular mostra quants llibres has afegit aquest mes, amb una fletxa que indica si ha pujat o baixat respecte al mes anterior. Al costat, unes etiquetes de categoria mostren com es reparteix el teu catàleg per categories — començant per **Tots**, el recompte total de tots els llibres.
 
-- **Resum** — el nombre total de llibres al catàleg, amb una fletxa que mostra si el recompte ha pujat o baixat respecte al mes anterior.
-- **Llibres reservats** — quants exemplars estan actualment en préstec a clients.
-- **Categories**, **Clients**, **Ubicacions**, **Autors** — el nombre total de cadascun, perquè puguis veure d'un cop d'ull com d'organitzat està el teu catàleg.
+A la dreta, un prestatge amb desplaçament horitzontal mostra les portades dels teus llibres afegits més recentment. Fes clic a qualsevol portada per anar directament a la seva [pàgina de detalls](#book-details).
+
+## Fila d'estadístiques
+
+Sota el prestatge, una fila d'estadístiques compactes et dona els totals del teu catàleg: llibres totals, llibres reservats, categories, clients, ubicacions i autors.
 
 ## Llibres afegits al llarg del temps
 
-Sota les targetes estadístiques, un gràfic mostra quants llibres s'han afegit al llarg del temps — útil per veure el creixement de la col·lecció o detectar un impuls recent de catalogació.
-
-## Llibres afegits recentment
-
-A la banda dreta, el panell **Últims llibres** llista els títols afegits més recentment, amb la seva portada i l'ISBN. Fes clic a qualsevol per anar directament a la seva [pàgina de detalls](#book-details).
+A la part inferior, un gràfic mostra quants llibres s'han afegit al llarg del temps — útil per veure el creixement de la col·lecció o detectar un impuls recent de catalogació.
 
 ## Retornar llibres des del Tauler de control
 

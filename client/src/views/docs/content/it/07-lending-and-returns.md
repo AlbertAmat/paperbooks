@@ -26,3 +26,12 @@ Quando una copia rientra, usa il pulsante **Restituisci libri** — disponibile 
 5. Clicca su **Restituisci** per segnarle tutte di nuovo come disponibili.
 
 Una volta restituita, lo stato di una copia torna a **Disponibile** ed è di nuovo libera per essere prestata.
+
+## La vista Prestiti
+
+La pagina **Prestiti** mostra un unico elenco di tutte le copie attualmente in prestito — il loro libro, chi le ha, il loro gruppo e la data in cui sono state prestate.
+
+- Filtra per **Gruppo** per vedere solo ciò che ha una classe/dipartimento, oppure per un intervallo di date **Da**/**A** per vedere i prestiti di un periodo specifico.
+- Clicca su **Restituisci** su qualsiasi riga per restituire subito quella copia - senza bisogno di conoscerne il codice di stock.
+
+È il modo più rapido per sapere "cosa è fuori in questo momento, e a chi" senza dover controllare cliente per cliente.

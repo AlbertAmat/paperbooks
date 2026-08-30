@@ -11,6 +11,7 @@
  */
 import BookItem from "@/model/book/BookItem";
 import IBook from "@/types/book/IBook";
+import {IBookFile} from "@/types/book/IBookFile";
 import {applicationService} from "@/service/ApplicationService";
 import Format from "@/model/format/Format";
 import {bookService} from "@/service/book/BookService";
@@ -44,6 +45,9 @@ export default class Book extends BookItem {
     /** Physical stocks (copies) of this book. */
     private m_stocks: ShallowRef<BookStock[]>;
 
+    /** Backed-up epub/pdf file for this book, or null if none was uploaded. */
+    private m_file: ShallowRef<IBookFile | null>;
+
     /** Timestamp the book was created. */
     private readonly m_dateCreated: Date;
 
@@ -65,6 +69,7 @@ export default class Book extends BookItem {
         }
 
         this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(this,stock)));
+        this.m_file = shallowRef(data.file);
     }
 
     /** @returns A placeholder "empty" book (id -1) used to initialize forms before real data loads. */
@@ -85,6 +90,7 @@ export default class Book extends BookItem {
             format_id: null,
             date_created: "",
             date_updated: "",
+            file: null,
         })
     }
 
@@ -176,6 +182,11 @@ export default class Book extends BookItem {
     /** @returns The book's physical stocks (copies). */
     public getStocks(): BookStock[] {
         return this.m_stocks.value;
+    }
+
+    /** @returns The book's backed-up epub/pdf file, or null if none was uploaded. */
+    public getFile(): IBookFile | null {
+        return this.m_file.value;
     }
 
     /**
@@ -285,6 +296,35 @@ export default class Book extends BookItem {
             this.m_imageUrl.value = await fileToBase64(image);
         } catch (e) {
             console.error("Error while updating book.", e)
+        }
+    }
+
+    /**
+     * Upload (or replace) the backed-up epub/pdf file for this book.
+     * @param file New epub/pdf file.
+     */
+    public async uploadFile(file: File) {
+        try {
+            this.m_file.value = await bookService.uploadFile(this.m_id, file);
+            appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_FILE_UPLOADED)})
+        } catch (e) {
+            console.error("Error while uploading book file.", e)
+        }
+    }
+
+    /** Delete the backed-up epub/pdf file for this book, if any. */
+    public async removeFile() {
+        try {
+            const result = await bookService.deleteFile(this.m_id);
+
+            if (!result) {
+                throw "Unable to remove book file";
+            }
+
+            this.m_file.value = null;
+            appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_FILE_DELETED)})
+        } catch (e) {
+            console.error("Error while removing book file.", e)
         }
     }
 

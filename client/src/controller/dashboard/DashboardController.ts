@@ -5,6 +5,8 @@ import { BaseController } from "@/controller/BaseController";
 import IDashboard, {
     IBooksInTime,
     IDashboardBook,
+    IDashboardCategoryShelf,
+    IDashboardLoan,
     IDashboardStockSatuts
 } from "@/types/dashboard/IDashboard";
 
@@ -86,6 +88,19 @@ export default class DashboardController extends BaseController<IDashboard> {
     private m_stockStatus: IDashboardStockSatuts[] = [];
 
     /**
+     * Top categories by book count, each with a sample of its books, for the
+     * dashboard's category pills and "browse by category" shelves.
+     * @private
+     */
+    private m_categoryShelves: IDashboardCategoryShelf[] = [];
+
+    /**
+     * Books currently on loan, with who they're loaned to.
+     * @private
+     */
+    private m_currentlyOnLoan: IDashboardLoan[] = [];
+
+    /**
      * Constructor initializes the controller with the identifier "Dashboard".
      */
     public constructor() {
@@ -116,6 +131,8 @@ export default class DashboardController extends BaseController<IDashboard> {
         this.m_booksInTime = data.booksInTime;
         this.m_stockStatus = data.stockStatus;
         this.m_totalAuthors = data.totalAuthors;
+        this.m_categoryShelves = data.categoryShelves;
+        this.m_currentlyOnLoan = data.currentlyOnLoan;
     }
 
     /**
@@ -193,6 +210,20 @@ export default class DashboardController extends BaseController<IDashboard> {
      */
     public getStockStatus() {
         return this.m_stockStatus;
+    }
+
+    /**
+     * Returns the top categories by book count, each with a sample of its books.
+     */
+    public getCategoryShelves() {
+        return this.m_categoryShelves;
+    }
+
+    /**
+     * Returns the books currently on loan, with who they're loaned to.
+     */
+    public getCurrentlyOnLoan() {
+        return this.m_currentlyOnLoan;
     }
 
 }

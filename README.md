@@ -168,7 +168,7 @@ paperbooks/
 │       ├── utils/         # Logger, etc.
 │       └── assets/        # Static login/register pages, prod client bundle
 ├── assets/
-│   ├── db/                # SQL schema + migrations (databaseSchema.sql, dated patches)
+│   ├── db/                # SQL schema (databaseSchema.sql) + upgrade/ (dated upgrade files)
 │   └── pm2/               # Sample PM2 ecosystem config for production
 ├── build.sh               # Builds client + server into ./dist and zips it
 └── LICENSE
@@ -206,15 +206,17 @@ psql -d paperbooks -f assets/db/databaseSchema.sql
 > insert a row into `users` directly, or start the server with `ALLOW_DEV_AUTH=true`
 > and use the `/register` page, then turn `ALLOW_DEV_AUTH` back off.
 
-The other, dated files in `assets/db/` (`082626-1.sql`, `082926-01.sql`, ...) are
-**not** for new installs — they're incremental migrations for a database that's
-already running an older version of the schema. Each one's header comment says what
-it does and confirms new installs should skip it. If you're upgrading an existing
-instance instead of setting one up fresh, apply only the migration files newer than
-whatever you're currently on, in filename order:
+The dated files in `assets/db/upgrade/` (`082626.sql`, `082926.sql`, ...) are
+**not** for new installs — they're incremental upgrades for a database that's
+already running an older version of the schema (see
+[`assets/db/upgrade/README.md`](assets/db/upgrade/README.md) for the full
+convention). Each one's header comment says what it does and confirms new
+installs should skip it. If you're upgrading an existing instance instead of
+setting one up fresh, apply only the files newer than whatever you're
+currently on, in filename (date) order:
 
 ```bash
-psql -d paperbooks -f assets/db/082926-02.sql   # example: apply one specific migration
+psql -d paperbooks -f assets/db/upgrade/082926.sql   # example: apply one day's upgrade
 ```
 
 ### 3. Configure the server

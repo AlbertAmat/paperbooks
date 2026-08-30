@@ -169,3 +169,124 @@ VALUES ('en', 'PUBLIC_INSTITUTION_SENSITIVE_DATA_WARNING',
 
        ('it', 'PUBLIC_INSTITUTION_SENSITIVE_DATA_WARNING',
         'Questo account è registrato come istituzione pubblica. Evita di inserire qui informazioni personali sensibili: usa codici o identificativi degli studenti che solo tu possa riconoscere, invece dei nomi completi.');
+
+-- Session invalidation: bumped on password change so a JWT issued before
+-- the change (a stolen token included) is rejected by requireAuth even
+-- though its signature is still valid. Existing users default to 0, so any
+-- token issued before this migration that lacks a token_version claim will
+-- fail the comparison and force a one-time re-login.
+ALTER TABLE users
+    ADD COLUMN token_version INT NOT NULL DEFAULT 0;
+
+-- bcrypt hashes are exactly 60 chars so VARCHAR(64) has worked so far, but
+-- leaves no room for a future hashing algorithm (e.g. argon2id) with longer
+-- output. Widen it now while it's a no-op.
+ALTER TABLE users
+    ALTER COLUMN password TYPE TEXT;
+
+-- Adds tracking for the public-institution security-measures notice shown
+-- after login (see SecurityNoticeDialog.vue).
+CREATE TABLE user_security_notice_acknowledgements
+(
+    id            SERIAL PRIMARY KEY,
+    user_id       INT       NOT NULL UNIQUE,
+    sent_date     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    accepted_date TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+-- Adds TOTP-based two-factor authentication support.
+ALTER TABLE users
+    ADD COLUMN totp_secret  TEXT,
+    ADD COLUMN totp_enabled BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE TABLE user_backup_codes
+(
+    id           SERIAL PRIMARY KEY,
+    user_id      INT       NOT NULL,
+    code_hash    TEXT      NOT NULL,
+    created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    used_date    TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+INSERT INTO app_labels (language, code, text)
+VALUES ('en', 'TWOFA_TITLE', 'Two-factor authentication'),
+       ('en', 'TWOFA_DESC', 'Require a code from an authenticator app when signing in.'),
+       ('en', 'TWOFA_STATUS_ENABLED', 'Enabled'),
+       ('en', 'TWOFA_STATUS_DISABLED', 'Disabled'),
+       ('en', 'TWOFA_ENABLE', 'Enable'),
+       ('en', 'TWOFA_DISABLE', 'Disable'),
+       ('en', 'TWOFA_SETUP_TITLE', 'Set up two-factor authentication'),
+       ('en', 'TWOFA_SETUP_SCAN_DESC', 'Scan this QR code with an authenticator app (Google Authenticator, Authy, 1Password, ...), then enter the 6-digit code it shows.'),
+       ('en', 'TWOFA_SETUP_MANUAL_KEY', 'Or enter this key manually:'),
+       ('en', 'TWOFA_CODE', 'Verification code'),
+       ('en', 'TWOFA_INVALID_CODE', 'Invalid code. Please try again.'),
+       ('en', 'TWOFA_BACKUP_CODES_TITLE', 'Save your backup codes'),
+       ('en', 'TWOFA_BACKUP_CODES_DESC', 'Each code can be used once to sign in if you lose access to your authenticator app. Store them somewhere safe - they won''t be shown again.'),
+       ('en', 'TWOFA_SAVED_CODES_CONFIRM', 'I''ve saved these codes'),
+       ('en', 'TWOFA_DISABLE_TITLE', 'Disable two-factor authentication'),
+       ('en', 'TWOFA_DISABLE_DESC', 'Enter your password to disable two-factor authentication. Your backup codes will stop working.'),
+       ('en', 'TWOFA_DISABLE_PASSWORD', 'Password'),
+       ('en', 'TWOFA_ENABLED_SNACKBAR', 'Two-factor authentication enabled'),
+       ('en', 'TWOFA_DISABLED_SNACKBAR', 'Two-factor authentication disabled'),
+
+       ('ca', 'TWOFA_TITLE', 'Autenticació de dos factors'),
+       ('ca', 'TWOFA_DESC', 'Exigeix un codi d''una aplicació autenticadora en iniciar sessió.'),
+       ('ca', 'TWOFA_STATUS_ENABLED', 'Activada'),
+       ('ca', 'TWOFA_STATUS_DISABLED', 'Desactivada'),
+       ('ca', 'TWOFA_ENABLE', 'Activar'),
+       ('ca', 'TWOFA_DISABLE', 'Desactivar'),
+       ('ca', 'TWOFA_SETUP_TITLE', 'Configurar l''autenticació de dos factors'),
+       ('ca', 'TWOFA_SETUP_SCAN_DESC', 'Escanegeu aquest codi QR amb una aplicació autenticadora (Google Authenticator, Authy, 1Password...) i després introduïu el codi de 6 xifres que mostri.'),
+       ('ca', 'TWOFA_SETUP_MANUAL_KEY', 'O introduïu aquesta clau manualment:'),
+       ('ca', 'TWOFA_CODE', 'Codi de verificació'),
+       ('ca', 'TWOFA_INVALID_CODE', 'Codi no vàlid. Torneu-ho a provar.'),
+       ('ca', 'TWOFA_BACKUP_CODES_TITLE', 'Deseu els vostres codis de seguretat'),
+       ('ca', 'TWOFA_BACKUP_CODES_DESC', 'Cada codi es pot fer servir una vegada per iniciar sessió si perdeu l''accés a la vostra aplicació autenticadora. Deseu-los en un lloc segur - no es tornaran a mostrar.'),
+       ('ca', 'TWOFA_SAVED_CODES_CONFIRM', 'He desat aquests codis'),
+       ('ca', 'TWOFA_DISABLE_TITLE', 'Desactivar l''autenticació de dos factors'),
+       ('ca', 'TWOFA_DISABLE_DESC', 'Introduïu la vostra contrasenya per desactivar l''autenticació de dos factors. Els vostres codis de seguretat deixaran de funcionar.'),
+       ('ca', 'TWOFA_DISABLE_PASSWORD', 'Contrasenya'),
+       ('ca', 'TWOFA_ENABLED_SNACKBAR', 'Autenticació de dos factors activada'),
+       ('ca', 'TWOFA_DISABLED_SNACKBAR', 'Autenticació de dos factors desactivada'),
+
+       ('es', 'TWOFA_TITLE', 'Autenticación de dos factores'),
+       ('es', 'TWOFA_DESC', 'Exige un código de una aplicación autenticadora al iniciar sesión.'),
+       ('es', 'TWOFA_STATUS_ENABLED', 'Activada'),
+       ('es', 'TWOFA_STATUS_DISABLED', 'Desactivada'),
+       ('es', 'TWOFA_ENABLE', 'Activar'),
+       ('es', 'TWOFA_DISABLE', 'Desactivar'),
+       ('es', 'TWOFA_SETUP_TITLE', 'Configurar la autenticación de dos factores'),
+       ('es', 'TWOFA_SETUP_SCAN_DESC', 'Escanea este código QR con una aplicación autenticadora (Google Authenticator, Authy, 1Password...) y luego introduce el código de 6 dígitos que muestre.'),
+       ('es', 'TWOFA_SETUP_MANUAL_KEY', 'O introduce esta clave manualmente:'),
+       ('es', 'TWOFA_CODE', 'Código de verificación'),
+       ('es', 'TWOFA_INVALID_CODE', 'Código no válido. Inténtalo de nuevo.'),
+       ('es', 'TWOFA_BACKUP_CODES_TITLE', 'Guarda tus códigos de respaldo'),
+       ('es', 'TWOFA_BACKUP_CODES_DESC', 'Cada código se puede usar una vez para iniciar sesión si pierdes el acceso a tu aplicación autenticadora. Guárdalos en un lugar seguro - no se volverán a mostrar.'),
+       ('es', 'TWOFA_SAVED_CODES_CONFIRM', 'He guardado estos códigos'),
+       ('es', 'TWOFA_DISABLE_TITLE', 'Desactivar la autenticación de dos factores'),
+       ('es', 'TWOFA_DISABLE_DESC', 'Introduce tu contraseña para desactivar la autenticación de dos factores. Tus códigos de respaldo dejarán de funcionar.'),
+       ('es', 'TWOFA_DISABLE_PASSWORD', 'Contraseña'),
+       ('es', 'TWOFA_ENABLED_SNACKBAR', 'Autenticación de dos factores activada'),
+       ('es', 'TWOFA_DISABLED_SNACKBAR', 'Autenticación de dos factores desactivada'),
+
+       ('it', 'TWOFA_TITLE', 'Autenticazione a due fattori'),
+       ('it', 'TWOFA_DESC', 'Richiedi un codice da un''app di autenticazione per accedere.'),
+       ('it', 'TWOFA_STATUS_ENABLED', 'Attiva'),
+       ('it', 'TWOFA_STATUS_DISABLED', 'Disattivata'),
+       ('it', 'TWOFA_ENABLE', 'Attiva'),
+       ('it', 'TWOFA_DISABLE', 'Disattiva'),
+       ('it', 'TWOFA_SETUP_TITLE', 'Configura l''autenticazione a due fattori'),
+       ('it', 'TWOFA_SETUP_SCAN_DESC', 'Scansiona questo codice QR con un''app di autenticazione (Google Authenticator, Authy, 1Password...), poi inserisci il codice a 6 cifre mostrato.'),
+       ('it', 'TWOFA_SETUP_MANUAL_KEY', 'Oppure inserisci questa chiave manualmente:'),
+       ('it', 'TWOFA_CODE', 'Codice di verifica'),
+       ('it', 'TWOFA_INVALID_CODE', 'Codice non valido. Riprova.'),
+       ('it', 'TWOFA_BACKUP_CODES_TITLE', 'Salva i tuoi codici di backup'),
+       ('it', 'TWOFA_BACKUP_CODES_DESC', 'Ogni codice può essere usato una sola volta per accedere se perdi l''accesso alla tua app di autenticazione. Conservali in un luogo sicuro - non verranno mostrati di nuovo.'),
+       ('it', 'TWOFA_SAVED_CODES_CONFIRM', 'Ho salvato questi codici'),
+       ('it', 'TWOFA_DISABLE_TITLE', 'Disattiva l''autenticazione a due fattori'),
+       ('it', 'TWOFA_DISABLE_DESC', 'Inserisci la tua password per disattivare l''autenticazione a due fattori. I tuoi codici di backup smetteranno di funzionare.'),
+       ('it', 'TWOFA_DISABLE_PASSWORD', 'Password'),
+       ('it', 'TWOFA_ENABLED_SNACKBAR', 'Autenticazione a due fattori attivata'),
+       ('it', 'TWOFA_DISABLED_SNACKBAR', 'Autenticazione a due fattori disattivata');

@@ -14,6 +14,7 @@ import {categoriesRoute} from "@/router/routes/CategoriesRoute";
 import {settingsRoute} from "@/router/routes/SettingsRoute";
 import {customersRoute} from "@/router/routes/CustomersRoute";
 import {authorsRoute} from "@/router/routes/AuthorsRoute";
+import {loansRoute} from "@/router/routes/LoansRoute";
 import {docsRoute} from "@/router/routes/DocsRoute";
 import {legalRoute} from "@/router/routes/LegalRoute";
 import {applicationService} from "@/service/ApplicationService";
@@ -31,6 +32,7 @@ const routes: Array<RouteRecordRaw> = [
     categoriesRoute.getRoute(),
     customersRoute.getRoute(),
     authorsRoute.getRoute(),
+    loansRoute.getRoute(),
     settingsRoute.getRoute(),
     docsRoute.getRoute(),
     legalRoute.getRoute(),

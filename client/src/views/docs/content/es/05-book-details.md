@@ -45,3 +45,9 @@ Usa las acciones de fila a la derecha de cada entrada de stock:
 - 🗑️ **Elimina** el ejemplar (con confirmación).
 
 > **Consejo:** Para prestar un ejemplar a alguien, puedes cambiar su estado a **Reservado** y elegir aquí un cliente, o usar el flujo de préstamo grupal desde la fila de un cliente — consulta [Préstamos y devoluciones](#lending-and-returns).
+
+## Copia de seguridad del archivo digital
+
+Junto a la imagen de portada puedes, opcionalmente, guardar una copia de seguridad del **archivo epub o pdf** del libro — útil si lo has descargado y transferido a un lector electrónico, ya que entonces el lector se convierte en el único lugar donde vive esa copia. Haz clic o arrastra y suelta un archivo (máximo 100MB) para subirlo; un libro conserva como máximo un archivo, así que subir uno nuevo sustituye al anterior.
+
+Una vez subido, puedes **descargarlo** de nuevo en cualquier momento (por ejemplo, si pierdes o restableces tu lector electrónico) o **eliminarlo** (con confirmación). Esto está pensado únicamente como copia de seguridad personal de archivos sobre los que ya tienes los derechos — no como un lugar para obtener libros de otras fuentes.

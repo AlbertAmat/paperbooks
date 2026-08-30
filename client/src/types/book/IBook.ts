@@ -1,5 +1,6 @@
 import IBookItem from "@/types/book/IBookItem";
 import {IBookStock} from "@/types/book/IBookStock";
+import {IBookFile} from "@/types/book/IBookFile";
 
 /**
  * Full book detail as returned by `GET /book/:id` - everything `IBookItem`
@@ -23,4 +24,6 @@ export default interface IBook extends IBookItem {
     date_created: string;
     /** Last-updated timestamp (ISO string). */
     date_updated: string;
+    /** Backed-up epub/pdf file for this book, or null if none was uploaded. */
+    file: IBookFile | null;
 }

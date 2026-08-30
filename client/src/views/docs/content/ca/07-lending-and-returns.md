@@ -26,3 +26,12 @@ Quan un exemplar es retorna, fes servir el botó **Retornar llibres** — dispon
 5. Fes clic a **Retornar** per marcar-los tots com a disponibles de nou.
 
 Un cop retornat, l'estat de l'exemplar torna a **Disponible** i queda lliure per tornar-se a deixar en préstec.
+
+## La vista de Préstecs
+
+La pàgina de **Préstecs** et dona una única llista de tots els exemplars actualment en préstec — el seu llibre, qui el té, el seu grup i la data en què es va deixar en préstec.
+
+- Filtra per **Grup** per veure només el que té una classe/departament, o per un interval de dates **Des de**/**Fins a** per veure els préstecs d'un període concret.
+- Fes clic a **Retornar** en qualsevol fila per retornar aquell exemplar concret — sense necessitat de saber el seu codi d'estoc.
+
+És la manera més ràpida de saber "què hi ha fora ara mateix, i a qui" sense haver de repassar client per client.

@@ -37,14 +37,15 @@ export default class SearchController extends BaseController<ISearchResponse> {
         this.m_books = shallowRef([]);
     }
 
-    /** @returns The first page of results for the route's initial `query` param, with no filters. */
+    /** @returns The first page of results for the route's initial `query`/`category` params, with no filters. */
     async fetchData(): Promise<ISearchResponse> {
         const params = router.currentRoute.value.query;
         const query = params[SearchRoute.QUERY_PARAM] ? params[SearchRoute.QUERY_PARAM] as string : null;
+        const categoryId = params[SearchRoute.CATEGORY_QUERY_PARAM] ? Number(params[SearchRoute.CATEGORY_QUERY_PARAM]) : null;
 
         return await searchService.searchBooks(
             query,
-            null,
+            categoryId,
             0,
             []
         )
@@ -68,9 +69,10 @@ export default class SearchController extends BaseController<ISearchResponse> {
         try {
             const params = router.currentRoute.value.query;
             const query = params[SearchRoute.QUERY_PARAM] ? params[SearchRoute.QUERY_PARAM] as string : null;
+            const categoryId = params[SearchRoute.CATEGORY_QUERY_PARAM] ? Number(params[SearchRoute.CATEGORY_QUERY_PARAM]) : null;
             const data = await searchService.searchBooks(
                 query,
-                null,
+                categoryId,
                 this.m_page.value,
                 this.m_filters.value
             );

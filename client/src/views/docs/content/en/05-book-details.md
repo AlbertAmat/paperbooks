@@ -45,3 +45,9 @@ Use the row actions on the right of each stock entry:
 - 🗑️ **Delete** the copy (with confirmation).
 
 > **Tip:** To lend a copy to someone, either set its status to **Booked** and pick a customer here, or use the group borrowing flow from a customer's row — see [Lending & returns](#lending-and-returns).
+
+## Ebook file backup
+
+Next to the cover image you can optionally back up the actual **epub or pdf file** for the book — useful if you've downloaded it and transferred it to an e-reader, since the reader then becomes the only place that copy lives. Click or drag-and-drop a file (max 100MB) to upload it; a book keeps at most one file, so uploading a new one replaces the previous one.
+
+Once uploaded, you can **download** it again at any time (e.g. after losing or resetting your e-reader) or **delete** it (with confirmation). This is meant purely as a personal backup of files you already have the rights to — not a place to source books from elsewhere.

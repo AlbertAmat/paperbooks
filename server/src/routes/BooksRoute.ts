@@ -23,10 +23,12 @@ import {v4 as uuidv4} from 'uuid';
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import multer from "multer";
 import {IBookAddMd} from "../types/book/IBookAddMd";
+import {IBookFile} from "../types/book/IBookFile";
 import {Pool, PoolClient} from "pg";
 import {AppErrors} from "../types/AppErrors";
 import {SearchFilter} from "../types/search/SearchFilter";
 import {normalizeAndValidateIsbn} from "../utils/IsbnVerification";
+import {isValidEpub, isValidPdf} from "../utils/FileSignature";
 //@ts-ignore
 const router: Router = Router();
 
@@ -39,6 +41,20 @@ const upload = multer({
         // @ts-ignore
         if (file.mimetype !== "image/png" && file.mimetype !== "image/jpeg") {
             return cb(new Error("Only PNG or JPG images are allowed"), false);
+        }
+        cb(null, true);
+    }
+});
+
+// Multer setup for the book ebook-file backup (epub/pdf) - also stored in memory,
+// validated by extension since browsers report inconsistent mimetypes for .epub.
+const fileUpload = multer({
+    storage,
+    limits: {fileSize: 100 * 1024 * 1024}, // 100MB
+    fileFilter: (req: Request, file: Express.Multer.File, cb: (error: any, acceptFile: boolean) => void) => {
+        const name = file.originalname.toLowerCase();
+        if (!name.endsWith(".epub") && !name.endsWith(".pdf")) {
+            return cb(new Error("Only EPUB or PDF files are allowed"), false);
         }
         cb(null, true);
     }
@@ -253,6 +269,15 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
                    books.date_updated,
                    books.pages,
                    books.format_id,
+                   CASE
+                       WHEN book_files.id IS NOT NULL THEN jsonb_build_object(
+                               'id', book_files.id,
+                               'file_type', book_files.file_type,
+                               'file_name', book_files.file_name,
+                               'file_size', book_files.file_size,
+                               'date_created', book_files.date_created
+                                                       )
+                       END AS file,
                    COALESCE(
                            json_agg(
                                DISTINCT jsonb_build_object(
@@ -279,6 +304,7 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
                      LEFT JOIN customers ON book_stocks.customer_id = customers.id
                      LEFT JOIN book_authors ON books.id = book_authors.book_id
                      LEFT JOIN authors ON book_authors.author_id = authors.id
+                     LEFT JOIN book_files ON books.id = book_files.book_id
             WHERE books.id = $1
               AND books.user_id = $2
             GROUP BY books.id,
@@ -293,7 +319,12 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
                      books.date_created,
                      books.date_updated,
                      books.pages,
-                     books.format_id;
+                     books.format_id,
+                     book_files.id,
+                     book_files.file_type,
+                     book_files.file_name,
+                     book_files.file_size,
+                     book_files.date_created;
         `, [id, userId]);
 
         if (result.rows.length !== 1) {
@@ -544,6 +575,140 @@ router.post('/:id/image', requireAuth, upload.single("image"), async (req: Reque
         // Rollback on error
         console.error("Transaction error:", error);
         res.status(500).send("Error adding book");
+    }
+});
+
+/**
+ * POST /book/:id/file
+ * --------------------
+ * Upload (or replace) the backup epub/pdf file for a book - a personal copy
+ * kept in case the user only has the file itself on an e-reader.
+ *
+ * Auth: required. Path param `id` {number} - book id.
+ * Body: multipart/form-data with a single field `file` (.epub or .pdf, max
+ * 100MB - enforced by the `fileUpload` config above). Stored as raw bytes
+ * in `book_files.file_data`; a book can only have one file at a time, so a
+ * new upload replaces any previous one.
+ *
+ * The file name's extension only gets it past `fileFilter` - the actual
+ * bytes are then checked against the real PDF/EPUB signature (see
+ * `utils/FileSignature.ts`) before anything is persisted, so a renamed
+ * unrelated file is rejected rather than stored.
+ *
+ * Example request (curl):
+ *   curl -X POST /api/rest/book/12/file -F "file=@book.epub"
+ *
+ * Response (200): the file's metadata (no bytes), e.g.
+ *   {"id": 3, "file_type": "epub", "file_name": "book.epub", "file_size": 512000, "date_created": "..."}
+ * Response (400): "No file provided" | "File content does not match a valid EPUB or PDF" | "Only EPUB or PDF files are allowed" (from fileFilter, via the error handler).
+ */
+router.post('/:id/file', requireAuth, fileUpload.single("file"), async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+
+    if (!req.file) {
+        return res.status(400).send("No file provided");
+    }
+
+    const fileType = req.file.originalname.toLowerCase().endsWith(".epub") ? "epub" : "pdf";
+
+    // Trust the actual bytes, not just the file name (which fileFilter above only
+    // checked by extension - trivially spoofed by renaming any file to .pdf/.epub).
+    const isValidContent = fileType === "epub" ? isValidEpub(req.file.buffer) : isValidPdf(req.file.buffer);
+    if (!isValidContent) {
+        return res.status(400).send("File content does not match a valid EPUB or PDF");
+    }
+
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        const book = await pool.query("SELECT id FROM books WHERE id = $1 AND user_id = $2", [id, userId]);
+        if (book.rowCount !== 1) {
+            return res.status(404).send("Book not found");
+        }
+
+        const result = await pool.query(
+            `INSERT INTO book_files (book_id, user_id, file_type, file_name, file_size, file_data)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             ON CONFLICT (book_id) DO UPDATE
+                 SET file_type    = EXCLUDED.file_type,
+                     file_name    = EXCLUDED.file_name,
+                     file_size    = EXCLUDED.file_size,
+                     file_data    = EXCLUDED.file_data,
+                     date_created = CURRENT_TIMESTAMP
+             RETURNING id, file_type, file_name, file_size, date_created`,
+            [id, userId, fileType, req.file.originalname, req.file.size, req.file.buffer]
+        );
+
+        const file: IBookFile = result.rows[0];
+        res.status(200).json(file);
+    } catch (error) {
+        console.error("Error uploading book file:", error);
+        res.status(500).send("Error uploading book file");
+    }
+});
+
+/**
+ * GET /book/:id/file/download
+ * ----------------------------
+ * Download the book's backed-up epub/pdf file.
+ *
+ * Auth: required. Path param `id` {number} - book id.
+ *
+ * Response (200): the raw file bytes, with `Content-Type` and
+ * `Content-Disposition: attachment` set from the stored file's name/type.
+ * Response (404): "File not found" - when the book has no backed-up file.
+ */
+router.get('/:id/file/download', requireAuth, async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        const result = await pool.query(
+            "SELECT file_data, file_name, file_type FROM book_files WHERE book_id = $1 AND user_id = $2",
+            [id, userId]
+        );
+
+        if (result.rowCount !== 1) {
+            return res.status(404).send("File not found");
+        }
+
+        const {file_data, file_name, file_type} = result.rows[0];
+        res.setHeader("Content-Type", file_type === "epub" ? "application/epub+zip" : "application/pdf");
+        const asciiName = file_name.replace(/[^\x20-\x7E]/g, "_").replace(/"/g, "");
+        res.setHeader("Content-Disposition", `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(file_name)}`);
+        res.status(200).send(file_data);
+    } catch (error) {
+        console.error("Error downloading book file:", error);
+        res.status(500).send("Error downloading book file");
+    }
+});
+
+/**
+ * DELETE /book/:id/file
+ * ----------------------
+ * Remove the book's backed-up epub/pdf file.
+ *
+ * Auth: required. Path param `id` {number} - book id.
+ *
+ * Response (200): whether a file was actually deleted, e.g. `true` | `false`.
+ */
+router.delete('/:id/file', requireAuth, async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        const result = await pool.query(
+            "DELETE FROM book_files WHERE book_id = $1 AND user_id = $2",
+            [id, userId]
+        );
+
+        res.status(200).json(result.rowCount === 1);
+    } catch (error) {
+        console.error("Error deleting book file:", error);
+        res.status(500).send("Error deleting book file");
     }
 });
 
@@ -1267,8 +1432,21 @@ router.put('/:id/stock/:stock_id', requireAuth, async (req: Request, res: Respon
             res.status(404).send("Location not found");
         }
 
+        // loaned_at is set only on the transition *into* booked (status wasn't
+        // already 2) and cleared on any transition out of it, so re-saving an
+        // already-booked stock (e.g. just moving its location) doesn't reset
+        // its loan date.
         const queryResult = await pool.query(
-            'UPDATE book_stocks SET status = $1, location_id = $2, customer_id = $3 WHERE book_id = $4 AND id = $5 AND user_id = $6',
+            `UPDATE book_stocks
+             SET status = $1,
+                 location_id = $2,
+                 customer_id = $3,
+                 loaned_at = CASE
+                                 WHEN $1 = 2 AND status != 2 THEN NOW()
+                                 WHEN $1 != 2 THEN NULL
+                                 ELSE loaned_at
+                 END
+             WHERE book_id = $4 AND id = $5 AND user_id = $6`,
             [status, location_id, customer_id, bookId, stockId, userId]
         );
 
@@ -1393,7 +1571,7 @@ router.post('/return', requireAuth, upload.single("image"), async (req: Request,
     try {
         books.forEach(async (bookStockCode: string) => {
             await pool.query(
-                'UPDATE book_stocks SET customer_id = $1, status = $2 WHERE code = $3 AND user_id = $4',
+                'UPDATE book_stocks SET customer_id = $1, status = $2, loaned_at = NULL WHERE code = $3 AND user_id = $4',
                 [null, 0, bookStockCode, userId]
             );
         })

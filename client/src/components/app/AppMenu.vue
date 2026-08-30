@@ -81,6 +81,7 @@ import {locationsRoute} from "@/router/routes/LocationsRoute";
 import {categoriesRoute} from "@/router/routes/CategoriesRoute";
 import {customersRoute} from "@/router/routes/CustomersRoute";
 import {authorsRoute} from "@/router/routes/AuthorsRoute";
+import {loansRoute} from "@/router/routes/LoansRoute";
 import {docsRoute} from "@/router/routes/DocsRoute";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
@@ -139,6 +140,11 @@ const items = [
 		name: t(AppLabels.CUSTOMERS),
 		icon: "mdi-account-school-outline",
 		path: customersRoute.getPath()
+	},
+	{
+		name: t(AppLabels.LOANS),
+		icon: "mdi-book-arrow-right-outline",
+		path: loansRoute.getPath()
 	},
 	{
 		name: t(AppLabels.AUTHORS),

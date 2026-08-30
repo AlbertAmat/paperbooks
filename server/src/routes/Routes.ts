@@ -14,6 +14,7 @@ import CategoriesRoute from "./CategoriesRoute";
 import UserRoute from "./UserRoute";
 import DashboardRoute from "./DashboardRoute";
 import CustomerRoute from "./CustomerRoute";
+import LoansRoute from "./LoansRoute";
 
 export const routes: Record<string, Router> = {
     "/app": AppRoute,
@@ -24,4 +25,5 @@ export const routes: Record<string, Router> = {
     "/author": AuthorRoute,
     "/category": CategoriesRoute,
     "/user": UserRoute,
+    "/loans": LoansRoute,
 }

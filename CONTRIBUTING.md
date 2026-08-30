@@ -103,10 +103,16 @@ return`). Group unrelated changes into separate commits/PRs where practical.
 
 ### Database schema changes
 
-If your change requires a schema change, add a new dated SQL file under
-`assets/db/` (following the existing `YYMMDD-N.sql` naming pattern) rather than
-editing `databaseSchema.sql` or earlier patch files in place — treat the schema as
-an append-only migration history, and mention the new file in your PR description.
+If your change requires a schema change, add it to **both**:
+
+- `assets/db/databaseSchema.sql` — always current, the only thing a fresh install runs.
+- `assets/db/upgrade/YYMMDD.sql` — dated upgrade file for existing installs (one
+  file per calendar day; append to today's file if one already exists rather than
+  creating a new one). See [`assets/db/upgrade/README.md`](assets/db/upgrade/README.md)
+  for the full convention.
+
+Treat a file under `assets/db/upgrade/` as append-only once it's part of a
+release — mention the new/updated file in your PR description.
 
 ## Reporting bugs
 
