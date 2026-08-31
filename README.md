@@ -11,6 +11,11 @@ language, format, cover image), and it can look books up automatically by ISBN.
 - **Live demo (read-only):** [demo.paperbooks.xyz](https://demo.paperbooks.xyz)
 - **License:** [MIT](LICENSE)
 
+<p align="center">
+  <img src="assets/screenshots/dashboard.png" alt="PaperBooks dashboard" width="49%">
+  <img src="assets/screenshots/library.png" alt="PaperBooks library view" width="49%">
+</p>
+
 ---
 
 ## Table of contents
