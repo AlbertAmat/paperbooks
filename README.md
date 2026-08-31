@@ -32,6 +32,7 @@ language, format, cover image), and it can look books up automatically by ISBN.
 - [Deploying with Docker](#deploying-with-docker)
 - [Releasing a new version](#releasing-a-new-version)
 - [Internationalization](#internationalization)
+- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Security](#security)
 - [License](#license)
@@ -356,6 +357,12 @@ in the database (`app_languages` / `app_labels` tables in `databaseSchema.sql`) 
 loaded into the client's Vue I18n instance — this keeps translations editable
 without a redeploy. The `/docs` help pages are Markdown files rendered per-language
 in the client. See [Contributing](#contributing) for how to add a new language.
+
+## Roadmap
+
+Looking for ways to contribute? [ROADMAP.md](ROADMAP.md) lists feature ideas
+that don't have anyone working on them yet — Kindle/Kobo sync, SSO, an admin
+panel, library sharing for families, and more.
 
 ## Contributing
 
