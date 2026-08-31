@@ -10,7 +10,7 @@
 		>
 			<v-img
 				cover
-				aspect-ratio="2/3"
+				:aspect-ratio="2 / 3"
 				:src="showFallbackImage ? notFound : book.getImageUrl()"
 				@error="showFallbackImage = true"
 			>

@@ -27,7 +27,7 @@
 					{{t(AppLabels.ADD_BOOK_ISBN_DESC)}}
 				</v-card-subtitle>
 
-				<div style="display: flex; align-items: center">
+				<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
 					<v-text-field
 						v-model="isbnCode"
 						:disabled="loadingIsbnCode.length != 0"
@@ -37,7 +37,7 @@
 						hide-details
 						density="compact"
 						autofocus
-						style="width: 250px; flex: none"
+						style="flex: 1 1 200px; min-width: 0"
 						class="mt-3"
 						@keydown.enter="handleEnter()"
 					>
@@ -55,8 +55,8 @@
 						item-value="value"
 						item-title="text"
 						hide-details
-						style="width: 250px; flex: none"
-						class="ml-3 mt-3"
+						style="flex: 1 1 200px; min-width: 0"
+						class="mt-3"
 					></v-select>
 				</div>
 

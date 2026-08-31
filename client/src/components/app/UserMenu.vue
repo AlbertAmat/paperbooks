@@ -7,7 +7,7 @@
 				class="d-flex align-center ml-3 text-none px-0"
 			>
 				<v-avatar
-					class="mr-2"
+					class="mr-2 user-menu-avatar"
 					size="30"
 					color="primary"
 				>
@@ -19,7 +19,7 @@
 					<v-icon v-else dark>mdi-account</v-icon>
 				</v-avatar>
 
-				{{user.getName()}}
+				<span class="user-menu-name">{{user.getName()}}</span>
 
 				<v-icon>mdi-chevron-down</v-icon>
 			</v-btn>
@@ -83,3 +83,15 @@ const items = [
 
 const user = applicationService.getUser();
 </script>
+
+<style scoped>
+@media (max-width: 600px) {
+	.user-menu-name {
+		display: none;
+	}
+
+	.user-menu-avatar {
+		margin-right: 0 !important;
+	}
+}
+</style>

@@ -96,4 +96,23 @@ watch(() => activeSection.value.id, () => {
 	overflow-y: auto;
 	padding-bottom: 60px !important;
 }
+
+@media (max-width: 600px) {
+	.docs-view {
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.docs-nav {
+		width: 100%;
+		height: auto;
+		overflow-y: visible;
+	}
+
+	.docs-content {
+		max-width: none;
+		height: auto;
+		overflow-y: visible;
+	}
+}
 </style>

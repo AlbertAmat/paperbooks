@@ -15,7 +15,7 @@
 		<template v-slot:default>
 			<div style="width: 100%; padding-top: 10px; padding-bottom: 10px;">
 				<settings-card :title="t(AppLabels.USERCONF_MY_PROFILE)">
-					<div style="display: flex; margin-bottom: 30px">
+					<div class="settings-profile-row">
 						<v-avatar
 							class="mr-6"
 							size="70"
@@ -28,8 +28,8 @@
 							/>
 							<v-icon v-else dark size="30">mdi-account</v-icon>
 						</v-avatar>
-						<div>
-							<div class="d-flex">
+						<div class="settings-profile-actions-wrap">
+							<div class="d-flex flex-wrap settings-profile-actions">
 								<v-btn
 									@click="changeImage()"
 									:loading="uploadingImage"
@@ -55,7 +55,7 @@
 							<p class="v-card-subtitle pl-0 mt-2">{{t(AppLabels.USERCONF_IMAGE_SUPPORT)}}</p>
 						</div>
 					</div>
-					<div style="width: 100%; display: flex">
+					<div class="settings-fields-row" style="width: 100%; display: flex">
 						<v-text-field
 							:model-value="controller.getUser().getCode()"
 							:label="t(AppLabels.CODE)"
@@ -125,8 +125,8 @@
 						</button>
 					</div>
 
-					<div style="display: flex; align-items: center; width: 100%; min-width: 0; margin-top: 24px">
-						<div style="flex: 1; padding-right: 80px">
+					<div class="settings-row" style="margin-top: 24px">
+						<div class="settings-row-text">
 							<p style="font-size: 14px; font-weight: 530">{{t(AppLabels.USERCONF_COMPACT_MENU)}}</p>
 							<p
 								class="v-card-subtitle pl-0"
@@ -147,7 +147,7 @@
 				</settings-card>
 
 				<settings-card :title="t(AppLabels.USERCONF_LANGUAGE_REGION)">
-					<div style="width: 100%; display: flex">
+					<div class="settings-fields-row" style="width: 100%; display: flex">
 						<v-select
 							v-model="language"
 							:items="supportedLanguages"
@@ -174,8 +174,8 @@
 					</div>
 				</settings-card>
 				<settings-card :title="t(AppLabels.USERCONF_ACCOUNT_SECURITY)">
-					<div style="display: flex; align-items: center; width: 100%; min-width: 0; margin-bottom: 16px">
-						<div style="flex: 1; padding-right: 80px">
+					<div class="settings-row" style="margin-bottom: 16px">
+						<div class="settings-row-text">
 							<p style="font-size: 14px; font-weight: 530">{{t(AppLabels.USERCONF_EMAIL)}}</p>
 							<p
 								class="v-card-subtitle pl-0"
@@ -193,8 +193,8 @@
 						/>
 					</div>
 
-					<div style="display: flex; align-items: center; width: 100%; min-width: 0">
-						<div style="flex: 1; padding-right: 80px">
+					<div class="settings-row">
+						<div class="settings-row-text">
 							<p style="font-size: 14px; font-weight: 530">{{t(AppLabels.USERCONF_CHANGE_PASSWORD)}}</p>
 							<p
 								class="v-card-subtitle pl-0"
@@ -206,8 +206,8 @@
 						<change-password-dialog :controller="controller"/>
 					</div>
 
-					<div style="display: flex; align-items: center; width: 100%; min-width: 0; margin-top: 16px">
-						<div style="flex: 1; padding-right: 80px">
+					<div class="settings-row" style="margin-top: 16px">
+						<div class="settings-row-text">
 							<p style="font-size: 14px; font-weight: 530">
 								{{t(AppLabels.TWOFA_TITLE)}}
 								<v-chip
@@ -229,8 +229,8 @@
 						<two-factor-disable-dialog v-else :controller="controller"/>
 					</div>
 
-					<div style="display: flex; align-items: center; margin-top: 16px">
-						<div style="flex: 1; min-width: 0">
+					<div class="settings-row" style="margin-top: 16px">
+						<div class="settings-row-text">
 							<p style="color: rgb(var(--v-theme-error)); font-weight: 530">{{t(AppLabels.USERCONF_DELETE)}}</p>
 							<p
 								class="v-card-subtitle pl-0"
@@ -458,6 +458,65 @@ function changeImage() {
 <style scoped>
 .settings-filed {
 	width: 50%;
+}
+
+.settings-row {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	min-width: 0;
+}
+
+.settings-row-text {
+	flex: 1;
+	padding-right: 80px;
+	min-width: 0;
+}
+
+@media (max-width: 600px) {
+	.settings-row {
+		flex-wrap: wrap;
+		row-gap: 12px;
+	}
+
+	.settings-row-text {
+		padding-right: 0;
+		flex-basis: 100%;
+	}
+}
+
+.settings-profile-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 30px;
+}
+
+.settings-profile-actions-wrap {
+	min-width: 0;
+}
+
+.settings-profile-actions {
+	gap: 8px;
+}
+
+.settings-profile-actions .ml-4 {
+	margin-left: 0 !important;
+}
+
+@media (max-width: 600px) {
+	.settings-filed {
+		width: 100%;
+	}
+
+	.settings-filed.mr-2,
+	.settings-filed.ml-2 {
+		margin: 0 0 12px !important;
+	}
+
+	.settings-fields-row {
+		flex-wrap: wrap;
+	}
 }
 
 .theme-picker {

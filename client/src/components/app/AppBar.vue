@@ -2,10 +2,16 @@
 	<v-app-bar
 		app
 		density="compact"
-		class="px-5 app-bar"
+		class="app-bar"
+		:class="smAndDown ? 'px-2' : 'px-5'"
 		border
 		:elevation="0"
 	>
+		<v-app-bar-nav-icon
+			v-if="smAndDown"
+			@click="navDrawerOpen = !navDrawerOpen"
+		/>
+
 		<v-text-field
 			v-model="searchInput"
 			:placeholder="t(AppLabels.SEARCH_BOOKS)"
@@ -26,7 +32,7 @@
 			</template>
 		</v-text-field>
 
-		<v-spacer></v-spacer>
+		<v-spacer v-if="!smAndDown"></v-spacer>
 
 		<user-menu/>
 	</v-app-bar>
@@ -39,6 +45,7 @@
  * query string set, letting `SearchController` pick it up.
  */
 import {ref, Ref} from "vue";
+import {useDisplay} from "vuetify";
 import {SearchRoute, searchRoute} from "@/router/routes/SearchRoute";
 import router from "@/router/Router";
 import UserMenu from "@/components/app/UserMenu.vue";
@@ -46,8 +53,11 @@ import BarcodeScanner from "@/components/barcodeScanner/BarcodeScanner.vue";
 import SearchToolbarFilterMenu from "@/components/app/SearchToolbarFilterMenu.vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
+import {navDrawerOpen} from "@/components/app/navDrawerState";
 
 const {t} = useI18n();
+
+const {smAndDown} = useDisplay();
 
 const params = router.currentRoute.value.query;
 const query = params[SearchRoute.QUERY_PARAM] ? params[SearchRoute.QUERY_PARAM] as string || "" : "";
@@ -86,5 +96,22 @@ function searchBarcode(value: string) {
 .app-bar-search :deep(.v-field) {
 	background: var(--pb-surface-alt);
 	border: 1px solid var(--pb-border);
+}
+
+/*
+ * Below the phone breakpoint there isn't room to both center this absolutely
+ * and reserve flex space for the nav icon/user menu either side of it - it
+ * would overlap them. Drop it back into normal flow instead, sized to
+ * whatever's left between the two.
+ */
+@media (max-width: 600px) {
+	.app-bar-search {
+		position: static;
+		transform: none;
+		width: auto;
+		max-width: none;
+		flex: 1 1 auto;
+		min-width: 0;
+	}
 }
 </style>

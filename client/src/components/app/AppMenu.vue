@@ -5,8 +5,9 @@
 		app
 		width="240"
 		class="app-menu"
-		:expand-on-hover="railEnabled"
-		permanent
+		:expand-on-hover="railEnabled && !smAndDown"
+		:permanent="!smAndDown"
+		:temporary="smAndDown"
 		:dark="true"
 	>
 		<div class="d-flex align-center pt-4 pb-3 ml-1 app-menu-header pr-1 pl-4">
@@ -158,8 +159,9 @@
  */
 import {computed, onMounted, Ref, ref, watch} from "vue";
 import {useRoute} from "vue-router";
-import {useTheme} from "vuetify";
+import {useDisplay, useTheme} from "vuetify";
 import {applicationService} from "@/service/ApplicationService";
+import {navDrawerOpen} from "@/components/app/navDrawerState";
 import {dashboardRoute} from "@/router/routes/DashboardRoute";
 import {searchRoute} from "@/router/routes/SearchRoute";
 import {locationsRoute} from "@/router/routes/LocationsRoute";
@@ -182,15 +184,31 @@ const theme = useTheme();
 
 const {t} = useI18n();
 
+const {smAndDown} = useDisplay();
+
 /**
  *
  */
 const selectedItem: Ref<string | null> = ref(null);
 
-/**
- *
- */
-const menu: Ref<boolean> = ref(true);
+/** Open state of the drawer - shared with `AppBar.vue`'s hamburger button. Starts closed on phone-sized screens, open otherwise. */
+const menu = navDrawerOpen;
+menu.value = !smAndDown.value;
+
+// Force the drawer closed/open whenever the viewport crosses the phone-sized
+// breakpoint, so e.g. rotating a phone to landscape doesn't leave a stray
+// permanent-looking drawer open, and resizing back up doesn't leave it closed.
+watch(smAndDown, (isSmall) => {
+	menu.value = !isSmall;
+});
+
+// Navigating to a new page closes the temporary (phone) drawer, matching how
+// a normal overlay/modal nav behaves.
+watch(() => route.path, () => {
+	if (smAndDown.value) {
+		menu.value = false;
+	}
+});
 
 /** Which nav list-groups are currently expanded (Vuetify's `v-list` `opened` model) - starts with "library" open if that's the current page. */
 const opened: Ref<string[]> = ref(route.path === SearchRoute.PATH ? ["library"] : []);

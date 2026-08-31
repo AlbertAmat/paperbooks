@@ -7,7 +7,7 @@
 			density="compact"
 			elevation="0"
 			style="position: sticky; top: 0; left: 0; z-index: 2"
-			class="px-6 page-toolbar"
+			class="page-toolbar"
 		>
 			<!-- Page name -->
 			<h4 class="page-toolbar-title pb-display">{{ model.getPageName() }}</h4>
@@ -76,10 +76,32 @@ const props = defineProps<Props>()
 	height: 52px !important;
 	background: var(--pb-surface) !important;
 	border-bottom: 1px solid var(--pb-border);
+	padding-left: 24px;
+	padding-right: 24px;
 
 	:deep(.v-toolbar__content) {
 		height: 52px !important;
 		min-height: 52px !important;
+	}
+
+	/*
+	 * A page's prepend/append slots (filters, sort selects, action buttons)
+	 * can easily add up to more than a phone screen's width. Let the row wrap
+	 * to a second line and grow past the usual fixed 52px instead of clipping
+	 * or squeezing everything unreadably thin.
+	 */
+	@media (max-width: 600px) {
+		height: auto !important;
+		padding-left: 12px;
+		padding-right: 12px;
+
+		:deep(.v-toolbar__content) {
+			height: auto !important;
+			flex-wrap: wrap;
+			row-gap: 8px;
+			padding-top: 8px;
+			padding-bottom: 8px;
+		}
 	}
 
 	.page-toolbar-title {

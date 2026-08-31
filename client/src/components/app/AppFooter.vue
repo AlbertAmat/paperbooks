@@ -43,4 +43,31 @@ const uiLabels = computed(() => legalUiLabels[normalizeLegalLocale(locale.value)
 		}
 	}
 }
+
+/*
+ * The copyright line plus three links don't fit on one row at phone widths -
+ * wrap instead of clipping, and let the footer grow past its usual 40px to
+ * fit the extra line (v-footer's `app` prop keeps the layout's reserved
+ * space in sync with this automatically).
+ */
+@media (max-width: 600px) {
+	.app-footer {
+		height: auto !important;
+		min-height: 40px !important;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 4px 16px;
+		padding-top: 8px;
+		padding-bottom: 8px;
+		text-align: center;
+	}
+
+	.app-footer a {
+		margin-left: 0;
+	}
+
+	.app-footer :deep(.v-spacer) {
+		display: none;
+	}
+}
 </style>
