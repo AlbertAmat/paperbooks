@@ -12,8 +12,8 @@ language, format, cover image), and it can look books up automatically by ISBN.
 - **License:** [MIT](LICENSE)
 
 <p align="center">
-  <img src="assets/screenshots/dashboard.png" alt="PaperBooks dashboard" width="49%">
-  <img src="assets/screenshots/library.png" alt="PaperBooks library view" width="49%">
+  <img src="assets/screenshots/dashboard.png" alt="PaperBooks dashboard" width="80%"><br>
+  <img src="assets/screenshots/library.png" alt="PaperBooks library view" width="80%">
 </p>
 
 ---
