@@ -7,7 +7,8 @@ at home, in a school library, or in a small lending library. It tracks where eac
 lives, who currently has it on loan, and its full catalog metadata (author, category,
 language, format, cover image), and it can look books up automatically by ISBN.
 
-- **Live demo / production URL:** none published yet — self-host it (see below).
+- **Website:** [paperbooks.xyz](https://paperbooks.xyz)
+- **Live demo (read-only):** [demo.paperbooks.xyz](https://demo.paperbooks.xyz)
 - **License:** [MIT](LICENSE)
 
 ---
