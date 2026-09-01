@@ -1,6 +1,6 @@
 # Dashboard
 
-La Dashboard è la prima cosa che vedi quando apri Paper Book. Ti offre un riepilogo a colpo d'occhio dell'intera collezione.
+La Dashboard è la prima cosa che vedi quando apri Vaultisse. Ti offre un riepilogo a colpo d'occhio dell'intera collezione.
 
 ## Questo mese, e il tuo scaffale
 
@@ -22,4 +22,4 @@ In basso, un grafico mostra quanti libri sono stati aggiunti nel tempo — utile
 
 ## Restituire libri dalla Dashboard
 
-Il pulsante **Restituisci libri** nell'angolo in alto a destra apre la stessa finestra di restituzione disponibile dalla pagina Clienti. Puoi scansionare o digitare il codice di qualsiasi copia in rientro, e Paper Book la segnerà di nuovo come disponibile. Vedi [Prestiti e restituzioni](#lending-and-returns) per il flusso completo.
+Il pulsante **Restituisci libri** nell'angolo in alto a destra apre la stessa finestra di restituzione disponibile dalla pagina Clienti. Puoi scansionare o digitare il codice di qualsiasi copia in rientro, e Vaultisse la segnerà di nuovo come disponibile. Vedi [Prestiti e restituzioni](#lending-and-returns) per il flusso completo.

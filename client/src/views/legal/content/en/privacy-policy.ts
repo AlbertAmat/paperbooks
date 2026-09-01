@@ -5,7 +5,7 @@ export const privacyPolicyEn: LegalBlock[] = [
     {type: "paragraph", text: "Last updated: 01-01-2026"},
     {
         type: "paragraph",
-        text: "This Privacy Policy explains how [Your Organization Name] (\"we\", \"us\") processes personal data through Paper Book (the \"App\"), in accordance with Regulation (EU) 2016/679 (GDPR) and Spanish Organic Law 3/2018 on Data Protection and Digital Rights Guarantee (LOPDGDD)."
+        text: "This Privacy Policy explains how [Your Organization Name] (\"we\", \"us\") processes personal data through Vaultisse (the \"App\"), in accordance with Regulation (EU) 2016/679 (GDPR) and Spanish Organic Law 3/2018 on Data Protection and Digital Rights Guarantee (LOPDGDD)."
     },
     {type: "heading", text: "1. Data controller"},
     {
@@ -17,7 +17,7 @@ export const privacyPolicyEn: LegalBlock[] = [
         ]
     },
     {type: "heading", text: "2. What data we process"},
-    {type: "paragraph", text: "Paper Book is a library and lending management tool. Depending on how it is used, we may process:"},
+    {type: "paragraph", text: "Vaultisse is a library and lending management tool. Depending on how it is used, we may process:"},
     {
         type: "list",
         items: [

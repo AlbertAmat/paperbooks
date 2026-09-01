@@ -5,7 +5,7 @@ export const securityMeasuresEs: LegalBlock[] = [
     {type: "paragraph", text: "Última actualización: 29-08-2026"},
     {
         type: "paragraph",
-        text: "Este documento resume las medidas de seguridad técnicas y organizativas integradas en Paper Book. Está redactado para que [Nombre de tu Organización] lo utilice como referencia en su propia evaluación de riesgos de seguridad, incluida, cuando proceda, una autoevaluación del Esquema Nacional de Seguridad (ENS) o una revisión conforme al artículo 32 del RGPD/LOPDGDD. Describe los controles que proporciona la propia aplicación; la seguridad del alojamiento, la red y las copias de seguridad siguen siendo responsabilidad de quien opere esta instancia (ver apartado 6)."
+        text: "Este documento resume las medidas de seguridad técnicas y organizativas integradas en Vaultisse. Está redactado para que [Nombre de tu Organización] lo utilice como referencia en su propia evaluación de riesgos de seguridad, incluida, cuando proceda, una autoevaluación del Esquema Nacional de Seguridad (ENS) o una revisión conforme al artículo 32 del RGPD/LOPDGDD. Describe los controles que proporciona la propia aplicación; la seguridad del alojamiento, la red y las copias de seguridad siguen siendo responsabilidad de quien opere esta instancia (ver apartado 6)."
     },
     {type: "heading", text: "1. Autenticación y gestión de sesiones"},
     {
@@ -56,7 +56,7 @@ export const securityMeasuresEs: LegalBlock[] = [
     {type: "heading", text: "6. Lo que sigue siendo responsabilidad de quien opera la instancia"},
     {
         type: "paragraph",
-        text: "Paper Book es software autoalojado, no un servicio gestionado. [Nombre de tu Organización] es el responsable del tratamiento de cualquier dato personal introducido en esta instancia y es responsable de: la terminación TLS/HTTPS, la seguridad del servidor y la red, las copias de seguridad de la base de datos y su cifrado, los plazos de conservación y eliminación de datos, y cualquier obligación sectorial que le sea aplicable, incluidos el RGPD/LOPDGDD y, en el caso de organismos del sector público español, el Esquema Nacional de Seguridad (Real Decreto 311/2022)."
+        text: "Vaultisse es software autoalojado, no un servicio gestionado. [Nombre de tu Organización] es el responsable del tratamiento de cualquier dato personal introducido en esta instancia y es responsable de: la terminación TLS/HTTPS, la seguridad del servidor y la red, las copias de seguridad de la base de datos y su cifrado, los plazos de conservación y eliminación de datos, y cualquier obligación sectorial que le sea aplicable, incluidos el RGPD/LOPDGDD y, en el caso de organismos del sector público español, el Esquema Nacional de Seguridad (Real Decreto 311/2022)."
     },
     {
         type: "paragraph",

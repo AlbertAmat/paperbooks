@@ -4,13 +4,13 @@ Hi ha dues maneres d'afegir un nou títol al teu catàleg, totes dues disponible
 
 ## Afegir per ISBN (recomanat)
 
-Aquesta és la manera més ràpida de catalogar un llibre: Paper Book cerca la informació del llibre per tu.
+Aquesta és la manera més ràpida de catalogar un llibre: Vaultisse cerca la informació del llibre per tu.
 
 1. Fes clic a la fletxa al costat de **Afegir llibre** i tria **Afegir llibre manualment** — o fes clic directament a **Afegir llibre** per obrir el diàleg d'ISBN.
 2. Introdueix l'ISBN **escrivint-lo** al camp, o fes clic a la icona de codi de barres per **escanejar-lo amb la càmera**.
 3. Prem Retorn per afegir-lo a la llista — pots posar a la cua **diversos ISBN alhora** abans d'enviar-los, cosa molt útil quan arriba un lot de novetats.
 4. Opcionalment, tria una **ubicació** — si en selecciones una, es crea automàticament un exemplar físic (estoc) en aquesta ubicació tan bon punt es trobi el llibre.
-5. Fes clic a **Afegir**. Paper Book obté automàticament les dades del llibre (títol, portada, descripció, autors...).
+5. Fes clic a **Afegir**. Vaultisse obté automàticament les dades del llibre (títol, portada, descripció, autors...).
 
 Mentre es processa cada ISBN, en veuràs l'estat al costat a la llista:
 
@@ -19,7 +19,7 @@ Mentre es processa cada ISBN, en veuràs l'estat al costat a la llista:
 - Una icona d'avís si no s'ha trobat cap llibre per a aquest ISBN.
 - Una icona d'error si alguna cosa ha anat malament.
 
-> **Consell:** Paper Book cerca l'ISBN automàticament fent servir bases de dades de llibres en línia, i recorre a una segona font si la primera no té el llibre. Si tot i així no es pot trobar un codi, sempre pots afegir aquest títol [manualment](#add-manually).
+> **Consell:** Vaultisse cerca l'ISBN automàticament fent servir bases de dades de llibres en línia, i recorre a una segona font si la primera no té el llibre. Si tot i així no es pot trobar un codi, sempre pots afegir aquest títol [manualment](#add-manually).
 
 ## Afegir manualment {#add-manually}
 

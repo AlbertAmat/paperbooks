@@ -4,13 +4,13 @@ Ci sono due modi per aggiungere un nuovo titolo al tuo catalogo, entrambi dispon
 
 ## Aggiungi tramite ISBN (consigliato)
 
-Questo è il modo più veloce per catalogare un libro: Paper Book cerca le informazioni del libro al posto tuo.
+Questo è il modo più veloce per catalogare un libro: Vaultisse cerca le informazioni del libro al posto tuo.
 
 1. Clicca sulla freccia accanto a **Aggiungi libro** e scegli **Aggiungi libro manualmente** — oppure clicca direttamente su **Aggiungi libro** per aprire la finestra dell'ISBN.
 2. Inserisci l'ISBN **digitandolo** nel campo, oppure clicca sull'icona del codice a barre per **scansionarlo con la fotocamera**.
 3. Premi Invio per aggiungerlo all'elenco — puoi accodare **più ISBN contemporaneamente** prima di confermare, comodo quando aggiungi una pila di nuovi arrivi.
 4. Facoltativamente scegli un'**ubicazione** — se selezionata, una copia fisica (stock) viene creata automaticamente in quella ubicazione non appena il libro viene trovato.
-5. Clicca su **Aggiungi**. Paper Book recupera automaticamente i dettagli del libro (titolo, copertina, descrizione, autori...).
+5. Clicca su **Aggiungi**. Vaultisse recupera automaticamente i dettagli del libro (titolo, copertina, descrizione, autori...).
 
 Mentre ogni ISBN viene elaborato, ne vedrai lo stato accanto nell'elenco:
 
@@ -19,7 +19,7 @@ Mentre ogni ISBN viene elaborato, ne vedrai lo stato accanto nell'elenco:
 - Un'icona di avviso se per quell'ISBN non è stato trovato alcun libro.
 - Un'icona di errore se qualcosa è andato storto.
 
-> **Suggerimento:** Paper Book cerca automaticamente l'ISBN usando database di libri online, ricorrendo a una seconda fonte se la prima non ha il libro. Se un codice non viene comunque trovato, puoi sempre aggiungere quel titolo [manualmente](#add-manually).
+> **Suggerimento:** Vaultisse cerca automaticamente l'ISBN usando database di libri online, ricorrendo a una seconda fonte se la prima non ha il libro. Se un codice non viene comunque trovato, puoi sempre aggiungere quel titolo [manualmente](#add-manually).
 
 ## Aggiungi manualmente {#add-manually}
 

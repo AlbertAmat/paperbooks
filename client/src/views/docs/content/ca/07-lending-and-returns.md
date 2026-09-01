@@ -1,6 +1,6 @@
 # Préstecs i devolucions
 
-Paper Book fa el seguiment dels préstecs a nivell d'un **exemplar** físic concret, no del títol del llibre — així sempre saps exactament quin exemplar té cada client.
+Vaultisse fa el seguiment dels préstecs a nivell d'un **exemplar** físic concret, no del títol del llibre — així sempre saps exactament quin exemplar té cada client.
 
 ## Deixar un exemplar en préstec
 

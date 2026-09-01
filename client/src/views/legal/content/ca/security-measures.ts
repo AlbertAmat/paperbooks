@@ -5,7 +5,7 @@ export const securityMeasuresCa: LegalBlock[] = [
     {type: "paragraph", text: "Última actualització: 29-08-2026"},
     {
         type: "paragraph",
-        text: "Aquest document resumeix les mesures de seguretat tècniques i organitzatives integrades a Paper Book. Està redactat perquè [Nom de la teva Organització] el faci servir com a referència en la seva pròpia avaluació de riscos de seguretat, inclosa, quan correspongui, una autoavaluació de l'Esquema Nacional de Seguretat (ENS) o una revisió segons l'article 32 del RGPD/LOPDGDD. Descriu els controls que proporciona la mateixa aplicació; la seguretat de l'allotjament, la xarxa i les còpies de seguretat continuen sent responsabilitat de qui operi aquesta instància (vegeu l'apartat 6)."
+        text: "Aquest document resumeix les mesures de seguretat tècniques i organitzatives integrades a Vaultisse. Està redactat perquè [Nom de la teva Organització] el faci servir com a referència en la seva pròpia avaluació de riscos de seguretat, inclosa, quan correspongui, una autoavaluació de l'Esquema Nacional de Seguretat (ENS) o una revisió segons l'article 32 del RGPD/LOPDGDD. Descriu els controls que proporciona la mateixa aplicació; la seguretat de l'allotjament, la xarxa i les còpies de seguretat continuen sent responsabilitat de qui operi aquesta instància (vegeu l'apartat 6)."
     },
     {type: "heading", text: "1. Autenticació i gestió de sessions"},
     {
@@ -56,7 +56,7 @@ export const securityMeasuresCa: LegalBlock[] = [
     {type: "heading", text: "6. Allò que continua sent responsabilitat de qui opera la instància"},
     {
         type: "paragraph",
-        text: "Paper Book és programari autoallotjat, no un servei gestionat. [Nom de la teva Organització] és el responsable del tractament de qualsevol dada personal introduïda en aquesta instància i és responsable de: la terminació TLS/HTTPS, la seguretat del servidor i la xarxa, les còpies de seguretat de la base de dades i el seu xifratge, els terminis de conservació i eliminació de dades, i qualsevol obligació sectorial que li sigui aplicable, inclosos el RGPD/LOPDGDD i, en el cas d'organismes del sector públic espanyol, l'Esquema Nacional de Seguretat (Reial Decret 311/2022)."
+        text: "Vaultisse és programari autoallotjat, no un servei gestionat. [Nom de la teva Organització] és el responsable del tractament de qualsevol dada personal introduïda en aquesta instància i és responsable de: la terminació TLS/HTTPS, la seguretat del servidor i la xarxa, les còpies de seguretat de la base de dades i el seu xifratge, els terminis de conservació i eliminació de dades, i qualsevol obligació sectorial que li sigui aplicable, inclosos el RGPD/LOPDGDD i, en el cas d'organismes del sector públic espanyol, l'Esquema Nacional de Seguretat (Reial Decret 311/2022)."
     },
     {
         type: "paragraph",

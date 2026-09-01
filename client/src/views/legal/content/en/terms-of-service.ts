@@ -5,12 +5,12 @@ export const termsOfServiceEn: LegalBlock[] = [
     {type: "paragraph", text: "Last updated: 01-01-2026"},
     {
         type: "paragraph",
-        text: "These Terms of Service (\"Terms\") govern access to and use of Paper Book (the \"App\"), provided by [Your Organization Name] (\"we\", \"us\"). By accessing or using the App, you agree to these Terms."
+        text: "These Terms of Service (\"Terms\") govern access to and use of Vaultisse (the \"App\"), provided by [Your Organization Name] (\"we\", \"us\"). By accessing or using the App, you agree to these Terms."
     },
     {type: "heading", text: "1. Description of the service"},
     {
         type: "paragraph",
-        text: "Paper Book is a book cataloging and lending-management tool that lets you register books, physical copies (\"stock\"), locations, categories, authors, and customers, and track borrowing and returns."
+        text: "Vaultisse is a book cataloging and lending-management tool that lets you register books, physical copies (\"stock\"), locations, categories, authors, and customers, and track borrowing and returns."
     },
     {type: "heading", text: "2. Accounts"},
     {

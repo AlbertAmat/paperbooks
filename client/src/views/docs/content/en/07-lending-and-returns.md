@@ -1,6 +1,6 @@
 # Lending & returns
 
-Paper Book tracks lending at the level of a single physical **copy**, not the book title — so you always know exactly which copy a customer has.
+Vaultisse tracks lending at the level of a single physical **copy**, not the book title — so you always know exactly which copy a customer has.
 
 ## Lending a copy
 

@@ -46,7 +46,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         decoded = jwt.verify(token, appService.getJwtSecret(), {
             algorithms: ["HS256"],
             audience: "vaultisse",
-            issuer: "vaultisse.xyz"
+            issuer: "vaultisse.com"
         }) as { user_id: number; token_version: number; exp: number };
     } catch (err: any) {
         appService.getLogger().error(err.toString());

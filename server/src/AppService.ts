@@ -294,7 +294,7 @@ export class AppService {
             decoded = jwt.verify(token, this.getJwtSecret(), {
                 algorithms: ["HS256"],
                 audience: "vaultisse",
-                issuer: "vaultisse.xyz"
+                issuer: "vaultisse.com"
             }) as { user_id: number; exp: number };
         } catch (err) {
             throw new Error("Error while getting session user");
@@ -318,7 +318,7 @@ export class AppService {
             {
                 expiresIn: Math.floor(this.getSessionTime() / 1000),
                 audience: "vaultisse",
-                issuer: "vaultisse.xyz"
+                issuer: "vaultisse.com"
             }
         );
     }
@@ -339,7 +339,7 @@ export class AppService {
             {
                 expiresIn: 5 * 60, // 5 minutes - just long enough to type a code
                 audience: "vaultisse-2fa-pending",
-                issuer: "vaultisse.xyz"
+                issuer: "vaultisse.com"
             }
         );
     }
@@ -358,7 +358,7 @@ export class AppService {
             const decoded = jwt.verify(token, this.getJwtSecret(), {
                 algorithms: ["HS256"],
                 audience: "vaultisse-2fa-pending",
-                issuer: "vaultisse.xyz"
+                issuer: "vaultisse.com"
             }) as { user_id: number };
             return decoded.user_id;
         } catch {

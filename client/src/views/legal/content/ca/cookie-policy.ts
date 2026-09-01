@@ -5,7 +5,7 @@ export const cookiePolicyCa: LegalBlock[] = [
     {type: "paragraph", text: "Darrera actualització: 01-01-2026"},
     {
         type: "paragraph",
-        text: "Aquesta Política de Cookies explica quines cookies utilitza Paper Book (l'\"Aplicació\") i amb quina finalitat, de conformitat amb la LSSI-CE (Llei de Serveis de la Societat de la Informació) i el RGPD."
+        text: "Aquesta Política de Cookies explica quines cookies utilitza Vaultisse (l'\"Aplicació\") i amb quina finalitat, de conformitat amb la LSSI-CE (Llei de Serveis de la Societat de la Informació) i el RGPD."
     },
     {type: "heading", text: "1. Què és una cookie?"},
     {
@@ -13,7 +13,7 @@ export const cookiePolicyCa: LegalBlock[] = [
         text: "Una cookie és un petit fitxer emmagatzemat al teu dispositiu que permet a un lloc web o aplicació reconèixer el teu navegador entre diferents peticions."
     },
     {type: "heading", text: "2. Cookies que utilitzem"},
-    {type: "paragraph", text: "Paper Book utilitza actualment només cookies tècniques o estrictament necessàries:"},
+    {type: "paragraph", text: "Vaultisse utilitza actualment només cookies tècniques o estrictament necessàries:"},
     {
         type: "table",
         headers: ["Cookie", "Finalitat", "Tipus", "Durada"],
@@ -28,7 +28,7 @@ export const cookiePolicyCa: LegalBlock[] = [
     {type: "heading", text: "3. Cookies que NO utilitzem"},
     {
         type: "paragraph",
-        text: "Paper Book no utilitza actualment cookies d'anàlisi, publicitat o seguiment de tercers. Si això canviés en el futur, aquesta política s'actualitzarà i, quan calgui, se sol·licitarà el teu consentiment abans d'instal·lar aquestes cookies."
+        text: "Vaultisse no utilitza actualment cookies d'anàlisi, publicitat o seguiment de tercers. Si això canviés en el futur, aquesta política s'actualitzarà i, quan calgui, se sol·licitarà el teu consentiment abans d'instal·lar aquestes cookies."
     },
     {type: "heading", text: "4. Gestió de cookies"},
     {

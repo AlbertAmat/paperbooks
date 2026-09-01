@@ -5,7 +5,7 @@ export const securityMeasuresEn: LegalBlock[] = [
     {type: "paragraph", text: "Last updated: 29-08-2026"},
     {
         type: "paragraph",
-        text: "This document summarizes the technical and organizational security measures built into Paper Book. It is written for [Your Organization Name] to reference in its own security risk assessment - including, where applicable, an Esquema Nacional de Seguridad (ENS) self-assessment or a GDPR/LOPDGDD Article 32 review. It describes controls the application itself provides; hosting, network, and backup security remain the responsibility of whoever operates this instance (see section 6)."
+        text: "This document summarizes the technical and organizational security measures built into Vaultisse. It is written for [Your Organization Name] to reference in its own security risk assessment - including, where applicable, an Esquema Nacional de Seguridad (ENS) self-assessment or a GDPR/LOPDGDD Article 32 review. It describes controls the application itself provides; hosting, network, and backup security remain the responsibility of whoever operates this instance (see section 6)."
     },
     {type: "heading", text: "1. Authentication and session management"},
     {
@@ -56,7 +56,7 @@ export const securityMeasuresEn: LegalBlock[] = [
     {type: "heading", text: "6. What remains the operator's responsibility"},
     {
         type: "paragraph",
-        text: "Paper Book is self-hosted software, not a managed service. [Your Organization Name] is the data controller for any personal data entered into this instance and is responsible for: TLS/HTTPS termination, host and network security, database backups and their encryption, data retention and deletion schedules, and any sector-specific obligation that applies to it - including GDPR/LOPDGDD, and, for Spanish public-sector bodies, the Esquema Nacional de Seguridad (Royal Decree 311/2022)."
+        text: "Vaultisse is self-hosted software, not a managed service. [Your Organization Name] is the data controller for any personal data entered into this instance and is responsible for: TLS/HTTPS termination, host and network security, database backups and their encryption, data retention and deletion schedules, and any sector-specific obligation that applies to it - including GDPR/LOPDGDD, and, for Spanish public-sector bodies, the Esquema Nacional de Seguridad (Royal Decree 311/2022)."
     },
     {
         type: "paragraph",

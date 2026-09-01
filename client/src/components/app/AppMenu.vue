@@ -27,7 +27,7 @@
 				class="mx-2 app-menu-title pb-display"
 				:class="{'app-menu-title--visible': !rail}"
 			>
-				Paper Book
+				Vaultisse
 			</span>
 		</div>
 

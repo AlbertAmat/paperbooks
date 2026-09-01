@@ -1,6 +1,6 @@
 # Panel de control
 
-El Panel de control es lo primero que ves al abrir Paper Book. Te ofrece un resumen general de toda tu colección de un vistazo.
+El Panel de control es lo primero que ves al abrir Vaultisse. Te ofrece un resumen general de toda tu colección de un vistazo.
 
 ## Este mes, y tu estantería
 
@@ -22,4 +22,4 @@ En la parte inferior, un gráfico muestra cuántos libros se han añadido a lo l
 
 ## Devolver libros desde el Panel de control
 
-El botón **Devolver libros** de la esquina superior derecha abre el mismo diálogo de devolución disponible en la página de Clientes. Puedes escanear o escribir el código de cualquier ejemplar que vuelva, y Paper Book lo marcará como disponible de nuevo. Consulta [Préstamos y devoluciones](#lending-and-returns) para conocer el proceso completo.
+El botón **Devolver libros** de la esquina superior derecha abre el mismo diálogo de devolución disponible en la página de Clientes. Puedes escanear o escribir el código de cualquier ejemplar que vuelva, y Vaultisse lo marcará como disponible de nuevo. Consulta [Préstamos y devoluciones](#lending-and-returns) para conocer el proceso completo.

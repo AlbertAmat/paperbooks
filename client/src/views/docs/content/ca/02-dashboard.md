@@ -1,6 +1,6 @@
 # Tauler de control
 
-El Tauler de control és el primer que veus quan obres Paper Book. Et dona un resum ràpid de tota la teva col·lecció.
+El Tauler de control és el primer que veus quan obres Vaultisse. Et dona un resum ràpid de tota la teva col·lecció.
 
 ## Aquest mes, i el teu prestatge
 
@@ -22,4 +22,4 @@ A la part inferior, un gràfic mostra quants llibres s'han afegit al llarg del t
 
 ## Retornar llibres des del Tauler de control
 
-El botó **Retornar llibres**, a la cantonada superior dreta, obre el mateix diàleg de devolució disponible des de la pàgina de Clients. Pots escanejar o escriure el codi de qualsevol exemplar que es retorni, i Paper Book el marcarà com a disponible de nou. Consulta [Préstecs i devolucions](#lending-and-returns) per veure el flux complet.
+El botó **Retornar llibres**, a la cantonada superior dreta, obre el mateix diàleg de devolució disponible des de la pàgina de Clients. Pots escanejar o escriure el codi de qualsevol exemplar que es retorni, i Vaultisse el marcarà com a disponible de nou. Consulta [Préstecs i devolucions](#lending-and-returns) per veure el flux complet.

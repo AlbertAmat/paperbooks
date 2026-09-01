@@ -5,12 +5,12 @@ export const termsOfServiceEs: LegalBlock[] = [
     {type: "paragraph", text: "Última actualización: 01-01-2026"},
     {
         type: "paragraph",
-        text: "Estos Términos de Servicio (\"Términos\") regulan el acceso y uso de Paper Book (la \"Aplicación\"), proporcionada por [Nombre de tu Organización] (\"nosotros\"). Al acceder o usar la Aplicación, aceptas estos Términos."
+        text: "Estos Términos de Servicio (\"Términos\") regulan el acceso y uso de Vaultisse (la \"Aplicación\"), proporcionada por [Nombre de tu Organización] (\"nosotros\"). Al acceder o usar la Aplicación, aceptas estos Términos."
     },
     {type: "heading", text: "1. Descripción del servicio"},
     {
         type: "paragraph",
-        text: "Paper Book es una herramienta de catalogación de libros y gestión de préstamos que permite registrar libros, ejemplares físicos (\"stock\"), ubicaciones, categorías, autores y clientes, y llevar el control de préstamos y devoluciones."
+        text: "Vaultisse es una herramienta de catalogación de libros y gestión de préstamos que permite registrar libros, ejemplares físicos (\"stock\"), ubicaciones, categorías, autores y clientes, y llevar el control de préstamos y devoluciones."
     },
     {type: "heading", text: "2. Cuentas"},
     {

@@ -4,13 +4,13 @@ Hay dos formas de añadir un nuevo título a tu catálogo, ambas disponibles des
 
 ## Añadir por ISBN (recomendado)
 
-Esta es la forma más rápida de catalogar un libro: Paper Book busca la información del libro por ti.
+Esta es la forma más rápida de catalogar un libro: Vaultisse busca la información del libro por ti.
 
 1. Haz clic en la flecha junto a **Añadir libro** y elige **Añadir libro manualmente** — o haz clic directamente en **Añadir libro** para abrir el diálogo de ISBN.
 2. Introduce el ISBN **escribiéndolo** en el campo, o haz clic en el icono de código de barras para **escanearlo con tu cámara**.
 3. Pulsa Intro para añadirlo a la lista — puedes poner en cola **varios ISBN a la vez** antes de enviarlos, lo cual resulta muy útil al añadir una pila de novedades.
 4. Opcionalmente, elige una **ubicación** — si la seleccionas, se crea automáticamente un ejemplar físico (stock) en esa ubicación en cuanto se encuentra el libro.
-5. Haz clic en **Añadir**. Paper Book obtiene automáticamente los datos del libro (título, portada, descripción, autores...).
+5. Haz clic en **Añadir**. Vaultisse obtiene automáticamente los datos del libro (título, portada, descripción, autores...).
 
 Mientras se procesa cada ISBN verás su estado junto a él en la lista:
 
@@ -19,7 +19,7 @@ Mientras se procesa cada ISBN verás su estado junto a él en la lista:
 - Un icono de advertencia si no se ha encontrado ningún libro para ese ISBN.
 - Un icono de error si algo ha salido mal.
 
-> **Consejo:** Paper Book busca el ISBN automáticamente usando bases de datos de libros en línea, recurriendo a una segunda fuente si la primera no tiene el libro. Si aun así no se encuentra un código, siempre puedes añadir ese título [manualmente](#add-manually).
+> **Consejo:** Vaultisse busca el ISBN automáticamente usando bases de datos de libros en línea, recurriendo a una segunda fuente si la primera no tiene el libro. Si aun así no se encuentra un código, siempre puedes añadir ese título [manualmente](#add-manually).
 
 ## Añadir manualmente {#add-manually}
 

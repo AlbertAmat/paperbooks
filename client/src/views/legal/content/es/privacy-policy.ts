@@ -5,7 +5,7 @@ export const privacyPolicyEs: LegalBlock[] = [
     {type: "paragraph", text: "Última actualización: 01-01-2026"},
     {
         type: "paragraph",
-        text: "Esta Política de Privacidad explica cómo [Nombre de tu Organización] (\"nosotros\") trata los datos personales a través de Paper Book (la \"Aplicación\"), de conformidad con el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018, de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD)."
+        text: "Esta Política de Privacidad explica cómo [Nombre de tu Organización] (\"nosotros\") trata los datos personales a través de Vaultisse (la \"Aplicación\"), de conformidad con el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018, de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD)."
     },
     {type: "heading", text: "1. Responsable del tratamiento"},
     {
@@ -17,7 +17,7 @@ export const privacyPolicyEs: LegalBlock[] = [
         ]
     },
     {type: "heading", text: "2. Qué datos tratamos"},
-    {type: "paragraph", text: "Paper Book es una herramienta de gestión de biblioteca y préstamos. Según el uso que se haga de ella, podemos tratar:"},
+    {type: "paragraph", text: "Vaultisse es una herramienta de gestión de biblioteca y préstamos. Según el uso que se haga de ella, podemos tratar:"},
     {
         type: "list",
         items: [

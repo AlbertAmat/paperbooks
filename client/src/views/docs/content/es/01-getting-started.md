@@ -1,8 +1,8 @@
-# Bienvenido a Paper Book
+# Bienvenido a Vaultisse
 
-Paper Book es una forma sencilla de catalogar todos los libros físicos que tienes o gestionas, saber exactamente dónde está cada ejemplar y llevar el control de quién lo ha tomado prestado.
+Vaultisse es una forma sencilla de catalogar todos los libros físicos que tienes o gestionas, saber exactamente dónde está cada ejemplar y llevar el control de quién lo ha tomado prestado.
 
-Tanto si gestionas la biblioteca de un colegio, la colección de un aula o tus propias estanterías en casa, Paper Book te ofrece un único lugar para:
+Tanto si gestionas la biblioteca de un colegio, la colección de un aula o tus propias estanterías en casa, Vaultisse te ofrece un único lugar para:
 
 - **Catalogar libros** — añádelos escaneando un código de barras ISBN o escribiendo los datos a mano.
 - **Controlar ejemplares, no solo títulos** — un mismo libro puede tener varios ejemplares físicos ("stock"), cada uno con su propio estado y ubicación.

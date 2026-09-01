@@ -5,7 +5,7 @@ export const cookiePolicyIt: LegalBlock[] = [
     {type: "paragraph", text: "Ultimo aggiornamento: 01-01-2026"},
     {
         type: "paragraph",
-        text: "La presente Cookie Policy spiega quali cookie utilizza Paper Book (l'\"App\") e per quale motivo, in conformità al GDPR e alla normativa applicabile in materia."
+        text: "La presente Cookie Policy spiega quali cookie utilizza Vaultisse (l'\"App\") e per quale motivo, in conformità al GDPR e alla normativa applicabile in materia."
     },
     {type: "heading", text: "1. Cos'è un cookie?"},
     {
@@ -13,7 +13,7 @@ export const cookiePolicyIt: LegalBlock[] = [
         text: "Un cookie è un piccolo file memorizzato sul tuo dispositivo che consente a un sito web o a un'applicazione di riconoscere il tuo browser tra diverse richieste."
     },
     {type: "heading", text: "2. Cookie che utilizziamo"},
-    {type: "paragraph", text: "Paper Book utilizza attualmente solo cookie tecnici strettamente necessari:"},
+    {type: "paragraph", text: "Vaultisse utilizza attualmente solo cookie tecnici strettamente necessari:"},
     {
         type: "table",
         headers: ["Cookie", "Finalità", "Tipo", "Durata"],
@@ -28,7 +28,7 @@ export const cookiePolicyIt: LegalBlock[] = [
     {type: "heading", text: "3. Cookie che NON utilizziamo"},
     {
         type: "paragraph",
-        text: "Paper Book non utilizza attualmente cookie di analisi, pubblicitari o di tracciamento di terze parti. Se ciò cambiasse in futuro, questa policy sarà aggiornata e, ove richiesto, ti sarà chiesto il consenso prima di installare tali cookie."
+        text: "Vaultisse non utilizza attualmente cookie di analisi, pubblicitari o di tracciamento di terze parti. Se ciò cambiasse in futuro, questa policy sarà aggiornata e, ove richiesto, ti sarà chiesto il consenso prima di installare tali cookie."
     },
     {type: "heading", text: "4. Gestione dei cookie"},
     {

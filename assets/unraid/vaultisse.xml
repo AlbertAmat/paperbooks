@@ -42,7 +42,7 @@
   <Config Name="Logs" Target="/app/logs" Default="/mnt/user/appdata/vaultisse/logs" Mode="rw" Description="Persistent app log directory" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/vaultisse/logs</Config>
   <Config Name="DB_HOST" Target="DB_HOST" Default="" Mode="" Description="Hostname/IP of your PostgreSQL server — e.g. another container's name on the same custom network, or your Unraid IP if Postgres runs elsewhere" Type="Variable" Display="always" Required="true" Mask="false"></Config>
   <Config Name="DB_PORT" Target="DB_PORT" Default="5432" Mode="" Description="PostgreSQL port" Type="Variable" Display="always" Required="true" Mask="false">5432</Config>
-  <Config Name="DB_NAME" Target="DB_NAME" Default="paperbooks" Mode="" Description="Database name" Type="Variable" Display="always" Required="true" Mask="false">paperbooks</Config>
+  <Config Name="DB_NAME" Target="DB_NAME" Default="vaultisse" Mode="" Description="Database name" Type="Variable" Display="always" Required="true" Mask="false">paperbooks</Config>
   <Config Name="DB_USER" Target="DB_USER" Default="postgres" Mode="" Description="Database user" Type="Variable" Display="always" Required="true" Mask="false">postgres</Config>
   <Config Name="DB_PASSWORD" Target="DB_PASSWORD" Default="" Mode="" Description="Database password" Type="Variable" Display="always" Required="true" Mask="true"></Config>
   <Config Name="FRONT_END_URL" Target="FRONT_END_URL" Default="" Mode="" Description="Public URL this app is served at, e.g. https://books.example.com or http://TOWER_IP:3000. Used for CORS/CSP." Type="Variable" Display="always" Required="true" Mask="false"></Config>
