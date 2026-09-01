@@ -7,8 +7,8 @@ at home, in a school library, or in a small lending library. It tracks where eac
 lives, who currently has it on loan, and its full catalog metadata (author, category,
 language, format, cover image), and it can look books up automatically by ISBN.
 
-- **Website:** [vaultisse.xyz](https://vaultisse.xyz)
-- **Live demo (read-only):** [demo.vaultisse.xyz](https://demo.vaultisse.xyz)
+- **Website:** [vaultisse.com](https://vaultisse.com)
+- **Live demo (read-only):** [demo.vaultisse.com](https://demo.vaultisse.com)
 - **License:** [MIT](LICENSE)
 
 <p align="center">
