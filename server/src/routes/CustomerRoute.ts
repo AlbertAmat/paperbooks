@@ -319,16 +319,14 @@ router.delete('/:id/group', requireAuth, async (req: Request, res: Response) => 
 /**
  * GET /customer
  * --------------
- * List all customers (with their group and current loan count) plus the
- * full list of tags available to the user, in one call.
+ * List all customers, with their group and current loan count.
  *
  * Auth: required.
  *
  * Example response (200):
  *  {
  *    "customers": [{ "id": 7, "name": "Jane Doe", "group_id": 1,
- *                     "group_name": "Class 4B", "total_books": 2 }],
- *    "tags": [{ "id": 1, "name": "VIP", "color": "#ff0000" }]
+ *                     "group_name": "Class 4B", "total_books": 2 }]
  *  }
  */
 //@ts-ignore
@@ -355,18 +353,8 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
             WHERE customers.user_id = $1
         `, [userId]);
 
-        // get user tags list
-        const tags = await client.query(`
-            SELECT id, 
-                   name,
-                   color
-              FROM tags
-               WHERE user_id = $1
-        `, [userId]);
-
         res.status(200).json({
-            customers: result.rows,
-            tags: tags.rows
+            customers: result.rows
         });
     } catch (err: any) {
         console.error('Error executing query', err.stack);

@@ -1,6 +1,6 @@
 /**
- * `Customer` extended with its (lazily loaded) list of loaned books and
- * assigned tags, used on the customer detail view/dialog.
+ * `Customer` extended with its (lazily loaded) list of loaned books, used
+ * on the customer detail view/dialog.
  */
 import {Ref, ref, ShallowRef, shallowRef} from "vue";
 import ICustomer, {ICustomerDetail} from "@/types/customer/ICustomer";
@@ -16,9 +16,6 @@ export default class CustomerDetail extends Customer {
 
     /** Books currently on loan to this customer, populated by `fetchBooks()`/`setBooks()`. */
     private m_books: ShallowRef<CustomerBook[]>;
-
-    /** Ids of the tags assigned to this customer. */
-    private m_tags: Ref<number[]> = ref([]);
 
     /** @param data Raw customer detail data from the server. */
     public constructor(data: ICustomerDetail) {
@@ -65,10 +62,5 @@ export default class CustomerDetail extends Customer {
             this.m_books.value = [...this.m_books.value];
             this.m_totalBooks.value = this.m_totalBooks.value -1;
         }
-    }
-
-    /** @returns The ids of the tags assigned to this customer. */
-    public getTags(): number[] {
-        return this.m_tags.value;
     }
 }

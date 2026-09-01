@@ -17,11 +17,9 @@ export default interface ICustomer {
 
 /**
  * `ICustomer` extended with the extra fields shown on the customers table -
- * assigned tag ids and the count of books currently on loan.
+ * the count of books currently on loan.
  */
 export interface ICustomerDetail extends ICustomer{
-    /** Ids of the tags assigned to this customer. */
-    tags: number[];
     /** Number of books currently on loan to this customer. */
     total_books: number;
 }

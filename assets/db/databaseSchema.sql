@@ -134,7 +134,6 @@ VALUES ('en', 'ADD_BOOK', 'Add book'),
        ('en', 'EDIT_CUSTOMER', 'Edit customer'),
        ('en', 'ADD_CUSTOMER', 'Add customer'),
        ('en', 'TOTAL_BOOKS', 'Total books'),
-   ('en', 'TAGS', 'Tags'),
        ('en', 'DELETE_CUSTOMER', 'Delete customer '),
        ('en', 'DELETE_CUSTOMER_DESC', 'Are you sure that you want to remove this customer?'),
        ('en', 'DASHBOARD_BOOKS_ADDED_TIME_OVER_TIME', 'Books Added Over Time'),
@@ -1088,15 +1087,6 @@ CREATE TABLE users
     FOREIGN KEY (language) REFERENCES app_languages (code) ON DELETE SET NULL
 );
 
-CREATE TABLE tags
-(
-    id              SERIAL PRIMARY KEY,
-    name            VARCHAR(100)       NOT NULL,
-    color           VARCHAR(7)         NOT NULL,
-    user_id         INT                NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-);
-
 -- Tracks the public-institution security-measures notice shown after login
 -- (see SecurityNoticeDialog.vue / GET /app/policy / POST /user/security-notice/accept).
 -- One row per user: sent_date is set the first time the notice is served to
@@ -1150,18 +1140,6 @@ CREATE TABLE customers
     user_id INT          NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (group_id) REFERENCES customer_groups (id) ON DELETE SET NULL
-);
-
--- customers tags table
-CREATE TABLE customer_tags
-(
-    id              SERIAL PRIMARY KEY,
-    tag_id          INT NOT NULL,
-    customer_id     INT NOT NULL,
-    user_id         INT NOT NULL,
-    FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE,
-    FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 -- Locations table

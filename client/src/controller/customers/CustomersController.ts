@@ -1,4 +1,4 @@
-/** Backs the customers management view: loads customers + tags together and exposes add/delete operations. */
+/** Backs the customers management view: loads customers and exposes add/delete operations. */
 import {BaseController} from "@/controller/BaseController";
 import {ShallowRef, shallowRef} from "vue";
 import ICustomer from "@/types/customer/ICustomer";
@@ -8,7 +8,6 @@ import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarControl
 import {i18n} from "@/plugins/i18n/i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {ICustomersResponse} from "@/types/customer/ICustomersResponse";
-import {Tag} from "@/model/customer/Tag";
 import CustomerDetail from "@/model/customer/CustomerDetail";
 import CustomerGroup from "@/model/customer/CustomerGroup";
 
@@ -17,27 +16,23 @@ export default class CustomersController extends BaseController<ICustomersRespon
     /** All customers belonging to the user, populated by `setData()`. */
     private m_customers: ShallowRef<CustomerDetail[]> = shallowRef([]);
 
-    /** All tags available to the user, populated by `setData()`. */
-    private m_tags: ShallowRef<Tag[]> = shallowRef([]);
-
     public constructor() {
         super(i18n.global.t(AppLabels.CUSTOMERS));
     }
 
-    /** @returns The customers list view's data: all customers plus all available tags. */
+    /** @returns The customers list view's data. */
     async fetchData(): Promise<ICustomersResponse> {
         return await customersService.getPageData()
     }
 
-    /** Re-run `fetchData()`/`setData()` to refresh customers + tags from the server. */
+    /** Re-run `fetchData()`/`setData()` to refresh customers from the server. */
     async reload() {
         await this.__fetchData();
     }
 
-    /** @param data Raw customers + tags data from the server. */
+    /** @param data Raw customers data from the server. */
     setData(data: ICustomersResponse) {
         this.m_customers.value = data.customers.map(customer => new CustomerDetail(customer));
-        this.m_tags.value = data.tags.map(tag => new Tag(tag));
     }
 
     /** @returns The currently loaded customers. */
@@ -51,19 +46,6 @@ export default class CustomersController extends BaseController<ICustomersRespon
      */
     public getCustomer(id: number): CustomerDetail | undefined {
         return this.m_customers.value.find(customer => customer.getCustomerId() === id);
-    }
-
-    /** @returns The currently loaded tags. */
-    public getTags(): Tag[] {
-        return this.m_tags.value;
-    }
-
-    /**
-     * @param id Tag id to look up.
-     * @returns The matching tag, or undefined if not loaded.
-     */
-    public getTag(id: number): Tag | undefined {
-        return this.m_tags.value.find(tag => tag.getId() == id);
     }
 
     /**

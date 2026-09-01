@@ -9,12 +9,12 @@ import {ICustomersResponse} from "@/types/customer/ICustomersResponse";
  * customer CRUD and lending/returning books to a customer.
  *
  * @example
- * const {customers, tags} = await customersService.getPageData();
+ * const {customers} = await customersService.getPageData();
  * await customersService.addBooks(customers[0].id, ["a1b2c3d4e5"]);
  */
 class CustomersService {
 
-    /** @returns The customers list view's data: all customers plus all available tags. */
+    /** @returns The customers list view's data. */
     public async getPageData(): Promise<ICustomersResponse> {
         const {data} = await axiosInstance.get(`${PATH_PREFIX}/customer`)
         return data;
