@@ -1,4 +1,4 @@
-# Contributing to PaperBooks
+# Contributing to Vaultisse
 
 Thanks for your interest in contributing! This document explains how to set up the
 project locally, the conventions we follow, and how to get a change merged.
@@ -147,4 +147,4 @@ UI labels live in the `app_languages` / `app_labels` tables (see
    `client/src/views/docs/`).
 4. Verify the language selector in Settings picks up the new locale.
 
-Thank you for contributing to PaperBooks!
+Thank you for contributing to Vaultisse!

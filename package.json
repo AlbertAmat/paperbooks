@@ -1,11 +1,11 @@
 {
-  "name": "paperbooks",
+  "name": "vaultisse",
   "version": "1.0.0",
   "private": true,
-  "description": "Version anchor for the PaperBooks release/Docker pipeline. Not published; client and server are built and versioned independently.",
+  "description": "Version anchor for the Vaultisse release/Docker pipeline. Not published; client and server are built and versioned independently.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlbertAmat/paperbooks.git"
+    "url": "git+https://github.com/AlbertAmat/vaultisse.git"
   },
   "license": "MIT"
 }

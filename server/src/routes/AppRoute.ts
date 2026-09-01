@@ -49,7 +49,7 @@ router.get('/version', (req: Request, res: Response) => {
  *    "formats": [{ "id": 1, "name": "Paperback" }],
  *    "locations": [{ "id": 2, "name": "Main shelf", "description": "" }],
  *    "customers": [{ "id": 7, "name": "Jane Doe" }],
- *    "labels": { "app.title": "PaperBooks" }
+ *    "labels": { "app.title": "Vaultisse" }
  *  }
  */
 //@ts-ignore

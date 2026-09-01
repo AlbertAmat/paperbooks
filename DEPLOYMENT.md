@@ -1,6 +1,6 @@
-# Deploying PaperBooks with Docker
+# Deploying Vaultisse with Docker
 
-PaperBooks ships as one Docker image (`ghcr.io/albertamat/paperbooks`) containing the
+Vaultisse ships as one Docker image (`ghcr.io/albertamat/vaultisse`) containing the
 compiled server and the built client, plus a `docker-compose.yml` that adds a
 PostgreSQL container next to it. This guide covers five ways to run it, depending on
 who should be able to reach it and what's managing your containers:
@@ -28,8 +28,8 @@ any real deployment.
 - The two files this repo publishes for deployment:
 
   ```bash
-  curl -O https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/docker-compose.yml
-  curl -O https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/.env.example
+  curl -O https://raw.githubusercontent.com/AlbertAmat/vaultisse/main/docker-compose.yml
+  curl -O https://raw.githubusercontent.com/AlbertAmat/vaultisse/main/.env.example
   cp .env.example .env
   ```
 - A generated JWT secret: `openssl rand -hex 32` → `JWT_SECRET` in `.env`.
@@ -44,7 +44,7 @@ amount of host configuration outside of Docker.
 
 ## A. Self-hosted, local only — no public access
 
-Use this when PaperBooks should only ever be reached from the machine it runs on, or
+Use this when Vaultisse should only ever be reached from the machine it runs on, or
 at most your home LAN — never the public internet.
 
 1. In `.env`:
@@ -181,13 +181,13 @@ there's nothing in the template that does this for you.
 1. **Load the template.** From a browser on your LAN, visit (swap in your Tower's
    actual address):
    ```
-   http://<TOWER-IP>/Docker/AddContainer?xmlTemplate=https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/assets/unraid/paperbooks.xml
+   http://<TOWER-IP>/Docker/AddContainer?xmlTemplate=https://raw.githubusercontent.com/AlbertAmat/vaultisse/main/assets/unraid/vaultisse.xml
    ```
    This opens Unraid's "Add Container" page pre-filled with the image, port, path,
    and all the env vars below — that's the one-click part.
 
    Prefer to install it through Unraid's UI instead of a typed URL? Docker tab →
-   gear icon → **Template Repositories** → add `https://github.com/AlbertAmat/paperbooks`,
+   gear icon → **Template Repositories** → add `https://github.com/AlbertAmat/vaultisse`,
    save. The template then shows up under **Add Container → Template** going forward,
    and stays in sync if the template is ever updated.
 
@@ -223,16 +223,16 @@ instead of Compose services:
   network from below) the same way you would in [scenario B](#b-production-with-your-own-reverse-proxy--dns).
 - **Cloudflare Tunnel**: add the official `cloudflare/cloudflared:latest` image as
   its own container — Add Container → Repository `cloudflare/cloudflared:latest`,
-  **Network Type** set to the same custom network as PaperBooks (see below) so it can
+  **Network Type** set to the same custom network as Vaultisse (see below) so it can
   reach it by container name without publishing any port, and **Extra Parameters** /
   **Post Arguments** set to `tunnel run --token <your-tunnel-token>` (the same token
   from Cloudflare's Zero Trust → Tunnels dashboard used in [scenario C](#c-production-with-cloudflare-tunnel)).
   In the Cloudflare dashboard, point the tunnel's public hostname at
-  `http://<PaperBooks-container-name>:3000` — the exact name you gave the PaperBooks
+  `http://<Vaultisse-container-name>:3000` — the exact name you gave the Vaultisse
   container, resolvable over Docker's internal DNS since they share a network.
 
 Either way, once traffic reaches it through a proxy/tunnel, flip `TRUST_PROXY` to
-`true` in the PaperBooks container's settings — otherwise its rate limiter can't
+`true` in the Vaultisse container's settings — otherwise its rate limiter can't
 tell your visitors apart from the proxy.
 
 ### Keeping it from becoming a way into your other containers
@@ -251,11 +251,11 @@ To contain that:
 1. **Give this app its own custom Docker network**, separate from whatever your other
    containers use:
    ```
-   docker network create paperbooks-net
+   docker network create vaultisse-net
    ```
    (Unraid persists custom networks created this way; some versions also expose an
    "Add a Custom Network" option under the Docker tab's settings.) Set **Network
-   Type** to this custom network — not `bridge`, not `br0` — for the PaperBooks
+   Type** to this custom network — not `bridge`, not `br0` — for the Vaultisse
    container, its reverse proxy/tunnel container, and, ideally, a Postgres container
    dedicated to it.
 2. **Don't use `br0`/macvlan for anything internet-facing.** It puts the container
@@ -265,12 +265,12 @@ To contain that:
 3. **Never use `Host` networking for it.** That removes container network isolation
    entirely.
 4. **Use a Postgres dedicated to this app, not one shared with unrelated services**,
-   if you're exposing it publicly. A custom network only isolates PaperBooks from
+   if you're exposing it publicly. A custom network only isolates Vaultisse from
    containers that *aren't* on it — a database that's also reachable from your other
    apps' network becomes the bridge between the two, undoing the isolation from
    point 1.
 
-The result: PaperBooks and only what it needs (its proxy/tunnel, its own database)
+The result: Vaultisse and only what it needs (its proxy/tunnel, its own database)
 share a network that nothing else you self-host is on — so if it's ever compromised,
 the attacker's reach stops there instead of extending to every other service on the
 box.
@@ -288,9 +288,9 @@ same Docker image.
 1. Check out a second directory (or just a second `.env` + compose project name —
    the compose file itself doesn't change) so the demo has its own named volumes:
    ```bash
-   mkdir paperbooks-demo && cd paperbooks-demo
-   curl -O https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/docker-compose.yml
-   curl -O https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/.env.example
+   mkdir vaultisse-demo && cd vaultisse-demo
+   curl -O https://raw.githubusercontent.com/AlbertAmat/vaultisse/main/docker-compose.yml
+   curl -O https://raw.githubusercontent.com/AlbertAmat/vaultisse/main/.env.example
    cp .env.example .env
    ```
 
@@ -308,22 +308,22 @@ same Docker image.
 
 3. Follow scenario C above to add the Cloudflare public hostname
    (`demo.your-domain.com` → `http://app:3000`) and start with
-   `docker compose -p paperbooks-demo --profile cloudflare up -d`. The `-p` flag
+   `docker compose -p vaultisse-demo --profile cloudflare up -d`. The `-p` flag
    keeps this stack's volumes/network namespaced separately from any production
-   `paperbooks` stack on the same host.
+   `vaultisse` stack on the same host.
 
 4. Seed it with sample data and a fixed demo login instead of real records. There's
    no seed script in the repo yet — the simplest options are a `pg_dump` of scrubbed
    sample data restored into the `db` container, or a hand-written SQL file applied
    the same way. Load it once with:
    ```bash
-   docker compose -p paperbooks-demo exec -T db psql -U "$DB_USER" -d "$DB_NAME" < demo-seed.sql
+   docker compose -p vaultisse-demo exec -T db psql -U "$DB_USER" -d "$DB_NAME" < demo-seed.sql
    ```
 
 5. Reset it on a schedule so it doesn't visibly degrade between visitors — e.g. a
    host cron entry that re-applies the seed file hourly:
    ```
-   0 * * * * cd /path/to/paperbooks-demo && docker compose -p paperbooks-demo exec -T db psql -U "$DB_USER" -d "$DB_NAME" < demo-seed.sql
+   0 * * * * cd /path/to/vaultisse-demo && docker compose -p vaultisse-demo exec -T db psql -U "$DB_USER" -d "$DB_NAME" < demo-seed.sql
    ```
    `DEMO_MODE` only blocks writes over HTTP - it doesn't stop the reseed script,
    which talks to Postgres directly.
@@ -336,7 +336,7 @@ real `JWT_SECRET` — every other production hardening step above still applies.
 ## Common operations, all scenarios
 
 - **Upgrading**: set `APP_TAG` in `.env` to a newer released version (see the
-  repo's [Releases](https://github.com/AlbertAmat/paperbooks/releases)), then:
+  repo's [Releases](https://github.com/AlbertAmat/vaultisse/releases)), then:
   ```bash
   docker compose pull
   docker compose up -d
@@ -382,6 +382,6 @@ real `JWT_SECRET` — every other production hardening step above still applies.
 - [ ] Scenario B: app port bound to `127.0.0.1`, only 80/443 open on the firewall
 - [ ] Scenario C: `TRUST_PROXY=true` is set (easy to forget since Cloudflare "just
       works" even without it — but rate limiting silently degrades without it)
-- [ ] Scenario D, if exposed publicly: PaperBooks (+ its proxy/tunnel + its own
+- [ ] Scenario D, if exposed publicly: Vaultisse (+ its proxy/tunnel + its own
       Postgres) on a dedicated custom Docker network, not `bridge` or `br0`/macvlan,
       and not sharing that network or its database with unrelated containers

@@ -14,7 +14,7 @@ import {generateSecret as generateOtpSecret, generateURI, verify as verifyOtp} f
 import QRCode from "qrcode";
 import crypto from "crypto";
 
-const ISSUER = "PaperBooks";
+const ISSUER = "Vaultisse";
 
 /** Generates a new random base32 TOTP secret. */
 export function generateTotpSecret(): string {

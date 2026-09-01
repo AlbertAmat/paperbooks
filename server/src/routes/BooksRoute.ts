@@ -1063,7 +1063,7 @@ async function fetchBookData(isbn: string, retries = 3): Promise<any> {
                 },
                 timeout: 9000,
                 headers: {
-                    'User-Agent': 'paperbooks-server/1.0',
+                    'User-Agent': 'vaultisse-server/1.0',
                 },
             },
         );

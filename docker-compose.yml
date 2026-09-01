@@ -16,7 +16,7 @@ services:
       retries: 10
 
   app:
-    image: ghcr.io/albertamat/paperbooks:${APP_TAG:-latest}
+    image: ghcr.io/albertamat/vaultisse:${APP_TAG:-latest}
     restart: unless-stopped
     depends_on:
       db:

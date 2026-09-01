@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>PaperBooks</Name>
-  <Repository>ghcr.io/albertamat/paperbooks:latest</Repository>
-  <Registry>https://github.com/AlbertAmat/paperbooks/pkgs/container/paperbooks</Registry>
+  <Name>Vaultisse</Name>
+  <Repository>ghcr.io/albertamat/vaultisse:latest</Repository>
+  <Registry>https://github.com/AlbertAmat/vaultisse/pkgs/container/vaultisse</Registry>
   <Network>bridge</Network>
   <MyIP/>
   <Shell>sh</Shell>
   <Privileged>false</Privileged>
-  <Support>https://github.com/AlbertAmat/paperbooks/issues</Support>
-  <Project>https://github.com/AlbertAmat/paperbooks</Project>
-  <Overview>PaperBooks is a self-hosted app for tracking, organizing, and lending physical book collections. This template runs the app itself; it needs a PostgreSQL server to connect to (its own container, or one you already run) with the schema from assets/db/databaseSchema.sql imported once. See the Project link, DEPLOYMENT.md, for full setup instructions.</Overview>
+  <Support>https://github.com/AlbertAmat/vaultisse/issues</Support>
+  <Project>https://github.com/AlbertAmat/vaultisse</Project>
+  <Overview>Vaultisse is a self-hosted app for tracking, organizing, and lending physical book collections. This template runs the app itself; it needs a PostgreSQL server to connect to (its own container, or one you already run) with the schema from assets/db/databaseSchema.sql imported once. See the Project link, DEPLOYMENT.md, for full setup instructions.</Overview>
   <Category>Productivity: Tools:</Category>
   <WebUI>http://[IP]:[PORT:3000]/login</WebUI>
-  <TemplateURL>https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/assets/unraid/paperbooks.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/client/public/favicon.ico</Icon>
+  <TemplateURL>https://raw.githubusercontent.com/AlbertAmat/vaultisse/main/assets/unraid/vaultisse.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/AlbertAmat/vaultisse/main/client/public/favicon.ico</Icon>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
@@ -33,13 +33,13 @@
   </Networking>
   <Data>
     <Volume>
-      <HostDir>/mnt/user/appdata/paperbooks/logs</HostDir>
+      <HostDir>/mnt/user/appdata/vaultisse/logs</HostDir>
       <ContainerDir>/app/logs</ContainerDir>
       <Mode>rw</Mode>
     </Volume>
   </Data>
   <Config Name="WebUI Port" Target="3000" Default="3000" Mode="tcp" Description="Port the app listens on and is published on" Type="Port" Display="always" Required="true" Mask="false">3000</Config>
-  <Config Name="Logs" Target="/app/logs" Default="/mnt/user/appdata/paperbooks/logs" Mode="rw" Description="Persistent app log directory" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/paperbooks/logs</Config>
+  <Config Name="Logs" Target="/app/logs" Default="/mnt/user/appdata/vaultisse/logs" Mode="rw" Description="Persistent app log directory" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/vaultisse/logs</Config>
   <Config Name="DB_HOST" Target="DB_HOST" Default="" Mode="" Description="Hostname/IP of your PostgreSQL server — e.g. another container's name on the same custom network, or your Unraid IP if Postgres runs elsewhere" Type="Variable" Display="always" Required="true" Mask="false"></Config>
   <Config Name="DB_PORT" Target="DB_PORT" Default="5432" Mode="" Description="PostgreSQL port" Type="Variable" Display="always" Required="true" Mask="false">5432</Config>
   <Config Name="DB_NAME" Target="DB_NAME" Default="paperbooks" Mode="" Description="Database name" Type="Variable" Display="always" Required="true" Mask="false">paperbooks</Config>

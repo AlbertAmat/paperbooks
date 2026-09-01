@@ -4,7 +4,7 @@
  * (see `LOGGER_PATH` env var in AppService) - not for HTTP access logs.
  *
  * @example
- * const logger = new Logger("/var/log/paperbooks");
+ * const logger = new Logger("/var/log/vaultisse");
  * logger.info("Server running on port 3000;");
  * // -> appends "[2026-08-29T12:00:00.000Z] [INFO]: Server running on port 3000;\n"
  */

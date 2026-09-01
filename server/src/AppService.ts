@@ -293,8 +293,8 @@ export class AppService {
         try {
             decoded = jwt.verify(token, this.getJwtSecret(), {
                 algorithms: ["HS256"],
-                audience: "paperbooks",
-                issuer: "paperbooks.xyz"
+                audience: "vaultisse",
+                issuer: "vaultisse.xyz"
             }) as { user_id: number; exp: number };
         } catch (err) {
             throw new Error("Error while getting session user");
@@ -317,8 +317,8 @@ export class AppService {
             this.getJwtSecret(),
             {
                 expiresIn: Math.floor(this.getSessionTime() / 1000),
-                audience: "paperbooks",
-                issuer: "paperbooks.xyz"
+                audience: "vaultisse",
+                issuer: "vaultisse.xyz"
             }
         );
     }
@@ -328,7 +328,7 @@ export class AppService {
      * passed the password check for `userId`, but is NOT a session token -
      * it carries no `token_version` claim and uses a distinct `audience`,
      * so even if it ended up in the `token` cookie by mistake, requireAuth
-     * (which checks for audience "paperbooks") would reject it. Kept in a
+     * (which checks for audience "vaultisse") would reject it. Kept in a
      * separate `pending_2fa_token` cookie, never `token` (see AuthRoute.ts).
      * @param userId
      */
@@ -338,8 +338,8 @@ export class AppService {
             this.getJwtSecret(),
             {
                 expiresIn: 5 * 60, // 5 minutes - just long enough to type a code
-                audience: "paperbooks-2fa-pending",
-                issuer: "paperbooks.xyz"
+                audience: "vaultisse-2fa-pending",
+                issuer: "vaultisse.xyz"
             }
         );
     }
@@ -357,8 +357,8 @@ export class AppService {
         try {
             const decoded = jwt.verify(token, this.getJwtSecret(), {
                 algorithms: ["HS256"],
-                audience: "paperbooks-2fa-pending",
-                issuer: "paperbooks.xyz"
+                audience: "vaultisse-2fa-pending",
+                issuer: "vaultisse.xyz"
             }) as { user_id: number };
             return decoded.user_id;
         } catch {

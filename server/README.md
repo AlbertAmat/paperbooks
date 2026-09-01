@@ -1,6 +1,6 @@
-# PaperBooks — Server
+# Vaultisse — Server
 
-Express + TypeScript REST API for PaperBooks, backed by PostgreSQL. See the
+Express + TypeScript REST API for Vaultisse, backed by PostgreSQL. See the
 [repository root README](../README.md) for the full project overview,
 architecture, and setup instructions covering both the client and the server.
 

@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-PaperBooks does not yet have tagged releases; security fixes are applied to the
+Vaultisse does not yet have tagged releases; security fixes are applied to the
 `main` branch. Please always run the latest commit on `main` in production.
 
 ## Reporting a Vulnerability
@@ -46,4 +46,4 @@ appreciated:
 - Vulnerabilities that require an attacker to already have valid database or
   server credentials
 - Issues in third-party dependencies without a demonstrated impact on
-  PaperBooks itself (please report those upstream as well)
+  Vaultisse itself (please report those upstream as well)

@@ -45,8 +45,8 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     try {
         decoded = jwt.verify(token, appService.getJwtSecret(), {
             algorithms: ["HS256"],
-            audience: "paperbooks",
-            issuer: "paperbooks.xyz"
+            audience: "vaultisse",
+            issuer: "vaultisse.xyz"
         }) as { user_id: number; token_version: number; exp: number };
     } catch (err: any) {
         appService.getLogger().error(err.toString());

@@ -1,19 +1,19 @@
-# PaperBooks
+# Vaultisse
 
 **The easiest way to track, organize, and share all your books.**
 
-PaperBooks is an open-source web application for managing physical book collections —
+Vaultisse is an open-source web application for managing physical book collections —
 at home, in a school library, or in a small lending library. It tracks where each book
 lives, who currently has it on loan, and its full catalog metadata (author, category,
 language, format, cover image), and it can look books up automatically by ISBN.
 
-- **Website:** [paperbooks.xyz](https://paperbooks.xyz)
-- **Live demo (read-only):** [demo.paperbooks.xyz](https://demo.paperbooks.xyz)
+- **Website:** [vaultisse.xyz](https://vaultisse.xyz)
+- **Live demo (read-only):** [demo.vaultisse.xyz](https://demo.vaultisse.xyz)
 - **License:** [MIT](LICENSE)
 
 <p align="center">
-  <img src="assets/screenshots/dashboard.png" alt="PaperBooks dashboard" width="80%"><br>
-  <img src="assets/screenshots/library.png" alt="PaperBooks library view" width="80%">
+  <img src="assets/screenshots/dashboard.png" alt="Vaultisse dashboard" width="80%"><br>
+  <img src="assets/screenshots/library.png" alt="Vaultisse library view" width="80%">
 </p>
 
 ---
@@ -64,7 +64,7 @@ language, format, cover image), and it can look books up automatically by ISBN.
 
 ## Architecture
 
-PaperBooks is a classic **SPA + REST API** monorepo: a Vue 3 single-page app talks to
+Vaultisse is a classic **SPA + REST API** monorepo: a Vue 3 single-page app talks to
 an Express/PostgreSQL backend over a JSON API. In production the backend also serves
 the built frontend, so the whole app runs as a single Node.js process behind one port.
 
@@ -157,7 +157,7 @@ stored or logged in plaintext.
 ## Project structure
 
 ```
-paperbooks/
+vaultisse/
 ├── client/                # Vue 3 + Vuetify frontend (see client/README.md)
 │   └── src/
 │       ├── views/         # Page components, grouped by feature
@@ -195,8 +195,8 @@ paperbooks/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/AlbertLacasta/paperbooks.git
-cd paperbooks
+git clone https://github.com/AlbertAmat/vaultisse.git
+cd vaultisse
 ```
 
 ### 2. Set up the database
@@ -293,7 +293,7 @@ pm2 start ecosystem.config.js --env production
 ## Deploying with Docker
 
 Every push of a `vX.Y.Z` tag builds a production image and publishes it to GitHub
-Container Registry at `ghcr.io/albertamat/paperbooks` (see
+Container Registry at `ghcr.io/albertamat/vaultisse` (see
 [Releasing a new version](#releasing-a-new-version)). The image bundles the compiled
 server and the built client into one process, same as the PM2 deployment above — there
 is no separate frontend container.
@@ -301,8 +301,8 @@ is no separate frontend container.
 To run it on a server with Docker installed:
 
 ```bash
-curl -O https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/docker-compose.yml
-curl -O https://raw.githubusercontent.com/AlbertAmat/paperbooks/main/.env.example
+curl -O https://raw.githubusercontent.com/AlbertAmat/vaultisse/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/AlbertAmat/vaultisse/main/.env.example
 cp .env.example .env
 # edit .env: set JWT_SECRET, DB_PASSWORD, FRONT_END_URL, etc.
 docker compose up -d
@@ -323,7 +323,7 @@ A few things worth knowing before pointing this at a real server:
 - **Logs** are written to `/app/logs` inside the container (`LOGGER_PATH`), persisted
   via the `app-logs` volume.
 - To build and run the image locally instead of pulling it:
-  `docker build -t paperbooks .`
+  `docker build -t vaultisse .`
 
 To build a multi-arch image or push to a different registry, adjust
 `.github/workflows/docker-release.yml`.
@@ -346,7 +346,7 @@ git push --follow-tags
 
 `npm version` bumps `package.json`, commits it, and creates a `vX.Y.Z` git tag.
 Pushing that tag triggers `.github/workflows/docker-release.yml`, which builds the
-Docker image, pushes `ghcr.io/albertamat/paperbooks:X.Y.Z` and `:latest`, and creates
+Docker image, pushes `ghcr.io/albertamat/vaultisse:X.Y.Z` and `:latest`, and creates
 a matching GitHub Release with auto-generated notes.
 
 The running app version is available at `GET /api/rest/app/version` (unauthenticated),

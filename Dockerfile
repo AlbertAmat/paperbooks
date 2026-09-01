@@ -40,10 +40,10 @@ ENV NODE_ENV=production \
     APP_VERSION=${APP_VERSION} \
     LOGGER_PATH=/app/logs
 
-LABEL org.opencontainers.image.title="paperbooks" \
-      org.opencontainers.image.description="PaperBooks — self-hosted personal/library book tracker" \
+LABEL org.opencontainers.image.title="vaultisse" \
+      org.opencontainers.image.description="Vaultisse — self-hosted personal/library book tracker" \
       org.opencontainers.image.version="${APP_VERSION}" \
-      org.opencontainers.image.source="https://github.com/AlbertAmat/paperbooks" \
+      org.opencontainers.image.source="https://github.com/AlbertAmat/vaultisse" \
       org.opencontainers.image.licenses="MIT"
 
 # Same runtime layout produced by build.sh, so the compiled server's

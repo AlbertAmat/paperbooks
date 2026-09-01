@@ -1,6 +1,6 @@
-# PaperBooks — Client
+# Vaultisse — Client
 
-Vue 3 + Vuetify 3 single-page application for PaperBooks, built with Vite and
+Vue 3 + Vuetify 3 single-page application for Vaultisse, built with Vite and
 TypeScript. See the [repository root README](../README.md) for the full project
 overview, architecture, and setup instructions covering both the client and the
 server.
