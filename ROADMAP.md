@@ -15,6 +15,11 @@ Have an idea that isn't listed? Open an issue — see
   read once it's finished on the device, and surface e-books that exist on the
   device but haven't been added to Vaultisse yet, so they can be imported with
   one click.
+- [ ] **OPDS feed support** ([#14](https://github.com/AlbertAmat/vaultisse/issues/14))
+  — serve the library as an OPDS feed so it can be read in other apps and
+  e-readers.
+- [ ] **Webhooks/API for automation** ([#15](https://github.com/AlbertAmat/vaultisse/issues/15))
+  — webhooks and/or a machine-to-machine API to enable automation.
 
 ## Security & accounts
 
@@ -30,6 +35,12 @@ Have an idea that isn't listed? Open an issue — see
 - [ ] **Email notifications** ([#5](https://github.com/AlbertAmat/vaultisse/issues/5))
   — notify users by email for account events, such as confirming an account
   action completed successfully or confirming account deletion.
+- [ ] **Disable new users by default** ([#12](https://github.com/AlbertAmat/vaultisse/issues/12))
+  — new registrations are created disabled until an administrator activates
+  them.
+- [ ] **Registration activation email** ([#11](https://github.com/AlbertAmat/vaultisse/issues/11))
+  — notify a new registrant that admin activation is required before they can
+  log in.
 
 ## Collaboration
 
@@ -39,6 +50,15 @@ Have an idea that isn't listed? Open an issue — see
   — let multiple accounts manage the same collection of books together.
   Example: a family shares one book repository for the home, and every family
   member can add, borrow, and manage books in it.
+
+## Library management
+
+- [ ] **CSV import/export** ([#17](https://github.com/AlbertAmat/vaultisse/issues/17))
+  — import and export the library via CSV.
+- [ ] **Audiobook support** ([#16](https://github.com/AlbertAmat/vaultisse/issues/16))
+  — playback, variable speed, sleep timer, and chapter navigation.
+- [ ] **Duplicate detection** ([#13](https://github.com/AlbertAmat/vaultisse/issues/13))
+  — detect and surface duplicate items across the library.
 
 ## Admin
 
