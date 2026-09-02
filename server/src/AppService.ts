@@ -195,6 +195,8 @@ export class AppService {
      * Initialize the API server
      */
     public init() {
+        AppService.__printBanner();
+
         const server = http.createServer(this.m_app);
 
         // Load all routes into Express
@@ -244,6 +246,25 @@ export class AppService {
     /** Get database connection pool */
     public getDatabasePool(): pg.Pool {
         return this.m_databasePool;
+    }
+
+    /**
+     * Print the startup ASCII banner to the console.
+     * @private
+     */
+    private static __printBanner() {
+        const banner = String.raw`
+██╗   ██╗ █████╗ ██╗   ██╗██╗  ████████╗██╗███████╗███████╗███████╗
+██║   ██║██╔══██╗██║   ██║██║  ╚══██╔══╝██║██╔════╝██╔════╝██╔════╝
+██║   ██║███████║██║   ██║██║     ██║   ██║███████╗███████╗█████╗
+╚██╗ ██╔╝██╔══██║██║   ██║██║     ██║   ██║╚════██║╚════██║██╔══╝
+ ╚████╔╝ ██║  ██║╚██████╔╝███████╗██║   ██║███████║███████║███████╗
+  ╚═══╝  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝   ╚═╝╚══════╝╚══════╝╚══════╝
+`;
+        console.log(banner);
+        console.log("  This project is open source — contributions and issues welcome!");
+        console.log("  https://github.com/AlbertAmat/vaultisse");
+        console.log("");
     }
 
     /**
