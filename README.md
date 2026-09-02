@@ -8,7 +8,8 @@ lives, who currently has it on loan, and its full catalog metadata (author, cate
 language, format, cover image), and it can look books up automatically by ISBN.
 
 - **Website:** [vaultisse.com](https://vaultisse.com)
-- **Live demo (read-only):** [demo.vaultisse.com](https://demo.vaultisse.com)
+- **Live demo (read-only):** [demo.vaultisse.com](https://demo.vaultisse.com) — log in with
+  `demo@vaultisse.com` / `VaultisseDemo!2026`
 - **License:** [MIT](LICENSE)
 
 <p align="center">
