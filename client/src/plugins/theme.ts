@@ -21,5 +21,5 @@ export function applyTheme(theme: string | null | undefined) {
 
     document.documentElement.dataset.theme = resolved;
     //@ts-ignore - Vuetify's created instance exposes `theme` (ThemeInstance) though it's not in the public plugin type.
-    vuetify.theme.global.name.value = resolved;
+    vuetify.theme.change(resolved);
 }

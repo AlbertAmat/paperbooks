@@ -23,24 +23,27 @@ const router = Router();
  *  {
  *    "lastBooks": [{ "id": 12, "name": "The Hobbit", "image_url": "...",
  *                     "isbn": "9780261102217", "pages": 310, "date_created": "2026-08-01T..." }],
- *    "totalBooks": "42",
- *    "totalThisMonth": "3",
- *    "totalLastMonth": "5",
- *    "totalCategories": "6",
- *    "totalCustomers": "10",
- *    "booksInTime": [{ "month": "2026-08-01T00:00:00.000Z", "total_books": "3" }],
- *    "stockStatus": [{ "status": 0, "count": "20" }, { "status": 2, "count": "5" }],
- *    "totalBookedBooks": "5",
- *    "totalLocations": "2",
- *    "totalAuthors": "15",
- *    "categoryShelves": [{ "id": 3, "name": "Fantasy", "count": "10",
+ *    "totalBooks": 42,
+ *    "totalThisMonth": 3,
+ *    "totalLastMonth": 5,
+ *    "totalCategories": 6,
+ *    "totalCustomers": 10,
+ *    "booksInTime": [{ "month": "2026-08-01T00:00:00.000Z", "total_books": 3 }],
+ *    "stockStatus": [{ "status": 0, "count": 20 }, { "status": 2, "count": 5 }],
+ *    "totalBookedBooks": 5,
+ *    "totalLocations": 2,
+ *    "totalAuthors": 15,
+ *    "categoryShelves": [{ "id": 3, "name": "Fantasy", "count": 10,
  *                          "books": [{ "id": 12, "name": "The Hobbit", "image_url": "..." }] }],
  *    "currentlyOnLoan": [{ "bookId": 12, "bookName": "The Hobbit", "imageUrl": "...",
  *                          "customerId": 4, "customerName": "Maria Puig" }]
  *  }
  *
- * Note: count fields come back as strings because Postgres `COUNT(*)` yields
- * a `bigint`, which node-postgres serializes as a string to avoid precision loss.
+ * Note: Postgres `COUNT(*)` yields a `bigint`, which node-postgres
+ * serializes as a string to avoid precision loss - every count below is
+ * cast back to a `number` before being sent, since a user's library is
+ * nowhere near `Number.MAX_SAFE_INTEGER` and the client types (and Vuetify
+ * prop checks) expect actual numbers.
  */
 //@ts-ignore
 router.get('', requireAuth, async (req: Request, res: Response) => {
@@ -129,13 +132,13 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
 
         // Fold the denormalized category/book rows into one entry per
         // category, each carrying its sample of books.
-        const categoryShelvesById = new Map<number, { id: number; name: string; count: string; books: { id: number; name: string; image_url: string | null }[] }>();
+        const categoryShelvesById = new Map<number, { id: number; name: string; count: number; books: { id: number; name: string; image_url: string | null }[] }>();
         for (const row of categoryShelfRows.rows) {
             if (!categoryShelvesById.has(row.category_id)) {
                 categoryShelvesById.set(row.category_id, {
                     id: row.category_id,
                     name: row.category_name,
-                    count: row.count,
+                    count: Number(row.count),
                     books: []
                 });
             }
@@ -150,16 +153,16 @@ router.get('', requireAuth, async (req: Request, res: Response) => {
 
         res.json({
             lastBooks: lastBooks.rows,
-            totalBooks: totalBooks.rows[0].count,
-            totalThisMonth: totalThisMonth.rows[0].count,
-            totalLastMonth: totalLastMonth.rows[0].count,
-            totalCategories: totalCategories.rows[0].count,
-            totalCustomers: totalCustomers.rows[0].count,
-            booksInTime: booksInTime.rows,
-            stockStatus: stockStatus.rows,
-            totalBookedBooks: totalBookedBooks.rows[0].count,
-            totalLocations: totalLocations.rows[0].count,
-            totalAuthors: totalAuthors.rows[0].count,
+            totalBooks: Number(totalBooks.rows[0].count),
+            totalThisMonth: Number(totalThisMonth.rows[0].count),
+            totalLastMonth: Number(totalLastMonth.rows[0].count),
+            totalCategories: Number(totalCategories.rows[0].count),
+            totalCustomers: Number(totalCustomers.rows[0].count),
+            booksInTime: booksInTime.rows.map((row) => ({...row, total_books: Number(row.total_books)})),
+            stockStatus: stockStatus.rows.map((row) => ({...row, count: Number(row.count)})),
+            totalBookedBooks: Number(totalBookedBooks.rows[0].count),
+            totalLocations: Number(totalLocations.rows[0].count),
+            totalAuthors: Number(totalAuthors.rows[0].count),
             categoryShelves: Array.from(categoryShelvesById.values()),
             currentlyOnLoan: currentlyOnLoan.rows,
         });
