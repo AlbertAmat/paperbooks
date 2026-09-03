@@ -239,6 +239,43 @@ router.patch("/sidebar-rail", requireAuth, async (req: Request, res: Response) =
 });
 
 /**
+ * PATCH /user/leasing
+ * ----------------------
+ * Update whether the current user's Loans and Customers pages (and their
+ * nav items) are shown (see AppMenu.vue and Router.ts on the client). Off
+ * by default - most accounts just track a personal collection and don't
+ * lend books out.
+ *
+ * Auth: required. Body: { "leasingEnabled": true | false }.
+ * Responses: 200 {"message": "Leasing preference updated successfully"} |
+ *            400 {"error": "Invalid leasingEnabled"}.
+ */
+router.patch("/leasing", requireAuth, async (req: Request, res: Response) => {
+    const {leasingEnabled} = req.body;
+
+    if (typeof leasingEnabled !== "boolean") {
+        return res.status(400).json({error: "Invalid leasingEnabled"});
+    }
+
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        await pool.query(
+            `UPDATE users
+             SET leasing_enabled = $1
+             WHERE id = $2`,
+            [leasingEnabled, userId]
+        );
+
+        res.status(200).json({message: "Leasing preference updated successfully"});
+    } catch (err: any) {
+        console.error("Error executing query", err.stack);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+/**
  * DELETE /user
  * -------------
  * Permanently delete the current user's account (and, via DB foreign keys,

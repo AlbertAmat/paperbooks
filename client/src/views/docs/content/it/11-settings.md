@@ -16,6 +16,10 @@ Scegli tra due temi:
 
 Selezionare un tema lo applica subito. Poco sotto, l'interruttore **Menu compatto** riduce la barra laterale sinistra alle sole icone, espandendola di nuovo al passaggio del mouse — comodo sugli schermi più piccoli.
 
+## Funzionalità
+
+L'interruttore **Prestiti** attiva le pagine **Prestiti** e **Clienti** (e le relative voci nel menu laterale) — disattivato per impostazione predefinita per gli account che tengono traccia solo di una collezione personale. Disattivarlo di nuovo nasconde entrambe le pagine; non elimina prestiti o clienti esistenti.
+
 ## Lingua e regione
 
 Scegli la tua **lingua** e **regione** preferite per l'interfaccia dell'app.

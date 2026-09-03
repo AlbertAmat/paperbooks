@@ -62,6 +62,16 @@ router.beforeEach((to, from, next) => {
         window.location.href = "/login";
         return;
     }
+
+    // The Loans and Customers pages are opt-in (see Settings > Features).
+    // Their nav items are already hidden when disabled (see AppMenu.vue) -
+    // this stops a direct/bookmarked link from reaching them regardless.
+    const leasingPaths: string[] = [customersRoute.getPath(), loansRoute.getPath()];
+    if (leasingPaths.includes(to.path) && !applicationService.getUser().isLeasingEnabled()) {
+        next(DashboardRoute.PATH);
+        return;
+    }
+
     next();
 });
 

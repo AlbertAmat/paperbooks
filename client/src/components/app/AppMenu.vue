@@ -256,22 +256,27 @@ watch(railEnabled, (enabled) => {
 /**
  *
  */
-const items = [
+/** Whether the Loans and Customers pages are enabled - the user's saved Settings preference. Off by default. */
+const leasingEnabled = computed(() => applicationService.getUser().isLeasingEnabled());
+
+const items = computed(() => [
 	{
 		name: t(AppLabels.LOCATIONS),
 		icon: "mdi-map-marker-radius",
 		path: locationsRoute.getPath()
 	},
-	{
-		name: t(AppLabels.CUSTOMERS),
-		icon: "mdi-account-school-outline",
-		path: customersRoute.getPath()
-	},
-	{
-		name: t(AppLabels.LOANS),
-		icon: "mdi-book-arrow-right-outline",
-		path: loansRoute.getPath()
-	},
+	...(leasingEnabled.value ? [
+		{
+			name: t(AppLabels.CUSTOMERS),
+			icon: "mdi-account-school-outline",
+			path: customersRoute.getPath()
+		},
+		{
+			name: t(AppLabels.LOANS),
+			icon: "mdi-book-arrow-right-outline",
+			path: loansRoute.getPath()
+		}
+	] : []),
 	{
 		name: t(AppLabels.CATEGORIES),
 		icon: "mdi-shape-outline",
@@ -282,7 +287,7 @@ const items = [
 		icon: "mdi-account-tie",
 		path: authorsRoute.getPath()
 	}
-]
+])
 
 watch(() => route.path, (path) => {
 	selectedItem.value = path || null;

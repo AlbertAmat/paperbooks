@@ -82,6 +82,15 @@ class UserService {
     }
 
     /**
+     * Update whether the current user's Loans and Customers pages (and
+     * their nav items) are shown.
+     * @param leasingEnabled Whether leasing is enabled.
+     */
+    public async updateLeasingEnabled(leasingEnabled: boolean) {
+        await axiosInstance.patch(`${PATH_PREFIX}/user/leasing`, {leasingEnabled});
+    }
+
+    /**
      * Acknowledge the security-measures notice shown to public-institution
      * accounts (see SecurityNoticeDialog.vue). Records the acceptance date
      * server-side so the dialog doesn't show again for this user.

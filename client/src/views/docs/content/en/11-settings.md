@@ -16,6 +16,10 @@ Pick between two themes:
 
 Selecting a theme applies it right away. Below it, the **Compact menu** switch collapses the left-hand sidebar down to icons only, expanding it again whenever you hover over it — handy on smaller screens.
 
+## Features
+
+The **Leasing** switch turns on the **Loans** and **Customers** pages (and their entries in the sidebar) — off by default for accounts that just track a personal collection. Turning it off again hides both pages; it doesn't delete any existing loans or customers.
+
 ## Language & region
 
 Choose your preferred **language** and **region** for the app's interface.

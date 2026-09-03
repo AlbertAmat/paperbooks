@@ -16,6 +16,10 @@ Elige entre dos temas:
 
 Al seleccionar un tema, se aplica al instante. Justo debajo, el interruptor **Menú compacto** reduce la barra lateral izquierda a solo iconos, expandiéndola de nuevo al pasar el ratón por encima — útil en pantallas más pequeñas.
 
+## Funciones
+
+El interruptor **Préstamos** activa las páginas de **Préstamos** y **Clientes** (y sus entradas en el menú lateral) — desactivado por defecto para las cuentas que solo hacen seguimiento de una colección personal. Volver a desactivarlo oculta ambas páginas; no elimina ningún préstamo o cliente existente.
+
 ## Idioma y región
 
 Elige tu **idioma** y **región** preferidos para la interfaz de la aplicación.

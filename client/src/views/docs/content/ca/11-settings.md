@@ -16,6 +16,10 @@ Tria entre dos temes:
 
 En seleccionar un tema, s'aplica a l'instant. Just a sota, l'interruptor **Menú compacte** redueix la barra lateral esquerra a només icones, i la torna a expandir en passar-hi el ratolí per sobre — útil en pantalles més petites.
 
+## Funcionalitats
+
+L'interruptor **Préstecs** activa les pàgines de **Préstecs** i **Clients** (i les seves entrades al menú lateral) — desactivat per defecte per als comptes que només fan seguiment d'una col·lecció personal. Tornar-lo a desactivar amaga totes dues pàgines; no elimina cap préstec o client existent.
+
 ## Idioma i regió
 
 Tria el teu **idioma** i **regió** preferits per a la interfície de l'aplicació.

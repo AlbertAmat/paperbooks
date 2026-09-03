@@ -43,7 +43,7 @@ router.get('/version', (req: Request, res: Response) => {
  *  {
  *    "user": { "code": "jdoe", "name": "Jane Doe", "email": "jane@example.com",
  *               "language": "en", "region": "US", "image": null, "isPublicInstitution": false,
- *               "totpEnabled": false, "securityNoticeAccepted": false },
+ *               "leasingEnabled": false, "totpEnabled": false, "securityNoticeAccepted": false },
  *    "categories": [{ "id": 3, "name": "Fantasy" }],
  *    "languages": [{ "code": "en", "name": "English" }],
  *    "formats": [{ "id": 1, "name": "Paperback" }],
@@ -255,6 +255,7 @@ async function getUser(userId: number): Promise<Record<string, any>> {
                u.image,
                u.theme,
                u.sidebar_rail          AS "sidebarRail",
+               u.leasing_enabled       AS "leasingEnabled",
                u.is_public_institution AS "isPublicInstitution",
                u.totp_enabled          AS "totpEnabled",
                (sn.accepted_date IS NOT NULL) AS "securityNoticeAccepted"
