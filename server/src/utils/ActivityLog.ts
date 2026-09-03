@@ -7,8 +7,18 @@
  */
 import {Pool, PoolClient} from "pg";
 
-/** Auth events currently written - keep in sync with the CHECK-free `action` column and GET /user/activity's filter. */
-export type AuthActivityAction = "login" | "login_failed" | "logout" | "password_changed";
+/**
+ * Auth events currently written - keep in sync with GET /user/activity's
+ * filter (which reads `Object.values(ActivityAction)` rather than
+ * duplicating this list, so the two can't drift). The `action` DB column
+ * itself is a plain VARCHAR with no CHECK constraint.
+ */
+export enum ActivityAction {
+    LOGIN = "login",
+    LOGIN_FAILED = "login_failed",
+    LOGOUT = "logout",
+    PASSWORD_CHANGED = "password_changed",
+}
 
 export interface RecordActivityOptions {
     entityType?: string | null;
@@ -22,12 +32,12 @@ export interface RecordActivityOptions {
  * @param actorId The user the action is attributed to, or `null` when
  *                there isn't one yet (e.g. a failed login for a username
  *                that doesn't match any account - see `metadata` instead).
- * @param action Short machine-readable action code, e.g. "login".
+ * @param action Which event this is, e.g. `ActivityAction.LOGIN`.
  */
 export async function recordActivity(
     db: Pool | PoolClient,
     actorId: number | null,
-    action: AuthActivityAction,
+    action: ActivityAction,
     options: RecordActivityOptions = {}
 ): Promise<void> {
     await db.query(

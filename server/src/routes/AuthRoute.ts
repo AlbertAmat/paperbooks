@@ -25,7 +25,7 @@ import jwt from "jsonwebtoken";
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import {verifyTotpCode, normalizeBackupCode} from "../utils/TwoFactorAuth";
 import {createUserSession} from "../utils/UserSessions";
-import {recordActivity} from "../utils/ActivityLog";
+import {recordActivity, ActivityAction} from "../utils/ActivityLog";
 
 const router = express.Router();
 
@@ -190,7 +190,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
 
         if (userResult.rows.length === 0) {
             appService.getLogger().debug("No user found for:" + username);
-            await recordActivity(pool, null, "login_failed", {metadata: {attemptedUsername: username, ip: req.ip}});
+            await recordActivity(pool, null, ActivityAction.LOGIN_FAILED, {metadata: {attemptedUsername: username, ip: req.ip}});
             return res.status(401).json({message: "Invalid username or password."});
         }
 
@@ -199,7 +199,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
         const comparePassword = await appService.comparePassword(password, user.password);
         if (!comparePassword) {
             appService.getLogger().debug("invalid password for user:" + username);
-            await recordActivity(pool, user.id, "login_failed", {metadata: {ip: req.ip}});
+            await recordActivity(pool, user.id, ActivityAction.LOGIN_FAILED, {metadata: {ip: req.ip}});
             return res.status(401).json({message: "Invalid username or password."});
         }
 
@@ -229,7 +229,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
         appService.getLogger().debug("Setting session and cookie for user:" + username);
 
         const {sessionKey} = await createUserSession(pool, user.id, req.get("user-agent"), req.ip);
-        await recordActivity(pool, user.id, "login", {metadata: {ip: req.ip}});
+        await recordActivity(pool, user.id, ActivityAction.LOGIN, {metadata: {ip: req.ip}});
 
         const userToken = appService.createSessionToken(user.id, user.token_version, sessionKey);
 
@@ -306,7 +306,7 @@ router.post("/login/2fa", twoFaLimiter, async (req: Request, res: Response) => {
         }
 
         if (!verified) {
-            await recordActivity(pool, user.id, "login_failed", {metadata: {stage: "2fa", ip: req.ip}});
+            await recordActivity(pool, user.id, ActivityAction.LOGIN_FAILED, {metadata: {stage: "2fa", ip: req.ip}});
             return res.status(401).json({message: "Invalid verification code."});
         }
 
@@ -315,7 +315,7 @@ router.post("/login/2fa", twoFaLimiter, async (req: Request, res: Response) => {
         await pool.query(`UPDATE users SET last_login_date = CURRENT_TIMESTAMP WHERE id = $1`, [user.id]);
 
         const {sessionKey} = await createUserSession(pool, user.id, req.get("user-agent"), req.ip);
-        await recordActivity(pool, user.id, "login", {metadata: {ip: req.ip}});
+        await recordActivity(pool, user.id, ActivityAction.LOGIN, {metadata: {ip: req.ip}});
 
         const userToken = appService.createSessionToken(user.id, user.token_version, sessionKey);
         res.cookie("token", userToken, {
@@ -455,7 +455,7 @@ router.get("/logout", async (req: Request, res: Response) => {
             );
 
             if ((result.rowCount ?? 0) > 0) {
-                await recordActivity(pool, decoded.user_id, "logout", {metadata: {ip: req.ip}});
+                await recordActivity(pool, decoded.user_id, ActivityAction.LOGOUT, {metadata: {ip: req.ip}});
             }
         } catch (err) {
             // Already invalid/expired - nothing to revoke, just clear the cookie below.

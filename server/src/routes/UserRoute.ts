@@ -20,7 +20,7 @@ import {
     verifyTotpCode,
     generateBackupCodes
 } from "../utils/TwoFactorAuth";
-import {recordActivity} from "../utils/ActivityLog";
+import {recordActivity, ActivityAction} from "../utils/ActivityLog";
 
 const router = Router();
 
@@ -389,7 +389,7 @@ router.post("/password", requireAuth, passwordChangeLimiter, async (req: Request
             );
         }
 
-        await recordActivity(pool, userId, "password_changed", {metadata: {ip: req.ip}});
+        await recordActivity(pool, userId, ActivityAction.PASSWORD_CHANGED, {metadata: {ip: req.ip}});
 
         // Reuses the same session_key (req.sessionKey) so this device's
         // user_sessions row - deliberately left un-revoked above - still
@@ -494,7 +494,7 @@ router.delete("/sessions/:id", requireAuth, async (req: Request, res: Response) 
             return res.status(404).json({error: "Session not found"});
         }
 
-        await recordActivity(pool, userId, "logout", {metadata: {ip: req.ip, sessionId}});
+        await recordActivity(pool, userId, ActivityAction.LOGOUT, {metadata: {ip: req.ip, sessionId}});
 
         if (sessionId === req.sessionId) {
             res.clearCookie("token");
@@ -532,10 +532,10 @@ router.get("/activity", requireAuth, async (req: Request, res: Response) => {
             `SELECT id, action, metadata, created_date AS "createdDate"
              FROM activity_log
              WHERE actor_id = $1
-               AND action IN ('login', 'login_failed', 'logout', 'password_changed')
+               AND action = ANY($2)
              ORDER BY created_date DESC
-             LIMIT $2`,
-            [userId, limit]
+             LIMIT $3`,
+            [userId, Object.values(ActivityAction), limit]
         );
 
         res.status(200).json(result.rows);
