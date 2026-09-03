@@ -22,7 +22,7 @@ import {appService} from "../AppService";
 import path from "path";
 import rateLimit from "express-rate-limit";
 import jwt from "jsonwebtoken";
-import {requireAuth} from "../middlewares/AuthMiddleware";
+import {requireAuth, requireAuthPage} from "../middlewares/AuthMiddleware";
 import {verifyTotpCode, normalizeBackupCode} from "../utils/TwoFactorAuth";
 import {createUserSession} from "../utils/UserSessions";
 import {recordActivity, ActivityAction} from "../utils/ActivityLog";
@@ -93,9 +93,11 @@ router.use("/app/assets", requireAuth, express.static(path.join(clientDistPath, 
  * GET /app
  * ---------
  * Serves the SPA's `index.html` entry point (production only - in dev the
- * Vite dev server handles this). Auth: required.
+ * Vite dev server handles this). Auth: required (redirects to `/login` on
+ * failure - see `requireAuthPage` - rather than the JSON 401 `requireAuth`
+ * uses elsewhere, since there's no SPA on screen yet to show that in).
  */
-router.get('/app', requireAuth, async (req: Request, res: Response) => {
+router.get('/app', requireAuthPage, async (req: Request, res: Response) => {
     const appPath = path.join(clientDistPath, "index.html");
 
     appService.getLogger().debug(`serving /app index: ${appPath}`);
@@ -106,9 +108,10 @@ router.get('/app', requireAuth, async (req: Request, res: Response) => {
  * GET /app/*
  * -----------
  * Catch-all so client-side (Vue Router) routes like `/app/book/12` still
- * resolve to the SPA shell on a hard refresh. Auth: required.
+ * resolve to the SPA shell on a hard refresh. Auth: required (see the
+ * `requireAuthPage` note on `GET /app` just above).
  */
-router.get('/app/*', requireAuth, async (req: Request, res: Response) => {
+router.get('/app/*', requireAuthPage, async (req: Request, res: Response) => {
     const appPath = path.join(clientDistPath, "index.html");
 
     appService.getLogger().debug(`serving /app/* index: ${appPath}`);

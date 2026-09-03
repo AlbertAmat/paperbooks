@@ -15,9 +15,18 @@
  * (there was never a real login to create one), so the per-session check
  * below is skipped for it too.
  *
- * Usage: `router.get('/foo', requireAuth, handler)`.
- * Failure responses: redirects to `/login` (no cookie) or `401 Unauthorized`
- * (invalid/expired/revoked token).
+ * Two variants share this same resolution logic (see `resolveSession`),
+ * differing only in how they fail:
+ *  - `requireAuth` - for `/api/rest/*` JSON endpoints. Usage:
+ *    `router.get('/foo', requireAuth, handler)`. Failure responses: 401
+ *    `{message: "Unauthorized", sessionExpired: true}` (missing/invalid/
+ *    expired/revoked token) - `sessionExpired` is what the client's axios
+ *    interceptor (axiosInstance.ts) keys off of to redirect to `/login`,
+ *    as opposed to a 401 from actual in-page logic (a wrong current
+ *    password, say) that has no reason to force a redirect.
+ *  - `requireAuthPage` - for the server-rendered `/app` and `/app/*` HTML
+ *    routes (AuthRoute.ts). Failure: redirects to `/login` either way,
+ *    since there's no SPA yet on screen to show a JSON error in.
  */
 import {Request, Response, NextFunction} from "express";
 import jwt from "jsonwebtoken";
@@ -26,7 +35,14 @@ import {appService} from "../AppService";
 /** Sentinel `sid` for the fake ALLOW_DEV_AUTH token - never matches a real `user_sessions` row. Exported so handlers reissuing a token (e.g. password change) can fall back to it when `req.sessionKey` is unset. */
 export const DEV_SESSION_KEY = "dev";
 
-export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+type SessionResolution = "ok" | "no-token" | "unauthorized";
+
+/**
+ * Does the actual work: resolves (and, on success, attaches to `req`/
+ * refreshes the cookie on) the caller's session, without deciding how a
+ * failure should be reported - that's each exported middleware's job.
+ */
+async function resolveSession(req: Request, res: Response): Promise<SessionResolution> {
     const pool = appService.getDatabasePool();
 
     // only development
@@ -46,7 +62,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
     const token = req.cookies.token;
     if (!token) {
-        return res.redirect("/login"); // Redirect to login;
+        return "no-token";
     }
 
     let decoded;
@@ -58,7 +74,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         }) as { user_id: number; token_version: number; sid: string; exp: number };
     } catch (err: any) {
         appService.getLogger().error(err.toString());
-        return res.status(401).json({message: "Unauthorized"});
+        return "unauthorized";
     }
 
     const result = await pool.query({
@@ -68,7 +84,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     });
 
     if (result.rowCount == 0) {
-        return res.status(401).json({message: "Unauthorized"});
+        return "unauthorized";
     }
 
     const currentTokenVersion = result.rows[0].token_version;
@@ -78,7 +94,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     // signature itself is still valid. This is what makes logout-elsewhere /
     // password-change session revocation possible with stateless JWTs.
     if (decoded.token_version !== currentTokenVersion) {
-        return res.status(401).json({message: "Unauthorized"});
+        return "unauthorized";
     }
 
     if (decoded.sid !== DEV_SESSION_KEY) {
@@ -88,7 +104,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         );
 
         if (sessionResult.rowCount === 0) {
-            return res.status(401).json({message: "Unauthorized"});
+            return "unauthorized";
         }
 
         req.sessionId = sessionResult.rows[0].id;
@@ -117,6 +133,31 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
             sameSite: "strict",
             maxAge: appService.getSessionTime()
         });
+    }
+
+    return "ok";
+}
+
+/** Gate for `/api/rest/*` JSON endpoints - see this file's top comment. */
+export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+    const resolution = await resolveSession(req, res);
+
+    if (resolution === "no-token") {
+        return res.redirect("/login");
+    }
+    if (resolution === "unauthorized") {
+        return res.status(401).json({message: "Unauthorized", sessionExpired: true});
+    }
+
+    next();
+};
+
+/** Gate for the server-rendered `/app`/`/app/*` HTML routes - see this file's top comment. */
+export const requireAuthPage = async (req: Request, res: Response, next: NextFunction) => {
+    const resolution = await resolveSession(req, res);
+
+    if (resolution === "no-token" || resolution === "unauthorized") {
+        return res.redirect("/login");
     }
 
     next();

@@ -29,6 +29,18 @@ axiosInstance.interceptors.response.use(
 
     // If there's an error, handle it here
     error => {
+        // The session itself is gone (expired/revoked/logged-out-elsewhere -
+        // see `sessionExpired` in AuthMiddleware.ts's `requireAuth`), as
+        // opposed to a 401 from in-page logic like a wrong current password
+        // (UserRoute.ts's own checks, which don't set this flag and so fall
+        // through to the generic dialog below instead). A full navigation,
+        // not a router push, since Vue Router state for a logged-out SPA
+        // isn't meaningful to keep around.
+        if (error.response?.status === 401 && error.response?.data?.sessionExpired) {
+            window.location.href = "/login";
+            return Promise.reject(error);
+        }
+
         // CUSTOM ERRORS
         // You can also add custom logic like:
         // - Show a toast notification
