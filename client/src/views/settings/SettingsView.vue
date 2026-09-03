@@ -274,8 +274,10 @@
 					</div>
 				</settings-card>
 
-				<sessions-card/>
-				<login-activity-card/>
+				<div class="settings-security-row">
+					<sessions-card/>
+					<login-activity-card/>
+				</div>
 			</div>
 		</template>
 	</page-component>
@@ -550,6 +552,33 @@ function changeImage() {
 
 .settings-profile-actions .ml-4 {
 	margin-left: 0 !important;
+}
+
+.settings-security-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 20px;
+}
+
+.settings-security-row > * {
+	flex: 1 1 0;
+	min-width: 0;
+}
+
+@media (max-width: 900px) {
+	.settings-security-row {
+		flex-direction: column;
+	}
+
+	/* flex: 1 1 0's zero basis is a width rule - once the row above
+	   switches to a column, that same zero basis applies to height
+	   instead, and an auto-height column flex container can't resolve
+	   "grow to fill" against its own content, collapsing each card to
+	   ~0px (clipped by Vuetify's card overflow: hidden). Stacked cards
+	   should just size to their own content. */
+	.settings-security-row > * {
+		flex: none;
+	}
 }
 
 @media (max-width: 600px) {
