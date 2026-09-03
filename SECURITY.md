@@ -32,7 +32,9 @@ appreciated:
 
 - Authentication and session handling (`server/src/routes/AuthRoute.ts`,
   `server/src/middlewares/AuthMiddleware.ts`) — JWT issuance/verification,
-  cookie flags, password hashing
+  cookie flags, password hashing, session revocation. See
+  [AUTHENTICATION.md](AUTHENTICATION.md) for how this is all meant to work,
+  as a reference point for what a "wait, that's not right" looks like.
 - Authorization on REST endpoints under `server/src/routes/`
 - SQL injection in any query against the PostgreSQL pool
 - The `ALLOW_DEV_AUTH` development bypass — it must never be reachable when

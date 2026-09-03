@@ -128,10 +128,12 @@ PostgreSQL.
   `CustomerRoute`, `AuthorRoute`, `CategoriesRoute`, `UserRoute`, `DashboardRoute`.
   `AuthRoute` is mounted separately at the root (`/`) and handles login, register,
   logout, and serving the built SPA in production.
-- **`src/middlewares/AuthMiddleware.ts`** – `requireAuth` guard. Verifies the JWT
-  stored in the `token` cookie, checks the user still exists and isn't disabled,
-  and silently refreshes the cookie when it's close to expiry. In development,
-  setting `ALLOW_DEV_AUTH=true` bypasses login with a fake session — never enable
+- **`src/middlewares/AuthMiddleware.ts`** – `requireAuth`/`requireAuthPage`
+  guards. Verify the JWT stored in the `token` cookie, check the user still
+  exists and isn't disabled, check the session hasn't been individually
+  revoked, and silently refresh the cookie when it's close to expiry — see
+  [AUTHENTICATION.md](AUTHENTICATION.md). In development, setting
+  `ALLOW_DEV_AUTH=true` bypasses login with a fake session — never enable
   this in production.
 - **`src/types/`** – shared TypeScript interfaces (book/stock shapes, search
   filters, app error types).
@@ -140,10 +142,13 @@ PostgreSQL.
   `login.html`/`register.html` pages, background image, and (in production) the
   built client bundle served from `assets/app`.
 
-Authentication is stateless JWT-in-an-HTTP-only-cookie: `/login` and `/register`
-issue a signed token containing the user id; `requireAuth` validates it on every
-protected request. Passwords are hashed with bcrypt (12 salt rounds) and never
-stored or logged in plaintext.
+Authentication is a JWT in an httpOnly cookie, but not purely stateless:
+`requireAuth` also checks a per-user `token_version` counter (bumped on
+password change, invalidating every device at once) and a per-login
+`user_sessions` row (so "log out this device" in Settings can revoke just
+one), on every protected request. Passwords are hashed with bcrypt (12 salt
+rounds) and never stored or logged in plaintext. See
+[AUTHENTICATION.md](AUTHENTICATION.md) for the full session/revocation model.
 
 ### How they talk to each other
 

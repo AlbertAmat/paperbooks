@@ -32,6 +32,11 @@ breakdown of `src/routes`, `src/middlewares`, `src/types`, `src/utils`, and
 ## Authentication
 
 Sessions are JWTs stored in an HTTP-only `token` cookie, verified on every
-protected request by `requireAuth` (`src/middlewares/AuthMiddleware.ts`). Never
-set `ALLOW_DEV_AUTH=true` outside local development — it bypasses login
-entirely. See [SECURITY.md](../SECURITY.md) for reporting auth-related issues.
+protected request by `requireAuth`/`requireAuthPage`
+(`src/middlewares/AuthMiddleware.ts`) - not just the JWT signature, but also a
+per-user `token_version` counter and a per-login `user_sessions` row, so a
+session can actually be revoked (one device or all of them) rather than just
+expiring on its own. See [AUTHENTICATION.md](../AUTHENTICATION.md) for the
+full model, or [SECURITY.md](../SECURITY.md) for reporting auth-related
+issues. Never set `ALLOW_DEV_AUTH=true` outside local development — it
+bypasses login entirely.
