@@ -3,7 +3,7 @@
 Ideas for where Vaultisse could go next. Nothing here is scheduled or assigned —
 these are open invitations for contributors to pick up, discuss, and design. If
 you'd like to work on one, open an issue first to align on approach before
-sending a pull request (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+sending a pull request (see [CONTRIBUTING.md](../CONTRIBUTING.md)).
 
 Have an idea that isn't listed? Open an issue — see
 [Suggesting features](CONTRIBUTING.md#suggesting-features).
@@ -26,7 +26,7 @@ Have an idea that isn't listed? Open an issue — see
 - [ ] **Security review** ([#2](https://github.com/AlbertAmat/vaultisse/issues/2))
   — an independent pass by a security-minded contributor to audit
   authentication, session handling, and the REST API for vulnerabilities, and
-  harden anything that's found. See [SECURITY.md](SECURITY.md) for how to
+  harden anything that's found. See [SECURITY.md](../SECURITY.md) for how to
   report anything found privately rather than as a public issue.
 - [ ] **Single sign-on (SSO)** ([#3](https://github.com/AlbertAmat/vaultisse/issues/3))
   — log in with Google or GitHub as an alternative to email/password.

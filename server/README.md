@@ -36,7 +36,7 @@ protected request by `requireAuth`/`requireAuthPage`
 (`src/middlewares/AuthMiddleware.ts`) - not just the JWT signature, but also a
 per-user `token_version` counter and a per-login `user_sessions` row, so a
 session can actually be revoked (one device or all of them) rather than just
-expiring on its own. See [AUTHENTICATION.md](../AUTHENTICATION.md) for the
+expiring on its own. See [docs/AUTHENTICATION.md](../docs/AUTHENTICATION.md) for the
 full model, or [SECURITY.md](../SECURITY.md) for reporting auth-related
 issues. Never set `ALLOW_DEV_AUTH=true` outside local development — it
 bypasses login entirely.

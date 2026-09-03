@@ -132,7 +132,7 @@ PostgreSQL.
   guards. Verify the JWT stored in the `token` cookie, check the user still
   exists and isn't disabled, check the session hasn't been individually
   revoked, and silently refresh the cookie when it's close to expiry — see
-  [AUTHENTICATION.md](AUTHENTICATION.md). In development, setting
+  [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md). In development, setting
   `ALLOW_DEV_AUTH=true` bypasses login with a fake session — never enable
   this in production.
 - **`src/types/`** – shared TypeScript interfaces (book/stock shapes, search
@@ -148,7 +148,7 @@ password change, invalidating every device at once) and a per-login
 `user_sessions` row (so "log out this device" in Settings can revoke just
 one), on every protected request. Passwords are hashed with bcrypt (12 salt
 rounds) and never stored or logged in plaintext. See
-[AUTHENTICATION.md](AUTHENTICATION.md) for the full session/revocation model.
+[docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) for the full session/revocation model.
 
 ### How they talk to each other
 
@@ -159,6 +159,10 @@ rounds) and never stored or logged in plaintext. See
 - In **production**, the client is built into static files and the Express server
   serves them directly (see `AuthRoute.ts`, which serves `index.html` for `/app` and
   `/app/*`, guarded by `requireAuth`) — there is a single process and a single port.
+
+For deeper dives into specific parts of the codebase (not to be confused with
+the in-app `/docs` help pages, which are end-user-facing), see
+[docs/](docs/README.md).
 
 ## Project structure
 
@@ -337,7 +341,7 @@ To build a multi-arch image or push to a different registry, adjust
 For step-by-step instructions covering local-only self-hosting, production behind
 your own reverse proxy/DNS, production behind Cloudflare Tunnel, and a one-click
 **Unraid** template (Docker tab → Add Container, no Compose needed), see
-**[DEPLOYMENT.md](DEPLOYMENT.md)**.
+**[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
 
 ## Releasing a new version
 
@@ -372,7 +376,7 @@ in the client. See [Contributing](#contributing) for how to add a new language.
 
 ## Roadmap
 
-Looking for ways to contribute? [ROADMAP.md](ROADMAP.md) lists feature ideas
+Looking for ways to contribute? [docs/ROADMAP.md](docs/ROADMAP.md) lists feature ideas
 that don't have anyone working on them yet — Kindle/Kobo sync, SSO, an admin
 panel, library sharing for families, and more.
 

@@ -4,7 +4,7 @@ How login, sessions, revocation, and the audit trail actually work under the
 hood. If you're debugging an auth issue, reviewing this area for security, or
 just want to understand what "log out this device" really does, start here.
 
-For how to *report* a vulnerability in any of this, see [SECURITY.md](SECURITY.md)
+For how to *report* a vulnerability in any of this, see [SECURITY.md](../SECURITY.md)
 instead - this document is architecture, not a reporting policy.
 
 ## Contents
@@ -127,7 +127,7 @@ internal `resolveSession()` in
    with the same `sid`, extending the session without the user noticing.
 
 `ALLOW_DEV_AUTH=true` (local development only - **never** in production, see
-[SECURITY.md](SECURITY.md)) skips all of this and fakes a session for user
+[SECURITY.md](../SECURITY.md)) skips all of this and fakes a session for user
 id 1, using a sentinel `sid` (`"dev"`) that can never match a real
 `user_sessions` row, so step 5 is skipped for it rather than always failing.
 
@@ -276,7 +276,7 @@ letter, a digit, and a special character.
   *next* request. Until then, that tab still looks logged in.
 - **`ALLOW_DEV_AUTH=true` bypasses everything above.** It exists purely to
   skip login during local development and must never be reachable in a real
-  deployment - see [SECURITY.md](SECURITY.md)'s scope notes.
+  deployment - see [SECURITY.md](../SECURITY.md)'s scope notes.
 - **One `JWT_SECRET` for the whole deployment**, not per-session - rotating
   it invalidates every session at once (nothing partial), which is usually
   what you'd want anyway if it's ever suspected of leaking.

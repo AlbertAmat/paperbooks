@@ -132,7 +132,7 @@ Open an issue describing the problem you're trying to solve (not just the
 solution) so it can be discussed before implementation starts. This helps avoid
 wasted effort on features that don't fit the project's direction.
 
-Check [ROADMAP.md](ROADMAP.md) first — it lists feature ideas that are already
+Check [docs/ROADMAP.md](docs/ROADMAP.md) first — it lists feature ideas that are already
 wanted but don't have anyone working on them yet.
 
 ## Adding a new language
