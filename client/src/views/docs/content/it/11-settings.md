@@ -31,4 +31,12 @@ Scegli la tua **lingua** e **regione** preferite per l'interfaccia dell'app.
 - In **Autenticazione a due fattori**, clicca su **Attiva** per richiedere un codice da un'app di autenticazione all'accesso: scansiona il codice QR (o inserisci la sua chiave manualmente) con un'app come Google Authenticator, Authy o 1Password, poi conferma con il codice a 6 cifre mostrato. Riceverai una serie di **codici di backup** monouso — conservali in un luogo sicuro, dato che vengono mostrati una sola volta e ti permettono di accedere se mai perdessi l'accesso alla tua app di autenticazione. Una volta configurata, un'etichetta la mostra come **Attiva**; clicca su **Disattiva** e conferma la tua password per disattivarla di nuovo.
 - Usa **Elimina account** se hai bisogno di rimuovere definitivamente il tuo account. Questa azione non può essere annullata, quindi ti verrà chiesta prima una conferma.
 
+## Sessioni attive
+
+Ogni dispositivo attualmente connesso al tuo account, con il suo browser/sistema operativo, indirizzo IP e ultima attività. Quello che stai usando in questo momento è contrassegnato come **Questo dispositivo**. Clicca su **Disconnetti** accanto a uno qualsiasi per disconnetterlo immediatamente — incluso, se vuoi, questo stesso dispositivo.
+
+## Accessi recenti
+
+Una cronologia degli accessi, dei tentativi di accesso falliti, delle disconnessioni e dei cambi di password sul tuo account, dal più recente al più vecchio — un modo rapido per notare qualcosa che non hai fatto tu.
+
 Ricorda di cliccare su **Salva** nell'angolo in alto a destra dopo aver apportato modifiche — resta disabilitato finché non hai modificato qualcosa.

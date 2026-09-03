@@ -31,4 +31,12 @@ Elige tu **idioma** y **región** preferidos para la interfaz de la aplicación.
 - En **Autenticación de dos factores**, haz clic en **Activar** para exigir un código de una aplicación autenticadora al iniciar sesión: escanea el código QR (o introduce su clave manualmente) con una app como Google Authenticator, Authy o 1Password, y confirma con el código de 6 dígitos que muestre. Recibirás un conjunto de **códigos de respaldo** de un solo uso — guárdalos en un lugar seguro, ya que solo se muestran una vez y te permiten iniciar sesión si alguna vez pierdes el acceso a tu aplicación autenticadora. Una vez configurada, una etiqueta la marca como **Activada**; haz clic en **Desactivar** y confirma tu contraseña para volver a apagarla.
 - Usa **Eliminar cuenta** si necesitas eliminar tu cuenta de forma permanente. Esta acción no se puede deshacer, así que se te pedirá confirmación antes.
 
+## Sesiones activas
+
+Cada dispositivo con la sesión iniciada actualmente en tu cuenta, con su navegador/sistema operativo, dirección IP y última actividad. El que estás usando ahora mismo aparece marcado como **Este dispositivo**. Haz clic en **Cerrar sesión** junto a cualquiera de ellos para cerrarla de inmediato — incluido, si quieres, el dispositivo actual.
+
+## Inicios de sesión recientes
+
+Un historial de inicios de sesión, intentos fallidos, cierres de sesión y cambios de contraseña en tu cuenta, del más reciente al más antiguo — una forma rápida de detectar cualquier cosa que no hayas hecho tú.
+
 Recuerda hacer clic en **Guardar**, en la esquina superior derecha, después de hacer cambios — permanece desactivado hasta que hayas editado algo.

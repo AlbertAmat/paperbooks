@@ -4,11 +4,16 @@
  * Flow: read the `token` httpOnly cookie -> verify its JWT signature/claims
  * -> look up the user and compare `token_version` (a DB counter bumped on
  * password change, so old tokens can be revoked even though JWTs are
- * otherwise stateless) -> if valid and about to expire, silently reissue a
- * fresh cookie -> call `next()`.
+ * otherwise stateless) -> look up the specific `user_sessions` row the
+ * token's `sid` claim identifies and reject if it's been individually
+ * revoked (see "Log out this device" in Settings) -> if valid and about to
+ * expire, silently reissue a fresh cookie -> call `next()`.
  *
  * In development (`ALLOW_DEV_AUTH=true`), it skips real auth entirely and
- * fakes a session for user id 1 - never enable this in production.
+ * fakes a session for user id 1 - never enable this in production. The fake
+ * token's `sid` is a sentinel that never matches a real `user_sessions` row
+ * (there was never a real login to create one), so the per-session check
+ * below is skipped for it too.
  *
  * Usage: `router.get('/foo', requireAuth, handler)`.
  * Failure responses: redirects to `/login` (no cookie) or `401 Unauthorized`
@@ -17,6 +22,9 @@
 import {Request, Response, NextFunction} from "express";
 import jwt from "jsonwebtoken";
 import {appService} from "../AppService";
+
+/** Sentinel `sid` for the fake ALLOW_DEV_AUTH token - never matches a real `user_sessions` row. Exported so handlers reissuing a token (e.g. password change) can fall back to it when `req.sessionKey` is unset. */
+export const DEV_SESSION_KEY = "dev";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     const pool = appService.getDatabasePool();
@@ -33,7 +41,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         const devTokenVersion = devUser.rows[0]?.token_version ?? 0;
 
         // Fake decoded token for dev
-        req.cookies.token = appService.createSessionToken(1, devTokenVersion); // fake user ID
+        req.cookies.token = appService.createSessionToken(1, devTokenVersion, DEV_SESSION_KEY); // fake user ID
     }
 
     const token = req.cookies.token;
@@ -47,7 +55,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
             algorithms: ["HS256"],
             audience: "vaultisse",
             issuer: "vaultisse.com"
-        }) as { user_id: number; token_version: number; exp: number };
+        }) as { user_id: number; token_version: number; sid: string; exp: number };
     } catch (err: any) {
         appService.getLogger().error(err.toString());
         return res.status(401).json({message: "Unauthorized"});
@@ -73,13 +81,35 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         return res.status(401).json({message: "Unauthorized"});
     }
 
+    if (decoded.sid !== DEV_SESSION_KEY) {
+        const sessionResult = await pool.query(
+            "SELECT id FROM user_sessions WHERE session_key = $1 AND user_id = $2 AND revoked_date IS NULL",
+            [decoded.sid, decoded.user_id]
+        );
+
+        if (sessionResult.rowCount === 0) {
+            return res.status(401).json({message: "Unauthorized"});
+        }
+
+        req.sessionId = sessionResult.rows[0].id;
+        req.sessionKey = decoded.sid;
+
+        // Best-effort and throttled (only writes once the row is more than
+        // a minute stale) - keeps "Active sessions" reasonably fresh
+        // without a DB write on every single authenticated request.
+        pool.query(
+            "UPDATE user_sessions SET last_seen_date = NOW() WHERE id = $1 AND last_seen_date < NOW() - INTERVAL '1 minute'",
+            [req.sessionId]
+        ).catch((err) => appService.getLogger().error("Error updating session last_seen_date: " + err));
+    }
+
     // Check if token is near expiry (e.g., less than 5 minutes left)
     const now = Math.floor(Date.now() / 1000);
     const timeLeft = decoded.exp - now;
 
     if (timeLeft < 5 * 60) {
         // Issue new token with extended expiration
-        const newToken = appService.createSessionToken(decoded.user_id, currentTokenVersion);
+        const newToken = appService.createSessionToken(decoded.user_id, currentTokenVersion, decoded.sid);
 
         res.cookie("token", newToken, {
             httpOnly: true,

@@ -1,5 +1,7 @@
 import {PATH_PREFIX} from "@/Constants";
 import axiosInstance from "@/plugins/axiosInstance";
+import IUserSession from "@/types/user/IUserSession";
+import IActivityLogEntry from "@/types/user/IActivityLogEntry";
 
 /**
  * Thin HTTP client for the `/api/rest/user` endpoints (see server/src/routes/UserRoute.ts):
@@ -88,6 +90,30 @@ class UserService {
      */
     public async updateLeasingEnabled(leasingEnabled: boolean) {
         await axiosInstance.patch(`${PATH_PREFIX}/user/leasing`, {leasingEnabled});
+    }
+
+    /** List the current user's active login sessions (Settings > Active sessions). */
+    public async getSessions(): Promise<IUserSession[]> {
+        const response = await axiosInstance.get(`${PATH_PREFIX}/user/sessions`);
+        return response.data;
+    }
+
+    /**
+     * Revoke one of the current user's own sessions ("Log out" next to a
+     * device in Settings > Active sessions).
+     * @param sessionId The session's `id` (from `getSessions`).
+     */
+    public async revokeSession(sessionId: number): Promise<void> {
+        await axiosInstance.delete(`${PATH_PREFIX}/user/sessions/${sessionId}`);
+    }
+
+    /**
+     * List the current user's recent auth activity (Settings > Recent logins).
+     * @param limit Max rows to return (default 20, capped at 50 server-side).
+     */
+    public async getActivity(limit: number = 20): Promise<IActivityLogEntry[]> {
+        const response = await axiosInstance.get(`${PATH_PREFIX}/user/activity`, {params: {limit}});
+        return response.data;
     }
 
     /**

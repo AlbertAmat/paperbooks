@@ -9,7 +9,7 @@
  * from the session, never from params).
  */
 import {Router, Request, Response} from 'express';
-import {requireAuth} from "../middlewares/AuthMiddleware";
+import {requireAuth, DEV_SESSION_KEY} from "../middlewares/AuthMiddleware";
 import {appService} from "../AppService";
 import multer from "multer";
 import rateLimit from "express-rate-limit";
@@ -20,6 +20,7 @@ import {
     verifyTotpCode,
     generateBackupCodes
 } from "../utils/TwoFactorAuth";
+import {recordActivity} from "../utils/ActivityLog";
 
 const router = Router();
 
@@ -314,8 +315,11 @@ router.delete("", requireAuth, async (req: Request, res: Response) => {
  * (`newPassword` needs 8+ chars, an uppercase letter, a digit, a special char).
  *
  * On success, `users.token_version` is incremented (invalidating every other
- * previously issued session token for this user) and a fresh token for
- * *this* session is issued immediately, so the caller isn't logged out.
+ * previously issued session token for this user), every other
+ * `user_sessions` row is explicitly revoked (so they also drop off "Active
+ * sessions" in Settings instead of lingering there until their JWT expires),
+ * and a fresh token for *this* session is issued immediately, so the caller
+ * isn't logged out.
  *
  * Responses: 200 {"success": true, "message": "Password updated successfully"} |
  *            400 {"success": false, "message": "...", "missing": [...]} (weak password) |
@@ -374,7 +378,23 @@ router.post("/password", requireAuth, passwordChangeLimiter, async (req: Request
             [newHashedPassword, userId]
         );
 
-        const newToken = appService.createSessionToken(userId, updateResult.rows[0].token_version);
+        // Every other session is already dead per the token_version bump
+        // above (their JWT won't match anymore) - revoke their rows too so
+        // "Active sessions" in Settings reflects that immediately instead
+        // of waiting for their JWT to naturally expire.
+        if (req.sessionId) {
+            await client.query(
+                `UPDATE user_sessions SET revoked_date = NOW() WHERE user_id = $1 AND id != $2 AND revoked_date IS NULL`,
+                [userId, req.sessionId]
+            );
+        }
+
+        await recordActivity(pool, userId, "password_changed", {metadata: {ip: req.ip}});
+
+        // Reuses the same session_key (req.sessionKey) so this device's
+        // user_sessions row - deliberately left un-revoked above - still
+        // matches the reissued token's `sid` claim.
+        const newToken = appService.createSessionToken(userId, updateResult.rows[0].token_version, req.sessionKey ?? DEV_SESSION_KEY);
         res.cookie("token", newToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -390,6 +410,138 @@ router.post("/password", requireAuth, passwordChangeLimiter, async (req: Request
         res.status(500).send("Internal Server Error");
     } finally {
         client.release();
+    }
+});
+
+/**
+ * GET /user/sessions
+ * ---------------------
+ * List the current user's active login sessions, for Settings > Security's
+ * "Active sessions" list. "Active" means not explicitly revoked (logout,
+ * "log out this device", or a password change - see POST /user/password)
+ * and seen within the current session lifetime (`SESSION_TIME`), so a
+ * session whose JWT simply expired without an explicit logout naturally
+ * drops off instead of lingering forever.
+ *
+ * Auth: required.
+ *
+ * Example response (200):
+ *  [{ "id": 12, "userAgent": "Mozilla/5.0 (...) Chrome/128.0", "ipAddress": "203.0.113.4",
+ *     "createdDate": "2026-09-01T10:00:00.000Z", "lastSeenDate": "2026-09-03T18:05:00.000Z",
+ *     "isCurrent": true }]
+ */
+router.get("/sessions", requireAuth, async (req: Request, res: Response) => {
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        const cutoff = new Date(Date.now() - appService.getSessionTime());
+
+        const result = await pool.query(
+            `SELECT id, user_agent AS "userAgent", ip_address AS "ipAddress",
+                    created_date AS "createdDate", last_seen_date AS "lastSeenDate"
+             FROM user_sessions
+             WHERE user_id = $1
+               AND revoked_date IS NULL
+               AND last_seen_date > $2
+             ORDER BY last_seen_date DESC`,
+            [userId, cutoff]
+        );
+
+        const sessions = result.rows.map((row) => ({...row, isCurrent: row.id === req.sessionId}));
+
+        res.status(200).json(sessions);
+    } catch (err: any) {
+        console.error("Error executing query", err.stack);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+/**
+ * DELETE /user/sessions/:id
+ * ----------------------------
+ * Revoke one of the current user's own sessions ("Log out" next to a device
+ * in Settings > Active sessions). Scoped to the caller's own sessions only -
+ * `:id` is looked up with `user_id = <session user>`, never trusted alone.
+ * Revoking the *current* session also clears the caller's own cookie, so
+ * the browser doesn't keep sending a token requireAuth would now reject.
+ *
+ * Auth: required.
+ *
+ * Responses: 200 {"message": "Session revoked successfully"} |
+ *            400 {"error": "Invalid session id"} |
+ *            404 {"error": "Session not found"}.
+ */
+router.delete("/sessions/:id", requireAuth, async (req: Request, res: Response) => {
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+    const sessionId = Number(req.params.id);
+
+    if (!Number.isInteger(sessionId)) {
+        return res.status(400).json({error: "Invalid session id"});
+    }
+
+    try {
+        const result = await pool.query(
+            `UPDATE user_sessions
+             SET revoked_date = NOW()
+             WHERE id = $1 AND user_id = $2 AND revoked_date IS NULL
+             RETURNING id`,
+            [sessionId, userId]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({error: "Session not found"});
+        }
+
+        await recordActivity(pool, userId, "logout", {metadata: {ip: req.ip, sessionId}});
+
+        if (sessionId === req.sessionId) {
+            res.clearCookie("token");
+        }
+
+        res.status(200).json({message: "Session revoked successfully"});
+    } catch (err: any) {
+        console.error("Error executing query", err.stack);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+/**
+ * GET /user/activity
+ * ---------------------
+ * List the current user's recent auth activity (sign-ins, failed sign-ins,
+ * sign-outs, password changes), for Settings > Security's "Recent logins"
+ * list. Scoped to auth events only - the underlying `activity_log` table is
+ * generic and may later carry data-change events (books, loans, ...) too,
+ * which this endpoint deliberately excludes.
+ *
+ * Auth: required. Query: `?limit=20` (default 20, capped at 50).
+ *
+ * Example response (200):
+ *  [{ "id": 42, "action": "login", "metadata": {"ip": "203.0.113.4"},
+ *     "createdDate": "2026-09-03T18:05:00.000Z" }]
+ */
+router.get("/activity", requireAuth, async (req: Request, res: Response) => {
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+    const limit = Math.min(Number(req.query.limit) || 20, 50);
+
+    try {
+        const result = await pool.query(
+            `SELECT id, action, metadata, created_date AS "createdDate"
+             FROM activity_log
+             WHERE actor_id = $1
+               AND action IN ('login', 'login_failed', 'logout', 'password_changed')
+             ORDER BY created_date DESC
+             LIMIT $2`,
+            [userId, limit]
+        );
+
+        res.status(200).json(result.rows);
+    } catch (err: any) {
+        console.error("Error executing query", err.stack);
+        res.status(500).send("Internal Server Error");
     }
 });
 

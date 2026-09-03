@@ -21,8 +21,11 @@ import express, {Request, Response} from "express";
 import {appService} from "../AppService";
 import path from "path";
 import rateLimit from "express-rate-limit";
+import jwt from "jsonwebtoken";
 import {requireAuth} from "../middlewares/AuthMiddleware";
 import {verifyTotpCode, normalizeBackupCode} from "../utils/TwoFactorAuth";
+import {createUserSession} from "../utils/UserSessions";
+import {recordActivity} from "../utils/ActivityLog";
 
 const router = express.Router();
 
@@ -187,6 +190,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
 
         if (userResult.rows.length === 0) {
             appService.getLogger().debug("No user found for:" + username);
+            await recordActivity(pool, null, "login_failed", {metadata: {attemptedUsername: username, ip: req.ip}});
             return res.status(401).json({message: "Invalid username or password."});
         }
 
@@ -195,6 +199,7 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
         const comparePassword = await appService.comparePassword(password, user.password);
         if (!comparePassword) {
             appService.getLogger().debug("invalid password for user:" + username);
+            await recordActivity(pool, user.id, "login_failed", {metadata: {ip: req.ip}});
             return res.status(401).json({message: "Invalid username or password."});
         }
 
@@ -223,7 +228,10 @@ router.post("/login", authLimiter,  async (req: Request, res: Response) => {
 
         appService.getLogger().debug("Setting session and cookie for user:" + username);
 
-        const userToken = appService.createSessionToken(user.id, user.token_version);
+        const {sessionKey} = await createUserSession(pool, user.id, req.get("user-agent"), req.ip);
+        await recordActivity(pool, user.id, "login", {metadata: {ip: req.ip}});
+
+        const userToken = appService.createSessionToken(user.id, user.token_version, sessionKey);
 
         // Send JWT in cookie
         res.cookie("token", userToken, {
@@ -298,6 +306,7 @@ router.post("/login/2fa", twoFaLimiter, async (req: Request, res: Response) => {
         }
 
         if (!verified) {
+            await recordActivity(pool, user.id, "login_failed", {metadata: {stage: "2fa", ip: req.ip}});
             return res.status(401).json({message: "Invalid verification code."});
         }
 
@@ -305,7 +314,10 @@ router.post("/login/2fa", twoFaLimiter, async (req: Request, res: Response) => {
 
         await pool.query(`UPDATE users SET last_login_date = CURRENT_TIMESTAMP WHERE id = $1`, [user.id]);
 
-        const userToken = appService.createSessionToken(user.id, user.token_version);
+        const {sessionKey} = await createUserSession(pool, user.id, req.get("user-agent"), req.ip);
+        await recordActivity(pool, user.id, "login", {metadata: {ip: req.ip}});
+
+        const userToken = appService.createSessionToken(user.id, user.token_version, sessionKey);
         res.cookie("token", userToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -414,12 +426,42 @@ router.post("/register", authLimiter, async (req: Request, res: Response) => {
 /**
  * GET /logout
  * ------------
- * Clear the session cookie and redirect to `/login`. No server-side session
- * to invalidate (JWTs are stateless) - see `token_version` in
- * AuthMiddleware.ts for the mechanism that revokes tokens instead.
+ * Clear the session cookie and redirect to `/login`. Also best-effort
+ * revokes the matching `user_sessions` row (see AuthMiddleware.ts) so it
+ * drops off "Active sessions" in Settings and, unlike a plain expiry, can't
+ * be replayed even if the cleared cookie somehow survived client-side -
+ * this always succeeds (redirects to `/login`) even if the cookie is
+ * missing/invalid/already expired.
  */
-router.get("/logout", (req: Request, res: Response) => {
+router.get("/logout", async (req: Request, res: Response) => {
     appService.getLogger().debug("Logout user");
+
+    //@ts-ignore
+    const token = req.cookies.token;
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, appService.getJwtSecret(), {
+                algorithms: ["HS256"],
+                audience: "vaultisse",
+                issuer: "vaultisse.com"
+            }) as { user_id: number; sid: string };
+
+            const pool = appService.getDatabasePool();
+            const result = await pool.query(
+                `UPDATE user_sessions SET revoked_date = NOW()
+                 WHERE session_key = $1 AND user_id = $2 AND revoked_date IS NULL
+                 RETURNING id`,
+                [decoded.sid, decoded.user_id]
+            );
+
+            if ((result.rowCount ?? 0) > 0) {
+                await recordActivity(pool, decoded.user_id, "logout", {metadata: {ip: req.ip}});
+            }
+        } catch (err) {
+            // Already invalid/expired - nothing to revoke, just clear the cookie below.
+        }
+    }
+
     res.clearCookie("token");
     return res.redirect("/login"); // Redirect to login;
 });

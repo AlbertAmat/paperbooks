@@ -273,6 +273,9 @@
 						</v-btn>
 					</div>
 				</settings-card>
+
+				<sessions-card/>
+				<login-activity-card/>
 			</div>
 		</template>
 	</page-component>
@@ -292,6 +295,8 @@ import {confirmationDialogController} from "@/components/confirmationDialog/Conf
 import ChangePasswordDialog from "@/views/settings/ChangePasswordDialog.vue";
 import TwoFactorSetupDialog from "@/views/settings/TwoFactorSetupDialog.vue";
 import TwoFactorDisableDialog from "@/views/settings/TwoFactorDisableDialog.vue";
+import SessionsCard from "@/views/settings/SessionsCard.vue";
+import LoginActivityCard from "@/views/settings/LoginActivityCard.vue";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {useI18n} from "vue-i18n";
 import {applyTheme} from "@/plugins/theme";

@@ -14,6 +14,7 @@ import helmet from "helmet"; // Middleware to set secure HTTP headers
 import rateLimit from "express-rate-limit";
 import path from "path"; // Middleware to limit repeated requests
 import {blockWritesInDemo} from "./middlewares/DemoModeMiddleware"; // Rejects writes when DEMO_MODE=true
+import "./types/express"; // Request.sessionId/sessionKey ambient augmentation - imported for its side effect, see that file's comment
 
 interface DatabaseConf {
     host: string;
@@ -328,13 +329,18 @@ export class AppService {
      * Create a signed JWT session token. tokenVersion must match the user's
      * current users.token_version at verification time (see requireAuth) -
      * bumping the DB column invalidates every previously issued token for
-     * that user, e.g. on password change.
+     * that user, e.g. on password change. sessionKey identifies the
+     * specific `user_sessions` row this token belongs to (its `session_key`
+     * column, see utils/UserSessions.ts) - carried as the `sid` claim so
+     * requireAuth can look up that one session (device/IP, revocation)
+     * instead of just the account as a whole.
      * @param userId
      * @param tokenVersion
+     * @param sessionKey
      */
-    public createSessionToken(userId: number, tokenVersion: number): string {
+    public createSessionToken(userId: number, tokenVersion: number, sessionKey: string): string {
         return jwt.sign(
-            {user_id: userId, token_version: tokenVersion},
+            {user_id: userId, token_version: tokenVersion, sid: sessionKey},
             this.getJwtSecret(),
             {
                 expiresIn: Math.floor(this.getSessionTime() / 1000),

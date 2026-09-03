@@ -31,4 +31,12 @@ Tria el teu **idioma** i **regió** preferits per a la interfície de l'aplicaci
 - A **Autenticació de dos factors**, fes clic a **Activar** per exigir un codi d'una aplicació autenticadora en iniciar sessió: escaneja el codi QR (o introdueix la seva clau manualment) amb una app com Google Authenticator, Authy o 1Password, i confirma amb el codi de 6 xifres que mostri. Rebràs un conjunt de **codis de reserva** d'un sol ús — desa'ls en un lloc segur, ja que només es mostren una vegada i et permeten iniciar sessió si mai perds l'accés a la teva aplicació autenticadora. Un cop configurada, una etiqueta la marca com a **Activada**; fes clic a **Desactivar** i confirma la teva contrasenya per tornar-la a apagar.
 - Fes servir **Eliminar compte** si necessites eliminar el teu compte de manera permanent. Aquesta acció no es pot desfer, així que se't demanarà confirmació prèviament.
 
+## Sessions actives
+
+Cada dispositiu que té la sessió iniciada al teu compte actualment, amb el seu navegador/sistema operatiu, adreça IP i última activitat. El que estàs utilitzant ara mateix es marca com **Aquest dispositiu**. Fes clic a **Tanca la sessió** al costat de qualsevol per tancar-la immediatament — inclòs, si vols, el dispositiu actual.
+
+## Inicis de sessió recents
+
+Un historial dels inicis de sessió, intents fallits, tancaments de sessió i canvis de contrasenya al teu compte, del més recent al més antic — una manera ràpida de detectar qualsevol cosa que no hagis fet tu.
+
 Recorda fer clic a **Desar**, a la cantonada superior dreta, després de fer canvis — es manté desactivat fins que has editat alguna cosa.
