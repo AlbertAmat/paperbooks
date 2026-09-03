@@ -33,9 +33,12 @@ class UserService {
         await axiosInstance.delete(`${PATH_PREFIX}/user/image`)
     }
 
-    /** Permanently delete the current user's account. */
-    public async delete() {
-        await axiosInstance.delete(`${PATH_PREFIX}/user`)
+    /**
+     * Permanently delete the current user's account.
+     * @param password Current account password, required as re-auth.
+     */
+    public async delete(password: string) {
+        await axiosInstance.delete(`${PATH_PREFIX}/user`, {data: {password}})
     }
 
     /**

@@ -261,16 +261,7 @@
 								{{t(AppLabels.USERCONF_DELETE_DESC)}}
 							</p>
 						</div>
-						<v-btn
-							@click="deleteUser()"
-							:loading="loadingDelete"
-							:disabled="loadingDelete"
-							variant="tonal"
-							color="error"
-							class="text-none"
-						>
-							{{t(AppLabels.USERCONF_DELETE)}}
-						</v-btn>
+						<delete-account-dialog :controller="controller"/>
 					</div>
 				</settings-card>
 
@@ -293,10 +284,10 @@ import PageComponent from "@/views/PageComponent.vue";
 import SettingsController from "@/controller/settings/SettingsController";
 import {Ref, ref, computed} from "vue";
 import SettingsCard from "@/views/settings/SettingsCard.vue";
-import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import ChangePasswordDialog from "@/views/settings/ChangePasswordDialog.vue";
 import TwoFactorSetupDialog from "@/views/settings/TwoFactorSetupDialog.vue";
 import TwoFactorDisableDialog from "@/views/settings/TwoFactorDisableDialog.vue";
+import DeleteAccountDialog from "@/views/settings/DeleteAccountDialog.vue";
 import SessionsCard from "@/views/settings/SessionsCard.vue";
 import LoginActivityCard from "@/views/settings/LoginActivityCard.vue";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
@@ -321,11 +312,6 @@ const deletingImage: Ref<boolean> = ref(false);
  *
  */
 const uploadingImage: Ref<boolean> = ref(false);
-
-/**
- *
- */
-const loadingDelete: Ref<boolean> = ref(false);
 
 /**
  *
@@ -451,21 +437,6 @@ async function removeImage() {
 	} finally {
 		deletingImage.value = false;
 	}
-}
-
-async function deleteUser() {
-	confirmationDialogController.showDialog(
-		t(AppLabels.USERCONF_DELETE_USER_TITLE),
-		t(AppLabels.USERCONF_DELETE_USER_DESC),
-		t(AppLabels.DELETE)
-	).then(async () => {
-		try {
-			loadingDelete.value = true;
-			await controller.getUser().delete();
-		} finally {
-			loadingDelete.value = false;
-		}
-	})
 }
 
 function changeImage() {

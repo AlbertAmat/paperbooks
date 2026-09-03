@@ -444,7 +444,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
         );
 
         if(queryResult.rowCount != 1) {
-            res.status(500).send();
+            return res.status(500).send();
         }
 
         const customerQueryResult = await pool.query(
@@ -561,7 +561,7 @@ router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) =
         return res.status(400).send('No customer ID provided');
     }
 
-    if (books.length === 0) {
+    if (!Array.isArray(books) || books.length === 0) {
         return res.status(400).send('No books provided');
     }
 

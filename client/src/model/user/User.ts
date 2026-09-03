@@ -291,18 +291,6 @@ export default class User {
     }
 
     /**
-     * Deletes the current user's account from the system.
-     * Handles any errors that occur during deletion.
-     */
-    public async delete() {
-        try {
-            await userService.delete();
-        } catch (e) {
-            console.error("Error while deleting user: ", e);
-        }
-    }
-
-    /**
      * Updates the user's profile information and shows a success snackbar.
      * On success, it updates the reactive properties locally.
      * @param name - New name of the user

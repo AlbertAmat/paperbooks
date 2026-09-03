@@ -282,24 +282,45 @@ router.patch("/leasing", requireAuth, async (req: Request, res: Response) => {
  * Permanently delete the current user's account (and, via DB foreign keys,
  * all of their books/locations/customers/etc.), then redirect to `/login`.
  *
+ * Rate limited: 5 requests / 5 minutes (see `passwordChangeLimiter`), same
+ * as password change and 2FA-disable - all three require re-entering the
+ * current password before acting on a stolen/short-lived session cookie.
  * Auth: required.
+ * Body: { "password": "S3cret!123" }
+ *
+ * Responses: 400 missing password | 401 {"message": "Invalid password."} | 500 server error.
  */
-router.delete("", requireAuth, async (req: Request, res: Response) => {
+router.delete("", requireAuth, passwordChangeLimiter, async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
-    const client = await pool.connect();
-
     const userId = appService.getSessionUser(req);
+    const {password} = req.body;
+
+    if (!password) {
+        return res.status(400).json({message: "Missing password"});
+    }
+
     try {
-        await client.query(`DELETE FROM users WHERE id = $1`,
-            [userId]
-        );
+        const userResult = await pool.query("SELECT password FROM users WHERE id = $1", [userId]);
+        if (userResult.rows.length === 0) {
+            return res.status(401).json({message: "Invalid password."});
+        }
+
+        const passwordMatches = await appService.comparePassword(password, userResult.rows[0].password);
+        if (!passwordMatches) {
+            return res.status(401).json({message: "Invalid password."});
+        }
+
+        const client = await pool.connect();
+        try {
+            await client.query(`DELETE FROM users WHERE id = $1`, [userId]);
+        } finally {
+            client.release();
+        }
 
         return res.redirect("/login"); // Redirect to login page if user is not logged in
     } catch (err: any) {
         console.error("Error executing query", err.stack);
         res.status(500).send("Internal Server Error");
-    } finally {
-        client.release();
     }
 });
 

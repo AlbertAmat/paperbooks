@@ -100,7 +100,7 @@ router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) =
         return res.status(400).send('No location ID provided');
     }
 
-    if (books.length === 0) {
+    if (!Array.isArray(books) || books.length === 0) {
         return res.status(400).send('No books provided');
     }
 
@@ -110,7 +110,7 @@ router.post('/:id/add/books', requireAuth, async (req: Request, res: Response) =
     try {
         const exist = await existLocation(pool, locationId, userId);
         if (!exist) {
-            res.status(404).send('Location does not exist');
+            return res.status(404).send('Location does not exist');
         }
 
         for (const bookStockCode of books) {
@@ -211,7 +211,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
         );
 
         if (queryResult.rowCount != 1) {
-            res.status(500).send();
+            return res.status(500).send();
         }
 
         const locationQueryResult = await pool.query(

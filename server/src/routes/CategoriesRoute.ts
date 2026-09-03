@@ -120,7 +120,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
         );
 
         if(queryResult.rowCount != 1) {
-            res.status(500).send();
+            return res.status(500).send();
         }
 
         const categoryQueryResult = await pool.query(
