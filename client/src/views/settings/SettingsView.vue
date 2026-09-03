@@ -569,9 +569,12 @@ function changeImage() {
    mb-5 (20px bottom margin) for spacing against the *next* sibling in the
    normal (non-flex) card list above it. Inside this row that margin just
    stacks on top of `gap`, doubling the space between the two cards - let
-   `gap` be the only thing spacing them, in both the row and stacked layouts. */
+   `gap` be the only thing spacing them, in both the row and stacked layouts.
+   Vuetify's spacing helpers (mb-5 included) are themselves `!important`,
+   so overriding them needs `!important` too - a plain override here would
+   silently lose and do nothing. */
 .settings-security-row :deep(.settings-card) {
-	margin-bottom: 0;
+	margin-bottom: 0 !important;
 }
 
 @media (max-width: 900px) {
