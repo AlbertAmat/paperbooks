@@ -565,9 +565,25 @@ function changeImage() {
 	min-width: 0;
 }
 
+/* Each card is its own <settings-card>, which already carries Vuetify's
+   mb-5 (20px bottom margin) for spacing against the *next* sibling in the
+   normal (non-flex) card list above it. Inside this row that margin just
+   stacks on top of `gap`, doubling the space between the two cards - let
+   `gap` be the only thing spacing them, in both the row and stacked layouts. */
+.settings-security-row :deep(.settings-card) {
+	margin-bottom: 0;
+}
+
 @media (max-width: 900px) {
 	.settings-security-row {
 		flex-direction: column;
+		/* align-items controls cross-axis alignment, and the cross axis
+		   flips from vertical to horizontal once flex-direction becomes
+		   column - "flex-start" (correct for the row, so unequal-height
+		   cards don't stretch to match each other) then means "shrink to
+		   content width" instead, leaving a stacked card narrower than
+		   its container. Stacked cards should just span full width. */
+		align-items: stretch;
 	}
 
 	/* flex: 1 1 0's zero basis is a width rule - once the row above
