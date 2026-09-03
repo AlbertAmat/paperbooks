@@ -3,9 +3,9 @@
 		<v-card-title>
 			<span class="pb-display settings-card-title">{{ title }}</span>
 		</v-card-title>
-		<v-divider class="mt-2 mb-5"></v-divider>
+		<v-divider class="mt-2 mb-0"></v-divider>
 
-		<v-card-text>
+		<v-card-text class="pt-2">
 			<slot></slot>
 		</v-card-text>
 	</v-card>
