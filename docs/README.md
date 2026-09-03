@@ -18,6 +18,28 @@ there.
 - **[ROADMAP.md](ROADMAP.md)** - feature ideas that don't have anyone working
   on them yet, for contributors looking for something to pick up.
 
+Module-by-module deep dives, each covering both the `server/src/routes/*.ts`
+endpoints and the matching `client/src/{controller,service,views}/` code:
+
+- **[BOOKS.md](BOOKS.md)** - the catalog: books vs. physical stock, the
+  stock lifecycle, ISBN auto-lookup (Google Books/Open Library), cover
+  images, ebook file backups, and barcode scanning/printing.
+- **[CUSTOMERS.md](CUSTOMERS.md)** - borrowers, customer groups, and the
+  lending/returning flow.
+- **[LOCATIONS.md](LOCATIONS.md)** - shelves/storage locations and moving
+  stock between them.
+- **[LOANS.md](LOANS.md)** - the currently-on-loan listing and the
+  `loan_history` audit/report table behind it.
+- **[CATALOG.md](CATALOG.md)** - categories, authors, languages, formats,
+  and the `GET /app/policy` bootstrap that delivers them to the client.
+- **[DASHBOARD.md](DASHBOARD.md)** - the single aggregate endpoint behind
+  the dashboard's KPIs and charts.
+- **[SETTINGS.md](SETTINGS.md)** - profile, UI preferences, and the leasing
+  feature toggle (session/password/2FA live in AUTHENTICATION.md instead).
+- **[CLIENT-ARCHITECTURE.md](CLIENT-ARCHITECTURE.md)** - the
+  controller/service/model pattern shared by every client feature, the
+  shared axios instance, routing, and i18n.
+
 `README.md`, `LICENSE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and
 `SECURITY.md` stay at the repo root - GitHub looks for those specific files
 there (or gives them dedicated UI - the Security tab, the "healthy
