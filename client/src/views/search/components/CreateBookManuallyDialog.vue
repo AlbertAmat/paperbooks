@@ -3,6 +3,7 @@
 		v-model="dialog"
 		width="700"
 		scrollable
+		persistent
 	>
 		<v-card>
 			<v-card-title class="d-flex" style="align-items: center">

@@ -93,6 +93,7 @@ import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {printDialogController} from "@/components/printDialog/PrintDialogController";
 import {appSnackbarController} from "@/components/appSnackbar/AppSnackbarController";
+import {applicationService} from "@/service/ApplicationService";
 
 interface Props {
 	book: Book
@@ -102,18 +103,26 @@ const props = defineProps<Props>()
 
 const {t} = useI18n();
 
-const headers = [
-	{
-		title: t(AppLabels.CODE),
-		align: 'start',
-		sortable: false,
-		value: 'code',
-	},
-	{title: t(AppLabels.LOCATION), value: 'location_name'},
-	{title: t(AppLabels.BOOK_STOCK_STATUS), value: 'status'},
-	{title: t(AppLabels.BOOKED_BY), value: 'booked_user'},
-	{title: t(AppLabels.ACTIONS), value: 'actions', align: 'end',}
-];
+const headers = computed(() => {
+	const cols: {title: string, value: string, align?: string, sortable?: boolean}[] = [
+		{
+			title: t(AppLabels.CODE),
+			align: 'start',
+			sortable: false,
+			value: 'code',
+		},
+		{title: t(AppLabels.LOCATION), value: 'location_name'},
+		{title: t(AppLabels.BOOK_STOCK_STATUS), value: 'status'},
+	];
+
+	if (applicationService.getUser().isLeasingEnabled()) {
+		cols.push({title: t(AppLabels.BOOKED_BY), value: 'booked_user'});
+	}
+
+	cols.push({title: t(AppLabels.ACTIONS), value: 'actions', align: 'end'});
+
+	return cols;
+});
 
 const stockDialog: Ref<boolean> = ref(false);
 const selectedStock: ShallowRef<BookStock | null> = shallowRef(null);

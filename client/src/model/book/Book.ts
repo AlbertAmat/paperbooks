@@ -41,7 +41,7 @@ export default class Book extends BookItem {
     private m_pages: number;
 
     /** Book format (e.g. paperback/hardcover), or null if unset. */
-    private m_format: Format | null;
+    private m_format: ShallowRef<Format | null>;
 
     /** Physical stocks (copies) of this book. */
     private m_stocks: ShallowRef<BookStock[]>;
@@ -64,10 +64,7 @@ export default class Book extends BookItem {
         this.m_dateCreated = new Date(data.date_created);
         this.m_dateUpdated = new Date(data.date_updated);
         this.m_pages = data.pages || 0;
-        this.m_format = null;
-        if (data.format_id) {
-            this.m_format = applicationService.getFormat(data.format_id) || null;
-        }
+        this.m_format = shallowRef(data.format_id ? applicationService.getFormat(data.format_id) || null : null);
 
         this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(this,stock)));
         this.m_files = shallowRef(data.files);
@@ -167,22 +164,22 @@ export default class Book extends BookItem {
 
     /** @returns Whether the book has a format set. */
     public hasFormat(): boolean {
-        return this.m_format != null;
+        return this.m_format.value != null;
     }
 
     /** @returns The book's format, or null if unset. */
     public getFormat(): Format | null {
-        return this.m_format;
+        return this.m_format.value;
     }
 
     /** @param format New format, or null to clear it. */
     public setFormat(format: Format | null) {
-        return this.m_format = format;
+        this.m_format.value = format;
     }
 
     /** @returns Whether this book's format is the digital/ebook edition (`ELECTRONIC_FORMAT_NAME`) - gates the file upload/preview card on the detail view. */
     public isElectronic(): boolean {
-        return this.m_format?.getFormatName() === ELECTRONIC_FORMAT_NAME;
+        return this.m_format.value?.getFormatName() === ELECTRONIC_FORMAT_NAME;
     }
 
     /** @returns The book's physical stocks (copies). */
@@ -262,7 +259,7 @@ export default class Book extends BookItem {
                 this.m_publisher,
                 this.m_publishedDate,
                 this.m_pages,
-                this.m_format ? this.m_format.getFormatId() : null
+                this.m_format.value ? this.m_format.value.getFormatId() : null
             )
             appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_UPDATED)})
         } catch (e) {

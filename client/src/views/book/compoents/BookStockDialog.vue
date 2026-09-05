@@ -135,9 +135,16 @@ const dialog = computed({
 const loading: Ref<boolean> = ref(false);
 
 /**
- * The list of book status
+ * The list of selectable book statuses. The BOOKED status is only offered
+ * when leasing is enabled, unless the stock being edited is already booked.
  */
-const status = BookStock.BookStockStatus;
+const status = computed(() => {
+	if (applicationService.getUser().isLeasingEnabled() || selectedStatus.value === BookStockStatusEnum.BOOKED) {
+		return BookStock.BookStockStatus;
+	}
+
+	return BookStock.BookStockStatus.filter((item) => item.value !== BookStockStatusEnum.BOOKED);
+});
 
 const locations = computed(() => {
 	return applicationService.getLocations().map((location) => {

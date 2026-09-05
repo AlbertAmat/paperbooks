@@ -3,6 +3,7 @@
 		v-model="dialog"
 		width="570"
 		scrollable
+		persistent
 		:close-on-content-click="false"
 	>
 		<v-card>
