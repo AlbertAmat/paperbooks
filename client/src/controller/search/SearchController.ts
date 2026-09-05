@@ -36,6 +36,12 @@ export default class SearchController extends BaseController<ISearchResponse> {
     /** Restrict to books added on/before this date (YYYY-MM-DD), or null. */
     private m_dateTo: Ref<string | null> = ref(null);
 
+    /** Restrict to books in this category, or null for every category. */
+    private m_categoryId: Ref<number | null> = ref(null);
+
+    /** Whether the results are currently rendered grouped by category (UI-only, not sent to the server). */
+    private m_groupByCategory: Ref<boolean> = ref(false);
+
     /** Number of results per page, as reported by the server. */
     private m_limit: number = 0;
 
@@ -60,6 +66,8 @@ export default class SearchController extends BaseController<ISearchResponse> {
         const dateToParam = params[SearchRoute.DATE_TO_QUERY_PARAM];
         this.m_dateFrom.value = dateFromParam ? String(dateFromParam) : null;
         this.m_dateTo.value = dateToParam ? String(dateToParam) : null;
+        const categoryParam = params[SearchRoute.CATEGORY_QUERY_PARAM];
+        this.m_categoryId.value = categoryParam ? Number(categoryParam) : null;
 
         // These route params can also be a plain router-link to this same
         // route with different values (quick filters, the global filter menu)
@@ -81,6 +89,12 @@ export default class SearchController extends BaseController<ISearchResponse> {
                 this.fetchBooks(true);
             }
         );
+
+        watch(() => router.currentRoute.value.query[SearchRoute.CATEGORY_QUERY_PARAM], (newCategoryParam) => {
+            this.m_categoryId.value = newCategoryParam ? Number(newCategoryParam) : null;
+            this.m_page.value = 0;
+            this.fetchBooks(true);
+        });
     }
 
     /**
@@ -127,10 +141,9 @@ export default class SearchController extends BaseController<ISearchResponse> {
         try {
             const params = router.currentRoute.value.query;
             const query = params[SearchRoute.QUERY_PARAM] ? params[SearchRoute.QUERY_PARAM] as string : null;
-            const categoryId = params[SearchRoute.CATEGORY_QUERY_PARAM] ? Number(params[SearchRoute.CATEGORY_QUERY_PARAM]) : null;
             const data = await searchService.searchBooks(
                 query,
-                categoryId,
+                this.m_categoryId.value,
                 this.m_page.value,
                 this.m_filters.value,
                 this.m_sort.value,
@@ -279,9 +292,41 @@ export default class SearchController extends BaseController<ISearchResponse> {
         this.setDateRange(null, null);
     }
 
-    /** @returns Whether any filter or upload-date range is currently active. */
+    /** @returns The active category filter, or null if every category is shown. */
+    public getCategoryId(): number | null {
+        return this.m_categoryId.value;
+    }
+
+    /**
+     * Change the category filter, reset to page 0, and re-run the search from scratch.
+     * @param categoryId New category id to restrict to, or null to clear it.
+     */
+    public setCategoryId(categoryId: number | null) {
+        if (this.m_categoryId.value !== categoryId) {
+            this.m_categoryId.value = categoryId;
+            this.m_page.value = 0;
+            this.fetchBooks(true);
+        }
+    }
+
+    /** Clear the category filter, reset to page 0, and re-run the search from scratch. */
+    public clearCategoryId() {
+        this.setCategoryId(null);
+    }
+
+    /** @returns Whether any filter, upload-date range or category is currently active. */
     public hasActiveFilters(): boolean {
-        return this.m_filters.value.length > 0 || this.hasDateRange();
+        return this.m_filters.value.length > 0 || this.hasDateRange() || this.m_categoryId.value !== null;
+    }
+
+    /** @returns Whether results are currently rendered grouped by category. */
+    public getGroupByCategory(): boolean {
+        return this.m_groupByCategory.value;
+    }
+
+    /** @param value New "group by category" state - purely a display toggle, doesn't affect the query. */
+    public setGroupByCategory(value: boolean) {
+        this.m_groupByCategory.value = value;
     }
 }
 

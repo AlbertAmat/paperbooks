@@ -33,6 +33,22 @@
 			<v-divider class="my-2"/>
 
 			<div class="px-2 pb-2">
+				<div class="text-caption text-medium-emphasis mb-2">{{ t(AppLabels.CATEGORY_FILTER) }}</div>
+				<v-select
+					v-model="categoryInput"
+					:items="categoryOptions"
+					item-title="title"
+					item-value="value"
+					density="compact"
+					variant="outlined"
+					hide-details
+					@update:model-value="applyCategory"
+				/>
+			</div>
+
+			<v-divider class="my-2"/>
+
+			<div class="px-2 pb-2">
 				<div class="text-caption text-medium-emphasis mb-2">{{ t(AppLabels.UPLOAD_DATE_FILTER) }}</div>
 				<v-text-field
 					v-model="dateFromInput"
@@ -66,11 +82,12 @@
  * `v-text-field`'s `append-inner` slot template.
  *
  * While the library page is mounted (see `activeSearchController`), it drives
- * that page's own `SearchController` directly - filters apply live, no
- * navigation. From any other page there's no live controller to mutate, so
- * toggling a filter/applying a date range instead navigates to the library
- * page with that filter set already in the URL (`SearchRoute.getPathForFilters`);
- * `SearchController` picks the same params back up on mount.
+ * that page's own `SearchController` directly - filters/category apply live,
+ * no navigation. From any other page there's no live controller to mutate, so
+ * toggling a filter/category/applying a date range instead navigates to the
+ * library page with that filter set already in the URL
+ * (`SearchRoute.getPathForFilters`); `SearchController` picks the same params
+ * back up on mount.
  */
 import {computed, ref, Ref, watch} from "vue";
 import {useI18n} from "vue-i18n";
@@ -79,12 +96,22 @@ import {activeSearchController} from "@/controller/search/SearchController";
 import {SearchFilter} from "@/types/search/SearchFilter";
 import router from "@/router/Router";
 import {searchRoute} from "@/router/routes/SearchRoute";
+import {applicationService} from "@/service/ApplicationService";
 
 const {t} = useI18n();
 
 const filterMenu: Ref<boolean> = ref(false);
 const dateFromInput: Ref<string | null> = ref(null);
 const dateToInput: Ref<string | null> = ref(null);
+const categoryInput: Ref<number | null> = ref(null);
+
+const categoryOptions = computed(() => [
+	{title: t(AppLabels.ALL_CATEGORIES), value: null},
+	...applicationService.getCategories().map((category) => ({
+		title: category.getCategoryName(),
+		value: category.getCategoryId()
+	}))
+]);
 
 /** Staged filter selection, used only while there's no live `activeSearchController` (see file doc). */
 const pendingFilters: Ref<SearchFilter[]> = ref([]);
@@ -100,7 +127,7 @@ const hasActiveFilters = computed(() => {
 	if (activeSearchController.value) {
 		return activeSearchController.value.hasActiveFilters();
 	}
-	return pendingFilters.value.length > 0;
+	return pendingFilters.value.length > 0 || categoryInput.value !== null;
 });
 
 function isFilterActive(filter: SearchFilter): boolean {
@@ -130,22 +157,40 @@ function toggleFilter(filter: SearchFilter) {
 	router.push(searchRoute.getPathForFilters({
 		filters: pendingFilters.value,
 		dateFrom: dateFromInput.value,
-		dateTo: dateToInput.value
+		dateTo: dateToInput.value,
+		categoryId: categoryInput.value
 	}));
 }
 
-// Reset the draft filters/dates to whatever's actually active each time the
-// menu opens - the live controller's state while on the library page, or a
-// blank slate (not last page's leftover picks) everywhere else.
+function applyCategory(categoryId: number | null) {
+	const controller = activeSearchController.value;
+	if (controller) {
+		controller.setCategoryId(categoryId);
+		return;
+	}
+
+	router.push(searchRoute.getPathForFilters({
+		filters: pendingFilters.value,
+		dateFrom: dateFromInput.value,
+		dateTo: dateToInput.value,
+		categoryId
+	}));
+}
+
+// Reset the draft filters/dates/category to whatever's actually active each
+// time the menu opens - the live controller's state while on the library
+// page, or a blank slate (not last page's leftover picks) everywhere else.
 watch(filterMenu, (open) => {
 	if (!open) return;
 	if (activeSearchController.value) {
 		dateFromInput.value = activeSearchController.value.getDateFrom();
 		dateToInput.value = activeSearchController.value.getDateTo();
+		categoryInput.value = activeSearchController.value.getCategoryId();
 	} else {
 		pendingFilters.value = [];
 		dateFromInput.value = null;
 		dateToInput.value = null;
+		categoryInput.value = null;
 	}
 });
 
@@ -157,7 +202,8 @@ function applyDateRange() {
 		router.push(searchRoute.getPathForFilters({
 			filters: pendingFilters.value,
 			dateFrom: dateFromInput.value || null,
-			dateTo: dateToInput.value || null
+			dateTo: dateToInput.value || null,
+			categoryId: categoryInput.value
 		}));
 	}
 	filterMenu.value = false;

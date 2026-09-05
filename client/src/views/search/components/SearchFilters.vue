@@ -17,6 +17,14 @@
 			color="primary"
 			@click:close="model.clearDateRange()"
 		>{{ dateRangeLabel }}</v-chip>
+
+		<v-chip
+			v-if="categoryLabel"
+			label
+			closable
+			color="primary"
+			@click:close="model.clearCategoryId()"
+		>{{ categoryLabel }}</v-chip>
 	</div>
 </template>
 
@@ -34,6 +42,7 @@ import {SearchFilter} from "@/types/search/SearchFilter";
 import {computed} from "vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "../../../plugins/i18n/AppLabels";
+import {applicationService} from "@/service/ApplicationService";
 
 interface Props {
 	model: SearchController
@@ -74,6 +83,12 @@ const dateRangeLabel = computed(() => {
 	if (from && to) return `${from} – ${to}`;
 	if (from) return `${t(AppLabels.DATE_FROM)} ${from}`;
 	return `${t(AppLabels.DATE_TO)} ${to}`;
+})
+
+const categoryLabel = computed(() => {
+	const categoryId = props.model.getCategoryId();
+	if (categoryId === null) return null;
+	return applicationService.getCategory(categoryId)?.getCategoryName() ?? null;
 })
 </script>
 

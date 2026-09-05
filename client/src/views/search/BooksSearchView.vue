@@ -12,6 +12,22 @@
 		</template>
 
 		<template v-slot:append>
+			<v-tooltip :text="t(AppLabels.GROUP_BY_CATEGORY)" location="bottom">
+				<template v-slot:activator="{ props }">
+					<v-btn
+						v-bind="props"
+						icon
+						variant="text"
+						density="compact"
+						class="mr-2"
+						:color="model.getGroupByCategory() ? 'primary' : undefined"
+						@click="model.setGroupByCategory(!model.getGroupByCategory())"
+					>
+						<v-icon size="20">mdi-shape-outline</v-icon>
+					</v-btn>
+				</template>
+			</v-tooltip>
+
 			<v-select
 				:model-value="model.getSort()"
 				:items="sortOptions"
@@ -89,6 +105,34 @@
 				</v-btn>
 			</empty-state>
 
+			<template v-else-if="model.getGroupByCategory()">
+				<div v-for="group in groupedBooks" :key="group.categoryId ?? 'uncategorized'" class="book-group">
+					<div class="book-group-header">
+						{{ group.categoryName }}
+						<v-chip size="x-small" variant="flat" class="ml-2">{{ group.books.length }}</v-chip>
+					</div>
+					<div class="book-grid">
+						<book-item
+							v-for="book in group.books"
+							:key="book.getId()"
+							:book="book"
+						/>
+					</div>
+				</div>
+
+				<template v-if="loadingBooks">
+					<div class="book-grid">
+						<book-item-skeleton
+							v-for="item in model.getLimit()"
+							:key="item"
+						/>
+					</div>
+				</template>
+
+				<!-- Infinite scroll trigger -->
+				<div ref="infiniteScrollTrigger" class="infinite-scroll-trigger"></div>
+			</template>
+
 			<template v-else>
 				<div class="book-grid">
 					<book-item
@@ -119,7 +163,7 @@
  * "add book" entry points (ISBN or manual). Re-runs the search whenever the
  * route's query string changes.
  */
-import {Ref, ref, onMounted, onUnmounted, watch, nextTick} from "vue";
+import {Ref, ref, computed, onMounted, onUnmounted, watch, nextTick} from "vue";
 import PageComponent from "@/views/PageComponent.vue";
 import SearchController, {activeSearchController} from "@/controller/search/SearchController";
 import {SortType} from "@/types/search/SortType";
@@ -132,10 +176,48 @@ import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import SearchFilters from "@/views/search/components/SearchFilters.vue";
 import EmptyState from "@/components/emptyState/EmptyState.vue";
+import {applicationService} from "@/service/ApplicationService";
+import BookItemModel from "@/model/book/BookItem";
 
 const model = new SearchController();
 
 const {t} = useI18n();
+
+/**
+ * `model.getBooks()`, split into one section per category (present in the
+ * loaded results) plus a trailing "Uncategorized" section for books with no
+ * category - only computed while `model.getGroupByCategory()` is on. Sections
+ * are sorted by category name; a section only appears once at least one
+ * loaded book belongs to it.
+ */
+const groupedBooks = computed(() => {
+	const groups = new Map<number | null, BookItemModel[]>();
+	for (const book of model.getBooks()) {
+		const categoryId = book.getCategoryId();
+		const bucket = groups.get(categoryId);
+		if (bucket) {
+			bucket.push(book);
+		} else {
+			groups.set(categoryId, [book]);
+		}
+	}
+
+	const named = [...groups.entries()]
+		.filter(([categoryId]) => categoryId !== null)
+		.map(([categoryId, books]) => ({
+			categoryId,
+			categoryName: applicationService.getCategory(categoryId)?.getCategoryName() ?? "",
+			books
+		}))
+		.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
+
+	const uncategorized = groups.get(null);
+	if (uncategorized) {
+		named.push({categoryId: null, categoryName: t(AppLabels.UNCATEGORIZED), books: uncategorized});
+	}
+
+	return named;
+});
 
 const createBookIsbnDialog: Ref<boolean> = ref(false);
 const createBookManuallyDialog: Ref<boolean> = ref(false);
@@ -253,5 +335,17 @@ watch(() => model.getBooks(), () => {
 	grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
 	gap: 16px 12px;
 	padding: 4px;
+}
+
+.book-group {
+	margin-bottom: 24px;
+}
+
+.book-group-header {
+	display: flex;
+	align-items: center;
+	font-size: 15px;
+	font-weight: 600;
+	padding: 4px 4px 12px;
 }
 </style>

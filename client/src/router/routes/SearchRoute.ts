@@ -63,15 +63,18 @@ export class SearchRoute extends ARoute {
 
     /**
      * Build the search/library view URL from any combination of filters/date
-     * range - used by the global filter menu (see `SearchToolbarFilterMenu.vue`)
+     * range/category - used by the global filter menu (see `SearchToolbarFilterMenu.vue`)
      * to jump there pre-filtered from any other page.
-     * @param options `filters` and/or `dateFrom`/`dateTo` (YYYY-MM-DD) to apply; any omitted/empty one is left out of the URL entirely.
+     * @param options `filters`, `categoryId` and/or `dateFrom`/`dateTo` (YYYY-MM-DD) to apply; any omitted/empty/null one is left out of the URL entirely.
      */
-    public getPathForFilters(options: { filters?: SearchFilter[]; dateFrom?: string | null; dateTo?: string | null }) {
+    public getPathForFilters(options: { filters?: SearchFilter[]; dateFrom?: string | null; dateTo?: string | null; categoryId?: number | null }) {
         const params = new URLSearchParams();
 
         if (options.filters && options.filters.length > 0) {
             params.set(SearchRoute.FILTERS_QUERY_PARAM, options.filters.join(","));
+        }
+        if (options.categoryId) {
+            params.set(SearchRoute.CATEGORY_QUERY_PARAM, String(options.categoryId));
         }
         if (options.dateFrom) {
             params.set(SearchRoute.DATE_FROM_QUERY_PARAM, options.dateFrom);
