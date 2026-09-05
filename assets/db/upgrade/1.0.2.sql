@@ -1,5 +1,5 @@
--- Consolidated migration for all schema changes made on 2026-09-01.
--- Brings an already-installed database in line with today's databaseSchema.sql.
+-- Upgrade to v1.0.2 - schema changes made on 2026-09-01.
+-- Brings an already-installed database in line with the v1.0.2 databaseSchema.sql.
 -- (New installs should use databaseSchema.sql directly and skip this file.)
 
 -- Rebrand: the account-deletion confirmation text still says "Paper Books" on

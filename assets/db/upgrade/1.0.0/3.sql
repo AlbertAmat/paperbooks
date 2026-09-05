@@ -1,5 +1,5 @@
--- Consolidated migration for all schema changes made on 2026-08-30.
--- Brings an already-installed database in line with today's databaseSchema.sql.
+-- Upgrade to v1.0.0 (3 of 3) - schema changes made on 2026-08-30.
+-- Brings an already-installed database in line with the v1.0.0 databaseSchema.sql.
 -- (New installs should use databaseSchema.sql directly and skip this file.)
 
 -- Per-user UI theme preference ("beige" or "library").

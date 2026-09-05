@@ -106,9 +106,9 @@ return`). Group unrelated changes into separate commits/PRs where practical.
 If your change requires a schema change, add it to **both**:
 
 - `assets/db/databaseSchema.sql` — always current, the only thing a fresh install runs.
-- `assets/db/upgrade/YYMMDD.sql` — dated upgrade file for existing installs (one
-  file per calendar day; append to today's file if one already exists rather than
-  creating a new one). See [`assets/db/upgrade/README.md`](assets/db/upgrade/README.md)
+- `assets/db/upgrade/X.Y.Z.sql` (or `X.Y.Z/N.sql` if that version needs more than
+  one file) — upgrade file for existing installs, named after the version it
+  ships in. See [`assets/db/upgrade/README.md`](assets/db/upgrade/README.md)
   for the full convention.
 
 Treat a file under `assets/db/upgrade/` as append-only once it's part of a

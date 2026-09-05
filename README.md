@@ -223,17 +223,18 @@ psql -d paperbooks -f assets/db/databaseSchema.sql
 > insert a row into `users` directly, or start the server with `ALLOW_DEV_AUTH=true`
 > and use the `/register` page, then turn `ALLOW_DEV_AUTH` back off.
 
-The dated files in `assets/db/upgrade/` (`082626.sql`, `082926.sql`, ...) are
-**not** for new installs — they're incremental upgrades for a database that's
-already running an older version of the schema (see
+The version-named files in `assets/db/upgrade/` (`1.0.0/1.sql`, `1.0.0/2.sql`,
+...) are **not** for new installs — they're incremental upgrades for a
+database that's already running an older version of the schema (see
 [`assets/db/upgrade/README.md`](assets/db/upgrade/README.md) for the full
 convention). Each one's header comment says what it does and confirms new
 installs should skip it. If you're upgrading an existing instance instead of
-setting one up fresh, apply only the files newer than whatever you're
-currently on, in filename (date) order:
+setting one up fresh, apply every version's file(s) newer than whatever
+version you're currently on, up through the version you're installing, in
+order:
 
 ```bash
-psql -d paperbooks -f assets/db/upgrade/082926.sql   # example: apply one day's upgrade
+psql -d paperbooks -f assets/db/upgrade/1.0.0/1.sql   # example: apply the first v1.0.0 upgrade file
 ```
 
 ### 3. Configure the server

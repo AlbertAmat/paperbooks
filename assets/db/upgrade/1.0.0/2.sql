@@ -1,5 +1,5 @@
--- Consolidated migration for all schema changes made on 2026-08-29.
--- Brings an already-installed database in line with today's databaseSchema.sql.
+-- Upgrade to v1.0.0 (2 of 3) - schema changes made on 2026-08-29.
+-- Brings an already-installed database in line with the v1.0.0 databaseSchema.sql.
 -- (New installs should use databaseSchema.sql directly and skip this file.)
 
 -- Customer groups: manage/add/edit/delete UI labels + drag-and-drop move labels

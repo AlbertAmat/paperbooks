@@ -345,14 +345,15 @@ real `JWT_SECRET` — every other production hardening step above still applies.
   deliberate step, not a surprise on container restart.
 - **A new `APP_TAG` sometimes needs a database upgrade first.** `assets/db/`
   contains `databaseSchema.sql` (always current — only used for brand-new installs)
-  plus an `upgrade/` directory with one dated file per day changes were made
-  (e.g. `082926.sql`) for a database that's already running an older schema; each
-  one's header comment explains what it does (see `assets/db/upgrade/README.md`
-  for the full convention). Check the release notes for the version you're
-  upgrading to, and if it mentions an upgrade file, apply it to the running `db`
-  container *before* switching `APP_TAG` and restarting `app`:
+  plus an `upgrade/` directory with files (or, for versions with more than one,
+  a folder) named after the version they ship in — e.g. `1.1.0/1.sql` — for a
+  database that's already running an older schema; each one's header comment
+  explains what it does (see `assets/db/upgrade/README.md` for the full
+  convention). Check the release notes for the version you're upgrading to, and
+  apply every version's file(s) up through that version, in order, to the
+  running `db` container *before* switching `APP_TAG` and restarting `app`:
   ```bash
-  docker compose exec -T db psql -U <DB_USER> -d <DB_NAME> < assets/db/upgrade/082926.sql
+  docker compose exec -T db psql -U <DB_USER> -d <DB_NAME> < assets/db/upgrade/1.1.0/1.sql
   ```
 - **Postgres major-version bumps are not the same kind of upgrade.** The app-version
   upgrade above is a drop-in restart because the same Postgres major version keeps
