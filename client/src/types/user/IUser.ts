@@ -6,7 +6,7 @@
  * const u: IUser = {
  *   code: "jdoe", name: "Jane Doe", email: "jane@example.com",
  *   language: "en", region: "US", image: null, isPublicInstitution: false,
- *   securityNoticeAccepted: false
+ *   securityNoticeAccepted: false, termsOfServiceAccepted: false
  * };
  */
 export interface IUser {
@@ -39,4 +39,10 @@ export interface IUser {
      * public-institution accounts.
      */
     securityNoticeAccepted: boolean;
+    /**
+     * Whether this account has accepted the Terms of Service (see
+     * TermsOfServiceDialog.vue). Required from every account, unlike
+     * `securityNoticeAccepted`.
+     */
+    termsOfServiceAccepted: boolean;
 }

@@ -43,6 +43,7 @@
 				<app-snackbar/>
 				<error-dialog/>
 				<cookie-consent-dialog/>
+				<terms-of-service-dialog/>
 				<security-notice-dialog/>
 			</v-main>
 
@@ -70,6 +71,7 @@ import AppSnackbar from "@/components/appSnackbar/AppSnackbar.vue";
 import ErrorDialog from "@/components/errorDialog/ErrorDialog.vue";
 import AppFooter from "@/components/app/AppFooter.vue";
 import CookieConsentDialog from "@/components/cookieConsent/CookieConsentDialog.vue";
+import TermsOfServiceDialog from "@/components/termsOfService/TermsOfServiceDialog.vue";
 import SecurityNoticeDialog from "@/components/securityNotice/SecurityNoticeDialog.vue";
 import {applyTheme} from "@/plugins/theme";
 

@@ -94,6 +94,15 @@ export default class User {
     private m_securityNoticeAccepted: Ref<boolean>;
 
     /**
+     * Whether this account has accepted the Terms of Service (see
+     * TermsOfServiceDialog.vue). Stored as a reactive value so the dialog
+     * hides itself immediately after `acceptTermsOfService()`. Required
+     * from every account, unlike `m_securityNoticeAccepted`.
+     * @private
+     */
+    private m_termsOfServiceAccepted: Ref<boolean>;
+
+    /**
      * Whether two-factor authentication (TOTP) is enabled for this account.
      * Stored as a reactive value so the settings view updates immediately
      * after enabling/disabling (see TwoFactorSetupDialog.vue / TwoFactorDisableDialog.vue).
@@ -117,6 +126,7 @@ export default class User {
         this.m_leasingEnabled = ref(data.leasingEnabled);
         this.m_isPublicInstitution = data.isPublicInstitution;
         this.m_securityNoticeAccepted = ref(data.securityNoticeAccepted);
+        this.m_termsOfServiceAccepted = ref(data.termsOfServiceAccepted);
         this.m_totpEnabled = ref(data.totpEnabled);
     }
 
@@ -259,6 +269,14 @@ export default class User {
     }
 
     /**
+     * Returns true once this account has accepted the Terms of Service -
+     * see TermsOfServiceDialog.vue. Required from every account.
+     */
+    public hasAcceptedTermsOfService(): boolean {
+        return this.m_termsOfServiceAccepted.value;
+    }
+
+    /**
      * Returns true if two-factor authentication is currently enabled.
      */
     public isTotpEnabled(): boolean {
@@ -287,6 +305,19 @@ export default class User {
             this.m_securityNoticeAccepted.value = true;
         } catch (e) {
             console.error("Error while accepting security notice: ", e);
+        }
+    }
+
+    /**
+     * Accepts the Terms of Service, persisting it server-side so the
+     * dialog doesn't show again for this user.
+     */
+    public async acceptTermsOfService() {
+        try {
+            await userService.acceptTermsOfService();
+            this.m_termsOfServiceAccepted.value = true;
+        } catch (e) {
+            console.error("Error while accepting terms of service: ", e);
         }
     }
 

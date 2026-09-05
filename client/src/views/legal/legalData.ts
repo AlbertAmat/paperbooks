@@ -56,6 +56,10 @@ export const legalUiLabels: Record<LegalLocale, {
     securityNoticeIntro: string;
     securityNoticeAccept: string;
     securityNoticeLearnMore: string;
+    termsOfServiceNoticeTitle: string;
+    termsOfServiceNoticeIntro: string;
+    termsOfServiceNoticeAccept: string;
+    termsOfServiceNoticeLearnMore: string;
 }> = {
     en: {
         pageTitle: "Legal",
@@ -72,6 +76,10 @@ export const legalUiLabels: Record<LegalLocale, {
         securityNoticeIntro: "This account is registered as a public institution. Before continuing, please review this summary of the security measures built into Vaultisse - useful evidence for your own risk assessment.",
         securityNoticeAccept: "I acknowledge this notice",
         securityNoticeLearnMore: "Open full document",
+        termsOfServiceNoticeTitle: "Terms of Service",
+        termsOfServiceNoticeIntro: "Before continuing, please review and accept our Terms of Service, including how your data (and any data you enter about others) is processed.",
+        termsOfServiceNoticeAccept: "I agree to the Terms of Service",
+        termsOfServiceNoticeLearnMore: "Open full document",
     },
     es: {
         pageTitle: "Legal",
@@ -88,6 +96,10 @@ export const legalUiLabels: Record<LegalLocale, {
         securityNoticeIntro: "Esta cuenta está registrada como institución pública. Antes de continuar, revisa este resumen de las medidas de seguridad integradas en Vaultisse: puede servirte como evidencia para tu propia evaluación de riesgos.",
         securityNoticeAccept: "He leído este aviso",
         securityNoticeLearnMore: "Abrir documento completo",
+        termsOfServiceNoticeTitle: "Términos de Servicio",
+        termsOfServiceNoticeIntro: "Antes de continuar, revisa y acepta nuestros Términos de Servicio, incluyendo cómo se procesan tus datos (y los de cualquier otra persona que registres).",
+        termsOfServiceNoticeAccept: "Acepto los Términos de Servicio",
+        termsOfServiceNoticeLearnMore: "Abrir documento completo",
     },
     ca: {
         pageTitle: "Legal",
@@ -104,6 +116,10 @@ export const legalUiLabels: Record<LegalLocale, {
         securityNoticeIntro: "Aquest compte està registrat com a institució pública. Abans de continuar, revisa aquest resum de les mesures de seguretat integrades a Vaultisse: et pot servir com a evidència per a la teva pròpia avaluació de riscos.",
         securityNoticeAccept: "He llegit aquest avís",
         securityNoticeLearnMore: "Obre el document complet",
+        termsOfServiceNoticeTitle: "Termes de Servei",
+        termsOfServiceNoticeIntro: "Abans de continuar, revisa i accepta els nostres Termes de Servei, incloent com es processen les teves dades (i les de qualsevol altra persona que hi registris).",
+        termsOfServiceNoticeAccept: "Accepto els Termes de Servei",
+        termsOfServiceNoticeLearnMore: "Obre el document complet",
     },
     it: {
         pageTitle: "Legale",
@@ -120,6 +136,10 @@ export const legalUiLabels: Record<LegalLocale, {
         securityNoticeIntro: "Questo account è registrato come istituzione pubblica. Prima di continuare, leggi questo riepilogo delle misure di sicurezza integrate in Vaultisse: può servirti come prova per la tua valutazione dei rischi.",
         securityNoticeAccept: "Ho letto questo avviso",
         securityNoticeLearnMore: "Apri il documento completo",
+        termsOfServiceNoticeTitle: "Termini di Servizio",
+        termsOfServiceNoticeIntro: "Prima di continuare, leggi e accetta i nostri Termini di Servizio, incluso il modo in cui vengono trattati i tuoi dati (e quelli di chiunque altro tu registri).",
+        termsOfServiceNoticeAccept: "Accetto i Termini di Servizio",
+        termsOfServiceNoticeLearnMore: "Apri il documento completo",
     },
 };
 

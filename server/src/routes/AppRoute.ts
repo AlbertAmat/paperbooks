@@ -43,7 +43,8 @@ router.get('/version', (req: Request, res: Response) => {
  *  {
  *    "user": { "code": "jdoe", "name": "Jane Doe", "email": "jane@example.com",
  *               "language": "en", "region": "US", "image": null, "isPublicInstitution": false,
- *               "leasingEnabled": false, "totpEnabled": false, "securityNoticeAccepted": false },
+ *               "leasingEnabled": false, "totpEnabled": false, "securityNoticeAccepted": false,
+ *               "termsOfServiceAccepted": false },
  *    "categories": [{ "id": 3, "name": "Fantasy" }],
  *    "languages": [{ "code": "en", "name": "English" }],
  *    "formats": [{ "id": 1, "name": "Paperback" }],
@@ -110,6 +111,17 @@ router.get('/policy', requireAuth, async (req: Request, res: Response) => {
             await recordSecurityNoticeSent(userId);
         } catch (e) {
             console.error("Error recording security notice sent date. ", e)
+        }
+    }
+
+    // Every account, regardless of isPublicInstitution, must accept the
+    // Terms of Service once (see TermsOfServiceDialog.vue). Same
+    // record-on-first-serve pattern as the security notice above.
+    if (!user.termsOfServiceAccepted) {
+        try {
+            await recordTermsOfServiceSent(userId);
+        } catch (e) {
+            console.error("Error recording terms of service sent date. ", e)
         }
     }
 
@@ -258,9 +270,11 @@ async function getUser(userId: number): Promise<Record<string, any>> {
                u.leasing_enabled       AS "leasingEnabled",
                u.is_public_institution AS "isPublicInstitution",
                u.totp_enabled          AS "totpEnabled",
-               (sn.accepted_date IS NOT NULL) AS "securityNoticeAccepted"
+               (sn.accepted_date IS NOT NULL) AS "securityNoticeAccepted",
+               (tos.accepted_date IS NOT NULL) AS "termsOfServiceAccepted"
         FROM users u
         LEFT JOIN user_security_notice_acknowledgements sn ON sn.user_id = u.id
+        LEFT JOIN user_terms_of_service_acknowledgements tos ON tos.user_id = u.id
         WHERE u.id = $1
     `;
 
@@ -298,6 +312,24 @@ async function recordSecurityNoticeSent(userId: number): Promise<void> {
 
     await pool.query(
         `INSERT INTO user_security_notice_acknowledgements (user_id)
+         VALUES ($1)
+         ON CONFLICT (user_id) DO NOTHING`,
+        [userId]
+    );
+}
+
+/**
+ * Ensures a `user_terms_of_service_acknowledgements` row exists for `userId`,
+ * recording "now" as `sent_date` the first time it's called for that user.
+ * `ON CONFLICT DO NOTHING` makes every later call for an already-recorded
+ * user a no-op, so `sent_date` always reflects the first time the dialog
+ * was actually shown.
+ */
+async function recordTermsOfServiceSent(userId: number): Promise<void> {
+    const pool = appService.getDatabasePool();
+
+    await pool.query(
+        `INSERT INTO user_terms_of_service_acknowledgements (user_id)
          VALUES ($1)
          ON CONFLICT (user_id) DO NOTHING`,
         [userId]

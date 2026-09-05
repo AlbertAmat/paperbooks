@@ -602,6 +602,37 @@ router.post("/security-notice/accept", requireAuth, async (req: Request, res: Re
 });
 
 /**
+ * POST /user/terms-of-service/accept
+ * -------------------------------------
+ * Accept the Terms of Service, required from every account on first login
+ * (see TermsOfServiceDialog.vue and GET /app/policy, which reports whether
+ * it's still pending as `user.termsOfServiceAccepted`).
+ *
+ * Auth: required. Idempotent - accepting more than once just refreshes the
+ * acceptance timestamp.
+ *
+ * Response (200): {"message": "Terms of service accepted"}.
+ */
+router.post("/terms-of-service/accept", requireAuth, async (req: Request, res: Response) => {
+    const pool = appService.getDatabasePool();
+    const userId = appService.getSessionUser(req);
+
+    try {
+        await pool.query(
+            `INSERT INTO user_terms_of_service_acknowledgements (user_id, accepted_date)
+             VALUES ($1, CURRENT_TIMESTAMP)
+             ON CONFLICT (user_id) DO UPDATE SET accepted_date = CURRENT_TIMESTAMP`,
+            [userId]
+        );
+
+        res.status(200).json({message: "Terms of service accepted"});
+    } catch (err: any) {
+        console.error("Error executing query", err.stack);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+/**
  * POST /user/2fa/setup
  * ----------------------
  * Start (or restart) two-factor auth setup: generates a new TOTP secret,

@@ -129,6 +129,15 @@ class UserService {
     }
 
     /**
+     * Accept the Terms of Service, required from every account (see
+     * TermsOfServiceDialog.vue). Records the acceptance date server-side
+     * so the dialog doesn't show again for this user.
+     */
+    public async acceptTermsOfService() {
+        await axiosInstance.post(`${PATH_PREFIX}/user/terms-of-service/accept`)
+    }
+
+    /**
      * Start (or restart) two-factor auth setup: generates a new TOTP secret
      * server-side and returns it plus a scannable QR code data URL.
      */

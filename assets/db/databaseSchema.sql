@@ -1199,6 +1199,22 @@ CREATE TABLE user_security_notice_acknowledgements
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
+-- Tracks acceptance of the Terms of Service, required from every account
+-- (see TermsOfServiceDialog.vue / GET /app/policy / POST
+-- /user/terms-of-service/accept) - unlike user_security_notice_acknowledgements
+-- above, this isn't gated by users.is_public_institution. One row per user:
+-- sent_date is set the first time the dialog is served to them, accepted_date
+-- once they accept. Doesn't version the document text - re-accepting after a
+-- material Terms change, if ever needed, would need a versioned redesign.
+CREATE TABLE user_terms_of_service_acknowledgements
+(
+    id            SERIAL PRIMARY KEY,
+    user_id       INT       NOT NULL UNIQUE,
+    sent_date     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    accepted_date TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
 -- One-time recovery codes for accounts with two-factor auth enabled (see
 -- users.totp_enabled). Each code is hashed the same way as a password
 -- (see UserRoute.ts / AuthRoute.ts) and can be redeemed once - used_date is
