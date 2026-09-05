@@ -1,49 +1,51 @@
 <template>
-	<v-hover v-slot="{ isHovering, props }">
-		<v-card
-			v-bind="props"
-			style="width: 100%; padding: 0"
-			variant="text"
-			@drop.prevent="handleDrop"
-			@dragover.prevent
-			@click="triggerFileSelect"
-		>
-			<v-img
-				cover
-				:aspect-ratio="2 / 3"
-				:src="showFallbackImage ? notFound : book.getImageUrl()"
-				@error="showFallbackImage = true"
+	<div class="book-image-container">
+		<v-hover v-slot="{ isHovering, props }">
+			<v-card
+				v-bind="props"
+				style="width: 100%; padding: 0"
+				variant="text"
+				@drop.prevent="handleDrop"
+				@dragover.prevent
+				@click="triggerFileSelect"
 			>
-				<v-expand-transition>
-					<div
-						v-if="isHovering || loading"
-						class="book-image-hover"
-					>
-						<v-progress-circular
-							v-if="loading"
-							color="white"
-							size="60"
-							indeterminate
-						/>
+				<v-img
+					cover
+					:aspect-ratio="2 / 3"
+					:src="showFallbackImage ? notFound : book.getImageUrl()"
+					@error="showFallbackImage = true"
+				>
+					<v-expand-transition>
+						<div
+							v-if="isHovering || loading"
+							class="book-image-hover"
+						>
+							<v-progress-circular
+								v-if="loading"
+								color="white"
+								size="60"
+								indeterminate
+							/>
 
-						<template v-else>
-							<v-icon size="60">mdi-plus</v-icon>
-							<span style="font-size: 20px; font-weight: bold; padding: 0 20px; text-align: center">{{t(AppLabels.IMAGE_DRAG_AND_DROP)}}</span>
-						</template>
-					</div>
-				</v-expand-transition>
-			</v-img>
-			<!-- Hidden file input for click selection -->
-			<input
-				ref="fileInput"
-				type="file"
-				accept="image/*"
-				style="display: none"
-				@change="handleFileSelect"
-			/>
-		</v-card>
-	</v-hover>
-	<div style="text-align: center; width: 100%; color: var(--pb-text-muted)">{{t(AppLabels.BOOK_HOVER_INFO)}}</div>
+							<template v-else>
+								<v-icon size="60">mdi-plus</v-icon>
+								<span style="font-size: 20px; font-weight: bold; padding: 0 20px; text-align: center">{{t(AppLabels.IMAGE_DRAG_AND_DROP)}}</span>
+							</template>
+						</div>
+					</v-expand-transition>
+				</v-img>
+				<!-- Hidden file input for click selection -->
+				<input
+					ref="fileInput"
+					type="file"
+					accept="image/*"
+					style="display: none"
+					@change="handleFileSelect"
+				/>
+			</v-card>
+		</v-hover>
+		<div style="text-align: center; width: 100%; color: var(--pb-text-muted); font-size: 14px">{{t(AppLabels.BOOK_HOVER_INFO)}}</div>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -105,6 +107,20 @@ async function loadImage(file: File) {
 </script>
 
 <style scoped>
+.book-image-container {
+	max-width: 240px;
+	margin: 0 auto;
+}
+
+/* Above the `md` breakpoint the image sits in its own narrow sidebar
+   column, so let it fill that column instead of staying capped. */
+@media (min-width: 960px) {
+	.book-image-container {
+		max-width: none;
+		margin: 0;
+	}
+}
+
 .book-image-hover {
 	height: 100%;
 	display: flex;

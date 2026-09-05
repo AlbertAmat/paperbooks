@@ -2,41 +2,64 @@
 	<card-component
 		:title="t(AppLabels.EBOOK_FILE)"
 		icon="mdi-file-download-outline"
-		dense
+		:counter="files.length"
 	>
+		<template v-slot:actions>
+			<v-btn
+				@click="triggerFileSelect"
+				density="comfortable"
+				color="primary"
+				class="text-none"
+				:loading="loading"
+				:disabled="loading"
+			>
+				{{ t(AppLabels.ADD) }}
+			</v-btn>
+		</template>
+
 		<template v-slot:default>
-			<div v-if="file">
-				<div class="d-flex align-center my-3">
-					<v-icon size="40" class="mr-3" color="primary">
-						{{ file.file_type === 'epub' ? 'mdi-book-open-page-variant-outline' : 'mdi-file-pdf-box' }}
-					</v-icon>
+			<div v-if="files.length > 0">
+				<div
+					v-for="file in files"
+					:key="file.id"
+					class="d-flex align-center my-3"
+				>
+					<v-icon size="28" class="mr-3" color="primary">{{ fileIcon(file) }}</v-icon>
 					<div class="flex-grow-1" style="min-width: 0">
 						<div class="text-truncate">{{ file.file_name }}</div>
 						<div class="text-caption" style="color: var(--pb-text-muted)">
-							{{ formattedSize }} &middot; {{ formattedDate }}
+							{{ formattedSize(file) }} &middot; {{ formattedDate(file) }}
 						</div>
 					</div>
 					<v-btn
 						icon
 						variant="text"
-						density="comfortable"
-						:href="downloadUrl"
+						density="compact"
+						@click="previewFile = file"
 					>
-						<v-icon>mdi-download</v-icon>
+						<v-icon size="21">mdi-eye-outline</v-icon>
 					</v-btn>
 					<v-btn
 						icon
 						variant="text"
-						density="comfortable"
-						:loading="deleteLoading"
-						:disabled="deleteLoading"
-						@click="removeFile"
+						density="compact"
+						class="mx-1"
+						:href="downloadUrl(file)"
 					>
-						<v-icon color="error">mdi-delete</v-icon>
+						<v-icon size="21">mdi-download</v-icon>
+					</v-btn>
+					<v-btn
+						icon
+						variant="text"
+						density="compact"
+						class="mr-4"
+						:loading="deleteLoadingId === file.id"
+						:disabled="deleteLoadingId !== null"
+						@click="removeFile(file)"
+					>
+						<v-icon size="21" color="error">mdi-delete</v-icon>
 					</v-btn>
 				</div>
-
-				<book-file-preview :key="file.id" :book="book"/>
 			</div>
 
 			<template v-else>
@@ -64,9 +87,17 @@
 			<input
 				ref="fileInput"
 				type="file"
-				accept=".epub,.pdf"
+				accept=".epub,.pdf,.mobi,.azw3"
 				style="display: none"
 				@change="handleFileSelect"
+			/>
+
+			<book-file-preview-dialog
+				v-if="previewFile"
+				:model-value="true"
+				@update:model-value="(value) => { if (!value) previewFile = null }"
+				:book="book"
+				:file="previewFile"
 			/>
 		</template>
 	</card-component>
@@ -74,17 +105,21 @@
 
 <script setup lang="ts">
 /**
- * Backed-up epub/pdf file for a book, shown on the book detail view: click
- * or drag-and-drop a file to upload it (via `Book.uploadFile`), or download
- * / delete the currently backed-up file.
+ * Backed-up ebook files for a book, shown on the book detail view: a list
+ * with one row per uploaded file (up to one per type - epub/pdf/mobi),
+ * each with a preview (opens `BookFilePreviewDialog`), download and delete
+ * action, plus an "add file" action - or, when empty, a click/drag-and-drop
+ * dropzone. The uploaded file's type is inferred server-side, so "add file"
+ * always just uploads: it replaces any existing file of the same type.
  */
 import Book from "@/model/book/Book";
 import CardComponent from "@/components/card/CardComponent.vue";
-import BookFilePreview from "@/views/book/compoents/BookFilePreview.vue";
+import BookFilePreviewDialog from "@/views/book/compoents/BookFilePreviewDialog.vue";
 import {computed, ref, Ref} from "vue";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
 import {PATH_PREFIX} from "@/Constants";
+import {IBookFile} from "@/types/book/IBookFile";
 import {confirmationDialogController} from "@/components/confirmationDialog/ConfirmationDialogController";
 import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppSnackbarController";
 
@@ -97,24 +132,32 @@ interface Props {
 const props = defineProps<Props>();
 
 const loading: Ref<boolean> = ref(false);
-const deleteLoading: Ref<boolean> = ref(false);
+const deleteLoadingId: Ref<number | null> = ref(null);
 const fileInput = ref<HTMLInputElement | null>(null);
+const previewFile: Ref<IBookFile | null> = ref(null);
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB, matches the server-side limit
 
-const file = computed(() => props.book.getFile());
+const files = computed(() => props.book.getFiles());
 
-const downloadUrl = computed(() => `${PATH_PREFIX}/book/${props.book.getId()}/file/download`);
+function fileIcon(file: IBookFile): string {
+	if (file.file_type === "epub") return "mdi-book-open-page-variant-outline";
+	if (file.file_type === "pdf") return "mdi-file-pdf-box";
+	return "mdi-tablet";
+}
 
-const formattedSize = computed(() => {
-	if (!file.value) return "";
-	const kb = file.value.file_size / 1024;
+function downloadUrl(file: IBookFile): string {
+	return `${PATH_PREFIX}/book/${props.book.getId()}/file/${file.id}/download`;
+}
+
+function formattedSize(file: IBookFile): string {
+	const kb = file.file_size / 1024;
 	return kb < 1024 ? `${kb.toFixed(0)} KB` : `${(kb / 1024).toFixed(1)} MB`;
-});
+}
 
-const formattedDate = computed(() => {
-	return file.value ? new Date(file.value.date_created).toLocaleDateString() : "";
-});
+function formattedDate(file: IBookFile): string {
+	return new Date(file.date_created).toLocaleDateString();
+}
 
 const triggerFileSelect = () => {
 	fileInput.value?.click();
@@ -137,7 +180,7 @@ const handleDrop = (event: DragEvent) => {
 
 async function loadFile(selectedFile: File) {
 	const name = selectedFile.name.toLowerCase();
-	if (!name.endsWith(".epub") && !name.endsWith(".pdf")) {
+	if (!name.endsWith(".epub") && !name.endsWith(".pdf") && !name.endsWith(".mobi") && !name.endsWith(".azw3")) {
 		appSnackbarController.show({message: t(AppLabels.ONLY_EBOOK_FILES_ALLOWED), type: SnackbarType.ERROR});
 		return;
 	}
@@ -155,17 +198,17 @@ async function loadFile(selectedFile: File) {
 	}
 }
 
-async function removeFile() {
+async function removeFile(file: IBookFile) {
 	confirmationDialogController.showDialog(
 		t(AppLabels.DELETE_FILE),
 		t(AppLabels.DELETE_FILE_DESC),
 		t(AppLabels.DELETE)
 	).then(async () => {
 		try {
-			deleteLoading.value = true;
-			await props.book.removeFile();
+			deleteLoadingId.value = file.id;
+			await props.book.removeFile(file.id);
 		} finally {
-			deleteLoading.value = false;
+			deleteLoadingId.value = null;
 		}
 	})
 }

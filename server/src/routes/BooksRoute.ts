@@ -29,7 +29,7 @@ import {AppErrors} from "../types/AppErrors";
 import {SearchFilter} from "../types/search/SearchFilter";
 import {SortType} from "../types/search/SortType";
 import {normalizeAndValidateIsbn} from "../utils/IsbnVerification";
-import {isValidEpub, isValidPdf} from "../utils/FileSignature";
+import {isValidEpub, isValidMobi, isValidPdf} from "../utils/FileSignature";
 import {recordLoan, recordReturn} from "../utils/LoanHistory";
 import {handleUploadError} from "../middlewares/UploadErrorMiddleware";
 //@ts-ignore
@@ -50,7 +50,7 @@ const upload = multer({
     }
 });
 
-// Max size for the ebook-file backup, configurable via MAX_EBOOK_FILE_SIZE_MB
+// Max size for the ebook-file backups, configurable via MAX_EBOOK_FILE_SIZE_MB
 // so deployers can raise (or lower) the limit without a code change.
 // Defaults to 10MB when unset or not a valid positive number.
 const parsedMaxEbookFileSizeMb = Number(process.env.MAX_EBOOK_FILE_SIZE_MB);
@@ -58,15 +58,16 @@ const maxEbookFileSizeMb = Number.isFinite(parsedMaxEbookFileSizeMb) && parsedMa
     ? parsedMaxEbookFileSizeMb
     : 10;
 
-// Multer setup for the book ebook-file backup (epub/pdf) - also stored in memory,
-// validated by extension since browsers report inconsistent mimetypes for .epub.
+// Multer setup for the book ebook-file backups (epub/pdf/Kindle) - also stored
+// in memory, validated by extension since browsers report inconsistent
+// mimetypes for .epub/.mobi/.azw3.
 const fileUpload = multer({
     storage,
     limits: {fileSize: maxEbookFileSizeMb * 1024 * 1024},
     fileFilter: (req: Request, file: Express.Multer.File, cb: (error: any, acceptFile: boolean) => void) => {
         const name = file.originalname.toLowerCase();
-        if (!name.endsWith(".epub") && !name.endsWith(".pdf")) {
-            return cb(new Error("Only EPUB or PDF files are allowed"), false);
+        if (!name.endsWith(".epub") && !name.endsWith(".pdf") && !name.endsWith(".mobi") && !name.endsWith(".azw3")) {
+            return cb(new Error("Only EPUB, PDF or Kindle files are allowed"), false);
         }
         cb(null, true);
     }
@@ -303,7 +304,8 @@ router.get('/counters', requireAuth, async (req: Request, res: Response) => {
  * GET /book/:id
  * -------------
  * Fetch full detail for a single book, including its physical stocks
- * (with resolved location/customer names) and its authors.
+ * (with resolved location/customer names), its authors, and its backed-up
+ * ebook files.
  *
  * Auth: required. Path param `id` {number} - book id.
  *
@@ -326,7 +328,10 @@ router.get('/counters', requireAuth, async (req: Request, res: Response) => {
  *      { "id": 1, "code": "a1b2c3d4e5", "status": 0, "location_id": 2,
  *        "location_name": "Main shelf", "customer_id": null, "customer_name": null }
  *    ],
- *    "authors": [{ "id": 4, "name": "J.R.R. Tolkien" }]
+ *    "authors": [{ "id": 4, "name": "J.R.R. Tolkien" }],
+ *    "files": [
+ *      { "id": 3, "file_type": "epub", "file_name": "hobbit.epub", "file_size": 512000, "date_created": "..." }
+ *    ]
  *  }
  *
  * Response (404): "Book not found" - when no book with that id belongs to the caller.
@@ -353,15 +358,17 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
                    books.date_updated,
                    books.pages,
                    books.format_id,
-                   CASE
-                       WHEN book_files.id IS NOT NULL THEN jsonb_build_object(
-                               'id', book_files.id,
-                               'file_type', book_files.file_type,
-                               'file_name', book_files.file_name,
-                               'file_size', book_files.file_size,
-                               'date_created', book_files.date_created
-                                                       )
-                       END AS file,
+                   COALESCE(
+                           json_agg(
+                               DISTINCT jsonb_build_object(
+                   'id', book_files.id,
+                   'file_type', book_files.file_type,
+                   'file_name', book_files.file_name,
+                   'file_size', book_files.file_size,
+                   'date_created', book_files.date_created
+               )
+           ) FILTER(WHERE book_files.id IS NOT NULL), '[]'
+                   )                                                                    AS files,
                    COALESCE(
                            json_agg(
                                DISTINCT jsonb_build_object(
@@ -403,12 +410,7 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
                      books.date_created,
                      books.date_updated,
                      books.pages,
-                     books.format_id,
-                     book_files.id,
-                     book_files.file_type,
-                     book_files.file_name,
-                     book_files.file_size,
-                     book_files.date_created;
+                     books.format_id;
         `, [id, userId]);
 
         if (result.rows.length !== 1) {
@@ -662,21 +664,32 @@ router.post('/:id/image', requireAuth, upload.single("image"), handleUploadError
     }
 });
 
+/** @param fileName Original uploaded file name. @returns The `book_files.file_type` its extension maps to. */
+function fileTypeFromName(fileName: string): "epub" | "pdf" | "mobi" {
+    const name = fileName.toLowerCase();
+    if (name.endsWith(".epub")) return "epub";
+    if (name.endsWith(".pdf")) return "pdf";
+    return "mobi"; // .mobi or .azw3 - already enforced by fileFilter above.
+}
+
 /**
  * POST /book/:id/file
  * --------------------
- * Upload (or replace) the backup epub/pdf file for a book - a personal copy
- * kept in case the user only has the file itself on an e-reader.
+ * Upload (or replace) one of a book's backup ebook files - a personal copy
+ * kept in case the user only has the file itself on an e-reader. A book can
+ * have up to one file per type (epub/pdf/mobi); uploading a file replaces
+ * any existing file of that same type, leaving files of other types alone.
  *
  * Auth: required. Path param `id` {number} - book id.
- * Body: multipart/form-data with a single field `file` (.epub or .pdf, max
- * size configurable via MAX_EBOOK_FILE_SIZE_MB, default 10MB - enforced by
- * the `fileUpload` config above). Stored as raw bytes
- * in `book_files.file_data`; a book can only have one file at a time, so a
- * new upload replaces any previous one.
+ * Body: multipart/form-data with a single field `file` (.epub, .pdf, .mobi
+ * or .azw3, max size configurable via MAX_EBOOK_FILE_SIZE_MB, default 10MB -
+ * enforced by the `fileUpload` config above). Stored
+ * as raw bytes in `book_files.file_data`. `.mobi` and `.azw3` are both
+ * stored under the `mobi` file_type - they share the same MOBI/KF8
+ * container - so uploading one replaces the other.
  *
  * The file name's extension only gets it past `fileFilter` - the actual
- * bytes are then checked against the real PDF/EPUB signature (see
+ * bytes are then checked against the real PDF/EPUB/MOBI signature (see
  * `utils/FileSignature.ts`) before anything is persisted, so a renamed
  * unrelated file is rejected rather than stored.
  *
@@ -685,7 +698,7 @@ router.post('/:id/image', requireAuth, upload.single("image"), handleUploadError
  *
  * Response (200): the file's metadata (no bytes), e.g.
  *   {"id": 3, "file_type": "epub", "file_name": "book.epub", "file_size": 512000, "date_created": "..."}
- * Response (400): "No file provided" | "File content does not match a valid EPUB or PDF" | "Only EPUB or PDF files are allowed" (from fileFilter, via `handleUploadError`).
+ * Response (400): "No file provided" | "File content does not match a valid EPUB, PDF or Kindle file" | "Only EPUB, PDF or Kindle files are allowed" (from fileFilter, via `handleUploadError`).
  * Response (413): "File exceeds the maximum allowed upload size of {N}MB" - when the file is larger than MAX_EBOOK_FILE_SIZE_MB.
  */
 router.post('/:id/file', requireAuth, fileUpload.single("file"), handleUploadError(maxEbookFileSizeMb), async (req: Request, res: Response) => {
@@ -695,13 +708,15 @@ router.post('/:id/file', requireAuth, fileUpload.single("file"), handleUploadErr
         return res.status(400).send("No file provided");
     }
 
-    const fileType = req.file.originalname.toLowerCase().endsWith(".epub") ? "epub" : "pdf";
+    const fileType = fileTypeFromName(req.file.originalname);
 
     // Trust the actual bytes, not just the file name (which fileFilter above only
-    // checked by extension - trivially spoofed by renaming any file to .pdf/.epub).
-    const isValidContent = fileType === "epub" ? isValidEpub(req.file.buffer) : isValidPdf(req.file.buffer);
+    // checked by extension - trivially spoofed by renaming any file to .pdf/.epub/.mobi/.azw3).
+    const isValidContent = fileType === "epub" ? isValidEpub(req.file.buffer)
+        : fileType === "pdf" ? isValidPdf(req.file.buffer)
+            : isValidMobi(req.file.buffer);
     if (!isValidContent) {
-        return res.status(400).send("File content does not match a valid EPUB or PDF");
+        return res.status(400).send("File content does not match a valid EPUB, PDF or Kindle file");
     }
 
     const pool = appService.getDatabasePool();
@@ -716,9 +731,8 @@ router.post('/:id/file', requireAuth, fileUpload.single("file"), handleUploadErr
         const result = await pool.query(
             `INSERT INTO book_files (book_id, user_id, file_type, file_name, file_size, file_data)
              VALUES ($1, $2, $3, $4, $5, $6)
-             ON CONFLICT (book_id) DO UPDATE
-                 SET file_type    = EXCLUDED.file_type,
-                     file_name    = EXCLUDED.file_name,
+             ON CONFLICT (book_id, file_type) DO UPDATE
+                 SET file_name    = EXCLUDED.file_name,
                      file_size    = EXCLUDED.file_size,
                      file_data    = EXCLUDED.file_data,
                      date_created = CURRENT_TIMESTAMP
@@ -735,25 +749,26 @@ router.post('/:id/file', requireAuth, fileUpload.single("file"), handleUploadErr
 });
 
 /**
- * GET /book/:id/file/download
- * ----------------------------
- * Download the book's backed-up epub/pdf file.
+ * GET /book/:id/file/:fileId/download
+ * -------------------------------------
+ * Download one of the book's backed-up ebook files.
  *
- * Auth: required. Path param `id` {number} - book id.
+ * Auth: required. Path params: `id` {number} - book id; `fileId` {number} - `book_files.id`.
  *
  * Response (200): the raw file bytes, with `Content-Type` and
  * `Content-Disposition: attachment` set from the stored file's name/type.
- * Response (404): "File not found" - when the book has no backed-up file.
+ * Response (404): "File not found" - when no such backed-up file exists for this book.
  */
-router.get('/:id/file/download', requireAuth, async (req: Request, res: Response) => {
+router.get('/:id/file/:fileId/download', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
+    const fileId = Number(req.params.fileId);
     const pool = appService.getDatabasePool();
     const userId = appService.getSessionUser(req);
 
     try {
         const result = await pool.query(
-            "SELECT file_data, file_name, file_type FROM book_files WHERE book_id = $1 AND user_id = $2",
-            [id, userId]
+            "SELECT file_data, file_name, file_type FROM book_files WHERE id = $1 AND book_id = $2 AND user_id = $3",
+            [fileId, id, userId]
         );
 
         if (result.rowCount !== 1) {
@@ -761,7 +776,10 @@ router.get('/:id/file/download', requireAuth, async (req: Request, res: Response
         }
 
         const {file_data, file_name, file_type} = result.rows[0];
-        res.setHeader("Content-Type", file_type === "epub" ? "application/epub+zip" : "application/pdf");
+        const contentType = file_type === "epub" ? "application/epub+zip"
+            : file_type === "pdf" ? "application/pdf"
+                : "application/x-mobipocket-ebook";
+        res.setHeader("Content-Type", contentType);
         const asciiName = file_name.replace(/[^\x20-\x7E]/g, "_").replace(/"/g, "");
         res.setHeader("Content-Disposition", `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(file_name)}`);
         res.status(200).send(file_data);
@@ -772,23 +790,24 @@ router.get('/:id/file/download', requireAuth, async (req: Request, res: Response
 });
 
 /**
- * DELETE /book/:id/file
- * ----------------------
- * Remove the book's backed-up epub/pdf file.
+ * DELETE /book/:id/file/:fileId
+ * -------------------------------
+ * Remove one of the book's backed-up ebook files.
  *
- * Auth: required. Path param `id` {number} - book id.
+ * Auth: required. Path params: `id` {number} - book id; `fileId` {number} - `book_files.id`.
  *
  * Response (200): whether a file was actually deleted, e.g. `true` | `false`.
  */
-router.delete('/:id/file', requireAuth, async (req: Request, res: Response) => {
+router.delete('/:id/file/:fileId', requireAuth, async (req: Request, res: Response) => {
     const id = Number(req.params.id);
+    const fileId = Number(req.params.fileId);
     const pool = appService.getDatabasePool();
     const userId = appService.getSessionUser(req);
 
     try {
         const result = await pool.query(
-            "DELETE FROM book_files WHERE book_id = $1 AND user_id = $2",
-            [id, userId]
+            "DELETE FROM book_files WHERE id = $1 AND book_id = $2 AND user_id = $3",
+            [fileId, id, userId]
         );
 
         res.status(200).json(result.rowCount === 1);

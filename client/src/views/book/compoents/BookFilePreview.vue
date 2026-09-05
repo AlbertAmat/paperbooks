@@ -4,8 +4,10 @@
 			<v-progress-circular color="primary" indeterminate size="32"/>
 		</div>
 
-		<div v-else-if="error" class="pb-file-preview-state pb-file-preview-overlay">
-			<v-icon size="28" color="error" class="mb-1">mdi-alert-circle-outline</v-icon>
+		<div v-else-if="error || fileType === 'mobi'" class="pb-file-preview-state pb-file-preview-overlay">
+			<v-icon size="28" :color="error ? 'error' : undefined" class="mb-1">
+				{{ error ? "mdi-alert-circle-outline" : "mdi-information-outline" }}
+			</v-icon>
 			<span class="text-caption" style="color: var(--pb-text-muted)">{{ t(AppLabels.PREVIEW_UNAVAILABLE) }}</span>
 		</div>
 
@@ -39,16 +41,19 @@
 
 <script setup lang="ts">
 /**
- * In-page preview of a book's backed-up epub/pdf file, shown on the book
- * detail view for `Electronic`-format books: PDF renders in the browser's
- * native viewer (an iframe over a blob URL); EPUB renders via `epubjs`
- * into a scoped container with prev/next page controls. Both fetch the
- * file's bytes through `BookService.downloadFileBlob` (not the `/download`
- * link, which forces a save-as instead of inline rendering).
+ * In-page preview of one of a book's backed-up ebook files, shown inside
+ * `BookFilePreviewDialog`: PDF renders in the browser's native viewer (an
+ * iframe over a blob URL); EPUB renders via `epubjs` into a scoped
+ * container with prev/next page controls. Kindle (`mobi`) files have no
+ * renderer available, so they skip the fetch entirely and show the
+ * "preview unavailable" state right away. Both PDF/EPUB fetch the file's
+ * bytes through `BookService.downloadFileBlob` (not the `/download` link,
+ * which forces a save-as instead of inline rendering).
  */
 import {nextTick, onMounted, onUnmounted, ref, Ref, shallowRef, ShallowRef} from "vue";
 import ePub, {Rendition} from "epubjs";
 import Book from "@/model/book/Book";
+import {IBookFile} from "@/types/book/IBookFile";
 import {bookService} from "@/service/book/BookService";
 import {useI18n} from "vue-i18n";
 import {AppLabels} from "@/plugins/i18n/AppLabels";
@@ -57,21 +62,26 @@ const {t} = useI18n();
 
 interface Props {
 	book: Book;
+	file: IBookFile;
 }
 
 const props = defineProps<Props>();
 
-const loading: Ref<boolean> = ref(true);
+const loading: Ref<boolean> = ref(props.file.file_type !== "mobi");
 const error: Ref<boolean> = ref(false);
 const objectUrl: Ref<string | null> = ref(null);
 const epubContainer = ref<HTMLDivElement | null>(null);
 const rendition: ShallowRef<Rendition | null> = shallowRef(null);
 
-const fileType = props.book.getFile()?.file_type ?? null;
+const fileType = props.file.file_type;
 
 onMounted(async () => {
+	if (fileType === "mobi") {
+		return;
+	}
+
 	try {
-		const blob = await bookService.downloadFileBlob(props.book.getId());
+		const blob = await bookService.downloadFileBlob(props.book.getId(), props.file.id);
 
 		if (fileType === "pdf") {
 			objectUrl.value = URL.createObjectURL(blob);

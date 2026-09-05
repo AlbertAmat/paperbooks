@@ -58,7 +58,7 @@
 						class="mx-1"
 					>
 						<v-icon
-							small
+							size="21"
 							color="error"
 						>
 							mdi-delete

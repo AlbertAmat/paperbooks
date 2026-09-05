@@ -46,8 +46,8 @@ export default class Book extends BookItem {
     /** Physical stocks (copies) of this book. */
     private m_stocks: ShallowRef<BookStock[]>;
 
-    /** Backed-up epub/pdf file for this book, or null if none was uploaded. */
-    private m_file: ShallowRef<IBookFile | null>;
+    /** This book's backed-up ebook files, up to one per type (epub/pdf/mobi). */
+    private m_files: ShallowRef<IBookFile[]>;
 
     /** Timestamp the book was created. */
     private readonly m_dateCreated: Date;
@@ -70,7 +70,7 @@ export default class Book extends BookItem {
         }
 
         this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(this,stock)));
-        this.m_file = shallowRef(data.file);
+        this.m_files = shallowRef(data.files);
     }
 
     /** @returns A placeholder "empty" book (id -1) used to initialize forms before real data loads. */
@@ -91,7 +91,7 @@ export default class Book extends BookItem {
             format_id: null,
             date_created: "",
             date_updated: "",
-            file: null,
+            files: [],
         })
     }
 
@@ -190,9 +190,9 @@ export default class Book extends BookItem {
         return this.m_stocks.value;
     }
 
-    /** @returns The book's backed-up epub/pdf file, or null if none was uploaded. */
-    public getFile(): IBookFile | null {
-        return this.m_file.value;
+    /** @returns The book's backed-up ebook files, up to one per type (epub/pdf/mobi). */
+    public getFiles(): IBookFile[] {
+        return this.m_files.value;
     }
 
     /**
@@ -306,28 +306,35 @@ export default class Book extends BookItem {
     }
 
     /**
-     * Upload (or replace) the backed-up epub/pdf file for this book.
-     * @param file New epub/pdf file.
+     * Upload (or replace) one of this book's backed-up ebook files. The
+     * server infers the file's type (epub/pdf/mobi) from its content, and
+     * replaces any existing file of that same type only.
+     * @param file New epub/pdf/mobi/azw3 file.
      */
     public async uploadFile(file: File) {
         try {
-            this.m_file.value = await bookService.uploadFile(this.m_id, file);
+            const uploaded = await bookService.uploadFile(this.m_id, file);
+            const withoutSameType = this.m_files.value.filter((f) => f.file_type !== uploaded.file_type);
+            this.m_files.value = [...withoutSameType, uploaded];
             appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_FILE_UPLOADED)})
         } catch (e) {
             console.error("Error while uploading book file.", e)
         }
     }
 
-    /** Delete the backed-up epub/pdf file for this book, if any. */
-    public async removeFile() {
+    /**
+     * Delete one of this book's backed-up ebook files.
+     * @param fileId Id of the file to remove.
+     */
+    public async removeFile(fileId: number) {
         try {
-            const result = await bookService.deleteFile(this.m_id);
+            const result = await bookService.deleteFile(this.m_id, fileId);
 
             if (!result) {
                 throw "Unable to remove book file";
             }
 
-            this.m_file.value = null;
+            this.m_files.value = this.m_files.value.filter((f) => f.id !== fileId);
             appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_FILE_DELETED)})
         } catch (e) {
             console.error("Error while removing book file.", e)

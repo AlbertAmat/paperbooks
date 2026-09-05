@@ -54,7 +54,7 @@
 		<template v-slot:default>
 			<div style="height: 100%;">
 				<v-row no-gutters class="mb-4">
-					<v-col class="px-1">
+					<v-col class="px-1" order="2" order-md="1">
 						<!-- ================================================================== -->
 						<!-- BOOK														-->
 						<!-- ================================================================== -->
@@ -257,7 +257,7 @@
 						</card-component>
 					</v-col>
 
-					<v-col cols="12" md="3" lg="3" class="px-1">
+					<v-col cols="12" md="3" lg="3" class="px-1" order="1" order-md="2">
 						<book-image :book="model.getBook()"/>
 					</v-col>
 				</v-row>

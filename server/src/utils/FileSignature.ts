@@ -46,3 +46,21 @@ export function isValidEpub(buffer: Buffer): boolean {
         return false;
     }
 }
+
+/** Byte offset, into a PalmDOC/MOBI file, of the 8-byte type/creator identifier. */
+const MOBI_MAGIC_OFFSET = 60;
+
+/** The identifier value shared by classic MOBI and AZW3/KF8 files - AZW3 still wraps a MOBI6 header for backward compatibility. */
+const MOBI_MAGIC = "BOOKMOBI";
+
+/**
+ * A Kindle ebook file (.mobi or .azw3): both are PalmDOC-container formats
+ * that carry the ASCII identifier `BOOKMOBI` at a fixed offset.
+ * @param buffer Uploaded file bytes.
+ */
+export function isValidMobi(buffer: Buffer): boolean {
+    if (buffer.length < MOBI_MAGIC_OFFSET + MOBI_MAGIC.length) {
+        return false;
+    }
+    return buffer.subarray(MOBI_MAGIC_OFFSET, MOBI_MAGIC_OFFSET + MOBI_MAGIC.length).toString("ascii") === MOBI_MAGIC;
+}

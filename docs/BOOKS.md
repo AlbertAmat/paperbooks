@@ -42,7 +42,7 @@ erDiagram
     books ||--o{ book_stocks : "has copies"
     books ||--o{ book_authors : ""
     authors ||--o{ book_authors : ""
-    books ||--o| book_files : "backup epub/pdf"
+    books ||--o{ book_files : "backup files (1/type)"
     book_stocks }o--o| locations : "stored at"
     book_stocks }o--o| customers : "loaned to"
 ```
@@ -172,14 +172,20 @@ the gap.
 
 ## Ebook file backups
 
-Independent of the cover image: a book can optionally have **one** backed-up
-epub/pdf file (`book_files`, `ON CONFLICT (book_id) DO UPDATE` - a new
-upload replaces the old one, not a second row).
+Independent of the cover image: a book can optionally have **one backed-up
+file per type** - epub, pdf, and mobi (also used for `.azw3` Kindle files,
+which share the same MOBI/KF8 container) - in `book_files`, which has a
+`UNIQUE (book_id, file_type)` constraint. Uploading a file replaces any
+existing file of that *same* type (`ON CONFLICT (book_id, file_type) DO
+UPDATE`) but leaves the other types alone, so a book can carry an epub, a
+pdf and a mobi backup at once.
 
-- **`POST /book/:id/file`** - multer accepts up to `MAX_EBOOK_FILE_SIZE_MB`
-  (default 10MB, see `.env.example`) by extension (`.epub`/`.pdf`), but the
-  *bytes* are then checked against the real file signature
-  (`isValidEpub`/`isValidPdf` in
+- **`POST /book/:id/file`** - a single upload endpoint for all three types;
+  the type is inferred from the file name's extension
+  (`fileTypeFromName()`). Multer accepts files by extension
+  (`.epub`/`.pdf`/`.mobi`/`.azw3`) up to `MAX_EBOOK_FILE_SIZE_MB` (default
+  10MB, see `.env.example`), but the *bytes* are then checked against the
+  real file signature (`isValidEpub`/`isValidPdf`/`isValidMobi` in
   [`FileSignature.ts`](../server/src/utils/FileSignature.ts)) before
   anything is persisted - extension-only checks are trivially spoofed by
   renaming any file.
@@ -195,9 +201,19 @@ upload replaces the old one, not a second row).
     named `mimetype` containing `application/epub+zip` (the EPUB OCF spec) -
     stronger than just checking the zip signature, since that alone would
     accept a `.docx`/`.jar`/plain zip renamed to `.epub`.
-- **`GET /book/:id/file/download`** streams the raw bytes back with
-  `Content-Disposition: attachment`.
-- **`DELETE /book/:id/file`** removes it.
+  - MOBI/AZW3: does the buffer carry the `BOOKMOBI` identifier at byte
+    offset 60 - the PalmDOC/MOBI header both formats share (AZW3 still
+    wraps a MOBI6 header for backward compatibility).
+- **`GET /book/:id/file/:fileId/download`** streams one file's raw bytes
+  back with `Content-Disposition: attachment`.
+- **`DELETE /book/:id/file/:fileId`** removes one file.
+
+On the client, `BookFile.vue` renders every uploaded file as a list row
+(icon, name, size/date) with download/delete actions and an "add file"
+action; a preview (eye) button opens `BookFilePreviewDialog.vue`, a modal
+wrapping `BookFilePreview.vue` with a fullscreen toggle. Kindle (`mobi`)
+files have no in-browser renderer, so their preview shows "preview
+unavailable" without fetching the file.
 
 ## Search, counters, and filters
 

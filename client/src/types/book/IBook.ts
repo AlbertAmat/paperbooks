@@ -24,6 +24,6 @@ export default interface IBook extends IBookItem {
     date_created: string;
     /** Last-updated timestamp (ISO string). */
     date_updated: string;
-    /** Backed-up epub/pdf file for this book, or null if none was uploaded. */
-    file: IBookFile | null;
+    /** This book's backed-up ebook files, up to one per type (epub/pdf/mobi). */
+    files: IBookFile[];
 }

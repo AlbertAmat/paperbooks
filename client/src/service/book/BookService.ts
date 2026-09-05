@@ -120,9 +120,11 @@ export class BookService {
     }
 
     /**
-     * Upload (or replace) the backed-up epub/pdf file for a book.
+     * Upload (or replace) one of a book's backed-up ebook files (epub/pdf/Kindle).
+     * A book can have up to one file per type - the server infers the type from
+     * the upload and replaces any existing file of that same type only.
      * @param id Book id.
-     * @param file New epub/pdf file.
+     * @param file New epub/pdf/mobi/azw3 file.
      * @returns The uploaded file's metadata.
      */
     public async uploadFile(
@@ -137,23 +139,25 @@ export class BookService {
     }
 
     /**
-     * Delete a book's backed-up epub/pdf file, if any.
+     * Delete one of a book's backed-up ebook files.
      * @param id Book id.
+     * @param fileId Id of the file to delete.
      * @returns Whether a file was actually deleted.
      */
-    public async deleteFile(id: number): Promise<boolean> {
-        const {data} = await axiosInstance.delete(`${PATH_PREFIX}/book/${id}/file`);
+    public async deleteFile(id: number, fileId: number): Promise<boolean> {
+        const {data} = await axiosInstance.delete(`${PATH_PREFIX}/book/${id}/file/${fileId}`);
         return data;
     }
 
     /**
-     * Fetch a book's backed-up epub/pdf file's raw bytes, for in-page preview
-     * (as opposed to the `/file/download` link, which forces a browser save).
+     * Fetch one of a book's backed-up ebook files' raw bytes, for in-page preview
+     * (as opposed to the `/file/:fileId/download` link, which forces a browser save).
      * @param id Book id.
+     * @param fileId Id of the file to fetch.
      * @returns The file's contents as a `Blob`.
      */
-    public async downloadFileBlob(id: number): Promise<Blob> {
-        const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/${id}/file/download`, {responseType: "blob"});
+    public async downloadFileBlob(id: number, fileId: number): Promise<Blob> {
+        const {data} = await axiosInstance.get(`${PATH_PREFIX}/book/${id}/file/${fileId}/download`, {responseType: "blob"});
         return data;
     }
 

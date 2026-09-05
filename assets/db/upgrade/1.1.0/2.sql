@@ -16,19 +16,15 @@ ALTER TABLE book_files
     ADD CONSTRAINT book_files_file_type_check CHECK (file_type IN ('epub', 'pdf', 'mobi'));
 
 INSERT INTO app_labels (language, code, text)
-VALUES ('en', 'ADD_FILE', 'Add file'),
-       ('en', 'FULLSCREEN', 'Fullscreen'),
+VALUES ('en', 'FULLSCREEN', 'Fullscreen'),
        ('en', 'EXIT_FULLSCREEN', 'Exit fullscreen'),
 
-       ('ca', 'ADD_FILE', 'Afegir fitxer'),
        ('ca', 'FULLSCREEN', 'Pantalla completa'),
        ('ca', 'EXIT_FULLSCREEN', 'Sortir de pantalla completa'),
 
-       ('es', 'ADD_FILE', 'Agregar archivo'),
        ('es', 'FULLSCREEN', 'Pantalla completa'),
        ('es', 'EXIT_FULLSCREEN', 'Salir de pantalla completa'),
 
-       ('it', 'ADD_FILE', 'Aggiungi file'),
        ('it', 'FULLSCREEN', 'Schermo intero'),
        ('it', 'EXIT_FULLSCREEN', 'Esci da schermo intero')
 ON CONFLICT (code, language) DO UPDATE SET text = EXCLUDED.text;
