@@ -365,6 +365,12 @@ router.get("/register", (req: Request, res: Response) => {
  *                                    // a digit and a special character
  *  }
  *
+ * `REGISTRATION_REQUIRES_APPROVAL=true` (.env, default false) creates the
+ * account with `disabled = TRUE` instead of the normal `FALSE`: it exists in
+ * the DB but can't log in (see the `disabled = FALSE` clause everywhere
+ * AuthRoute/AuthMiddleware look up a user) until an admin flips that column
+ * by hand - there's no in-app admin role/UI for this, see AUTHENTICATION.md.
+ *
  * Example response (201):
  *  { "success": true, "message": "Register successful", "redirectUrl": "/login" }
  *
@@ -397,18 +403,23 @@ router.post("/register", authLimiter, async (req: Request, res: Response) => {
         // Hash the password securely
         const hashedPassword = await appService.hashPassword(password);
 
+        const requiresApproval = process.env.REGISTRATION_REQUIRES_APPROVAL === "true";
+
         // Use INSERT with unique constraints to avoid race conditions
         const insertQuery = `
-            INSERT INTO users (name, code, email, password) 
-            VALUES ($1, $2, $3, $4) 
+            INSERT INTO users (name, code, email, password, disabled)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING id
         `;
 
-        await pool.query(insertQuery, [name, userName, email, hashedPassword]);
+        await pool.query(insertQuery, [name, userName, email, hashedPassword, requiresApproval]);
 
         return res.status(201).json({
             success: true,
-            message: "Register successful",
+            message: requiresApproval
+                ? "Registration successful. An administrator needs to review and approve your account before you can log in."
+                : "Registration successful. You can now log in.",
+            requiresApproval,
             redirectUrl: "/login",
         });
 

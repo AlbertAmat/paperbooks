@@ -370,6 +370,15 @@ real `JWT_SECRET` — every other production hardening step above still applies.
 - **Backups**: everything that matters lives in the `db-data` volume. Either back up
   the volume directly or run `docker compose exec db pg_dump -U <DB_USER> <DB_NAME>`
   on a schedule.
+- **Approving a new registration**: with `REGISTRATION_REQUIRES_APPROVAL=true` (see
+  `.env.example`), new accounts are created disabled and can't log in until you
+  enable them - there's no admin UI for this, run:
+  ```bash
+  docker compose exec -T db psql -U <DB_USER> -d <DB_NAME> \
+    -c "UPDATE users SET disabled = FALSE WHERE code = '<their username>';"
+  ```
+  See [AUTHENTICATION.md](AUTHENTICATION.md#registration-approval) for why this
+  exists.
 
 ## Security checklist
 

@@ -19,6 +19,7 @@ instead - this document is architecture, not a reporting policy.
 - [`activity_log`: the audit trail](#activity_log-the-audit-trail)
 - [Two-factor authentication](#two-factor-authentication)
 - [Passwords](#passwords)
+- [Registration approval](#registration-approval)
 - [Other defenses](#other-defenses)
 - [Known limitations](#known-limitations)
 - [Where this lives in code](#where-this-lives-in-code)
@@ -245,6 +246,21 @@ do by accident, not easier.
 Hashed with bcrypt, 12 salt rounds. Never logged or stored in plaintext.
 Registration and password-change both enforce: 8+ characters, an uppercase
 letter, a digit, and a special character.
+
+## Registration approval
+
+By default, `POST /register` creates an account that can log in immediately.
+Setting `REGISTRATION_REQUIRES_APPROVAL=true` (`.env`, default `false`)
+switches new accounts to `users.disabled = TRUE` instead - the row exists,
+but every login lookup filters on `disabled = FALSE` (see
+[Validating a request](#validating-a-request) and `POST /login` in
+AuthRoute.ts), so the account simply can't authenticate until someone flips
+that column back to `FALSE`.
+
+There's no admin role or UI in the app for this - Vaultisse has no concept
+of an application-level admin, only the person operating the deployment. See
+"Approving a new registration" in [DEPLOYMENT.md](DEPLOYMENT.md) for the SQL
+to run.
 
 ## Other defenses
 

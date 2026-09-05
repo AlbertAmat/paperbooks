@@ -342,9 +342,7 @@
             <h2>Create your account</h2>
 
             <div class="success-message" id="success-message">
-                Your account has been created. An administrator needs to review and
-                approve it before you can log in — you'll be able to sign in once
-                that happens.
+                <span id="success-message-text"></span>
                 <br><br>
                 <a href="/login">Go to login</a>
             </div>
@@ -445,6 +443,7 @@
 
             errorMessage.style.display = "none";
             form.style.display = "none";
+            document.getElementById('success-message-text').innerText = data.message || "Your account has been created.";
             document.getElementById('success-message').style.display = "block";
 
         } catch (error) {
