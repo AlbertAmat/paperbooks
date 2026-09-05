@@ -21,6 +21,7 @@ import {
     generateBackupCodes
 } from "../utils/TwoFactorAuth";
 import {recordActivity, ActivityAction} from "../utils/ActivityLog";
+import {handleUploadError} from "../middlewares/UploadErrorMiddleware";
 
 const router = Router();
 
@@ -43,9 +44,10 @@ const twoFaLimiter = rateLimit({
 
 // Multer setup - store in memory
 const storage = multer.memoryStorage();
+const maxProfileImageSizeMb = 2;
 const upload = multer({
     storage,
-    limits: {fileSize: 2 * 1024 * 1024}, // 2MB
+    limits: {fileSize: maxProfileImageSizeMb * 1024 * 1024},
     fileFilter: (req: Request, file: Express.Multer.File, cb: (error: any, acceptFile: boolean) => void) => {
         // @ts-ignore
         if (file.mimetype !== "image/png" && file.mimetype !== "image/jpeg") {
@@ -67,15 +69,16 @@ const upload = multer({
  * Example request (curl): curl -X POST /api/rest/user/image -F "image=@avatar.png"
  *
  * Responses: 200 {"message": "Image uploaded successfully"} |
- *            400 {"error": "No PNG file uploaded or file too large"}.
+ *            400 {"error": "No PNG file uploaded"} |
+ *            413 {"error": "File exceeds the maximum allowed upload size of 2MB"}.
  */
-router.post("/image", requireAuth, upload.single("image"), async (req: Request, res: Response) => {
+router.post("/image", requireAuth, upload.single("image"), handleUploadError(maxProfileImageSizeMb, "json"), async (req: Request, res: Response) => {
     const pool = appService.getDatabasePool();
     const client = await pool.connect();
 
     try {
         if (!req.file) {
-            return res.status(400).json({error: "No PNG file uploaded or file too large"});
+            return res.status(400).json({error: "No PNG file uploaded"});
         }
 
         // Update user image in DB

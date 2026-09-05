@@ -176,12 +176,20 @@ Independent of the cover image: a book can optionally have **one** backed-up
 epub/pdf file (`book_files`, `ON CONFLICT (book_id) DO UPDATE` - a new
 upload replaces the old one, not a second row).
 
-- **`POST /book/:id/file`** - multer accepts up to 100MB by extension
-  (`.epub`/`.pdf`), but the *bytes* are then checked against the real file
-  signature (`isValidEpub`/`isValidPdf` in
+- **`POST /book/:id/file`** - multer accepts up to `MAX_EBOOK_FILE_SIZE_MB`
+  (default 10MB, see `.env.example`) by extension (`.epub`/`.pdf`), but the
+  *bytes* are then checked against the real file signature
+  (`isValidEpub`/`isValidPdf` in
   [`FileSignature.ts`](../server/src/utils/FileSignature.ts)) before
   anything is persisted - extension-only checks are trivially spoofed by
   renaming any file.
+  - A file over `MAX_EBOOK_FILE_SIZE_MB`, or a rejected `fileFilter` case,
+    is turned into a clean `413`/`400` response by `handleUploadError()`
+    (see [`UploadErrorMiddleware.ts`](../server/src/middlewares/UploadErrorMiddleware.ts))
+    placed right after `fileUpload.single("file")` - without it, multer's
+    error would fall through to Express's default handler as a bare 500,
+    since this app registers no app-wide error middleware. The same helper
+    also covers the cover-image and profile-picture uploads.
   - PDF: does the buffer contain the `%PDF-` header within the first 1KB.
   - EPUB: is it a zip whose *first* entry is an uncompressed file literally
     named `mimetype` containing `application/epub+zip` (the EPUB OCF spec) -

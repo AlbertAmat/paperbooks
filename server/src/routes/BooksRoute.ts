@@ -31,14 +31,16 @@ import {SortType} from "../types/search/SortType";
 import {normalizeAndValidateIsbn} from "../utils/IsbnVerification";
 import {isValidEpub, isValidPdf} from "../utils/FileSignature";
 import {recordLoan, recordReturn} from "../utils/LoanHistory";
+import {handleUploadError} from "../middlewares/UploadErrorMiddleware";
 //@ts-ignore
 const router: Router = Router();
 
 // Multer setup - store in memory
 const storage = multer.memoryStorage();
+const maxCoverImageSizeMb = 4;
 const upload = multer({
     storage,
-    limits: {fileSize: 4 * 1024 * 1024}, // 4MB
+    limits: {fileSize: maxCoverImageSizeMb * 1024 * 1024},
     fileFilter: (req: Request, file: Express.Multer.File, cb: (error: any, acceptFile: boolean) => void) => {
         // @ts-ignore
         if (file.mimetype !== "image/png" && file.mimetype !== "image/jpeg") {
@@ -48,11 +50,19 @@ const upload = multer({
     }
 });
 
+// Max size for the ebook-file backup, configurable via MAX_EBOOK_FILE_SIZE_MB
+// so deployers can raise (or lower) the limit without a code change.
+// Defaults to 10MB when unset or not a valid positive number.
+const parsedMaxEbookFileSizeMb = Number(process.env.MAX_EBOOK_FILE_SIZE_MB);
+const maxEbookFileSizeMb = Number.isFinite(parsedMaxEbookFileSizeMb) && parsedMaxEbookFileSizeMb > 0
+    ? parsedMaxEbookFileSizeMb
+    : 10;
+
 // Multer setup for the book ebook-file backup (epub/pdf) - also stored in memory,
 // validated by extension since browsers report inconsistent mimetypes for .epub.
 const fileUpload = multer({
     storage,
-    limits: {fileSize: 100 * 1024 * 1024}, // 100MB
+    limits: {fileSize: maxEbookFileSizeMb * 1024 * 1024},
     fileFilter: (req: Request, file: Express.Multer.File, cb: (error: any, acceptFile: boolean) => void) => {
         const name = file.originalname.toLowerCase();
         if (!name.endsWith(".epub") && !name.endsWith(".pdf")) {
@@ -626,7 +636,7 @@ router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
  *
  * Response (200): number of rows updated (0 or 1), e.g. `1`.
  */
-router.post('/:id/image', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
+router.post('/:id/image', requireAuth, upload.single("image"), handleUploadError(maxCoverImageSizeMb), async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     let imageUrl = "";
 
@@ -660,7 +670,8 @@ router.post('/:id/image', requireAuth, upload.single("image"), async (req: Reque
  *
  * Auth: required. Path param `id` {number} - book id.
  * Body: multipart/form-data with a single field `file` (.epub or .pdf, max
- * 100MB - enforced by the `fileUpload` config above). Stored as raw bytes
+ * size configurable via MAX_EBOOK_FILE_SIZE_MB, default 10MB - enforced by
+ * the `fileUpload` config above). Stored as raw bytes
  * in `book_files.file_data`; a book can only have one file at a time, so a
  * new upload replaces any previous one.
  *
@@ -674,9 +685,10 @@ router.post('/:id/image', requireAuth, upload.single("image"), async (req: Reque
  *
  * Response (200): the file's metadata (no bytes), e.g.
  *   {"id": 3, "file_type": "epub", "file_name": "book.epub", "file_size": 512000, "date_created": "..."}
- * Response (400): "No file provided" | "File content does not match a valid EPUB or PDF" | "Only EPUB or PDF files are allowed" (from fileFilter, via the error handler).
+ * Response (400): "No file provided" | "File content does not match a valid EPUB or PDF" | "Only EPUB or PDF files are allowed" (from fileFilter, via `handleUploadError`).
+ * Response (413): "File exceeds the maximum allowed upload size of {N}MB" - when the file is larger than MAX_EBOOK_FILE_SIZE_MB.
  */
-router.post('/:id/file', requireAuth, fileUpload.single("file"), async (req: Request, res: Response) => {
+router.post('/:id/file', requireAuth, fileUpload.single("file"), handleUploadError(maxEbookFileSizeMb), async (req: Request, res: Response) => {
     const id = Number(req.params.id);
 
     if (!req.file) {
@@ -807,7 +819,7 @@ router.delete('/:id/file', requireAuth, async (req: Request, res: Response) => {
  * Response (200): the new book's id, e.g. `42`.
  */
 //@ts-ignore
-router.post('', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
+router.post('', requireAuth, upload.single("image"), handleUploadError(maxCoverImageSizeMb), async (req: Request, res: Response) => {
     const name = req.body.name;
     const description = req.body.description;
     const isbn = req.body.isbn;
@@ -1674,7 +1686,7 @@ router.get('/:bookCode/add/md', requireAuth, async (req: Request, res: Response)
  * Response: 200 (empty body) on success, 500 on failure.
  */
 //@ts-ignore
-router.post('/return', requireAuth, upload.single("image"), async (req: Request, res: Response) => {
+router.post('/return', requireAuth, upload.single("image"), handleUploadError(maxCoverImageSizeMb), async (req: Request, res: Response) => {
     const books: string[] = req.body.books;
     const pool = appService.getDatabasePool();
     const userId = appService.getSessionUser(req);
