@@ -17,7 +17,7 @@ import Format from "@/model/format/Format";
 import {bookService} from "@/service/book/BookService";
 import BookStock from "@/model/book/BookStock";
 import {BookStockStatusEnum} from "@/types/book/IBookStock";
-import {shallowRef, ShallowRef} from "vue";
+import {ref, Ref, shallowRef, ShallowRef} from "vue";
 import router from "@/router/Router";
 import {searchRoute} from "@/router/routes/SearchRoute";
 import {appSnackbarController, SnackbarType} from "@/components/appSnackbar/AppSnackbarController";
@@ -29,16 +29,16 @@ import {ELECTRONIC_FORMAT_NAME} from "@/Constants";
 export default class Book extends BookItem {
 
     /** Free-text description. */
-    private m_description: string;
+    private m_description: Ref<string>;
 
     /** Publisher name, or null if unset. */
-    private m_publisher: string | null;
+    private m_publisher: Ref<string | null>;
 
     /** Publication date, or null if unset. */
-    private m_publishedDate: Date | null;
+    private m_publishedDate: Ref<Date | null>;
 
     /** Page count. */
-    private m_pages: number;
+    private m_pages: Ref<number>;
 
     /** Book format (e.g. paperback/hardcover), or null if unset. */
     private m_format: ShallowRef<Format | null>;
@@ -58,12 +58,12 @@ export default class Book extends BookItem {
     /** @param data Raw full book detail data from the server. */
     public constructor(data: IBook) {
         super(data);
-        this.m_description = data.description || "";
-        this.m_publisher = data.publisher;
-        this.m_publishedDate = data.published_date ? new Date(data.published_date) : null;
+        this.m_description = ref(data.description || "");
+        this.m_publisher = ref(data.publisher);
+        this.m_publishedDate = ref(data.published_date ? new Date(data.published_date) : null);
         this.m_dateCreated = new Date(data.date_created);
         this.m_dateUpdated = new Date(data.date_updated);
-        this.m_pages = data.pages || 0;
+        this.m_pages = ref(data.pages || 0);
         this.m_format = shallowRef(data.format_id ? applicationService.getFormat(data.format_id) || null : null);
 
         this.m_stocks = shallowRef(data.stocks.map((stock) => new BookStock(this,stock)));
@@ -94,42 +94,42 @@ export default class Book extends BookItem {
 
     /** @returns The book's description. */
     public getDescription(): string {
-        return this.m_description;
+        return this.m_description.value;
     }
 
     /** @param value New description. */
     public setDescription(value: string) {
-        this.m_description = value;
+        this.m_description.value = value;
     }
 
     /** @returns Whether the book has a publisher set. */
     public hasPublisher(): boolean {
-        return this.m_publisher != null;
+        return this.m_publisher.value != null;
     }
 
     /** @returns The publisher name, or null if unset. */
     public getPublisher(): string | null {
-        return this.m_publisher;
+        return this.m_publisher.value;
     }
 
     /** @param value New publisher name, or null to clear it. */
     public setPublisher(value: string | null) {
-        this.m_publisher = value;
+        this.m_publisher.value = value;
     }
 
     /** @returns Whether the book has a publish date set. */
     public hasPublishDate(): boolean {
-        return this.m_publishedDate != null;
+        return this.m_publishedDate.value != null;
     }
 
     /** @returns The publish date, or null if unset. */
     public getPublishDate(): Date | null {
-        return this.m_publishedDate;
+        return this.m_publishedDate.value;
     }
 
     /** @param value New publish date, or null to clear it. */
     public setPublishDate(value: Date | null) {
-        this.m_publishedDate = value;
+        this.m_publishedDate.value = value;
     }
 
     /** @returns The timestamp the book was created. */
@@ -154,12 +154,12 @@ export default class Book extends BookItem {
 
     /** @returns The page count. */
     public getNumberOfPages(): number {
-        return this.m_pages;
+        return this.m_pages.value;
     }
 
     /** @param value New page count. */
     public setNumberOfPages(value: number) {
-        this.m_pages = value;
+        this.m_pages.value = value;
     }
 
     /** @returns Whether the book has a format set. */
@@ -255,10 +255,10 @@ export default class Book extends BookItem {
                 this.m_categoryId.value,
                 this.m_languageCode.value,
                 this.m_authors.value.map((author) => author.getAuthorId()),
-                this.m_description,
-                this.m_publisher,
-                this.m_publishedDate,
-                this.m_pages,
+                this.m_description.value,
+                this.m_publisher.value,
+                this.m_publishedDate.value,
+                this.m_pages.value,
                 this.m_format.value ? this.m_format.value.getFormatId() : null
             )
             appSnackbarController.show({message: i18n.global.t(AppLabels.SNACKBAR_BOOK_UPDATED)})

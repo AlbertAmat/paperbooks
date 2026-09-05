@@ -131,7 +131,7 @@ export class AppService {
                     defaultSrc: ["'self'"],
                     scriptSrc: ["'self'", frontEndUrl, "'unsafe-inline'"],
                     styleSrc: ["'self'", "'unsafe-inline'"],
-                    frameSrc: ["'self'", "data:"],
+                    frameSrc: ["'self'", "data:", "blob:"],
                     // Book covers are either our own uploads (data: URIs) or fetched
                     // from these two ISBN metadata providers - kept in sync with the
                     // isAllowedImageUrl() allowlist in BooksRoute.ts.
