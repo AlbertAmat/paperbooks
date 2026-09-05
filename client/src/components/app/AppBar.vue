@@ -18,7 +18,6 @@
 			density="compact"
 			:details="false"
 			hide-details
-			clearable
 			prepend-inner-icon="mdi-magnify"
 			variant="solo"
 			flat
